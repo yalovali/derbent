@@ -14,20 +14,21 @@ import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.customers.customer.domain.CCustomer;
 import tech.derbent.plm.customers.customertype.service.CCustomerTypeService;
 
-@Profile({"derbent", "default"})
+@Profile ({
+		"derbent", "default"
+})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll
 public class CCustomerService extends CProjectItemService<CCustomer> implements IEntityRegistrable, IEntityWithView {
 
-	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCustomerService.class);
 	private final CCustomerTypeService typeService;
 
@@ -42,22 +43,16 @@ public class CCustomerService extends CProjectItemService<CCustomer> implements 
 		return super.checkDeleteAllowed(entity);
 	}
 
-	/**
-	 * Copy CCustomer-specific fields from source to target entity.
-	 * Uses direct setter/getter calls for clarity.
-	 * 
+	/** Copy CCustomer-specific fields from source to target entity. Uses direct setter/getter calls for clarity.
 	 * @param source  the source entity to copy from
 	 * @param target  the target entity to copy to
-	 * @param options clone options controlling what fields to copy
-	 */
+	 * @param options clone options controlling what fields to copy */
 	@Override
 	public void copyEntityFieldsTo(final CCustomer source, final CEntityDB<?> target, final CCloneOptions options) {
 		super.copyEntityFieldsTo(source, target, options);
-
 		if (!(target instanceof CCustomer targetCustomer)) {
 			return;
 		}
-
 		// Copy basic fields using direct setter/getter
 		targetCustomer.setAnnualRevenue(source.getAnnualRevenue());
 		targetCustomer.setBillingAddress(source.getBillingAddress());
@@ -71,13 +66,11 @@ public class CCustomerService extends CProjectItemService<CCustomer> implements 
 		targetCustomer.setPrimaryContactPhone(source.getPrimaryContactPhone());
 		targetCustomer.setShippingAddress(source.getShippingAddress());
 		targetCustomer.setWebsite(source.getWebsite());
-
 		// Conditional: dates
 		if (!options.isResetDates()) {
 			targetCustomer.setLastInteractionDate(source.getLastInteractionDate());
 			targetCustomer.setRelationshipStartDate(source.getRelationshipStartDate());
 		}
-
 		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
 	}
 
@@ -108,7 +101,6 @@ public class CCustomerService extends CProjectItemService<CCustomer> implements 
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Customer type is required");
 		Check.notBlank(entity.getCompanyName(), "Company Name is required");
-		
 		// 2. Length Checks - Use validateStringLength helper
 		validateStringLength(entity.getCompanyName(), "Company Name", 200);
 		validateStringLength(entity.getIndustry(), "Industry", 100);
@@ -120,7 +112,6 @@ public class CCustomerService extends CProjectItemService<CCustomer> implements 
 		validateStringLength(entity.getBillingAddress(), "Billing Address", 500);
 		validateStringLength(entity.getShippingAddress(), "Shipping Address", 500);
 		validateStringLength(entity.getCustomerNotes(), "Customer Notes", 2000);
-		
 		// 3. Unique Checks
 		validateUniqueNameInProject((ICustomerRepository) repository, entity, entity.getName(), entity.getProject());
 		// 4. Numeric Checks

@@ -1,51 +1,64 @@
-Telegram Copilot Bridge
+Telegram AI Agent Bridge
 ======================
 
 Overview
 --------
-Bu küçük servis Telegram üzerinden gelen komutları "Copilot" için prompt olarak kaydeder ve (konfigürasyona bağlı olarak) sistem üzerinde komutları yürütür. Güvenlik için izin listesi, whitelist ve admin bayrağı gereklidir.
+Bu servis Telegram üzerinden Codex, Copilot veya JSON'da tanımlanan başka AI CLI ajanlarına prompt gönderir. Güvenlik için izin listesi, whitelist, admin bayrağı ve token env değişkeni gereklidir.
 
 Quickstart
 ----------
-1. Edit config file: config/telegram_config.json
-   - set telegram_token (Bot token)
+1. Set the Telegram token outside git:
+
+   ```bash
+   cat > telegram_service/.env <<'EOF'
+   TELEGRAM_BOT_TOKEN=your-telegram-bot-token
+   EOF
+   chmod 600 telegram_service/.env
+   ```
+
+2. Edit `telegram_service/telegram_config.json`
+   - keep `telegram_token_env` as the env var name; do not put the token in JSON
    - add your Telegram numeric user id to allowed_user_ids and admin_user_ids
    - verify working_dir (default: /home/yasin/git/derbent)
+   - choose default_agent (`codex` or `copilot`)
+   - add any number of `custom_prompts` with aliases like `durum`, `/durum`, `raporla`
    - exec_mode: "auto" (currently set to auto based on your choice)
    - allow_unsafe_exec: false (set true only for admin and with care)
 
-2. Install dependencies (recommended virtualenv):
+3. Install dependencies (recommended virtualenv):
 
    python3 -m pip install --user -U python-telegram-bot
 
-3. Make control script executable and start:
+4. Install or restart the systemd service:
 
-   chmod +x bin/telegram-botctl
-   bin/telegram-botctl start
+   sudo ./telegram_service/install_service.sh
+   sudo systemctl restart telegram_service.service
 
-4. Check logs in logs/telegram_bot.log and logs/copilot_prompts.log
+5. Check logs in `telegram_service/logs/telegram_bot.log` and `telegram_service/logs/ai_prompts.log`
 
 Commands
 --------
-- /prompt <text>  -> saves prompt to logs/copilot_prompts.log
+- /prompt [agent] <text> -> sends a one-shot prompt to the default or selected AI agent
+- /agent <agent> <text>  -> sends a one-shot prompt to a specific AI agent
+- /task [agent] <text>   -> starts a long-running background AI task
+- /taskstatus            -> shows current background task output
+- /agents                -> lists configured AI agents
 - /run <cmd>      -> executes command subject to whitelist / admin override
 - /logs <n>       -> admin only: tail logs
 - /status         -> show service status
+- custom aliases  -> run JSON-defined prompts, for example `hi`, `durum`, `/durum`, `raporla`, `/raporla`
 
 Security
 --------
+- The bot token must come from `TELEGRAM_BOT_TOKEN` or the env var named by `telegram_token_env`.
+- `.env` is ignored by git; never commit Telegram tokens.
 - By default only users in allowed_user_ids can interact.
 - Admins (admin_user_ids) can bypass whitelist only if allow_unsafe_exec=true.
 - Exec mode is set to auto per your choice; edit config to change to dry-run.
+- Rotate the Telegram token if it was ever committed or shared.
 
 Notes
 -----
-- This template does NOT call external AI endpoints by default. To forward prompts to an assistant endpoint set copilot_endpoint in config (e.g., local endpoint) but validate credentials and privacy.
-- Running with auto-exec is powerful and dangerous. Keep allowed_user_ids and admin_user_ids secure.
-
-Next steps I can do for you
---------------------------
-- Make the control script executable and start the service now
-- Add systemd unit installation commands
-- Wire an opt-in flow to enable allow_unsafe_exec per admin request
-
+- `agents` is the reusable section for Codex, Copilot, or another CLI.
+- `custom_prompts` can contain unlimited ready-to-run prompts with text and slash aliases.
+- Running with auto-exec is powerful. Keep allowed_user_ids, admin_user_ids, and `.env` secure.

@@ -59,6 +59,17 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 	private static final Pattern HANDLER_PATTERN = Pattern.compile("on_([A-Za-z0-9]+)_([A-Za-z0-9]+)");
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageService.class);
 
+	private static boolean isCausedBy(final Throwable ex, final Class<? extends Throwable> type) {
+		Throwable current = ex;
+		while (current != null) {
+			if (type.isInstance(current)) {
+				return true;
+			}
+			current = current.getCause();
+		}
+		return false;
+	}
+
 	//
 	protected static void on_dragStart(@SuppressWarnings ("unused") final CDragDropEvent event) {
 		LOGGER.debug("Drag start event received in base CPageService.");
@@ -154,17 +165,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 			LOGGER.error("Error creating new entity instance for type: {} - {}", getEntityClass().getSimpleName(), e.getMessage());
 			throw e;
 		}
-	}
-
-	private static boolean isCausedBy(final Throwable ex, final Class<? extends Throwable> type) {
-		Throwable current = ex;
-		while (current != null) {
-			if (type.isInstance(current)) {
-				return true;
-			}
-			current = current.getCause();
-		}
-		return false;
 	}
 
 	public void actionDelete() throws Exception {

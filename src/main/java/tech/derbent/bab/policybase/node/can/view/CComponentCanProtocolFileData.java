@@ -23,6 +23,7 @@ import tech.derbent.bab.policybase.node.can.CBabCanNodeService;
 /** Upload/delete component for CAN protocol file content (`protocolFileData`). */
 public class CComponentCanProtocolFileData extends CComponentBase<CBabCanNode>
 		implements IPageServiceAutoRegistrable, IComponentTransientPlaceHolder<CBabCanNode> {
+
 	private static final String COMPONENT_NAME = "canProtocolFileData";
 	private static final String DIALOG_TITLE_PARSED_JSON = "Protocol Parsed JSON";
 	private static final String DIALOG_TITLE_RAW_DATA = "Protocol Raw Data";
@@ -34,12 +35,12 @@ public class CComponentCanProtocolFileData extends CComponentBase<CBabCanNode>
 	public static final String ID_UPLOAD = "custom-can-protocol-upload";
 	public static final String ID_VIEW_JSON_BUTTON = "custom-can-protocol-view-json-button";
 	public static final String ID_VIEW_RAW_BUTTON = "custom-can-protocol-view-raw-button";
-	private static final String MESSAGE_NO_PARSED_JSON = "No parsed protocol JSON is stored.";
-	private static final String MESSAGE_NO_RAW_DATA = "No raw protocol file data is stored.";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentCanProtocolFileData.class);
 	private static final long MAX_UPLOAD_FILE_SIZE_BYTES = 10L * 1024L * 1024L;
-	private static final String STATUS_NO_NODE = "No CAN node selected.";
+	private static final String MESSAGE_NO_PARSED_JSON = "No parsed protocol JSON is stored.";
+	private static final String MESSAGE_NO_RAW_DATA = "No raw protocol file data is stored.";
 	private static final long serialVersionUID = 1L;
+	private static final String STATUS_NO_NODE = "No CAN node selected.";
 
 	private static boolean hasProtocolData(final CBabCanNode node) {
 		return (node != null) && (node.getProtocolFileData() != null) && !node.getProtocolFileData().isBlank();
@@ -52,8 +53,8 @@ public class CComponentCanProtocolFileData extends CComponentBase<CBabCanNode>
 	private final CBabCanNodeService canNodeService;
 	private final CSpan labelFileSize;
 	private final CSpan labelStatus;
-	private final MemoryBuffer uploadBuffer;
 	private final Upload upload;
+	private final MemoryBuffer uploadBuffer;
 
 	public CComponentCanProtocolFileData(final CBabCanNodeService canNodeService) {
 		Check.notNull(canNodeService, "CBabCanNodeService cannot be null");

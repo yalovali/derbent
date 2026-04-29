@@ -108,40 +108,39 @@ public class CProjectExpenseInitializerService extends CProjectItemInitializerSe
 					expense.setCurrency(currency);
 					// Set realistic amounts and dates for different expense types
 					switch (index) {
-					case 0: // Cloud Infrastructure
+					case 0 -> {
 						expense.setAmount(new BigDecimal("3500.00"));
 						expense.setExpenseDate(LocalDate.now().minusDays(25));
-						break;
-					case 1: // Software Licenses
+					}
+					case 1 -> {
 						expense.setAmount(new BigDecimal("12000.00"));
 						expense.setExpenseDate(LocalDate.now().minusDays(60));
-						break;
-					case 2: // Contractor Payment
+					}
+					case 2 -> {
 						expense.setAmount(new BigDecimal("8500.00"));
 						expense.setExpenseDate(LocalDate.now().minusDays(15));
-						break;
-					case 3: // Office Supplies
+					}
+					case 3 -> {
 						expense.setAmount(new BigDecimal("4200.00"));
 						expense.setExpenseDate(LocalDate.now().minusDays(45));
-						break;
-					case 4: // Third-party API
+					}
+					case 4 -> {
 						expense.setAmount(new BigDecimal("750.00"));
 						expense.setExpenseDate(LocalDate.now().minusDays(10));
-						break;
-					case 5: // Training
+					}
+					case 5 -> {
 						expense.setAmount(new BigDecimal("2500.00"));
 						expense.setExpenseDate(LocalDate.now().minusDays(30));
-						break;
-					case 6: // Travel
+					}
+					case 6 -> {
 						expense.setAmount(new BigDecimal("1800.00"));
 						expense.setExpenseDate(LocalDate.now().minusDays(20));
-						break;
-					case 7: // Marketing
+					}
+					case 7 -> {
 						expense.setAmount(new BigDecimal("5000.00"));
 						expense.setExpenseDate(LocalDate.now().minusDays(35));
-						break;
-					default:
-						throw new IllegalArgumentException("Unsupported project expense sample index: " + index);
+					}
+					default -> throw new IllegalArgumentException("Unsupported project expense sample index: " + index);
 					}
 				});
 	}

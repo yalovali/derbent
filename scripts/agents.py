@@ -110,6 +110,7 @@ def _write(path: Path, text: str) -> None:
 
 
 def cmd_new(args: argparse.Namespace) -> int:
+    _play_sound("start")
     profile = _detect_profile(args.title, args.profile)
     task_id = args.id or f"{_now_id()}_{_slugify(args.title)[:48]}"
 
@@ -182,6 +183,7 @@ def cmd_new(args: argparse.Namespace) -> int:
         _write(task_dir / "outputs" / filename, f"# {title}\n\n")
 
     print(str(task_dir))
+    _play_sound("all-done")
     return 0
 
 
@@ -237,8 +239,46 @@ def cmd_kb(args: argparse.Namespace) -> int:
     rc = subprocess.run([sys.executable, str(script)], cwd=str(REPO_ROOT)).returncode
     print(str(REPO_ROOT / "docs" / "knowledge" / "_generated"))
     _play_sound("all-done" if rc == 0 else "error")
-    _play_sound("all-done" if rc == 0 else "error")
     return int(rc)
+
+
+_AGENT_GREETINGS: list[tuple[str, str, str]] = [
+    ("orchestrator",    "🎼", "Coordinates the full pipeline — analyze → code → verify → test → document → cleanup"),
+    ("analyzer",        "🔍", "Clarifies scope, picks profile (bab/derbent/common), and maps risks"),
+    ("pattern-designer","🏗️ ", "Scans codebase for patterns and designs the smallest compliant solution"),
+    ("coder",           "💻", "Implements features — zero TODOs, zero shortcuts, production-ready first attempt"),
+    ("verifier",        "✅", "Runs compile gates, static-analysis checks, and flags Java warnings"),
+    ("tester",          "🧪", "Runs selective Playwright tests — fast proof, not full suite"),
+    ("documenter",      "📚", "Keeps docs in sync whenever patterns or workflows change"),
+    ("todo-fix",        "🔧", "Converts diff/log gaps into ordered, file:line-anchored follow-up tasks"),
+    ("cleanup",         "🧹", "Audits stale docs and proposes safe archive moves — never deletes"),
+]
+
+
+def cmd_hi(_args: argparse.Namespace) -> int:
+    """Make every agent announce itself with a beep."""
+    width = 60
+    print("=" * width)
+    print("  🤖  Derbent Agent Roll-Call — all units reporting!")
+    print("=" * width)
+    _play_sound("start")
+    time.sleep(0.3)
+
+    for name, icon, mission in _AGENT_GREETINGS:
+        print()
+        print(f"  {icon}  {name.upper()}")
+        print(f"     🎯 {name.capitalize()} Agent reporting for duty")
+        print(f"     📌 {mission}")
+        print(f"     ⚡ Configuration loaded — Derbent standards enforced")
+        _play_sound("success")
+        time.sleep(0.25)
+
+    print()
+    print("=" * width)
+    print("  🛡️  All 9 agents ready — SSC WAS HERE!! 🌟")
+    print("=" * width)
+    _play_sound("all-done")
+    return 0
 
 
 def main(argv: list[str]) -> int:
@@ -263,6 +303,9 @@ def main(argv: list[str]) -> int:
 
     p_kb = sub.add_parser("kb", help="Regenerate docs knowledge base indexes")
     p_kb.set_defaults(func=cmd_kb)
+
+    p_hi = sub.add_parser("hi", help="Make all 9 agents announce themselves (roll-call with sounds)")
+    p_hi.set_defaults(func=cmd_hi)
 
     args = parser.parse_args(argv)
     return int(args.func(args))

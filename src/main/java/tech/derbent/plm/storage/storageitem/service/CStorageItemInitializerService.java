@@ -34,6 +34,7 @@ public class CStorageItemInitializerService extends CProjectItemInitializerServi
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
+		detailSection.addScreenLine(CDetailLinesService.createSection("Details"));
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "storage"));

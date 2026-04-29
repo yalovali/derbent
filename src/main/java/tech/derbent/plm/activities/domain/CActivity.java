@@ -25,7 +25,6 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import tech.derbent.api.parentrelation.domain.CParentRelation;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
@@ -35,6 +34,7 @@ import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.interfaces.ISprintableItem;
+import tech.derbent.api.parentrelation.domain.CParentRelation;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -60,6 +60,12 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	public static final String ENTITY_TITLE_SINGULAR = "Activity";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
 	public static final String VIEW_NAME = "Activities View";
+
+	/** Get the default sort field for this entity type. PERFORMANCE OPTIMIZED: Static method for time-sensitive entities. Activities should be sorted
+	 * by due date (most urgent first).
+	 * @return default order field name */
+	public static String getDefaultOrderByStatic() { return "dueDate"; }
+
 	// Additional Information
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
@@ -85,15 +91,6 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			description = "Actual time spent on this activity in hours", hidden = false
 	)
 	private BigDecimal actualHours = BigDecimal.ZERO;
-	// Agile Parent Relation - REQUIRED: every activity must have an agile parent relation for agile hierarchy
-	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
-	@NotNull (message = "Agile parent relation is required for agile hierarchy")
-	@AMetaData (
-			displayName = "Agile Parent Relation", required = true, readOnly = true, description = "Agile hierarchy tracking for this activity",
-			hidden = true
-	)
-	private CParentRelation parentRelation;
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "activity_id")
@@ -118,12 +115,6 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			dataProviderBean = "pageservice", dataProviderMethod = "buildDataProviderComponentWidget"
 	)
 	private final CComponentWidgetEntity<CActivity> componentWidget = null;
-	@Transient
-	@AMetaData (
-			displayName = "Agile Parent", required = false, readOnly = false, description = "Agile hierarchy parent selector", hidden = false,
-			createComponentMethod = "createComponentParent", dataProviderBean = "pageservice", captionVisible = false
-	)
-	private final CProjectItem<?> placeHolder_createComponentParent = null;
 	@Column (nullable = true)
 	@AMetaData (displayName = "Due Date", required = false, readOnly = false, description = "Expected completion date", hidden = false)
 	private LocalDate dueDate;
@@ -176,6 +167,21 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			hidden = false, maxLength = 2000
 	)
 	private String notes = "";
+	// Agile Parent Relation - REQUIRED: every activity must have an agile parent relation for agile hierarchy
+	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
+	@NotNull (message = "Agile parent relation is required for agile hierarchy")
+	@AMetaData (
+			displayName = "Agile Parent Relation", required = true, readOnly = true, description = "Agile hierarchy tracking for this activity",
+			hidden = true
+	)
+	private CParentRelation parentRelation;
+	@Transient
+	@AMetaData (
+			displayName = "Agile Parent", required = false, readOnly = false, description = "Agile hierarchy parent selector", hidden = false,
+			createComponentMethod = "createComponentParent", dataProviderBean = "pageservice", captionVisible = false
+	)
+	private final CProjectItem<?> placeHolder_createComponentParent = null;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "cactivitypriority_id", nullable = true)
 	@AMetaData (
@@ -243,6 +249,10 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		initializeDefaults();
 	}
 
+	public CComponentWidgetEntity<CActivity> buildDataProviderComponentWidget() {
+		return componentWidget;
+	}
+
 	/** Calculate the cost variance (actual cost - estimated cost).
 	 * @return the cost variance, positive if over budget, negative if under budget */
 	public BigDecimal calculateCostVariance() {
@@ -294,11 +304,12 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	public LocalDate getCompletionDate() { return completionDate; }
 
-	public CComponentWidgetEntity<CActivity> buildDataProviderComponentWidget() { return componentWidget; }
-
 	public CComponentWidgetEntity<CActivity> getComponentWidget() { return componentWidget; }
 
-	public CProjectItem<?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
+	/** Get the default sort field for this entity instance. LEGACY: Consider using getDefaultOrderByStatic() for better performance.
+	 * @return default order field name */
+	@Override
+	public String getDefaultOrderBy() { return getDefaultOrderByStatic(); }
 
 	public LocalDate getDueDate() { return dueDate; }
 
@@ -330,6 +341,8 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	@Override
 	public CParentRelation getParentRelation() { return parentRelation; }
+
+	public CProjectItem<?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
 
 	public CActivityPriority getPriority() { return priority; }
 
@@ -446,6 +459,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		updateLastModified();
 	}
 
+	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	@Override
@@ -515,13 +529,13 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	@Override
 	public void setLinks(final Set<CLink> links) { this.links = links; }
 
-	@Override
-	public void setParentRelation(final CParentRelation parentRelation) { this.parentRelation = parentRelation; }
-
 	public void setNotes(final String notes) {
 		this.notes = notes;
 		updateLastModified();
 	}
+
+	@Override
+	public void setParentRelation(final CParentRelation parentRelation) { this.parentRelation = parentRelation; }
 
 	public void setPriority(final CActivityPriority priority) {
 		this.priority = priority;
@@ -580,27 +594,5 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		sprintItem.setStoryPoint(storyPoint);
 		this.storyPoint = storyPoint; // Keep for backward compatibility during migration
 		updateLastModified();
-	}
-
-	/**
-	 * Get the default sort field for this entity type.
-	 * PERFORMANCE OPTIMIZED: Static method for time-sensitive entities.
-	 * Activities should be sorted by due date (most urgent first).
-	 * 
-	 * @return default order field name
-	 */
-	public static String getDefaultOrderByStatic() {
-		return "dueDate";
-	}
-
-	/**
-	 * Get the default sort field for this entity instance.
-	 * LEGACY: Consider using getDefaultOrderByStatic() for better performance.
-	 * 
-	 * @return default order field name
-	 */
-	@Override
-	public String getDefaultOrderBy() { 
-		return getDefaultOrderByStatic(); 
 	}
 }

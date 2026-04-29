@@ -33,6 +33,29 @@ public class CComponentActionMaskOutputActionMappings extends CComponentBase<Lis
 
 	public static final String COMPONENT_NAME = "outputActionMappings";
 	private static final long serialVersionUID = 1L;
+
+	private static Map<String, ROutputActionMapping> getMappingsByOutputName(final List<ROutputActionMapping> mappings) {
+		if (mappings == null || mappings.isEmpty()) {
+			return new LinkedHashMap<>();
+		}
+		final Map<String, ROutputActionMapping> mappingsByOutputName = new LinkedHashMap<>();
+		mappings.stream().filter(mapping -> mapping != null && !mapping.outputName().isBlank())
+				.forEach(mapping -> mappingsByOutputName.putIfAbsent(CBabPolicyFilterCAN.normalizeVariableName(mapping.outputName()), mapping));
+		return mappingsByOutputName;
+	}
+
+	private static List<ROutputActionMapping> sanitizeMappings(final List<ROutputActionMapping> mappings) {
+		if (mappings == null || mappings.isEmpty()) {
+			return new ArrayList<>();
+		}
+		final Map<String, ROutputActionMapping> uniqueMappingsByOutput = new LinkedHashMap<>();
+		mappings.stream().filter(mapping -> mapping != null && !mapping.outputName().isBlank()).forEach(mapping -> {
+			final String outputKey = mapping.outputName().trim().toLowerCase(Locale.ROOT);
+			uniqueMappingsByOutput.putIfAbsent(outputKey, mapping);
+		});
+		return new ArrayList<>(uniqueMappingsByOutput.values());
+	}
+
 	private final CButton buttonSetAsDestination;
 	private final CButton buttonUnsetDestination;
 	private CBabPolicyActionMaskCAN currentMask;
@@ -96,16 +119,14 @@ public class CComponentActionMaskOutputActionMappings extends CComponentBase<Lis
 		refreshComponent();
 	}
 
+	@Override
+	public String getComponentName() { return COMPONENT_NAME; }
+
 	private List<CPageServiceBabPolicyActionMaskCAN.RDestinationProtocolVariable> getDestinationVariables() {
 		return pageService.getDestinationProtocolVariables(currentMask);
 	}
 
-	@Override
-	public String getComponentName() { return COMPONENT_NAME; }
-
-	private List<ROutputStructure> getSourceOutputStructure() {
-		return pageService.getSourceFilterOutputStructure(currentMask);
-	}
+	private List<ROutputStructure> getSourceOutputStructure() { return pageService.getSourceFilterOutputStructure(currentMask); }
 
 	private boolean isCompatibleDataType(final String sourceDataType, final String destinationDataType) {
 		final String normalizedSourceType = CBabPolicyFilterCAN.normalizeDataType(sourceDataType);
@@ -131,9 +152,8 @@ public class CComponentActionMaskOutputActionMappings extends CComponentBase<Lis
 		}
 		final Map<String, ROutputActionMapping> mappingsByOutputName = getMappingsByOutputName(getValue());
 		final String outputKey = CBabPolicyFilterCAN.normalizeVariableName(selectedRow.outputName());
-		mappingsByOutputName.put(outputKey,
-				new ROutputActionMapping(selectedRow.outputName(), selectedRow.outputDataType(), selectedDestination.name(),
-						selectedDestination.dataType()));
+		mappingsByOutputName.put(outputKey, new ROutputActionMapping(selectedRow.outputName(), selectedRow.outputDataType(),
+				selectedDestination.name(), selectedDestination.dataType()));
 		updateValueFromClient(new ArrayList<>(mappingsByOutputName.values()));
 		CNotificationService.showSaveSuccess();
 	}
@@ -154,15 +174,6 @@ public class CComponentActionMaskOutputActionMappings extends CComponentBase<Lis
 		CNotificationService.showSaveSuccess();
 	}
 
-	private void refreshButtonStates() {
-		final ROutputMappingGridRow selectedRow = gridMappings.asSingleSelect().getValue();
-		final CPageServiceBabPolicyActionMaskCAN.RDestinationProtocolVariable selectedDestination = destinationVariableCombo.getValue();
-		final boolean hasSelection = selectedRow != null;
-		buttonSetAsDestination.setEnabled(hasSelection && selectedDestination != null);
-		buttonUnsetDestination.setEnabled(hasSelection && selectedRow != null && selectedRow.destinationVariableName() != null
-				&& !selectedRow.destinationVariableName().isBlank());
-	}
-
 	@Override
 	protected void onValueChanged(final List<ROutputActionMapping> oldValue, final List<ROutputActionMapping> newValue, final boolean fromClient) {
 		super.onValueChanged(oldValue, newValue, fromClient);
@@ -170,6 +181,15 @@ public class CComponentActionMaskOutputActionMappings extends CComponentBase<Lis
 			currentMask.setOutputActionMappings(newValue);
 		}
 		refreshComponent();
+	}
+
+	private void refreshButtonStates() {
+		final ROutputMappingGridRow selectedRow = gridMappings.asSingleSelect().getValue();
+		final CPageServiceBabPolicyActionMaskCAN.RDestinationProtocolVariable selectedDestination = destinationVariableCombo.getValue();
+		final boolean hasSelection = selectedRow != null;
+		buttonSetAsDestination.setEnabled(hasSelection && selectedDestination != null);
+		buttonUnsetDestination.setEnabled(hasSelection && selectedRow != null && selectedRow.destinationVariableName() != null
+				&& !selectedRow.destinationVariableName().isBlank());
 	}
 
 	@Override
@@ -193,34 +213,30 @@ public class CComponentActionMaskOutputActionMappings extends CComponentBase<Lis
 			refreshButtonStates();
 			return;
 		}
-		final Map<String, CPageServiceBabPolicyActionMaskCAN.RDestinationProtocolVariable> destinationByName = destinationVariables.stream()
-				.filter(variable -> variable != null && !variable.name().isBlank())
-				.collect(LinkedHashMap::new, (map, variable) -> map.putIfAbsent(CBabPolicyFilterCAN.normalizeVariableName(variable.name()), variable),
-						Map::putAll);
+		final Map<String, CPageServiceBabPolicyActionMaskCAN.RDestinationProtocolVariable> destinationByName =
+				destinationVariables.stream().filter(variable -> variable != null && !variable.name().isBlank()).collect(LinkedHashMap::new,
+						(map, variable) -> map.putIfAbsent(CBabPolicyFilterCAN.normalizeVariableName(variable.name()), variable), Map::putAll);
 		final Map<String, ROutputActionMapping> mappingsByOutputName = getMappingsByOutputName(getValue());
-		final String previousSelectedOutputName = gridMappings.asSingleSelect().getValue() != null ? gridMappings.asSingleSelect().getValue().outputName()
-				: null;
-		final List<ROutputMappingGridRow> rows = sourceOutputs.stream()
-				.filter(output -> output != null && !output.name().isBlank())
-				.map(output -> {
-					final ROutputActionMapping mapping = mappingsByOutputName.get(CBabPolicyFilterCAN.normalizeVariableName(output.name()));
-					if (mapping == null) {
-						return new ROutputMappingGridRow(output.name(), output.dataType(), "", "");
-					}
-					final CPageServiceBabPolicyActionMaskCAN.RDestinationProtocolVariable destinationVariable = destinationByName
-							.get(CBabPolicyFilterCAN.normalizeVariableName(mapping.targetProtocolVariableName()));
-					final String destinationName = destinationVariable != null ? destinationVariable.name() : mapping.targetProtocolVariableName();
-					final String destinationType = destinationVariable != null ? destinationVariable.dataType()
-							: mapping.targetProtocolVariableDataType();
-					return new ROutputMappingGridRow(output.name(), output.dataType(), destinationName, destinationType);
-				})
-				.sorted(Comparator.comparing(ROutputMappingGridRow::outputName, Comparator.nullsLast(String::compareToIgnoreCase))).toList();
+		final String previousSelectedOutputName =
+				gridMappings.asSingleSelect().getValue() != null ? gridMappings.asSingleSelect().getValue().outputName() : null;
+		final List<ROutputMappingGridRow> rows = sourceOutputs.stream().filter(output -> output != null && !output.name().isBlank()).map(output -> {
+			final ROutputActionMapping mapping = mappingsByOutputName.get(CBabPolicyFilterCAN.normalizeVariableName(output.name()));
+			if (mapping == null) {
+				return new ROutputMappingGridRow(output.name(), output.dataType(), "", "");
+			}
+			final CPageServiceBabPolicyActionMaskCAN.RDestinationProtocolVariable destinationVariable =
+					destinationByName.get(CBabPolicyFilterCAN.normalizeVariableName(mapping.targetProtocolVariableName()));
+			final String destinationName = destinationVariable != null ? destinationVariable.name() : mapping.targetProtocolVariableName();
+			final String destinationType = destinationVariable != null ? destinationVariable.dataType() : mapping.targetProtocolVariableDataType();
+			return new ROutputMappingGridRow(output.name(), output.dataType(), destinationName, destinationType);
+		}).sorted(Comparator.comparing(ROutputMappingGridRow::outputName, Comparator.nullsLast(String::compareToIgnoreCase))).toList();
 		gridMappings.setItems(rows);
 		if (previousSelectedOutputName != null && !previousSelectedOutputName.isBlank()) {
 			rows.stream().filter(row -> previousSelectedOutputName.equalsIgnoreCase(row.outputName())).findFirst()
 					.ifPresent(row -> gridMappings.asSingleSelect().setValue(row));
 		}
-		final long mappedCount = rows.stream().filter(row -> row.destinationVariableName() != null && !row.destinationVariableName().isBlank()).count();
+		final long mappedCount =
+				rows.stream().filter(row -> row.destinationVariableName() != null && !row.destinationVariableName().isBlank()).count();
 		labelStatus.setText("Mapped outputs: " + mappedCount + " / " + rows.size());
 		refreshSelectionDetails();
 	}
@@ -230,8 +246,8 @@ public class CComponentActionMaskOutputActionMappings extends CComponentBase<Lis
 		if (selectedRow == null) {
 			labelSelectedOutputInfo.setText("Select an output row.");
 		} else {
-			labelSelectedOutputInfo.setText(
-					"Selected Output: %s (%s)".formatted(selectedRow.outputName(), selectedRow.outputDataType() == null ? "" : selectedRow.outputDataType()));
+			labelSelectedOutputInfo.setText("Selected Output: %s (%s)".formatted(selectedRow.outputName(),
+					selectedRow.outputDataType() == null ? "" : selectedRow.outputDataType()));
 		}
 		final CPageServiceBabPolicyActionMaskCAN.RDestinationProtocolVariable selectedDestination = destinationVariableCombo.getValue();
 		if (selectedDestination == null) {
@@ -249,27 +265,5 @@ public class CComponentActionMaskOutputActionMappings extends CComponentBase<Lis
 	public void setThis(final CBabPolicyActionMaskCAN value) {
 		currentMask = value;
 		setValue(sanitizeMappings(value == null ? List.of() : value.getOutputActionMappings()));
-	}
-
-	private static Map<String, ROutputActionMapping> getMappingsByOutputName(final List<ROutputActionMapping> mappings) {
-		if (mappings == null || mappings.isEmpty()) {
-			return new LinkedHashMap<>();
-		}
-		final Map<String, ROutputActionMapping> mappingsByOutputName = new LinkedHashMap<>();
-		mappings.stream().filter(mapping -> mapping != null && !mapping.outputName().isBlank()).forEach(mapping -> mappingsByOutputName
-				.putIfAbsent(CBabPolicyFilterCAN.normalizeVariableName(mapping.outputName()), mapping));
-		return mappingsByOutputName;
-	}
-
-	private static List<ROutputActionMapping> sanitizeMappings(final List<ROutputActionMapping> mappings) {
-		if (mappings == null || mappings.isEmpty()) {
-			return new ArrayList<>();
-		}
-		final Map<String, ROutputActionMapping> uniqueMappingsByOutput = new LinkedHashMap<>();
-		mappings.stream().filter(mapping -> mapping != null && !mapping.outputName().isBlank()).forEach(mapping -> {
-			final String outputKey = mapping.outputName().trim().toLowerCase(Locale.ROOT);
-			uniqueMappingsByOutput.putIfAbsent(outputKey, mapping);
-		});
-		return new ArrayList<>(uniqueMappingsByOutput.values());
 	}
 }

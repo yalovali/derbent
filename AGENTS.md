@@ -2,19 +2,41 @@
 
 Mandatory entry point for AI agents working in `/home/yasin/git/derbent`.
 
+<<<<<<< HEAD
 ## Required read order
 1. `.github/copilot-instructions.md`
 2. `.github/agents/README.md`
 3. `.github/agents/QUICK_REFERENCE.md`
 4. Relevant agent definition: `.github/agents/<agent>/<agent>.agent.md`
 5. Relevant agent config: `.github/agents/<agent>/config/settings.md`
+=======
+## Specialized Entry Points
+- **[CLAUDE.md](CLAUDE.md)** - Specific entry point for Claude Code (CLI + IDE extensions).
+- **[CODEX.md](CODEX.md)** - Specific entry point for Codex CLI agent.
+- **[GEMINI.md](GEMINI.md)** - Specific entry point for Gemini CLI agent.
+>>>>>>> branch 'main' of https://github.com/yalovali/derbent
 
+<<<<<<< HEAD
 ## Canonical sources
 - Repository-wide rules: `.github/copilot-instructions.md`
 - Agent operating model: `.github/agents/README.md`
 - Task memory, skills, and artifacts: `.github/agents/_shared/`
 - Architecture and coding rules: `docs/architecture/README.md`
 - BAB-specific rules: `docs/bab/CODING_RULES.md`
+=======
+## Claude Code Integration
+Claude Code must use this root file first, then load **[CLAUDE.md](CLAUDE.md)**. Claude Code starts every Derbent task as the Orchestrator Agent and reuses the shared `.github/agents/` definitions, configs, and `scripts/agents.sh` task artifacts. Project-level settings live in `.claude/settings.json`. This is an additive integration only; Copilot, Gemini, Codex, Cursor, Cline, and AI Digest configs remain independent clients of the same `.github/agents/` system.
+
+## Codex CLI Integration
+Codex CLI must use this root file first, then load **[CODEX.md](CODEX.md)**. Codex must start every Derbent task through the existing `.github/agents/orchestrator/` role and reuse the shared `.github/agents/` definitions, configs, and `scripts/agents.sh` task artifacts. This is an additive integration only; Copilot, Gemini, Cursor, Cline, and AI Digest configs remain independent clients of the same `.github/agents/` system.
+
+## Required reading order
+1. `.github/copilot-instructions.md` (master playbook; mandatory rules)
+2. `.github/agents/README.md` (agent roster and workflow)
+3. `.github/agents/QUICK_REFERENCE.md` (quick rules + triggers)
+4. Relevant agent definition (e.g., `.github/agents/coder/coder.agent.md`)
+5. Relevant agent config (e.g., `.github/agents/coder/config/settings.md`)
+>>>>>>> branch 'main' of https://github.com/yalovali/derbent
 
 ## Non-negotiable enforcement
 - Read `.github/` before code changes or test runs.

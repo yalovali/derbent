@@ -341,7 +341,8 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 		}
 	}
 
-	public void setItemLabelGenerator(@SuppressWarnings ("unused") final ItemLabelGenerator<DetailEntity> itemLabelGenerator) {
+	@SuppressWarnings ("unused")
+	public void setItemLabelGenerator(final ItemLabelGenerator<DetailEntity> itemLabelGenerator) {
 		try {
 			grid.getColumns().forEach(grid::removeColumn);
 			configureGrid(grid, "Items");

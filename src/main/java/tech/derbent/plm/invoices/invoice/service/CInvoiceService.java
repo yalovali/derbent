@@ -17,15 +17,17 @@ import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
-import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.invoices.invoice.domain.CInvoice;
 import tech.derbent.plm.invoices.invoiceitem.service.CInvoiceItemService;
 import tech.derbent.plm.invoices.payment.domain.CPaymentStatus;
 import tech.derbent.plm.invoices.payment.service.CPaymentService;
 
-@Profile({"derbent", "default"})
+@Profile ({
+		"derbent", "default"
+})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll
@@ -42,6 +44,60 @@ public class CInvoiceService extends CProjectItemService<CInvoice> implements IE
 	@Override
 	public String checkDeleteAllowed(final CInvoice invoice) {
 		return super.checkDeleteAllowed(invoice);
+	}
+
+	/** Copy CInvoice-specific fields from source to target entity. Uses direct setter/getter calls for clarity.
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy */
+	@Override
+	public void copyEntityFieldsTo(final CInvoice source, final CEntityDB<?> target, final CCloneOptions options) {
+		super.copyEntityFieldsTo(source, target, options);
+		if (!(target instanceof CInvoice targetInvoice)) {
+			return;
+		}
+		// Copy basic fields
+		targetInvoice.setCustomerName(source.getCustomerName());
+		targetInvoice.setCustomerEmail(source.getCustomerEmail());
+		targetInvoice.setCustomerAddress(source.getCustomerAddress());
+		targetInvoice.setCustomerTaxId(source.getCustomerTaxId());
+		targetInvoice.setPaymentTerms(source.getPaymentTerms());
+		targetInvoice.setNotes(source.getNotes());
+		targetInvoice.setTaxRate(source.getTaxRate());
+		targetInvoice.setDiscountRate(source.getDiscountRate());
+		targetInvoice.setPaymentStatus(source.getPaymentStatus());
+		targetInvoice.setIsMilestonePayment(source.getIsMilestonePayment());
+		targetInvoice.setInstallmentNumber(source.getInstallmentNumber());
+		targetInvoice.setPaymentPlanInstallments(source.getPaymentPlanInstallments());
+		// Copy amounts
+		targetInvoice.setSubtotal(source.getSubtotal());
+		targetInvoice.setTaxAmount(source.getTaxAmount());
+		targetInvoice.setDiscountAmount(source.getDiscountAmount());
+		targetInvoice.setTotalAmount(source.getTotalAmount());
+		targetInvoice.setPaidAmount(source.getPaidAmount());
+		// Copy unique fields - make unique by appending timestamp
+		if (source.getInvoiceNumber() != null) {
+			targetInvoice.setInvoiceNumber(source.getInvoiceNumber() + "-COPY-" + System.currentTimeMillis());
+		}
+		// Copy dates conditionally
+		if (!options.isResetDates()) {
+			targetInvoice.setInvoiceDate(source.getInvoiceDate());
+			targetInvoice.setDueDate(source.getDueDate());
+		}
+		// Copy relations conditionally
+		if (options.includesRelations()) {
+			targetInvoice.setCurrency(source.getCurrency());
+			targetInvoice.setIssuedBy(source.getIssuedBy());
+			targetInvoice.setRelatedMilestone(source.getRelatedMilestone());
+			// Copy collections
+			if (source.getInvoiceItems() != null) {
+				targetInvoice.setInvoiceItems(new java.util.ArrayList<>(source.getInvoiceItems()));
+			}
+			if (source.getPayments() != null) {
+				targetInvoice.setPayments(new java.util.ArrayList<>(source.getPayments()));
+			}
+		}
+		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
 	}
 
 	/** Find invoices by customer name.
@@ -105,72 +161,6 @@ public class CInvoiceService extends CProjectItemService<CInvoice> implements IE
 		super.initializeNewEntity(entity);
 	}
 
-	/**
-	 * Copy CInvoice-specific fields from source to target entity.
-	 * Uses direct setter/getter calls for clarity.
-	 * 
-	 * @param source  the source entity to copy from
-	 * @param target  the target entity to copy to
-	 * @param options clone options controlling what fields to copy
-	 */
-	@Override
-	public void copyEntityFieldsTo(final CInvoice source, final CEntityDB<?> target,
-			final CCloneOptions options) {
-		super.copyEntityFieldsTo(source, target, options);
-		
-		if (!(target instanceof CInvoice targetInvoice)) {
-			return;
-		}
-		// Copy basic fields
-		targetInvoice.setCustomerName(source.getCustomerName());
-		targetInvoice.setCustomerEmail(source.getCustomerEmail());
-		targetInvoice.setCustomerAddress(source.getCustomerAddress());
-		targetInvoice.setCustomerTaxId(source.getCustomerTaxId());
-		targetInvoice.setPaymentTerms(source.getPaymentTerms());
-		targetInvoice.setNotes(source.getNotes());
-		targetInvoice.setTaxRate(source.getTaxRate());
-		targetInvoice.setDiscountRate(source.getDiscountRate());
-		targetInvoice.setPaymentStatus(source.getPaymentStatus());
-		targetInvoice.setIsMilestonePayment(source.getIsMilestonePayment());
-		targetInvoice.setInstallmentNumber(source.getInstallmentNumber());
-		targetInvoice.setPaymentPlanInstallments(source.getPaymentPlanInstallments());
-		
-		// Copy amounts
-		targetInvoice.setSubtotal(source.getSubtotal());
-		targetInvoice.setTaxAmount(source.getTaxAmount());
-		targetInvoice.setDiscountAmount(source.getDiscountAmount());
-		targetInvoice.setTotalAmount(source.getTotalAmount());
-		targetInvoice.setPaidAmount(source.getPaidAmount());
-		
-		// Copy unique fields - make unique by appending timestamp
-		if (source.getInvoiceNumber() != null) {
-			targetInvoice.setInvoiceNumber(source.getInvoiceNumber() + "-COPY-" + System.currentTimeMillis());
-		}
-		
-		// Copy dates conditionally
-		if (!options.isResetDates()) {
-			targetInvoice.setInvoiceDate(source.getInvoiceDate());
-			targetInvoice.setDueDate(source.getDueDate());
-		}
-		
-		// Copy relations conditionally
-		if (options.includesRelations()) {
-			targetInvoice.setCurrency(source.getCurrency());
-			targetInvoice.setIssuedBy(source.getIssuedBy());
-			targetInvoice.setRelatedMilestone(source.getRelatedMilestone());
-			
-			// Copy collections
-			if (source.getInvoiceItems() != null) {
-				targetInvoice.setInvoiceItems(new java.util.ArrayList<>(source.getInvoiceItems()));
-			}
-			if (source.getPayments() != null) {
-				targetInvoice.setPayments(new java.util.ArrayList<>(source.getPayments()));
-			}
-		}
-		
-		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
-	}
-
 	/** Recalculate invoice amounts (subtotal, tax, total).
 	 * @param invoice the invoice to recalculate
 	 * @return the updated invoice */
@@ -209,10 +199,8 @@ public class CInvoiceService extends CProjectItemService<CInvoice> implements IE
 		validateStringLength(entity.getCustomerAddress(), "Customer Address", 500);
 		validateStringLength(entity.getNotes(), "Notes", 2000);
 		validateStringLength(entity.getPaymentTerms(), "Payment Terms", 1000);
-		
 		// 3. Unique Name Check - USE STATIC HELPER
 		validateUniqueNameInProject((IInvoiceRepository) repository, entity, entity.getName(), entity.getProject());
-		
 		// 4. Numeric Checks - USE STATIC HELPER
 		validateNumericField(entity.getSubtotal(), "Subtotal", new BigDecimal("9999999999.99"));
 		validateNumericField(entity.getTaxAmount(), "Tax Amount", new BigDecimal("9999999999.99"));

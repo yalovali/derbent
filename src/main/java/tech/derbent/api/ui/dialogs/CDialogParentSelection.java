@@ -15,9 +15,9 @@ import tech.derbent.api.domains.CParentChildRelationService;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.parentrelation.service.CParentRelationService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CDiv;
@@ -103,6 +103,44 @@ public class CDialogParentSelection extends CDialog {
 		return button;
 	}
 
+	/** Find valid parent candidates for a child entity based on its hierarchy level. For level N children (N > 0): parents must be at level N-1. For
+	 * leaf (level -1) children: parents can be any non-leaf entity (level >= 0).
+	 * @param childLevel the hierarchy level of the child entity
+	 * @return list of valid parent candidates from current project */
+	@SuppressWarnings ({
+	})
+	private List<CProjectItem<?>> findParentCandidates(final int childLevel) {
+		final int requiredParentLevel = childLevel > 0 ? childLevel - 1 : Integer.MAX_VALUE; // leaf can have any non-leaf parent
+		final List<CProjectItem<?>> candidates = new ArrayList<>();
+		for (final String entityName : CEntityRegistry.getAllRegisteredEntityKeys()) {
+			try {
+				final Class<?> entityClass = CEntityRegistry.getEntityClass(entityName);
+				if (entityClass == null || !IHasParentRelation.class.isAssignableFrom(entityClass)) {
+					continue;
+				}
+				final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
+				if (serviceClass == null || !CProjectItemService.class.isAssignableFrom(serviceClass)) {
+					continue;
+				}
+				final CProjectItemService<?> service = (CProjectItemService<?>) CSpringContext.getBean(serviceClass);
+				service.findAll().forEach(item -> {
+					final CProjectItem<?> projItem = item;
+					if (projItem.getProject() != null && projItem.getProject().getId().equals(project.getId())
+							&& !projItem.getId().equals(childItem.getId())) {
+						final int itemLevel = CParentRelationService.getEntityLevel(projItem);
+						// For leaf children: accept any non-leaf parent; for others: accept exact level match
+						final boolean isValidParent = childLevel == -1 ? itemLevel >= 0 : itemLevel == requiredParentLevel;
+						if (isValidParent) {
+							candidates.add(projItem);
+						}
+					}
+				});
+			} catch (final Exception e) {
+				LOGGER.debug("Could not load parent candidates from entity type {}: {}", entityName, e.getMessage());
+			}
+		}
+		return candidates;
+	}
 
 	@Override
 	public String getDialogTitleString() { return "Select Parent for " + childItem.getName(); }
@@ -182,16 +220,14 @@ public class CDialogParentSelection extends CDialog {
 		}
 	}
 
-
 	@Override
 	protected void setupButtons() {
 		buttonSelect = create_buttonSelect();
 		buttonClear = create_buttonClear();
 		buttonCancel = create_buttonCancel();
 		// Enable clear button only if item currently has a parent (level-based check)
-		final boolean hasParent = (childItem instanceof IHasParentRelation iHasParent)
-			&& iHasParent.getParentRelation() != null
-			&& iHasParent.getParentRelation().getParentItem() != null;
+		final boolean hasParent = (childItem instanceof IHasParentRelation iHasParent) && iHasParent.getParentRelation() != null
+				&& iHasParent.getParentRelation().getParentItem() != null;
 		buttonClear.setEnabled(hasParent);
 		buttonLayout.add(buttonSelect, buttonClear, buttonCancel);
 	}
@@ -203,10 +239,9 @@ public class CDialogParentSelection extends CDialog {
 		layout.setPadding(false);
 		// Info banner section
 		final String childTypeLabel = childType != null ? " Child type: %s.".formatted(childType.getName()) : "";
-		final CDiv infoSection = createTextBannerSection(
-			"Select a parent item from the hierarchy. Candidates are filtered by hierarchy level." + childTypeLabel,
-			CUIConstants.COLOR_INFO_TEXT,
-			CUIConstants.GRADIENT_INFO);
+		final CDiv infoSection =
+				createTextBannerSection("Select a parent item from the hierarchy. Candidates are filtered by hierarchy level." + childTypeLabel,
+						CUIConstants.COLOR_INFO_TEXT, CUIConstants.GRADIENT_INFO);
 		layout.add(infoSection);
 		// Determine child level and find valid parent candidates
 		final int childLevel = CParentRelationService.getEntityLevel(childItem);
@@ -218,7 +253,7 @@ public class CDialogParentSelection extends CDialog {
 			final List<CProjectItem<?>> candidates = findParentCandidates(childLevel);
 			if (candidates.isEmpty()) {
 				final CSpan warningSpan = new CSpan("No valid parent candidates found for this item type. "
-					+ "Ensure parent entity types are configured with the correct hierarchy level.");
+						+ "Ensure parent entity types are configured with the correct hierarchy level.");
 				warningSpan.getStyle().set("color", "var(--lumo-error-text-color)");
 				layout.add(warningSpan);
 			} else {
@@ -234,49 +269,6 @@ public class CDialogParentSelection extends CDialog {
 			}
 		}
 		mainLayout.add(layout);
-	}
-
-	/** Find valid parent candidates for a child entity based on its hierarchy level.
-	 * For level N children (N > 0): parents must be at level N-1.
-	 * For leaf (level -1) children: parents can be any non-leaf entity (level >= 0).
-	 * @param  childLevel the hierarchy level of the child entity
-	 * @return            list of valid parent candidates from current project */
-	@SuppressWarnings ({"rawtypes", "unchecked"})
-	private List<CProjectItem<?>> findParentCandidates(final int childLevel) {
-		final int requiredParentLevel = childLevel > 0 ? childLevel - 1 : Integer.MAX_VALUE; // leaf can have any non-leaf parent
-		final List<CProjectItem<?>> candidates = new ArrayList<>();
-		for (final String entityName : CEntityRegistry.getAllRegisteredEntityKeys()) {
-			try {
-				final Class<?> entityClass = CEntityRegistry.getEntityClass(entityName);
-				if (entityClass == null || !IHasParentRelation.class.isAssignableFrom(entityClass)) {
-					continue;
-				}
-				final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
-				if (serviceClass == null || !CProjectItemService.class.isAssignableFrom(serviceClass)) {
-					continue;
-				}
-				final CProjectItemService<?> service = (CProjectItemService<?>) CSpringContext.getBean(serviceClass);
-				service.findAll().forEach(item -> {
-					final CProjectItem<?> projItem = item;
-					if (projItem.getProject() != null
-						&& projItem.getProject().getId().equals(project.getId())
-						&& !projItem.getId().equals(childItem.getId())) {
-						final int itemLevel = CParentRelationService.getEntityLevel(projItem);
-						// For leaf children: accept any non-leaf parent; for others: accept exact level match
-						final boolean isValidParent = childLevel == -1
-							? itemLevel >= 0
-							: itemLevel == requiredParentLevel;
-						if (isValidParent) {
-							candidates.add(projItem);
-						}
-					}
-				});
-			}
-			catch (final Exception e) {
-				LOGGER.debug("Could not load parent candidates from entity type {}: {}", entityName, e.getMessage());
-			}
-		}
-		return candidates;
 	}
 
 	private void updateSelectButtonState() {

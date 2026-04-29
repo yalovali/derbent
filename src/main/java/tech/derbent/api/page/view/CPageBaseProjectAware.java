@@ -23,13 +23,13 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
+import tech.derbent.api.session.service.CLayoutService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CFlexLayout;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CDetailsBuilder;
-import tech.derbent.api.session.service.CLayoutService;
-import tech.derbent.api.session.service.ISessionService;
 
 @SuppressWarnings ("rawtypes")
 public abstract class CPageBaseProjectAware extends CPageBase
@@ -297,7 +297,8 @@ public abstract class CPageBaseProjectAware extends CPageBase
 					Check.isInitialized(value, "Lazy field '" + field.getName() + "' is not initialized for " + entity.getClass().getSimpleName());
 				}
 			} catch (final IllegalAccessException e) {
-				LOGGER.error("Failed to validate lazy field {} for entity {} reason={}", field.getName(), entity.getClass().getSimpleName(), e.getMessage());
+				LOGGER.error("Failed to validate lazy field {} for entity {} reason={}", field.getName(), entity.getClass().getSimpleName(),
+						e.getMessage());
 				throw new IllegalStateException("Unable to validate lazy fields for " + entity.getClass().getSimpleName(), e);
 			}
 		}

@@ -39,8 +39,7 @@ public final class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 	@OneToMany (mappedBy = "workflowEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@AMetaData (
 			displayName = "Status Transitions", required = false, readOnly = false, description = "Status transitions for this workflow",
-			hidden = false, dataProviderBean = "CWorkflowEntityService", createComponentMethod = "createWorkflowStatusRelationsComponent",
-			dataProviderParamBean = "context", dataProviderParamMethod = "getValue"
+			hidden = false, dataProviderBean = "CWorkflowEntityService", createComponentMethod = "createWorkflowStatusRelationsComponent"
 	)
 	private final List<CWorkflowStatusRelation> statusRelations = new ArrayList<>();
 

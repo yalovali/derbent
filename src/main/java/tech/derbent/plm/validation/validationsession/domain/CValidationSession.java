@@ -149,7 +149,7 @@ public class CValidationSession extends CEntityOfProject<CValidationSession> imp
 	@jakarta.persistence.Transient
 	@AMetaData (
 			displayName = "Validation Execution", required = false, readOnly = false, description = "Validation execution interface", hidden = false,
-			dataProviderBean = "CPageServiceValidationSession", createComponentMethod = "createValidationExecutionComponent"
+			dataProviderBean = "pageservice", createComponentMethod = "createValidationExecutionComponent"
 	)
 	private transient Object validationExecutionComponent;
 	@ManyToOne (fetch = FetchType.LAZY)

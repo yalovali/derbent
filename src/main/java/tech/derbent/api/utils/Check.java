@@ -4,9 +4,9 @@ import java.util.Collection;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
-import tech.derbent.api.companies.domain.CCompany;
 
 public class Check {
 
@@ -143,6 +143,16 @@ public class Check {
 		throw new IllegalArgumentException(message);
 	}
 
+	public static void fieldExists(Class<?> clazz, String string) {
+		try {
+			clazz.getDeclaredField(string);
+		} catch (NoSuchFieldException e) {
+			final String m = "Field '%s' does not exist in class %s".formatted(string, clazz.getName());
+			logFail(m);
+			throw new IllegalArgumentException(m);
+		}
+	}
+
 	/** Finds the first stack trace element that is not from Check or java.lang.Thread. */
 	private static StackTraceElement findExternalCaller() {
 		final String self = Check.class.getName();
@@ -213,7 +223,8 @@ public class Check {
 		// this field may be lazy loaded, so we use getName() instead of company.getName()
 		final Long comp_id1 = entity1.getCompany().getId();
 		final Long comp_id2 = company.getId();
-		final String def = "Entity belongs to different company: name(%s):%s: id:%d != name(%s): id:%d".formatted(entity1.getName(), entity1.getId(), comp_id1, company.getName(), comp_id2);
+		final String def = "Entity belongs to different company: name(%s):%s: id:%d != name(%s): id:%d".formatted(entity1.getName(), entity1.getId(),
+				comp_id1, company.getName(), comp_id2);
 		logFail(def);
 		throw new IllegalArgumentException(def);
 	}
@@ -230,8 +241,7 @@ public class Check {
 			return;
 		}
 		final String entityInfo = entity.getClass().getSimpleName();
-		final String def =
-				"Entity '%s' is not initialized. Call initializeAllFields() or access a property before use.".formatted(entityInfo);
+		final String def = "Entity '%s' is not initialized. Call initializeAllFields() or access a property before use.".formatted(entityInfo);
 		final String m = msg(message, def);
 		logFail(m);
 		throw new IllegalArgumentException(m);
@@ -261,7 +271,8 @@ public class Check {
 		// this field may be lazy loaded, so we use getName() instead of company.getName()
 		final Long comp_id1 = entity1.getCompany().getId();
 		final Long comp_id2 = entity2.getCompany().getId();
-		final String def = "Entities belong to different companies: name(%s):%s: id:%d != name(%s):%s: id:%d".formatted(entity1.getName(), entity1.getId(), comp_id1, entity2.getName(), entity2.getId(), comp_id2);
+		final String def = "Entities belong to different companies: name(%s):%s: id:%d != name(%s):%s: id:%d".formatted(entity1.getName(),
+				entity1.getId(), comp_id1, entity2.getName(), entity2.getId(), comp_id2);
 		logFail(def);
 		throw new IllegalArgumentException(def);
 	}
@@ -274,7 +285,8 @@ public class Check {
 		if (entity1.getProject().getId().equals(entity2.getProject().getId())) {
 			return;
 		}
-		final String def = "Entities belong to different projects: name(%s):%s: pid:%d != name(%s):%s: pid:%d".formatted(entity1.getName(), entity1.getId(), entity1.getProject().getId(), entity2.getName(), entity2.getId(), entity2.getProject().getId());
+		final String def = "Entities belong to different projects: name(%s):%s: pid:%d != name(%s):%s: pid:%d".formatted(entity1.getName(),
+				entity1.getId(), entity1.getProject().getId(), entity2.getName(), entity2.getId(), entity2.getProject().getId());
 		logFail(def);
 		throw new IllegalArgumentException(def);
 	}
