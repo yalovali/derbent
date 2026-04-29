@@ -3,7 +3,11 @@
 This file is the mandatory entry point for any AI agent or automation running in this repository.
 
 ## Specialized Entry Points
+- **[CODEX.md](CODEX.md)** - Specific entry point for Codex CLI agent.
 - **[GEMINI.md](GEMINI.md)** - Specific entry point for Gemini CLI agent.
+
+## Codex CLI Integration
+Codex CLI must use this root file first, then load **[CODEX.md](CODEX.md)**. Codex must start every Derbent task through the existing `.github/agents/orchestrator/` role and reuse the shared `.github/agents/` definitions, configs, and `scripts/agents.sh` task artifacts. This is an additive integration only; Copilot, Gemini, Cursor, Cline, and AI Digest configs remain independent clients of the same `.github/agents/` system.
 
 ## Required reading order
 1. `.github/copilot-instructions.md` (master playbook; mandatory rules)

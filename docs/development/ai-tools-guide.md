@@ -68,11 +68,26 @@ Derbent provides configuration files for multiple AI coding assistants to ensure
 
 **When to Use**: For AI tools that don't have specific config files, or for AI Digest tool
 
+### 5. Codex CLI
+**File**: `CODEX.md`
+
+**Purpose**: Codex-specific entry point that binds Codex CLI to the existing `.github/agents/` orchestrated workflow
+
+**Coverage**:
+- Root `AGENTS.md` startup sequence
+- Orchestrator-first workflow requirement
+- Specialist agent loading order
+- Shared `tasks/agents/` artifact layout through `scripts/agents.sh`
+- Non-negotiable Derbent coding and verification rules
+
+**When to Use**: When using Codex CLI in this repository
+
 ## File Locations Reference
 
 All AI configuration files are in the repository root:
 ```
 derbent/
+├── CODEX.md                         # Codex CLI entry point
 ├── .github/
 │   └── copilot-instructions.md    # GitHub Copilot (COMPLETE)
 ├── .cursorrules                    # Cursor IDE
@@ -90,6 +105,7 @@ Different AI tools look for configuration in standard locations:
 | Cursor | `.cursorrules` | User settings |
 | Cline | `.clinerules` | System prompt |
 | AI Digest | `.aidigestconfig` | Project structure |
+| Codex CLI | `AGENTS.md`, then `CODEX.md` | Repository context |
 | Windsurf | `.windsurfrules` | Project files |
 | Continue | `.continuerules` | Configuration |
 
