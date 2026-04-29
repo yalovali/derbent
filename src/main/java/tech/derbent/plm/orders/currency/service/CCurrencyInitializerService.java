@@ -5,19 +5,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CEntityOfProjectInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.plm.orders.currency.domain.CCurrency;
-import tech.derbent.api.page.service.CPageEntityService;
-import tech.derbent.api.projects.domain.CProject;
 
-public class CCurrencyInitializerService extends CInitializerServiceBase {
+public class CCurrencyInitializerService extends CEntityOfProjectInitializerService {
 
 	private static final Class<?> clazz = CCurrency.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCurrencyInitializerService.class);
@@ -29,8 +28,8 @@ public class CCurrencyInitializerService extends CInitializerServiceBase {
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
-			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+			final CDetailSection detailSection =
+					CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "currencyCode"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "currencySymbol"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
@@ -38,11 +37,9 @@ public class CCurrencyInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createSection("Display Configuration"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-   
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
@@ -53,16 +50,18 @@ public class CCurrencyInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "currencyCode", "currencySymbol", "description", "active", "project"));
+		grid.setColumnFields(
+				List.of("id", "name", "currencyCode", "currencySymbol", "description", "active", "project"));
 		return grid;
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
@@ -76,8 +75,9 @@ public class CCurrencyInitializerService extends CInitializerServiceBase {
 				}
 		};
 		// Use consumer pattern to set currency-specific fields
-		initializeProjectEntity(data, (CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project,
-				minimal, (item, index) -> {
+		initializeProjectEntity(data,
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
+				project, minimal, (item, index) -> {
 					final CCurrency currency = (CCurrency) item;
 					currency.setCurrencyCode(data[index][2]);
 					currency.setCurrencySymbol(data[index][3]);

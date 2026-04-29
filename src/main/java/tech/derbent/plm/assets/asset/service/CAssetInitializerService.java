@@ -12,9 +12,9 @@ import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CEntityNamedInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.api.screens.service.CProjectItemInitializerService;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
 import tech.derbent.plm.assets.asset.domain.CAsset;
@@ -22,7 +22,8 @@ import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.links.service.CLinkInitializerService;
 
-public class CAssetInitializerService extends CInitializerServiceBase {
+public class CAssetInitializerService extends CProjectItemInitializerService {
+
 	private static final Class<?> clazz = CAsset.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAssetInitializerService.class);
 	private static final String menuOrder = Menu_Order_FINANCE + ".20";
@@ -35,7 +36,7 @@ public class CAssetInitializerService extends CInitializerServiceBase {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			// Basic Information Section
-			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+			CEntityNamedInitializerService.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "brand"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "model"));
@@ -86,43 +87,50 @@ public class CAssetInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "entityType", "brand", "model", "serialNumber", "inventoryNumber", "status", "assignedTo", "user",
-				"location", "provider", "purchaseValue", "createdBy", "createdDate"));
+		grid.setColumnFields(List.of("id", "name", "entityType", "brand", "model", "serialNumber", "inventoryNumber",
+				"status", "assignedTo", "user", "location", "provider", "purchaseValue", "createdBy", "createdDate"));
 		return grid;
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final String[][] nameAndDescriptions = {
 				{
-						"Development Laptop - MacBook Pro", "High-performance laptop for software development with 16GB RAM and 512GB SSD"
+						"Development Laptop - MacBook Pro",
+						"High-performance laptop for software development with 16GB RAM and 512GB SSD"
 				}, {
-						"Production Server - AWS EC2", "Cloud server instance for production environment running Ubuntu 22.04 LTS"
+						"Production Server - AWS EC2",
+						"Cloud server instance for production environment running Ubuntu 22.04 LTS"
 				}, {
-						"Office Printer - HP LaserJet", "Multi-function laser printer for office document printing and scanning"
+						"Office Printer - HP LaserJet",
+						"Multi-function laser printer for office document printing and scanning"
 				}, {
-						"Network Switch - Cisco Catalyst", "48-port Gigabit Ethernet switch for office network infrastructure"
+						"Network Switch - Cisco Catalyst",
+						"48-port Gigabit Ethernet switch for office network infrastructure"
 				}, {
-						"Conference Room TV - Samsung", "65-inch 4K display for conference room presentations and video calls"
+						"Conference Room TV - Samsung",
+						"65-inch 4K display for conference room presentations and video calls"
 				}
 		};
 		initializeProjectEntity(nameAndDescriptions,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
-				(item, index) -> {
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
+				project, minimal, (item, index) -> {
 					final CAsset asset = (CAsset) item;
-					final CUser user = CSpringContext.getBean(CUserService.class).getRandom(asset.getProject().getCompany());
+					final CUser user =
+							CSpringContext.getBean(CUserService.class).getRandom(asset.getProject().getCompany());
 					asset.setAssignedTo(user);
 					asset.setUser(user);
 					// Set asset-specific fields based on index
 					switch (index) {
-					case 0: // MacBook Pro
+					case 0 -> {
 						asset.setBrand("Apple");
 						asset.setModel("MacBook Pro 16\" M2");
 						asset.setSerialNumber("MB-2024-001");
@@ -136,8 +144,8 @@ public class CAssetInitializerService extends CInitializerServiceBase {
 						asset.setDepreciationPeriod(3);
 						asset.setNeedInsurance(true);
 						asset.setInstallationDate(java.time.LocalDate.now().minusMonths(6));
-						break;
-					case 1: // AWS Server
+					}
+					case 1 -> {
 						asset.setBrand("Amazon Web Services");
 						asset.setModel("EC2 t3.large");
 						asset.setSerialNumber("AWS-EC2-2024-001");
@@ -151,8 +159,8 @@ public class CAssetInitializerService extends CInitializerServiceBase {
 						asset.setDepreciationPeriod(5);
 						asset.setNeedInsurance(true);
 						asset.setInstallationDate(java.time.LocalDate.now().minusMonths(3));
-						break;
-					case 2: // HP Printer
+					}
+					case 2 -> {
 						asset.setBrand("HP");
 						asset.setModel("LaserJet Pro MFP M428fdw");
 						asset.setSerialNumber("HP-PRN-2024-001");
@@ -166,8 +174,8 @@ public class CAssetInitializerService extends CInitializerServiceBase {
 						asset.setDepreciationPeriod(5);
 						asset.setNeedInsurance(false);
 						asset.setInstallationDate(java.time.LocalDate.now().minusMonths(12));
-						break;
-					case 3: // Cisco Switch
+					}
+					case 3 -> {
 						asset.setBrand("Cisco");
 						asset.setModel("Catalyst 2960-X Series");
 						asset.setSerialNumber("CSC-SW-2024-001");
@@ -181,8 +189,8 @@ public class CAssetInitializerService extends CInitializerServiceBase {
 						asset.setDepreciationPeriod(7);
 						asset.setNeedInsurance(true);
 						asset.setInstallationDate(java.time.LocalDate.now().minusMonths(18));
-						break;
-					case 4: // Samsung TV
+					}
+					case 4 -> {
 						asset.setBrand("Samsung");
 						asset.setModel("QLED 4K Q80C 65\"");
 						asset.setSerialNumber("SAM-TV-2024-001");
@@ -196,9 +204,8 @@ public class CAssetInitializerService extends CInitializerServiceBase {
 						asset.setDepreciationPeriod(5);
 						asset.setNeedInsurance(false);
 						asset.setInstallationDate(java.time.LocalDate.now().minusMonths(8));
-						break;
-					default:
-						break;
+					}
+					default -> {}
 					}
 				});
 	}

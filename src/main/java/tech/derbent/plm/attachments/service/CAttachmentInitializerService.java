@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyInitializerService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
@@ -13,16 +14,15 @@ import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.plm.attachments.domain.CAttachment;
 
 /** Initializer service for CAttachment entities. Provides: 1. Screen and grid initialization for standalone attachment management views 2. Standard
  * attachment section creation for ALL entity detail views **Key Feature**: addAttachmentsSection() ensures ALL entities have identical attachment
  * sections with consistent naming, behavior, and appearance. */
-public final class CAttachmentInitializerService extends CInitializerServiceBase {
+public final class CAttachmentInitializerService extends CEntityOfCompanyInitializerService {
 
 	public static final String BASE_PANEL_NAME = "Attachment Details";
 	private static final Class<?> clazz = CAttachment.class;
@@ -37,10 +37,10 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 	public static final String SECTION_NAME_ATTACHMENTS = "Attachments";
 	private static final boolean showInQuickToolbar = false;
 
-	/** Add standard Attachments section to any entity detail view. **This is the ONLY method that creates attachment sections.** ALL entity
-	 * initializers (Activity, Risk, Meeting, Sprint, Project, User, etc.) MUST call this method to ensure consistent attachment sections. Note: For
-	 * the BAB profile, the attachments section is intentionally skipped during initialization. Creates: - Section header: "Attachments" - Field:
-	 * "attachments" (renders CComponentListAttachments via factory) Usage in ANY entity initializer:
+	/** Add standard Attachments section to any entity detail view. **This is the ONLY method that creates attachment sections.** ALL entity initializers
+	 * (Activity, Risk, Meeting, Sprint, Project, User, etc.) MUST call this method to ensure consistent attachment sections. Note: For the BAB profile,
+	 * the attachments section is intentionally skipped during initialization. Creates: - Section header: "Attachments" - Field: "attachments" (renders
+	 * CComponentListAttachments via factory) Usage in ANY entity initializer:
 	 *
 	 * <pre>
 	 * // CActivityInitializerService.java
@@ -62,7 +62,8 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 	 * @param detailSection the detail section to add attachments to
 	 * @param entityClass   the entity class (must implement IHasAttachments and have @OneToMany attachments field)
 	 * @throws Exception if adding section fails */
-	public static void addDefaultSection(final CDetailSection detailSection, final Class<?> entityClass) throws Exception {
+	public static void addDefaultSection(final CDetailSection detailSection, final Class<?> entityClass)
+			throws Exception {
 		Check.notNull(detailSection, "detailSection cannot be null");
 		Check.notNull(entityClass, "entityClass cannot be null");
 		if (CSpringContext.isBabProfile()) {
@@ -75,7 +76,8 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 			detailLine.setIsCaptionVisible(false);
 			detailSection.addScreenLine(detailLine);
 		} catch (final Exception e) {
-			LOGGER.error("Error adding Attachments section for {}: {} reason={}", entityClass.getSimpleName(), e.getMessage(), e.getMessage());
+			LOGGER.error("Error adding Attachments section for {}: {} reason={}", entityClass.getSimpleName(),
+					e.getMessage(), e.getMessage());
 			throw e;
 		}
 	}
@@ -121,8 +123,8 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 	 * @return the grid entity */
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(
-				List.of("id", "versionNumber", "fileName", "fileSize", "fileType", "documentType", "uploadDate", "uploadedBy", "company", "active"));
+		grid.setColumnFields(List.of("id", "versionNumber", "fileName", "fileSize", "fileType", "documentType",
+				"uploadDate", "uploadedBy", "company", "active"));
 		return grid;
 	}
 
@@ -162,15 +164,16 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 	 * @param pageEntityService    page service
 	 * @throws Exception if initialization fails */
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		if (CSpringContext.isBabProfile()) {
 			LOGGER.info("Skipping attachment management page initialization for BAB profile.");
 			return;
 		}
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	private CAttachmentInitializerService() {

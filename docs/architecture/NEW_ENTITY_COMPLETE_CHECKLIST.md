@@ -611,13 +611,13 @@ public class C{Entity}InitializerService extends CInitializerServiceBase {
 - [ ] **Returns**: CDetailSection
 - [ ] **Try-Catch**: Error handling with logger
 - [ ] **createBaseScreenEntity()**: Call to create base section
-- [ ] **CInitializerServiceNamedEntity.createBasicView()**: For named entities
+- [ ] **CEntityNamedInitializerService.createBasicView()**: For named entities
 - [ ] **Sections**: Organized into logical sections
 
 **Standard Sections:**
 
 ```java
-// Basic info - from CInitializerServiceNamedEntity.createBasicView()
+// Basic info - from CEntityNamedInitializerService.createBasicView()
 
 // Entity-specific fields
 detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
@@ -995,7 +995,7 @@ After implementation, manually test:
 - [ ] **Grid Tests**: Grid loads and displays data
 - [ ] **Form Tests**: Form validation and submission
 
-**Reference**: `docs/testing/PLAYWRIGHT_TESTING_GUIDE.md`
+**Reference**: `docs/implementation/PLAYWRIGHT_TESTING_GUIDE.md`
 
 ---
 

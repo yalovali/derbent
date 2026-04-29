@@ -13,9 +13,8 @@ import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CEntityOfProjectInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
@@ -25,7 +24,7 @@ import tech.derbent.plm.validation.validationsession.domain.CValidationSession;
 import tech.derbent.plm.validation.validationsuite.domain.CValidationSuite;
 import tech.derbent.plm.validation.validationsuite.service.CValidationSuiteService;
 
-public class CValidationSessionInitializerService extends CInitializerServiceBase {
+public class CValidationSessionInitializerService extends CEntityOfProjectInitializerService {
 
 	private static final Class<?> clazz = CValidationSession.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CValidationSessionInitializerService.class);
@@ -37,8 +36,8 @@ public class CValidationSessionInitializerService extends CInitializerServiceBas
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
-			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, false);
+			final CDetailSection detailSection =
+					CEntityOfProjectInitializerService.createBasicView(project, clazz, false);
 			detailSection.addScreenLine(CDetailLinesService.createSection("Execution Details"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "validationSuite"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "result"));
@@ -85,7 +84,8 @@ public class CValidationSessionInitializerService extends CInitializerServiceBas
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 			// Full-screen execution component
 			detailSection.addScreenLine(CDetailLinesService.createSection("Validation Execution"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "validationExecutionComponent"));
+			detailSection
+					.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "validationExecutionComponent"));
 			// LOGGER.debug("Created execution view for validation session");
 			return detailSection;
 		} catch (final Exception e) {
@@ -96,18 +96,21 @@ public class CValidationSessionInitializerService extends CInitializerServiceBas
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "validationSuite", "result", "executedBy", "executionStart", "executionEnd", "durationMs",
-				"totalValidationCases", "passedValidationCases", "failedValidationCases", "project", "createdDate"));
+		grid.setColumnFields(List.of("id", "name", "validationSuite", "result", "executedBy", "executionStart",
+				"executionEnd", "durationMs", "totalValidationCases", "passedValidationCases", "failedValidationCases",
+				"project", "createdDate"));
 		return grid;
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		// View 1: Standard CRUD for validation session management
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, MenuTitle_DEVELOPMENT + menuTitle,
-				pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				MenuTitle_DEVELOPMENT + menuTitle, pageTitle, pageDescription, showInQuickToolbar,
+				Menu_Order_DEVELOPMENT + menuOrder, null);
 		// View 2: Single-page execution view (full-screen validation execution interface)
 		final CDetailSection executionSection = createExecutionView(project);
 		final CGridEntity executionGrid = createGridEntity(project);
@@ -117,8 +120,8 @@ public class CValidationSessionInitializerService extends CInitializerServiceBas
 		// CRITICAL: Hide grid to show only execution component
 		executionGrid.setAttributeNone(true);
 		// Register single-page execution view as separate menu item
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, executionSection, executionGrid,
-				menuTitle + ".Execute Validation", // Submenu: Tests.Validation Sessions.Execute Validation
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, executionSection,
+				executionGrid, menuTitle + ".Execute Validation", // Submenu: Tests.Validation Sessions.Execute Validation
 				"Validation Execution", // Page title
 				"Execute validations step-by-step with result recording", // Description
 				true, // Show in quick toolbar
@@ -130,12 +133,14 @@ public class CValidationSessionInitializerService extends CInitializerServiceBas
 				(CValidationSessionService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
 		final List<CValidationSession> existingValidationSessions = validationSessionService.findAll();
 		if (!existingValidationSessions.isEmpty()) {
-			LOGGER.info("Clearing {} existing validation sessions for project: {}", existingValidationSessions.size(), project.getName());
+			LOGGER.info("Clearing {} existing validation sessions for project: {}", existingValidationSessions.size(),
+					project.getName());
 			existingValidationSessions.forEach((final CValidationSession existingValidationSession) -> {
 				try {
 					validationSessionService.delete(existingValidationSession);
 				} catch (final Exception e) {
-					LOGGER.warn("Could not delete existing validation session {}: {}", existingValidationSession.getId(), e.getMessage());
+					LOGGER.warn("Could not delete existing validation session {}: {}",
+							existingValidationSession.getId(), e.getMessage());
 				}
 			});
 		}
@@ -153,34 +158,38 @@ public class CValidationSessionInitializerService extends CInitializerServiceBas
 				}
 		};
 		initializeProjectEntity(nameAndDescriptions,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
-				(item, index) -> {
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
+				project, minimal, (item, index) -> {
 					final CValidationSession validationSession = (CValidationSession) item;
 					final CUser user = CSpringContext.getBean(CUserService.class).getRandom(project.getCompany());
 					validationSession.setExecutedBy(user);
 					// Get a random validation suite
-					final CValidationSuiteService scenarioService = CSpringContext.getBean(CValidationSuiteService.class);
+					final CValidationSuiteService scenarioService =
+							CSpringContext.getBean(CValidationSuiteService.class);
 					final List<CValidationSuite> scenarios = scenarioService.findAll();
 					if (!scenarios.isEmpty()) {
 						validationSession.setValidationSuite(scenarios.get(index % scenarios.size()));
 					}
 					// Set execution times
 					validationSession.setExecutionStart(LocalDateTime.now().minusDays(10 - index).minusHours(2));
-					validationSession.setExecutionEnd(validationSession.getExecutionStart().plusHours(1).plusMinutes(30));
+					validationSession
+							.setExecutionEnd(validationSession.getExecutionStart().plusHours(1).plusMinutes(30));
 					// Set test results
 					validationSession.setTotalValidationCases(10 + index * 2);
 					validationSession.setPassedValidationCases(8 + index);
 					validationSession.setFailedValidationCases(index % 3 == 0 ? 2 : 1);
 					// Set validation steps results
 					validationSession.setTotalValidationSteps(validationSession.getTotalValidationCases() * 5); // Assume 5 steps per validation case
-					validationSession.setPassedValidationSteps((int) (validationSession.getTotalValidationSteps() * 0.85)); // 85% pass rate
 					validationSession
-							.setFailedValidationSteps(validationSession.getTotalValidationSteps() - validationSession.getPassedValidationSteps());
+							.setPassedValidationSteps((int) (validationSession.getTotalValidationSteps() * 0.85)); // 85% pass rate
+					validationSession.setFailedValidationSteps(
+							validationSession.getTotalValidationSteps() - validationSession.getPassedValidationSteps());
 					// Set execution metadata
 					validationSession.setBuildNumber("Build-2026.01." + (15 + index));
 					validationSession.setEnvironment(index % 2 == 0 ? "Staging" : "Production");
-					validationSession.setExecutionNotes("Validation session completed. " + validationSession.getPassedValidationCases()
-							+ " validation cases passed, " + validationSession.getFailedValidationCases() + " failed.");
+					validationSession.setExecutionNotes("Validation session completed. "
+							+ validationSession.getPassedValidationCases() + " validation cases passed, "
+							+ validationSession.getFailedValidationCases() + " failed.");
 					// Set overall result
 					if (validationSession.getFailedValidationCases() > 0) {
 						validationSession.setResult(CValidationResult.FAILED);

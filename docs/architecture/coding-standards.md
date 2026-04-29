@@ -1347,7 +1347,7 @@ public class CActivityService {
 
 #### Pattern Structure
 ```java
-public class CEntityTypeInitializerService extends CInitializerServiceBase {
+public class CEntityTypeInitializerService extends CEntityTypeInitializerService {
     
     private static final Class<?> clazz = CEntityType.class;
     
@@ -3237,7 +3237,7 @@ static boolean copyAttachmentsTo(final CEntityDB<?> source, final CEntityDB<?> t
 
 - **Implementation Details**: `AUTOMATIC_INTERFACE_COPY_COMPLETE.md`
 - **Clone Pattern**: `docs/architecture/CLONE_PATTERN.md`
-- **Interface Hierarchy**: `docs/architecture/interface-hierarchy-before-after.md`
+- **Interface Hierarchy**: `docs/archive/deprecated-2026-04/architecture/interface-hierarchy-before-after.md` (archived)
 
 ### Quality Matrix Compliance
 

@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyInitializerService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.scheduler.domain.CScheduleTask;
@@ -14,10 +15,9 @@ import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
 
 @Service
-public final class CScheduleTaskInitializerService extends CInitializerServiceBase {
+public final class CScheduleTaskInitializerService extends CEntityOfCompanyInitializerService {
 
 	private static final Class<?> clazz = CScheduleTask.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CScheduleTaskInitializerService.class);
@@ -48,17 +48,19 @@ public final class CScheduleTaskInitializerService extends CInitializerServiceBa
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("name", "cronExpression", "action", "enabled", "lastRun", "nextRun", "executionCount", "failureCount"));
+		grid.setColumnFields(List.of("name", "cronExpression", "action", "enabled", "lastRun", "nextRun",
+				"executionCount", "failureCount"));
 		return grid;
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		LOGGER.info("Initializing Schedule Task entity");
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 		LOGGER.info("Schedule Task entity initialized successfully");
 	}
 
@@ -69,7 +71,8 @@ public final class CScheduleTaskInitializerService extends CInitializerServiceBa
 			LOGGER.info("Schedule tasks already exist for company: {}", company.getName());
 			return;
 		}
-		CScheduleTask task = new CScheduleTask("Email Queue Processor", "0 */5 * * * *", CScheduleTask.ACTION_PROCESS_EMAIL_QUEUE, company);
+		CScheduleTask task = new CScheduleTask("Email Queue Processor", "0 */5 * * * *",
+				CScheduleTask.ACTION_PROCESS_EMAIL_QUEUE, company);
 		task.setDescription("Processes queued emails every 5 minutes");
 		task = service.save(task);
 		service.calculateNextRun(task);

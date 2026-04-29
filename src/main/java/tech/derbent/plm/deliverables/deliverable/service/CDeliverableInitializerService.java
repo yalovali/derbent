@@ -3,29 +3,29 @@ package tech.derbent.plm.deliverables.deliverable.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.parentrelation.service.CParentRelationInitializerService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.parentrelation.service.CParentRelationInitializerService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CEntityOfProjectInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
-import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
-import tech.derbent.plm.comments.service.CCommentInitializerService;
-import tech.derbent.plm.deliverables.deliverable.domain.CDeliverable;
+import tech.derbent.api.screens.service.CProjectItemInitializerService;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
 import tech.derbent.plm.agile.domain.CFeature;
 import tech.derbent.plm.agile.domain.CUserStory;
 import tech.derbent.plm.agile.service.CUserStoryService;
+import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
+import tech.derbent.plm.comments.service.CCommentInitializerService;
+import tech.derbent.plm.deliverables.deliverable.domain.CDeliverable;
 
-public class CDeliverableInitializerService extends CInitializerServiceBase {
+public class CDeliverableInitializerService extends CProjectItemInitializerService {
 
 	private static final Class<?> clazz = CDeliverable.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDeliverableInitializerService.class);
@@ -37,8 +37,8 @@ public class CDeliverableInitializerService extends CInitializerServiceBase {
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
-			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+			final CDetailSection detailSection =
+					CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
@@ -61,35 +61,39 @@ public class CDeliverableInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "status", "project", "assignedTo", "createdBy", "createdDate"));
+		grid.setColumnFields(
+				List.of("id", "name", "description", "status", "project", "assignedTo", "createdBy", "createdDate"));
 		return grid;
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
-	
 	public static void initializeSample(final CProject<?> project, final boolean minimal, final CFeature sampleFeature1,
 			final CUserStory sampleUserStory1) throws Exception {
 		final String[][] nameAndDescriptions = {
 				{
-						"Requirements Specification Document", "Comprehensive requirements specification for the project"
+						"Requirements Specification Document",
+						"Comprehensive requirements specification for the project"
 				}, {
-						"Milestone Delivery Plan", "Milestone plan that tracks checkpoints required to complete leaf requirements"
+						"Milestone Delivery Plan",
+						"Milestone plan that tracks checkpoints required to complete leaf requirements"
 				}, {
 						"Release Package v1.0", "Production release package with deployment artifacts"
 				}, {
-						"Operational Readiness Checklist", "Checklist deliverable for go-live, support handoff, and monitoring readiness"
+						"Operational Readiness Checklist",
+						"Checklist deliverable for go-live, support handoff, and monitoring readiness"
 				}
 		};
 		initializeProjectEntity(nameAndDescriptions,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
-				(item, index) -> {
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
+				project, minimal, (item, index) -> {
 					final CDeliverable deliverable = (CDeliverable) item;
 					final CUser user = CSpringContext.getBean(CUserService.class).getRandom(project.getCompany());
 					deliverable.setAssignedTo(user);

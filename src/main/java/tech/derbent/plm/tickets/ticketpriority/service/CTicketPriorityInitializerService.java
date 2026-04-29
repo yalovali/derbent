@@ -14,13 +14,13 @@ import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CEntityOfProjectInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.api.services.CEntityTypeInitializerService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.tickets.ticketpriority.domain.CTicketPriority;
 
-public class CTicketPriorityInitializerService extends CInitializerServiceBase {
+public class CTicketPriorityInitializerService extends CEntityTypeInitializerService {
 
 	private static final Class<?> clazz = CTicketPriority.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CTicketPriorityInitializerService.class);
@@ -33,8 +33,7 @@ public class CTicketPriorityInitializerService extends CInitializerServiceBase {
 	public static CDetailSection createBasicView(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
 		try {
-			final CDetailSection scr = createBaseScreenEntity(project, clazz);
-			CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
+			final CDetailSection scr = CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
 			scr.addScreenLine(CDetailLinesService.createSection("Display Configuration"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
@@ -58,17 +57,19 @@ public class CTicketPriorityInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "priorityLevel", "isDefault", "color", "sortOrder", "active", "company"));
+		grid.setColumnFields(List.of("id", "name", "description", "priorityLevel", "isDefault", "color", "sortOrder",
+				"active", "company"));
 		return grid;
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		Check.notNull(project, "project cannot be null");
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
@@ -87,6 +88,7 @@ public class CTicketPriorityInitializerService extends CInitializerServiceBase {
 		};
 		final CCompany company = project.getCompany();
 		initializeCompanyEntity(nameAndDescriptions,
-				(CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company, minimal, null);
+				(CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
+				company, minimal, null);
 	}
 }

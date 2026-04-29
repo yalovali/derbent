@@ -15,8 +15,8 @@ import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
-import tech.derbent.api.screens.service.CInitializerServiceProjectItem;
+import tech.derbent.api.screens.service.CEntityOfProjectInitializerService;
+import tech.derbent.api.screens.service.CProjectItemInitializerService;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
@@ -26,7 +26,7 @@ import tech.derbent.plm.requirements.requirement.domain.CRequirement;
 import tech.derbent.plm.requirements.requirementtype.domain.CRequirementType;
 import tech.derbent.plm.requirements.requirementtype.service.CRequirementTypeService;
 
-public class CRequirementInitializerService extends CInitializerServiceProjectItem {
+public class CRequirementInitializerService extends CProjectItemInitializerService {
 
 	private static final Class<?> clazz = CRequirement.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRequirementInitializerService.class);
@@ -37,8 +37,7 @@ public class CRequirementInitializerService extends CInitializerServiceProjectIt
 	private static final boolean showInQuickToolbar = true;
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
-		final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-		CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+		final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
 		detailSection.addScreenLine(CDetailLinesService.createSection("Planning"));
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));

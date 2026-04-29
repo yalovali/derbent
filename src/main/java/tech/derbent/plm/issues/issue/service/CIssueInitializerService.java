@@ -3,31 +3,31 @@ package tech.derbent.plm.issues.issue.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.parentrelation.service.CParentRelationInitializerService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.parentrelation.service.CParentRelationInitializerService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CEntityOfProjectInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.api.screens.service.CProjectItemInitializerService;
+import tech.derbent.api.users.domain.CUser;
+import tech.derbent.api.users.service.CUserService;
+import tech.derbent.plm.agile.domain.CUserStory;
+import tech.derbent.plm.agile.service.CUserStoryService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.issues.issue.domain.CIssue;
 import tech.derbent.plm.issues.issue.domain.EIssuePriority;
 import tech.derbent.plm.issues.issue.domain.EIssueSeverity;
 import tech.derbent.plm.links.service.CLinkInitializerService;
-import tech.derbent.api.users.domain.CUser;
-import tech.derbent.api.users.service.CUserService;
-import tech.derbent.plm.agile.domain.CUserStory;
-import tech.derbent.plm.agile.service.CUserStoryService;
 
-public class CIssueInitializerService extends CInitializerServiceBase {
+public class CIssueInitializerService extends CProjectItemInitializerService {
 
 	private static final Class<?> clazz = CIssue.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CIssueInitializerService.class);
@@ -39,8 +39,8 @@ public class CIssueInitializerService extends CInitializerServiceBase {
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
-			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+			final CDetailSection detailSection =
+					CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "issueSeverity"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "issuePriority"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
@@ -76,43 +76,61 @@ public class CIssueInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "issueSeverity", "issuePriority", "status", "project", "assignedTo", "dueDate",
-				"resolvedDate", "createdBy", "createdDate"));
+		grid.setColumnFields(List.of("id", "name", "description", "issueSeverity", "issuePriority", "status", "project",
+				"assignedTo", "dueDate", "resolvedDate", "createdBy", "createdDate"));
 		return grid;
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
-	
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		// Check if issues already exist for this project
-		final CIssueService issueService = (CIssueService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
+		final CIssueService issueService =
+				(CIssueService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
 		final List<CIssue> existingIssues = issueService.listByProject(project);
 		if (!existingIssues.isEmpty()) {
 			LOGGER.info("Issues already exist for project '{}', skipping initialization", project.getName());
 			return;
 		}
 		final String[][] nameAndDescriptions = {
-				{"Login button not responding", "Button click event not firing on login page"},
-				{"Data validation error", "Form submission fails with incorrect validation message"},
-				{"Performance issue on dashboard", "Dashboard takes too long to load with large datasets"},
-				{"UI rendering problem", "Layout breaks on mobile devices below 768px width"},
-				{"Memory leak in background task", "Background worker process consuming excessive memory over time"},
-				{"Sprint planning drag/drop glitch", "Dragging a backlog leaf into a sprint sometimes loses selection context"},
-				{"Kanban status dropdown incomplete", "Status filter dropdown shows only a subset of company statuses"},
-				{"Gantt timeline overlap", "Timeline bars overlap on narrow windows; header should keep compact widths"},
-				{"Assignment context menu warning", "Right-click Assign To Me warns about selection even though a row is selected"},
-				{"Null pointer in workflow transition", "Changing status on a freshly created item throws if workflow relations are missing"}
+				{
+						"Login button not responding", "Button click event not firing on login page"
+				}, {
+						"Data validation error", "Form submission fails with incorrect validation message"
+				}, {
+						"Performance issue on dashboard", "Dashboard takes too long to load with large datasets"
+				}, {
+						"UI rendering problem", "Layout breaks on mobile devices below 768px width"
+				}, {
+						"Memory leak in background task",
+						"Background worker process consuming excessive memory over time"
+				}, {
+						"Sprint planning drag/drop glitch",
+						"Dragging a backlog leaf into a sprint sometimes loses selection context"
+				}, {
+						"Kanban status dropdown incomplete",
+						"Status filter dropdown shows only a subset of company statuses"
+				}, {
+						"Gantt timeline overlap",
+						"Timeline bars overlap on narrow windows; header should keep compact widths"
+				}, {
+						"Assignment context menu warning",
+						"Right-click Assign To Me warns about selection even though a row is selected"
+				}, {
+						"Null pointer in workflow transition",
+						"Changing status on a freshly created item throws if workflow relations are missing"
+				}
 		};
 		initializeProjectEntity(nameAndDescriptions,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
-				(item, index) -> {
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
+				project, minimal, (item, index) -> {
 					final CIssue issue = (CIssue) item;
 					final CUser user = CSpringContext.getBean(CUserService.class).getRandom(project.getCompany());
 					issue.setAssignedTo(user);
@@ -126,9 +144,9 @@ public class CIssueInitializerService extends CInitializerServiceBase {
 					}
 					// Keep samples varied so filter widgets have realistic distributions.
 					issue.setIssueSeverity(index % 3 == 0 ? EIssueSeverity.CRITICAL
-							: (index % 3 == 1 ? EIssueSeverity.MAJOR : EIssueSeverity.MINOR));
-					issue.setIssuePriority(index % 3 == 0 ? EIssuePriority.HIGH
-							: (index % 3 == 1 ? EIssuePriority.MEDIUM : EIssuePriority.LOW));
+							: index % 3 == 1 ? EIssueSeverity.MAJOR : EIssueSeverity.MINOR);
+					issue.setIssuePriority(index % 3 == 0 ? EIssuePriority.HIGH : index % 3 == 1 ? EIssuePriority.MEDIUM
+							: EIssuePriority.LOW);
 				});
 	}
 }

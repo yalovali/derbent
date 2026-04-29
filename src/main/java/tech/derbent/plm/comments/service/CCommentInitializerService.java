@@ -5,19 +5,19 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyInitializerService;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailLinesService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.plm.comments.domain.CComment;
 
 /** Initializer service for CComment entities. Provides standard comment section creation for ALL entity detail views AND sample comment generation.
  * **Key Features**: 1. addDefaultSection() ensures ALL entities have identical comment sections 2. createSampleComments() provides reusable sample
  * comment generation **Important**: Comments are child entities with NO standalone views or pages. They are managed exclusively through their parent
  * entities. */
-public final class CCommentInitializerService extends CInitializerServiceBase {
+public final class CCommentInitializerService extends CEntityOfCompanyInitializerService {
 
 	/** Standard field name - must match entity field name */
 	public static final String FIELD_NAME_COMMENTS = "comments";
@@ -26,13 +26,14 @@ public final class CCommentInitializerService extends CInitializerServiceBase {
 	public static final String SECTION_NAME_COMMENTS = "Comments";
 
 	/** Add standard Comments section to any entity detail view. **This is the ONLY method that creates comment sections.** ALL entity initializers
-	 * (Activity, Risk, Meeting, Sprint, Project, User, etc.) MUST call this method to ensure consistent comment sections. Note: For the BAB profile,
-	 * the comments section is intentionally skipped during initialization. Creates: - Section header: "Comments" - Field: "comments" (renders comment
+	 * (Activity, Risk, Meeting, Sprint, Project, User, etc.) MUST call this method to ensure consistent comment sections. Note: For the BAB profile, the
+	 * comments section is intentionally skipped during initialization. Creates: - Section header: "Comments" - Field: "comments" (renders comment
 	 * component via factory)
 	 * @param detailSection the detail section to add comments to
 	 * @param entityClass   the entity class (must implement IHasComments and have @OneToMany comments field)
 	 * @throws Exception if adding section fails */
-	public static void addDefaultSection(final CDetailSection detailSection, final Class<?> entityClass) throws Exception {
+	public static void addDefaultSection(final CDetailSection detailSection, final Class<?> entityClass)
+			throws Exception {
 		Check.notNull(detailSection, "detailSection cannot be null");
 		Check.notNull(entityClass, "entityClass cannot be null");
 		if (CSpringContext.isBabProfile()) {
@@ -45,7 +46,8 @@ public final class CCommentInitializerService extends CInitializerServiceBase {
 			detailLine.setIsCaptionVisible(false);
 			detailSection.addScreenLine(detailLine);
 		} catch (final Exception e) {
-			LOGGER.error("Error adding Comments section for {}: {} reason={}", entityClass.getSimpleName(), e.getMessage(), e.getMessage());
+			LOGGER.error("Error adding Comments section for {}: {} reason={}", entityClass.getSimpleName(),
+					e.getMessage(), e.getMessage());
 			throw e;
 		}
 	}

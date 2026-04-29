@@ -15,7 +15,7 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.api.screens.service.CEntityOfProjectInitializerService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.links.service.CLinkInitializerService;
@@ -32,8 +32,7 @@ public final class CBabSyslogNodeInitializerService extends CInitializerServiceB
 
 	/** Create detail view with all Syslog node fields. */
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
-		final CDetailSection scr = createBaseScreenEntity(project, clazz);
-		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
+		final CDetailSection scr = CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));

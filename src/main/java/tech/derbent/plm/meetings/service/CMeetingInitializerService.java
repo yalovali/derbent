@@ -4,18 +4,18 @@ import java.time.LocalDate;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.parentrelation.service.CParentRelationInitializerService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.parentrelation.service.CParentRelationInitializerService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.api.screens.service.CProjectItemInitializerService;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
 import tech.derbent.plm.agile.domain.CUserStory;
@@ -26,7 +26,7 @@ import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.meetings.domain.CMeeting;
 import tech.derbent.plm.meetings.domain.CMeetingType;
 
-public class CMeetingInitializerService extends CInitializerServiceBase {
+public class CMeetingInitializerService extends CProjectItemInitializerService {
 
 	public static final String BASE_PANEL_NAME = "Meeting Information";
 	private static final Class<?> ENTITY_CLASS = CMeeting.class;
@@ -38,13 +38,15 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 	private static final boolean showInQuickToolbar = true;
 
 	/** Add relationships (comments) to sample meetings. */
-	private static void addRelationshipsToMeetings(final List<CMeeting> meetings, final CMeetingService meetingService) {
+	private static void addRelationshipsToMeetings(final List<CMeeting> meetings,
+			final CMeetingService meetingService) {
 		try {
 			// Add comments to first meeting
 			if (meetings.size() > 0) {
 				final CMeeting meeting1 = meetings.get(0);
 				final List<CComment> comments = CCommentInitializerService.createSampleComments(new String[] {
-						"Please prepare Q4 performance metrics before the meeting", "Meeting link: https://teams.microsoft.com/meeting/..."
+						"Please prepare Q4 performance metrics before the meeting",
+						"Meeting link: https://teams.microsoft.com/meeting/..."
 				}, new boolean[] {
 						true, false
 				} // First comment is important
@@ -55,8 +57,8 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 			// Add comments to second meeting
 			if (meetings.size() > 1) {
 				final CMeeting meeting2 = meetings.get(1);
-				final List<CComment> comments =
-						CCommentInitializerService.createSampleComments("Architecture diagrams will be shared 24 hours before the meeting");
+				final List<CComment> comments = CCommentInitializerService
+						.createSampleComments("Architecture diagrams will be shared 24 hours before the meeting");
 				meeting2.getComments().addAll(comments);
 				meetingService.save(meeting2);
 			}
@@ -110,17 +112,18 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
-		grid.setColumnFields(List.of("id", "name", "description", "entityType", "project", "startDate", "startTime", "endDate", "endTime",
-				"createdBy", "createdDate", "status", "location"));
+		grid.setColumnFields(List.of("id", "name", "description", "entityType", "project", "startDate", "startTime",
+				"endDate", "endTime", "createdBy", "createdDate", "status", "location"));
 		return grid;
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder, null);
+		initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	/** Initialize sample meetings for a project with relationships (comments, participants).
@@ -128,11 +131,14 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 	 * @param minimal if true, creates only 1 meeting; if false, creates 2 meetings */
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		// Seed data for sample meetings
-		record MeetingSeed(String name, String description, String location, String agenda, int startDaysOffset, int durationDays) {}
-		final List<MeetingSeed> seeds = List.of(
-				new MeetingSeed("Q1 Planning Session", "Quarterly planning session to review goals and set priorities", "Conference Room A / Virtual",
-						"1. Review Q4 achievements\n2. Discuss Q1 objectives\n3. Resource allocation\n4. Budget planning", 250, 3),
-				new MeetingSeed("Technical Architecture Review", "Review and discuss technical architecture decisions and implementation approach",
+		record MeetingSeed(String name, String description, String location, String agenda, int startDaysOffset,
+				int durationDays) {}
+		final List<MeetingSeed> seeds = List.of(new MeetingSeed("Q1 Planning Session",
+				"Quarterly planning session to review goals and set priorities", "Conference Room A / Virtual",
+				"1. Review Q4 achievements\n2. Discuss Q1 objectives\n3. Resource allocation\n4. Budget planning", 250,
+				3),
+				new MeetingSeed("Technical Architecture Review",
+						"Review and discuss technical architecture decisions and implementation approach",
 						"Engineering Lab / Teams",
 						"1. Architecture proposal presentation\n2. Security considerations\n3. Scalability discussion\n4. Technology stack decisions",
 						150, 2));
@@ -159,7 +165,7 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 				}
 				meeting.setAssignedTo(user1);
 				// Deterministic scheduling keeps sample Gnnt data stable across reloads and UI tests.
-				meeting.setStartDate(LocalDate.now().plusDays(seed.startDaysOffset() + (index * 7)));
+				meeting.setStartDate(LocalDate.now().plusDays(seed.startDaysOffset() + index * 7));
 				meeting.setEndDate(meeting.getStartDate().plusDays(seed.durationDays()));
 				meeting.setLocation(seed.location());
 				meeting.setAgenda(seed.agenda());
@@ -185,7 +191,8 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 				addRelationshipsToMeetings(createdMeetings, meetingService);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample meetings for project: {} reason={}", project.getName(), e.getMessage());
+			LOGGER.error("Error initializing sample meetings for project: {} reason={}", project.getName(),
+					e.getMessage());
 			throw new RuntimeException("Failed to initialize sample meetings for project: " + project.getName(), e);
 		}
 	}

@@ -11,13 +11,13 @@ import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CEntityOfProjectInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.api.services.CEntityTypeInitializerService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.requirements.requirementtype.domain.CRequirementType;
 
-public class CRequirementTypeInitializerService extends CInitializerServiceBase {
+public class CRequirementTypeInitializerService extends CEntityTypeInitializerService {
 
 	private static final Class<?> clazz = CRequirementType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRequirementTypeInitializerService.class);
@@ -30,8 +30,8 @@ public class CRequirementTypeInitializerService extends CInitializerServiceBase 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		try {
-			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+			final CDetailSection detailSection =
+					CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workflow"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Hierarchy Configuration"));
@@ -54,16 +54,18 @@ public class CRequirementTypeInitializerService extends CInitializerServiceBase 
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "level", "canHaveChildren", "color", "sortOrder", "active", "company"));
+		grid.setColumnFields(List.of("id", "name", "description", "level", "canHaveChildren", "color", "sortOrder",
+				"active", "company"));
 		return grid;
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
@@ -80,16 +82,16 @@ public class CRequirementTypeInitializerService extends CInitializerServiceBase 
 		// Use the concrete service bean to keep this initializer type-safe (no unchecked casts).
 		final CRequirementTypeService requirementTypeService = CSpringContext.getBean(CRequirementTypeService.class);
 		initializeCompanyEntity(seeds, requirementTypeService, company, minimal, (requirementType, index) -> {
-					if (index == 0) {
-						requirementType.setLevel(0);
-						requirementType.setCanHaveChildren(true);
-					} else if (index == 1) {
-						requirementType.setLevel(1);
-						requirementType.setCanHaveChildren(true);
-					} else {
-						requirementType.setLevel(-1);
-						requirementType.setCanHaveChildren(false);
-					}
-				});
+			if (index == 0) {
+				requirementType.setLevel(0);
+				requirementType.setCanHaveChildren(true);
+			} else if (index == 1) {
+				requirementType.setLevel(1);
+				requirementType.setCanHaveChildren(true);
+			} else {
+				requirementType.setLevel(-1);
+				requirementType.setCanHaveChildren(false);
+			}
+		});
 	}
 }

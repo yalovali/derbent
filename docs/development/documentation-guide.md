@@ -88,7 +88,7 @@ Explains the design decisions, patterns, and standards that guide development.
 
 **Other Files**:
 - `bean-access-patterns.md` - Spring bean access
-- `interface-hierarchy-before-after.md` - Interface refactoring
+- `interface-hierarchy-before-after.md` - Interface refactoring (archived to docs/archive/deprecated-2026-04/architecture/)
 - `multi-user-singleton-advisory.md` - Multi-tenant patterns
 
 #### When to Reference

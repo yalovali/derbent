@@ -8,17 +8,17 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.projects.service.CProjectInitializerService;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CEntityOfProjectInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.bab.project.domain.CProject_Bab;
 
-public class CProject_BabInitializerService extends CInitializerServiceBase {
+public class CProject_BabInitializerService extends CProjectInitializerService {
 
 	private static final String BAB_PROJECT_DESCRIPTION = "Initial BAB Gateway project for UI configuration.";
 	private static final String BAB_PROJECT_NAME = "BAB Gateway Core";
@@ -32,8 +32,8 @@ public class CProject_BabInitializerService extends CInitializerServiceBase {
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
-			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+			final CDetailSection detailSection =
+					CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			final CDetailLines companyLine = CDetailLinesService.createLineFromDefaults(clazz, "company");
 			companyLine.setIsReadonly(true);
@@ -60,16 +60,19 @@ public class CProject_BabInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "ipAddress", "authToken", "active", "createdDate", "lastModifiedDate"));
+		grid.setColumnFields(List.of("id", "name", "description", "ipAddress", "authToken", "active", "createdDate",
+				"lastModifiedDate"));
 		return grid;
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
-				MenuTitle_DEVELOPMENT + menuTitle + "_devel", pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder, null);
+				MenuTitle_DEVELOPMENT + menuTitle + "_devel", pageTitle, pageDescription, showInQuickToolbar,
+				Menu_Order_DEVELOPMENT + menuOrder, null);
 	}
 
 	public static CProject_Bab initializeSampleBab(final CCompany company, final boolean minimal) throws Exception {

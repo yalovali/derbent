@@ -16,8 +16,7 @@ This directory contains comprehensive documentation for the **BAB (Building Auto
 
 ### Essential Reading (Start Here)
 
-1. **[BAB Implementation Summary](BAB_IMPLEMENTATION_SUMMARY_2026-02-01.md)** - Latest status and achievements
-2. **[HTTP Client Architecture](HTTP_CLIENT_ARCHITECTURE.md)** - System design and patterns
+1. **[HTTP Client Architecture](HTTP_CLIENT_ARCHITECTURE.md)** - System design and patterns
 3. **[Calimero API Response Patterns](CALIMERO_API_RESPONSE_PATTERNS.md)** - **CRITICAL** JSON parsing guide
 4. **[JSON Network Serialization Coding Rules](JSON_NETWORK_SERIALIZATION_CODING_RULES.md)** - **MANDATORY** profile exclusion pattern
 5. **[Development Guide](DEVELOPMENT_GUIDE.md)** - How to develop BAB features
@@ -73,14 +72,12 @@ This directory contains comprehensive documentation for the **BAB (Building Auto
 - [DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md) - Developer setup and workflow
 - [HTTP_CLIENT_QUICKSTART.md](HTTP_CLIENT_QUICKSTART.md) - Quick HTTP client tutorial
 - [HTTP_CLIENT_IMPLEMENTATION.md](HTTP_CLIENT_IMPLEMENTATION.md) - Detailed implementation
-- [HTTP_CLIENT_SOURCE_CODE.md](HTTP_CLIENT_SOURCE_CODE.md) - Source code reference
 
 ### API Integration
 
 - **[CALIMERO_API_RESPONSE_PATTERNS.md](CALIMERO_API_RESPONSE_PATTERNS.md)** ⭐ **START HERE**
 - [JSON_NETWORK_SERIALIZATION_CODING_RULES.md](JSON_NETWORK_SERIALIZATION_CODING_RULES.md) - BAB entity JSON export rules
 - [CALIMERO_INTEGRATION_PLAN.md](CALIMERO_INTEGRATION_PLAN.md) - Integration roadmap
-- [BAB_CALIMERO_AGILE_PLAN.md](BAB_CALIMERO_AGILE_PLAN.md) - Agile implementation plan
 
 ### Component Standards
 
@@ -89,10 +86,7 @@ This directory contains comprehensive documentation for the **BAB (Building Auto
 
 ### Status & Planning
 
-- [BAB_IMPLEMENTATION_SUMMARY_2026-02-01.md](BAB_IMPLEMENTATION_SUMMARY_2026-02-01.md) - Latest status
-- [BAB_FINAL_STATUS_2026-02-01.md](BAB_FINAL_STATUS_2026-02-01.md) - Milestone summary
 - [BAB_TODO_EPICS.md](BAB_TODO_EPICS.md) - Future work
-- [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md) - Historical summary
 
 ### Authentication & Security
 
@@ -101,10 +95,8 @@ This directory contains comprehensive documentation for the **BAB (Building Auto
 
 ### Reference
 
-- [PROJECT_DEFINITION.md](PROJECT_DEFINITION.md) - BAB project definition
-- [COMPETITIVE_ANALYSIS.md](COMPETITIVE_ANALYSIS.md) - Market analysis
-- [HTTP_CLIENT_IMPLEMENTATION_COMPLETE.md](HTTP_CLIENT_IMPLEMENTATION_COMPLETE.md) - Complete reference
-- [BAB_HTTP_FINAL_SUMMARY.md](BAB_HTTP_FINAL_SUMMARY.md) - HTTP system summary
+- [HTTP_CLIENT_IMPLEMENTATION.md](HTTP_CLIENT_IMPLEMENTATION.md) - Implementation guide
+- [HTTP_CLIENT_QUICKSTART.md](HTTP_CLIENT_QUICKSTART.md) - Quick start
 
 ---
 
@@ -120,7 +112,7 @@ This directory contains comprehensive documentation for the **BAB (Building Auto
 
 **Documentation**: Created comprehensive **[CALIMERO_API_RESPONSE_PATTERNS.md](CALIMERO_API_RESPONSE_PATTERNS.md)** guide.
 
-**See**: [../../CALIMERO_METRICS_PARSING_FIX_SUMMARY.md](../../CALIMERO_METRICS_PARSING_FIX_SUMMARY.md) for complete details.
+**See**: [CALIMERO_API_RESPONSE_PATTERNS.md](CALIMERO_API_RESPONSE_PATTERNS.md) for complete parsing details.
 
 ---
 

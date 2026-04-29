@@ -1153,7 +1153,7 @@ public class C{Entity}InitializerService extends CInitializerServiceBase {
     // 1. DETAIL VIEW STRUCTURE
     public static CDetailSection createBasicView(final CProject project) throws Exception {
         final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-        CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+        CEntityNamedInitializerService.createBasicView(detailSection, clazz, project, true);
         
         // Entity-specific fields
         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
@@ -1239,7 +1239,7 @@ public class C{Entity}InitializerService extends CInitializerServiceBase {
 ```java
 public static CDetailSection createBasicView(final CProject project) throws Exception {
     final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-    CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+    CEntityNamedInitializerService.createBasicView(detailSection, clazz, project, true);
     detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
     detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workflow"));
     

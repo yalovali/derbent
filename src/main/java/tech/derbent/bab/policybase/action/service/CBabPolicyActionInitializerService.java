@@ -14,8 +14,8 @@ import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CEntityNamedInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskBase;
 import tech.derbent.bab.policybase.node.can.CBabCanNode;
@@ -30,8 +30,10 @@ import tech.derbent.plm.links.service.CLinkInitializerService;
 
 /** Initializer for destination-aware policy actions. */
 @Service
-@Profile({"bab", "default", "test"})
-public final class CBabPolicyActionInitializerService extends CInitializerServiceBase {
+@Profile ({
+		"bab", "default", "test"
+})
+public final class CBabPolicyActionInitializerService extends CEntityNamedInitializerService {
 
 	private static final Class<CBabPolicyAction> clazz = CBabPolicyAction.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabPolicyActionInitializerService.class);
@@ -41,6 +43,19 @@ public final class CBabPolicyActionInitializerService extends CInitializerServic
 	private static final String pageTitle = "Policy Actions";
 	private static final boolean showInQuickToolbar = false;
 
+	private static String buildSampleActionName(final CBabNodeEntity<?> destinationNode) {
+		if (destinationNode instanceof CBabCanNode) {
+			return "Sample CAN Action";
+		}
+		if (destinationNode instanceof CBabFileOutputNode) {
+			return "Sample File Output Action";
+		}
+		if (destinationNode instanceof CBabROSNode) {
+			return "Sample ROS Action";
+		}
+		return "Sample Action";
+	}
+
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
 		scr.addScreenLine(CDetailLinesService.createSection("Basic Information"));
@@ -48,7 +63,8 @@ public final class CBabPolicyActionInitializerService extends CInitializerServic
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "policyRule"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "destinationNode"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actionMask"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentActionMaskDetails"));
+		scr.addScreenLine(
+				CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentActionMaskDetails"));
 		scr.addScreenLine(CDetailLinesService.createSection("Execution Settings"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
@@ -68,17 +84,18 @@ public final class CBabPolicyActionInitializerService extends CInitializerServic
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "policyRule", "destinationNode", "actionMask", "active", "executionPriority", "executionOrder",
-				"asyncExecution", "timeoutSeconds", "retryCount"));
+		grid.setColumnFields(List.of("id", "name", "policyRule", "destinationNode", "actionMask", "active",
+				"executionPriority", "executionOrder", "asyncExecution", "timeoutSeconds", "retryCount"));
 		return grid;
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
@@ -92,19 +109,23 @@ public final class CBabPolicyActionInitializerService extends CInitializerServic
 		final List<CBabPolicyAction> existingActions = new ArrayList<>(actionService.listByProject(project));
 		final List<CBabNodeEntity<?>> supportedNodes = actionService.listSupportedDestinationNodes(project);
 		if (supportedNodes.isEmpty()) {
-			LOGGER.info("No supported destination nodes found for project {}, skipping action sample creation", project.getName());
+			LOGGER.info("No supported destination nodes found for project {}, skipping action sample creation",
+					project.getName());
 			return;
 		}
-		final List<CBabNodeEntity<?>> typedNodes = supportedNodes.stream().filter(CBabPolicyActionInitializerService::isSupportedActionNodeType).toList();
+		final List<CBabNodeEntity<?>> typedNodes =
+				supportedNodes.stream().filter(CBabPolicyActionInitializerService::isSupportedActionNodeType).toList();
 		if (typedNodes.isEmpty()) {
-			LOGGER.info("No CAN/FileOutput/ROS destination nodes found for project {}, skipping action sample creation", project.getName());
+			LOGGER.info("No CAN/FileOutput/ROS destination nodes found for project {}, skipping action sample creation",
+					project.getName());
 			return;
 		}
 		int created = 0;
 		for (int index = 0; index < typedNodes.size(); index++) {
 			final CBabNodeEntity<?> destinationNode = typedNodes.get(index);
-			final boolean typeAlreadyCovered = existingActions.stream().anyMatch(action -> action.getDestinationNode() != null
-					&& action.getDestinationNode().getClass().equals(destinationNode.getClass()));
+			final boolean typeAlreadyCovered =
+					existingActions.stream().anyMatch(action -> action.getDestinationNode() != null
+							&& action.getDestinationNode().getClass().equals(destinationNode.getClass()));
 			if (typeAlreadyCovered) {
 				continue;
 			}
@@ -112,7 +133,8 @@ public final class CBabPolicyActionInitializerService extends CInitializerServic
 			final CBabPolicyAction action = actionService.createDraftActionForRule(rule);
 			final String actionName = buildSampleActionName(destinationNode);
 			action.setName(actionName);
-			if (action.getDestinationNode() == null || !Objects.equals(action.getDestinationNode().getId(), destinationNode.getId())) {
+			if (action.getDestinationNode() == null
+					|| !Objects.equals(action.getDestinationNode().getId(), destinationNode.getId())) {
 				action.setDestinationNode(destinationNode);
 				action.setActionMask(actionService.createMaskForDestination(action, destinationNode));
 			}
@@ -130,19 +152,6 @@ public final class CBabPolicyActionInitializerService extends CInitializerServic
 			}
 		}
 		LOGGER.info("Created {} sample policy actions for project: {}", created, project.getName());
-	}
-
-	private static String buildSampleActionName(final CBabNodeEntity<?> destinationNode) {
-		if (destinationNode instanceof CBabCanNode) {
-			return "Sample CAN Action";
-		}
-		if (destinationNode instanceof CBabFileOutputNode) {
-			return "Sample File Output Action";
-		}
-		if (destinationNode instanceof CBabROSNode) {
-			return "Sample ROS Action";
-		}
-		return "Sample Action";
 	}
 
 	private static boolean isSupportedActionNodeType(final CBabNodeEntity<?> destinationNode) {

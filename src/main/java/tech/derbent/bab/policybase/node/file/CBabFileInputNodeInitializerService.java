@@ -15,7 +15,7 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.api.screens.service.CEntityOfProjectInitializerService;
 import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterCSVInitializerService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
@@ -33,8 +33,7 @@ public final class CBabFileInputNodeInitializerService extends CInitializerServi
 
 	/** Create detail view with all File Input node fields. */
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
-		final CDetailSection scr = createBaseScreenEntity(project, clazz);
-		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
+		final CDetailSection scr = CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
 		// NOTE: nodeType is managed by @DiscriminatorColumn - displayed via getNodeType() which returns class name
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));

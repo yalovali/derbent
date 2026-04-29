@@ -7,20 +7,20 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.service.CProjectInitializerService;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CEntityOfProjectInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.project.domain.CProject_Derbent;
 
-public class CProject_DerbentInitializerService extends CInitializerServiceBase {
+public class CProject_DerbentInitializerService extends CProjectInitializerService {
 
 	private static final Class<?> clazz = CProject_Derbent.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProject_DerbentInitializerService.class);
@@ -32,8 +32,8 @@ public class CProject_DerbentInitializerService extends CInitializerServiceBase 
 
 	public static CDetailSection createBasicView(final CProject_Derbent project) throws Exception {
 		try {
-			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+			final CDetailSection detailSection =
+					CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			final CDetailLines companyLine = CDetailLinesService.createLineFromDefaults(clazz, "company");
 			companyLine.setIsReadonly(true);
@@ -63,28 +63,32 @@ public class CProject_DerbentInitializerService extends CInitializerServiceBase 
 
 	public static CGridEntity createGridEntity(final CProject_Derbent project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "kanbanLine", "active", "createdDate", "lastModifiedDate"));
+		grid.setColumnFields(
+				List.of("id", "name", "description", "kanbanLine", "active", "createdDate", "lastModifiedDate"));
 		return grid;
 	}
 
 	public static void initialize(final CProject_Derbent project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	public static void initializeSample(final CCompany company, final boolean minimal) throws Exception {
 		final String[][] nameAndDescription = {
 				{
-						"Digital Transformation Initiative", "Comprehensive digital transformation for enhanced customer experience"
+						"Digital Transformation Initiative",
+						"Comprehensive digital transformation for enhanced customer experience"
 				}, {
-						"Infrastructure Upgrade Project", "Upgrading IT infrastructure for improved performance and scalability"
+						"Infrastructure Upgrade Project",
+						"Upgrading IT infrastructure for improved performance and scalability"
 				}
 		};
 		initializeCompanyEntity(nameAndDescription,
-				(CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company, minimal,
-				null);
+				(CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
+				company, minimal, null);
 	}
 }

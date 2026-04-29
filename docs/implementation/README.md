@@ -17,9 +17,7 @@ The Gantt chart implementation includes:
 **Start here**: [GANTT_DESIGN_PATTERN.md](GANTT_DESIGN_PATTERN.md) for complete Gantt design patterns.
 
 ### 🔐 Authentication & Authorization
-- [AUTHENTICATION_CALL_HIERARCHY.md](AUTHENTICATION_CALL_HIERARCHY.md) - Authentication call flow
 - [COMPANY_LOGIN_PATTERN.md](COMPANY_LOGIN_PATTERN.md) - Company login implementation
-- [LOGIN_AUTHENTICATION_MECHANISM.md](LOGIN_AUTHENTICATION_MECHANISM.md) - Authentication mechanism details
 
 ### 🔄 Workflow & Status Management
 - [WORKFLOW_ENTITY_PATTERN.md](WORKFLOW_ENTITY_PATTERN.md) - Workflow entity pattern
@@ -36,7 +34,6 @@ The Gantt chart implementation includes:
 - [selection-event-pattern.md](selection-event-pattern.md) - Selection event handling
 - [Grid-Selection-After-Save-Pattern.md](Grid-Selection-After-Save-Pattern.md) - Grid selection after save
 - [PageService-Pattern.md](PageService-Pattern.md) - Page service pattern
-- [HIERARCHICAL_MENU_ORDER.md](HIERARCHICAL_MENU_ORDER.md) - Menu hierarchy
 
 ### 🧪 Testing
 - [PLAYWRIGHT_BEST_PRACTICES.md](PLAYWRIGHT_BEST_PRACTICES.md) - Playwright testing best practices

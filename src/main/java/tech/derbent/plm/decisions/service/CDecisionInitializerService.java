@@ -5,17 +5,17 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.parentrelation.service.CParentRelationInitializerService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.parentrelation.service.CParentRelationInitializerService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CEntityNamedInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.api.screens.service.CProjectItemInitializerService;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
 import tech.derbent.plm.agile.domain.CUserStory;
@@ -27,7 +27,7 @@ import tech.derbent.plm.decisions.domain.CDecision;
 import tech.derbent.plm.links.domain.CLink;
 import tech.derbent.plm.links.service.CLinkInitializerService;
 
-public class CDecisionInitializerService extends CInitializerServiceBase {
+public class CDecisionInitializerService extends CProjectItemInitializerService {
 
 	private static final Class<?> clazz = CDecision.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecisionInitializerService.class);
@@ -38,13 +38,14 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 	private static final boolean showInQuickToolbar = false;
 
 	/** Add relationships (comments, links) to sample decisions. */
-	private static void addRelationshipsToDecisions(final List<CDecision> decisions, final CDecisionService decisionService,
-			final CProject<?> project) {
+	private static void addRelationshipsToDecisions(final List<CDecision> decisions,
+			final CDecisionService decisionService, final CProject<?> project) {
 		try {
 			// Add comments to first decision
 			final CDecision decision1 = decisions.get(0);
 			final List<CComment> comments1 = CCommentInitializerService.createSampleComments(new String[] {
-					"This decision aligns with our digital transformation strategy", "Cost-benefit analysis shows 3x ROI within 18 months"
+					"This decision aligns with our digital transformation strategy",
+					"Cost-benefit analysis shows 3x ROI within 18 months"
 			}, new boolean[] {
 					false, true
 			} // Second comment is important
@@ -54,12 +55,13 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 			LOGGER.debug("Added comments to decision: {}", decision1.getName());
 			// Add comment to second decision
 			final CDecision decision2 = decisions.get(1);
-			final List<CComment> comments2 =
-					CCommentInitializerService.createSampleComments("Team training will begin in Q1 to support this transition");
+			final List<CComment> comments2 = CCommentInitializerService
+					.createSampleComments("Team training will begin in Q1 to support this transition");
 			decision2.getComments().addAll(comments2);
 			// Link second decision to first decision
-			final CLink link = CLinkInitializerService.createRandomLink(decision2, project, CDecision.class, CDecisionService.class, "Supports",
-					"Agile methodology supports cloud-native architecture adoption", project.getCompany());
+			final CLink link = CLinkInitializerService.createRandomLink(decision2, project, CDecision.class,
+					CDecisionService.class, "Supports", "Agile methodology supports cloud-native architecture adoption",
+					project.getCompany());
 			if (link != null) {
 				decision2.getLinks().add(link);
 			}
@@ -76,7 +78,7 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			// create screen lines
-			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+			CEntityNamedInitializerService.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Schedule"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
@@ -104,17 +106,18 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "project", "entityType", "status", "assignedTo", "createdBy", "createdDate",
-				"implementationDate"));
+		grid.setColumnFields(List.of("id", "name", "description", "project", "entityType", "status", "assignedTo",
+				"createdBy", "createdDate", "implementationDate"));
 		return grid;
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	/** Initialize sample decisions for a project with relationships (comments, links).
@@ -122,22 +125,23 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 	 * @param minimal if true, creates only 1 decision; if false, creates 2 decisions */
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		// Seed data for sample decisions
-		record DecisionSeed(String name, String description, String estimatedCost, int implementationDays, int reviewDays) {}
+		record DecisionSeed(String name, String description, String estimatedCost, int implementationDays,
+				int reviewDays) {}
 		final List<DecisionSeed> seeds = List.of(
 				new DecisionSeed("Adopt Cloud-Native Architecture",
-						"Strategic decision to migrate to cloud-native architecture for improved scalability", "50000.00", 30, 90),
-				new DecisionSeed("Implement Agile Methodology", "Operational decision to transition from waterfall to agile development methodology",
+						"Strategic decision to migrate to cloud-native architecture for improved scalability",
+						"50000.00", 30, 90),
+				new DecisionSeed("Implement Agile Methodology",
+						"Operational decision to transition from waterfall to agile development methodology",
 						"25000.00", 15, 60));
 		try {
 			final CDecisionService decisionService = CSpringContext.getBean(CDecisionService.class);
 			final CDecisionTypeService decisionTypeService = CSpringContext.getBean(CDecisionTypeService.class);
 			final CUserService userService = CSpringContext.getBean(CUserService.class);
-
 			// Decisions require a DecisionType via service initialization. Ensure at least one exists for this company.
 			if (decisionTypeService.listByCompany(project.getCompany()).isEmpty()) {
 				CDecisionTypeInitializerService.initializeSample(project, true);
 			}
-
 			final List<CDecision> createdDecisions = new java.util.ArrayList<>();
 			int index = 0;
 			for (final DecisionSeed seed : seeds) {
@@ -170,7 +174,8 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 			}
 			LOGGER.debug("Created {} sample decision(s) for project: {}", index, project.getName());
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample decisions for project: {} reason={}", project.getName(), e.getMessage());
+			LOGGER.error("Error initializing sample decisions for project: {} reason={}", project.getName(),
+					e.getMessage());
 			throw new RuntimeException("Failed to initialize sample decisions for project: " + project.getName(), e);
 		}
 	}

@@ -4,33 +4,33 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.parentrelation.service.CParentRelationInitializerService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.parentrelation.service.CParentRelationInitializerService;
+import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CEntityOfProjectInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
-import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.registry.CEntityRegistry;
-import tech.derbent.plm.risks.risk.domain.CRisk;
-import tech.derbent.plm.risks.risk.domain.ERiskCriticality;
-import tech.derbent.plm.risks.risk.domain.ERiskLikelihood;
+import tech.derbent.api.screens.service.CProjectItemInitializerService;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
 import tech.derbent.plm.agile.domain.CUserStory;
 import tech.derbent.plm.agile.service.CUserStoryService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
+import tech.derbent.plm.risks.risk.domain.CRisk;
+import tech.derbent.plm.risks.risk.domain.ERiskCriticality;
+import tech.derbent.plm.risks.risk.domain.ERiskLikelihood;
 import tech.derbent.plm.risks.risk.domain.ERiskResponseStrategy;
 import tech.derbent.plm.risks.risk.domain.ERiskSeverity;
 import tech.derbent.plm.risks.risktype.domain.CRiskType;
 import tech.derbent.plm.risks.risktype.service.CRiskTypeService;
 
-public class CRiskInitializerService extends CInitializerServiceBase {
+public class CRiskInitializerService extends CProjectItemInitializerService {
 
 	private static final Class<?> clazz = CRisk.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskInitializerService.class);
@@ -42,14 +42,13 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
-			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+			final CDetailSection detailSection =
+					CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "riskSeverity"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
 			CParentRelationInitializerService.addDefaultSection(detailSection, clazz, project);
-			
 			// ISO 31000:2018 Risk Assessment Section
 			detailSection.addScreenLine(CDetailLinesService.createSection("Risk Assessment (ISO 31000)"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "riskLikelihood"));
@@ -58,7 +57,6 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "impactScore"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "riskCriticality"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "cause"));
-			
 			// ISO 31000:2018 Risk Treatment Section
 			detailSection.addScreenLine(CDetailLinesService.createSection("Risk Treatment (ISO 31000)"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "riskResponseStrategy"));
@@ -66,13 +64,10 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "plan"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "residualRisk"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "result"));
-			
 			// Attachments section - standard section for ALL entities
 			CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
-			
 			// Comments section - standard section for discussion entities
 			CCommentInitializerService.addDefaultSection(detailSection, clazz);
-			
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
@@ -87,35 +82,38 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "riskSeverity", "status", "project", "assignedTo", "createdBy", "createdDate"));
+		grid.setColumnFields(List.of("id", "name", "description", "riskSeverity", "status", "project", "assignedTo",
+				"createdBy", "createdDate"));
 		return grid;
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
-		record RiskSeed(String name, String description, int parentUserStoryIndex, ERiskSeverity severity, ERiskLikelihood likelihood,
-				ERiskCriticality criticality, ERiskResponseStrategy responseStrategy, int probability, int impactScore, String cause, String impact,
-				String mitigation, String plan, String residualRisk, String result) {}
-		final List<RiskSeed> seeds = List.of(
-				new RiskSeed("MFA Enrollment Drop-off",
-						"Users may abandon MFA rollout if enrollment is confusing or recovery instructions are unclear.", 0, ERiskSeverity.HIGH,
-						ERiskLikelihood.LIKELY, ERiskCriticality.HIGH, ERiskResponseStrategy.MITIGATE, 7, 8,
-						"Enrollment flow includes too many steps and limited contextual help.",
-						"Pilot adoption could miss security goals and launch dates if admins do not complete setup.",
-						"Run guided onboarding, improve inline help, and monitor funnel conversion during the pilot.",
-						"Add UX review checkpoints, pilot metrics dashboard, and support playbook before broad rollout.",
-						"Some adoption variance will remain across customer segments with strict device policies.",
-						"Tracked as top security-readiness risk for the identity stream."),
+		record RiskSeed(String name, String description, int parentUserStoryIndex, ERiskSeverity severity,
+				ERiskLikelihood likelihood, ERiskCriticality criticality, ERiskResponseStrategy responseStrategy,
+				int probability, int impactScore, String cause, String impact, String mitigation, String plan,
+				String residualRisk, String result) {}
+		final List<RiskSeed> seeds = List.of(new RiskSeed("MFA Enrollment Drop-off",
+				"Users may abandon MFA rollout if enrollment is confusing or recovery instructions are unclear.", 0,
+				ERiskSeverity.HIGH, ERiskLikelihood.LIKELY, ERiskCriticality.HIGH, ERiskResponseStrategy.MITIGATE, 7, 8,
+				"Enrollment flow includes too many steps and limited contextual help.",
+				"Pilot adoption could miss security goals and launch dates if admins do not complete setup.",
+				"Run guided onboarding, improve inline help, and monitor funnel conversion during the pilot.",
+				"Add UX review checkpoints, pilot metrics dashboard, and support playbook before broad rollout.",
+				"Some adoption variance will remain across customer segments with strict device policies.",
+				"Tracked as top security-readiness risk for the identity stream."),
 				new RiskSeed("Session Audit Storage Growth",
-						"Security audit events may grow faster than planned once suspicious-session review is enabled.", 1, ERiskSeverity.MEDIUM,
-						ERiskLikelihood.POSSIBLE, ERiskCriticality.MODERATE, ERiskResponseStrategy.MITIGATE, 5, 6,
+						"Security audit events may grow faster than planned once suspicious-session review is enabled.",
+						1, ERiskSeverity.MEDIUM, ERiskLikelihood.POSSIBLE, ERiskCriticality.MODERATE,
+						ERiskResponseStrategy.MITIGATE, 5, 6,
 						"Expanded audit capture and long retention windows increase storage pressure.",
 						"Reporting queries and export jobs could slow down during peak usage periods.",
 						"Partition audit tables, introduce retention policies, and benchmark export queries.",
@@ -123,8 +121,9 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 						"Unexpected customer retention obligations may still increase long-term storage needs.",
 						"Requires observability checks before compliance sign-off."),
 				new RiskSeed("Billing Contact Data Sync Drift",
-						"Customer profile updates might not propagate correctly to billing systems and notification services.", 2, ERiskSeverity.HIGH,
-						ERiskLikelihood.POSSIBLE, ERiskCriticality.HIGH, ERiskResponseStrategy.MITIGATE, 6, 8,
+						"Customer profile updates might not propagate correctly to billing systems and notification services.",
+						2, ERiskSeverity.HIGH, ERiskLikelihood.POSSIBLE, ERiskCriticality.HIGH,
+						ERiskResponseStrategy.MITIGATE, 6, 8,
 						"Multiple downstream services depend on customer contact records with inconsistent validation rules.",
 						"Invoices, reminders, or escalation notices could be delivered to outdated recipients.",
 						"Introduce contract tests, event replay validation, and cross-system reconciliation jobs.",
@@ -132,8 +131,9 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 						"Manual override procedures are still needed for outlier legacy customers.",
 						"Flagged for finance and support stakeholders before self-service rollout."),
 				new RiskSeed("Saved Filter Scope Creep",
-						"Workspace search enhancements may expand beyond the current sprint into dashboard personalization and sharing.", 3,
-						ERiskSeverity.MEDIUM, ERiskLikelihood.LIKELY, ERiskCriticality.MODERATE, ERiskResponseStrategy.ACCEPT, 6, 5,
+						"Workspace search enhancements may expand beyond the current sprint into dashboard personalization and sharing.",
+						3, ERiskSeverity.MEDIUM, ERiskLikelihood.LIKELY, ERiskCriticality.MODERATE,
+						ERiskResponseStrategy.ACCEPT, 6, 5,
 						"Customer feedback quickly expands the definition of reusable views and filter sharing.",
 						"Sprint focus could diffuse and delay committed workspace deliverables.",
 						"Gate new ideas behind backlog triage and keep the current release focused on personal saved views only.",
@@ -141,8 +141,9 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 						"Some pressure from pilot customers will remain until collaboration features are planned.",
 						"Managed as a product-scope risk rather than a technical blocker."),
 				new RiskSeed("Dispute SLA Breach During Launch",
-						"Operational load could exceed invoice dispute handling capacity when new dispute intake goes live.", 4, ERiskSeverity.CRITICAL,
-						ERiskLikelihood.POSSIBLE, ERiskCriticality.CRITICAL, ERiskResponseStrategy.ESCALATE, 6, 9,
+						"Operational load could exceed invoice dispute handling capacity when new dispute intake goes live.",
+						4, ERiskSeverity.CRITICAL, ERiskLikelihood.POSSIBLE, ERiskCriticality.CRITICAL,
+						ERiskResponseStrategy.ESCALATE, 6, 9,
 						"Launch campaign may increase dispute volume before triage automation is fully stable.",
 						"Missed SLAs would affect customer trust and finance operations during the release window.",
 						"Escalate staffing plan, define overflow support rota, and monitor queue depth daily.",
@@ -150,15 +151,17 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 						"Unexpected marketing volume can still create short-term response delays.",
 						"Executive risk for release go/no-go review."),
 				new RiskSeed("Release Gate Automation Gaps",
-						"Launch approval may proceed with incomplete checklist coverage if automation misses a gate.", 5, ERiskSeverity.HIGH,
-						ERiskLikelihood.POSSIBLE, ERiskCriticality.HIGH, ERiskResponseStrategy.AVOID, 5, 8,
+						"Launch approval may proceed with incomplete checklist coverage if automation misses a gate.",
+						5, ERiskSeverity.HIGH, ERiskLikelihood.POSSIBLE, ERiskCriticality.HIGH,
+						ERiskResponseStrategy.AVOID, 5, 8,
 						"Manual gates are still being converted into automated launch checks.",
 						"Incomplete automation could allow a release with unresolved blockers or missing rollback readiness.",
 						"Require manual sign-off until every critical gate has an automated signal and owner.",
 						"Audit launch checklist coverage, assign owners, and block release until critical gates are automated.",
 						"Some lower-priority checks may remain manual for the first production cut.",
 						"Tracked directly in the release readiness steering group."));
-		final CRiskService riskService = (CRiskService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
+		final CRiskService riskService =
+				(CRiskService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
 		if (!riskService.listByProject(project).isEmpty()) {
 			LOGGER.info("Risks already exist for project '{}', skipping initialization", project.getName());
 			return;

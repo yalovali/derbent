@@ -10,7 +10,7 @@ import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.utils.Check;
 
-public class CGridEntityInitializerService extends CInitializerServiceBase {
+public class CGridEntityInitializerService extends CEntityOfProjectInitializerService {
 
 	private static final Class<?> clazz = CGridEntity.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CGridEntityInitializerService.class);
@@ -24,7 +24,7 @@ public class CGridEntityInitializerService extends CInitializerServiceBase {
 		Check.notNull(project, "project cannot be null");
 		try {
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
-			CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
+			CEntityNamedInitializerService.createBasicView(scr, clazz, project, true);
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNone"));
@@ -45,7 +45,8 @@ public class CGridEntityInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "dataServiceBeanName", "attributeNonDeletable", "project"));
+		grid.setColumnFields(
+				List.of("id", "name", "description", "dataServiceBeanName", "attributeNonDeletable", "project"));
 		return grid;
 	}
 
@@ -54,12 +55,13 @@ public class CGridEntityInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, MenuTitle_DEVELOPMENT + menuTitle,
-				pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder, 
-				null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				MenuTitle_DEVELOPMENT + menuTitle, pageTitle, pageDescription, showInQuickToolbar,
+				Menu_Order_DEVELOPMENT + menuOrder, null);
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
@@ -75,7 +77,8 @@ public class CGridEntityInitializerService extends CInitializerServiceBase {
 		initializeProjectEntity(sampleGrids, gridService, project, minimal, (gridEntity, index) -> {
 			gridEntity.setDataServiceBeanName(CGridEntityService.class.getSimpleName());
 			gridEntity.setAttributeNonDeletable(true);
-			gridEntity.setColumnFields(List.of("name", "description", "dataServiceBeanName", "project", "attributeNonDeletable"));
+			gridEntity.setColumnFields(
+					List.of("name", "description", "dataServiceBeanName", "project", "attributeNonDeletable"));
 			if (index == 1) {
 				gridEntity.setAttributeNone(true);
 			}

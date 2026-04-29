@@ -4,14 +4,14 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.domain.CMasterSection;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.page.service.CPageEntityService;
-import tech.derbent.api.projects.domain.CProject;
 
-public class CMasterInitializerService extends CInitializerServiceBase {
+public class CMasterInitializerService extends CEntityOfProjectInitializerService {
 
 	private static final Class<?> clazz = CMasterSection.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMasterInitializerService.class);
@@ -25,7 +25,7 @@ public class CMasterInitializerService extends CInitializerServiceBase {
 		Check.notNull(project, "project cannot be null");
 		try {
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
-			CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
+			CEntityNamedInitializerService.createBasicView(scr, clazz, project, true);
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			scr.addScreenLine(CDetailLinesService.createSection("Configuration"));
@@ -49,11 +49,12 @@ public class CMasterInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
@@ -68,9 +69,11 @@ public class CMasterInitializerService extends CInitializerServiceBase {
 		final CMasterSectionService masterSectionService = CSpringContext.getBean(CMasterSectionService.class);
 		initializeProjectEntity(sections, masterSectionService, project, minimal, (section, index) -> {
 			final List<String> availableTypes = CMasterSectionService.getComboValuesOfType();
-			final String defaultType = availableTypes.isEmpty() ? "None" : availableTypes.get(Math.min(index, availableTypes.size() - 1));
+			final String defaultType =
+					availableTypes.isEmpty() ? "None" : availableTypes.get(Math.min(index, availableTypes.size() - 1));
 			section.setSectionType(defaultType);
-			section.setSectionDBName((section.getName() + "_" + project.getId()).toLowerCase().replaceAll("[^a-z0-9]+", "_"));
+			section.setSectionDBName(
+					(section.getName() + "_" + project.getId()).toLowerCase().replaceAll("[^a-z0-9]+", "_"));
 		});
 	}
 }

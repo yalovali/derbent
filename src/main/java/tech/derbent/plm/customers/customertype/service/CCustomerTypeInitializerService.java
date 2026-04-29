@@ -11,15 +11,13 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
-import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CEntityNamedInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
-import tech.derbent.api.utils.Check;
+import tech.derbent.api.services.CEntityTypeInitializerService;
 import tech.derbent.plm.customers.customertype.domain.CCustomerType;
 
-public class CCustomerTypeInitializerService extends CInitializerServiceBase {
+public class CCustomerTypeInitializerService extends CEntityTypeInitializerService {
 
 	private static final Class<?> clazz = CCustomerType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCustomerTypeInitializerService.class);
@@ -30,24 +28,8 @@ public class CCustomerTypeInitializerService extends CInitializerServiceBase {
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
-		Check.notNull(project, "project cannot be null");
 		try {
-			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workflow"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Display Configuration"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-
-			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-
-			detailSection.debug_printScreenInformation();
-			return detailSection;
+			return CEntityNamedInitializerService.createTypeEntityView(project, clazz, "Display Configuration", true);
 		} catch (final Exception e) {
 			LOGGER.error("Error creating customer type view.");
 			throw e;
@@ -61,11 +43,12 @@ public class CCustomerTypeInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
@@ -84,6 +67,7 @@ public class CCustomerTypeInitializerService extends CInitializerServiceBase {
 		};
 		final CCompany company = project.getCompany();
 		initializeCompanyEntity(nameAndDescriptions,
-				(CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company, minimal, null);
+				(CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
+				company, minimal, null);
 	}
 }

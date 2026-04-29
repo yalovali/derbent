@@ -1,4 +1,5 @@
 package tech.derbent.plm.customers.customer.service;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -13,16 +14,16 @@ import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CEntityOfProjectInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
-import tech.derbent.plm.customers.customer.domain.CCustomer;
+import tech.derbent.api.screens.service.CProjectItemInitializerService;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
+import tech.derbent.plm.customers.customer.domain.CCustomer;
 
-public class CCustomerInitializerService extends CInitializerServiceBase {
+public class CCustomerInitializerService extends CProjectItemInitializerService {
 
 	private static final Class<?> clazz = CCustomer.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCustomerInitializerService.class);
@@ -34,45 +35,37 @@ public class CCustomerInitializerService extends CInitializerServiceBase {
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
-			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+			final CDetailSection detailSection =
+					CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
-
 			detailSection.addScreenLine(CDetailLinesService.createSection("Company Information"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companyName"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "industry"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companySize"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "website"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "annualRevenue"));
-
 			detailSection.addScreenLine(CDetailLinesService.createSection("Primary Contact"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "primaryContactName"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "primaryContactEmail"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "primaryContactPhone"));
-
 			detailSection.addScreenLine(CDetailLinesService.createSection("Address Information"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "billingAddress"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "shippingAddress"));
-
 			detailSection.addScreenLine(CDetailLinesService.createSection("Relationship Tracking"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "relationshipStartDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastInteractionDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lifetimeValue"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "customerNotes"));
-
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-
 			// Attachments section - standard section for ALL entities
 			CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
-
 			// Comments section - standard section for discussion entities
 			CCommentInitializerService.addDefaultSection(detailSection, clazz);
-
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
@@ -89,11 +82,12 @@ public class CCustomerInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
@@ -107,14 +101,13 @@ public class CCustomerInitializerService extends CInitializerServiceBase {
 				}
 		};
 		initializeProjectEntity(nameAndDescriptions,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
-				(item, index) -> {
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
+				project, minimal, (item, index) -> {
 					final CCustomer customer = (CCustomer) item;
 					final CUser user = CSpringContext.getBean(CUserService.class).getRandom(project.getCompany());
 					customer.setAssignedTo(user);
-
-					// Set company-specific details based on index
-					if (index == 0) {
+					switch (index) {
+					case 0 -> {
 						customer.setCompanyName("Acme Corporation");
 						customer.setIndustry("Technology");
 						customer.setCompanySize("201-500");
@@ -123,7 +116,8 @@ public class CCustomerInitializerService extends CInitializerServiceBase {
 						customer.setPrimaryContactName("John Smith");
 						customer.setPrimaryContactEmail("john.smith@acmecorp.example.com");
 						customer.setPrimaryContactPhone("+1-555-0100");
-					} else if (index == 1) {
+					}
+					case 1 -> {
 						customer.setCompanyName("TechStart Innovations");
 						customer.setIndustry("Artificial Intelligence");
 						customer.setCompanySize("11-50");
@@ -132,7 +126,8 @@ public class CCustomerInitializerService extends CInitializerServiceBase {
 						customer.setPrimaryContactName("Sarah Johnson");
 						customer.setPrimaryContactEmail("sarah.j@techstart.example.com");
 						customer.setPrimaryContactPhone("+1-555-0200");
-					} else if (index == 2) {
+					}
+					case 2 -> {
 						customer.setCompanyName("Global Enterprises Ltd");
 						customer.setIndustry("Manufacturing");
 						customer.setCompanySize("500+");
@@ -142,7 +137,7 @@ public class CCustomerInitializerService extends CInitializerServiceBase {
 						customer.setPrimaryContactEmail("m.chen@globalent.example.com");
 						customer.setPrimaryContactPhone("+1-555-0300");
 					}
-
+					}
 					customer.setRelationshipStartDate(LocalDate.now().minusMonths(index * 6));
 					customer.setLastInteractionDate(LocalDate.now().minusDays(index * 7));
 					customer.setLifetimeValue(customer.getAnnualRevenue().multiply(new BigDecimal("2.5")));

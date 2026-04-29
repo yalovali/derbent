@@ -10,13 +10,12 @@ import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CEntityOfProjectInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntViewEntity;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.EGnntGridType;
 
-public class CGnntViewEntityInitializerService extends CInitializerServiceBase {
+public class CGnntViewEntityInitializerService extends CEntityOfProjectInitializerService {
 
 	public static final String BOARD_PAGE_NAME = "Gannt Board View";
 	public static final String BOARD_PAGE_TITLE = "Gannt Board";
@@ -29,8 +28,7 @@ public class CGnntViewEntityInitializerService extends CInitializerServiceBase {
 	private static final boolean SHOW_IN_QUICK_TOOLBAR = true;
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
-		final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-		CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+		final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "gridType"));
 		detailSection.addScreenLine(CDetailLinesService.createSection("Gnnt Board"));
@@ -55,11 +53,12 @@ public class CGnntViewEntityInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, MENU_TITLE, PAGE_TITLE,
-				PAGE_DESCRIPTION, SHOW_IN_QUICK_TOOLBAR, MENU_ORDER, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				MENU_TITLE, PAGE_TITLE, PAGE_DESCRIPTION, SHOW_IN_QUICK_TOOLBAR, MENU_ORDER, null);
 		final CDetailSection boardSection = createGnntBoardView(project);
 		final CGridEntity boardGrid = createGridEntity(project);
 		boardSection.setName(CGnntViewEntity.ENTITY_TITLE_SINGULAR);
@@ -67,24 +66,26 @@ public class CGnntViewEntityInitializerService extends CInitializerServiceBase {
 		// hide grid-level controls for the board page since it has only one item and they don't make sense in that context
 		boardGrid.setAttributeNone(true);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, boardSection, boardGrid,
-				MenuTitle_PROJECT + "." + CGnntViewEntity.ENTITY_TITLE_SINGULAR, BOARD_PAGE_TITLE, "Dedicated Gnnt board page", true,
-				MENU_ORDER + ".1", null);
+				MenuTitle_PROJECT + "." + CGnntViewEntity.ENTITY_TITLE_SINGULAR, BOARD_PAGE_TITLE,
+				"Dedicated Gnnt board page", true, MENU_ORDER + ".1", null);
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final String[][] sampleViews = {
 				{
-						"Delivery Timeline", "Project-wide Gnnt board focused on the agile delivery hierarchy and current iteration flow."
+						"Delivery Timeline",
+						"Project-wide Gnnt board focused on the agile delivery hierarchy and current iteration flow."
 				}, {
-						"Release Roadmap", "Second Gnnt board for roadmap-style review across epics, features, stories, and execution items."
+						"Release Roadmap",
+						"Second Gnnt board for roadmap-style review across epics, features, stories, and execution items."
 				}
 		};
 		final CGnntViewEntityService service = CSpringContext.getBean(CGnntViewEntityService.class);
 		initializeProjectEntity(sampleViews, service, project, minimal, null);
-		for (final CGnntViewEntity gnntViewEntity : service.listByProject(project)) {
+		service.listByProject(project).forEach((final CGnntViewEntity gnntViewEntity) -> {
 			gnntViewEntity.setGridType(EGnntGridType.TREE);
 			service.save(gnntViewEntity);
-		}
+		});
 		LOGGER.debug("Initialized sample Gnnt views for project {}", project.getName());
 	}
 }

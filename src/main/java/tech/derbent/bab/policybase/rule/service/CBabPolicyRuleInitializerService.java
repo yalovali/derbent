@@ -19,7 +19,7 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.api.screens.service.CEntityOfProjectInitializerService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskBase;
@@ -57,8 +57,7 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
-			final CDetailSection scr = createBaseScreenEntity(project, clazz);
-			CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
+			final CDetailSection scr = CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
 			// Policy rule specific fields
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active", true, ""));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "rulePriority", true, ""));

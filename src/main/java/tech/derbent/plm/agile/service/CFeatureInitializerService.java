@@ -5,19 +5,19 @@ import java.time.LocalDate;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.parentrelation.service.CParentRelationInitializerService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.parentrelation.service.CParentRelationInitializerService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CEntityNamedInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
-import tech.derbent.api.screens.service.CInitializerServiceProjectItem;
+import tech.derbent.api.screens.service.CProjectItemInitializerService;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
 import tech.derbent.plm.activities.domain.CActivityPriority;
@@ -29,7 +29,7 @@ import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.links.service.CLinkInitializerService;
 
-public class CFeatureInitializerService extends CInitializerServiceProjectItem {
+public class CFeatureInitializerService extends CProjectItemInitializerService {
 
 	static final Class<?> clazz = CFeature.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CFeatureInitializerService.class);
@@ -42,7 +42,7 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
-			CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
+			CEntityNamedInitializerService.createBasicView(scr, clazz, project, true);
 			scr.addScreenLine(CDetailLinesService.createSection("System Access"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
@@ -87,18 +87,19 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "componentWidget", "entityType", "assignedTo", "createdBy", "startDate", "dueDate",
-				"completionDate", "progressPercentage", "estimatedHours", "actualHours", "remainingHours", "status", "priority", "project",
-				"createdDate", "lastModifiedDate"));
+		grid.setColumnFields(List.of("id", "name", "componentWidget", "entityType", "assignedTo", "createdBy",
+				"startDate", "dueDate", "completionDate", "progressPercentage", "estimatedHours", "actualHours",
+				"remainingHours", "status", "priority", "project", "createdDate", "lastModifiedDate"));
 		return grid;
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	/** Initialize sample features for a project.
@@ -107,23 +108,23 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 	 * @param sampleEpic1 the first epic to link features to (can be null)
 	 * @param sampleEpic2 the second epic to link second feature to (can be null)
 	 * @return array of created features [feature1, feature2] where feature2 may be null if minimal is true */
-	public static CFeature[] initializeSample(final CProject<?> project, final boolean minimal, final CEpic sampleEpic1, final CEpic sampleEpic2)
-			throws Exception {
-		record FeatureSeed(String name, String description, String acceptanceCriteria, String notes, int parentEpicIndex, int startOffsetDays,
-				int durationDays, int storyPoints, int estimatedHours, int actualHours, int progressPercentage) {}
-		final List<FeatureSeed> seeds = List.of(
-				new FeatureSeed("Requirement Group: Core Platform",
-						"Sub-requirement group under the requirements epic, focusing on core platform and architecture items.",
-						"Leaf requirements exist under this feature and include activities, milestones, and deliverables.",
-						"Sample sub-requirement bucket for platform enablement work.", 0, 42, 55, 13, 86, 28, 24),
+	public static CFeature[] initializeSample(final CProject<?> project, final boolean minimal, final CEpic sampleEpic1,
+			final CEpic sampleEpic2) throws Exception {
+		record FeatureSeed(String name, String description, String acceptanceCriteria, String notes,
+				int parentEpicIndex, int startOffsetDays, int durationDays, int storyPoints, int estimatedHours,
+				int actualHours, int progressPercentage) {}
+		final List<FeatureSeed> seeds = List.of(new FeatureSeed("Requirement Group: Core Platform",
+				"Sub-requirement group under the requirements epic, focusing on core platform and architecture items.",
+				"Leaf requirements exist under this feature and include activities, milestones, and deliverables.",
+				"Sample sub-requirement bucket for platform enablement work.", 0, 42, 55, 13, 86, 28, 24),
 				new FeatureSeed("Requirement Group: Customer Delivery",
 						"Sub-requirement group under the requirements epic, focusing on delivery artifacts and execution tracking.",
 						"Deliverables and activities roll up to leaf requirements under this feature.",
 						"Sample sub-requirement bucket for milestone-driven delivery.", 0, 35, 50, 11, 74, 22, 20),
 				new FeatureSeed("MFA Enrollment and Recovery",
 						"Enable users to enroll multi-factor authentication and recover access without manual support intervention.",
-						"Enrollment, recovery codes, and admin override flow are validated in staging.", "Anchors the identity modernization epic.",
-						0, 45, 70, 21, 120, 55, 45),
+						"Enrollment, recovery codes, and admin override flow are validated in staging.",
+						"Anchors the identity modernization epic.", 0, 45, 70, 21, 120, 55, 45),
 				new FeatureSeed("Session Security and Audit Review",
 						"Provide suspicious session review, forced sign-out, and audit trail visibility for administrators.",
 						"Admins can review active sessions, revoke them, and export audit evidence.",
@@ -135,7 +136,8 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 				new FeatureSeed("Saved Searches and Dashboard Views",
 						"Add reusable saved filters, dashboard widgets, and pinned views for daily customer operations.",
 						"Customers can save, rename, pin, and reuse search criteria across sessions.",
-						"Expected to create visible backlog breadth for workspace-focused teams.", 1, 18, 55, 14, 88, 30, 24),
+						"Expected to create visible backlog breadth for workspace-focused teams.", 1, 18, 55, 14, 88,
+						30, 24),
 				new FeatureSeed("Invoice Dispute Triage",
 						"Support invoice dispute intake, SLA tracking, and evidence gathering for finance operations.",
 						"Disputes can be created, triaged, and resolved with SLA visibility and linked evidence.",
@@ -143,17 +145,20 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 				new FeatureSeed("Release Command Center",
 						"Create release go-live checklist, risk review, and observability handoff workflows for launch teams.",
 						"Release managers can verify launch criteria, monitor blockers, and record go-live decisions.",
-						"Used to keep a meaningful future backlog beyond the first active sprints.", 3, 0, 45, 11, 64, 15, 12));
+						"Used to keep a meaningful future backlog beyond the first active sprints.", 3, 0, 45, 11, 64,
+						15, 12));
 		try {
 			final CFeatureService featureService = CSpringContext.getBean(CFeatureService.class);
 			final CEpicService epicService = CSpringContext.getBean(CEpicService.class);
 			final CFeatureTypeService featureTypeService = CSpringContext.getBean(CFeatureTypeService.class);
-			final CActivityPriorityService activityPriorityService = CSpringContext.getBean(CActivityPriorityService.class);
+			final CActivityPriorityService activityPriorityService =
+					CSpringContext.getBean(CActivityPriorityService.class);
 			final CUserService userService = CSpringContext.getBean(CUserService.class);
 			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 			final List<CEpic> availableEpics = epicService.listByProject(project);
 			final List<CFeatureType> availableTypes = featureTypeService.listByCompany(project.getCompany());
-			final List<CActivityPriority> availablePriorities = activityPriorityService.listByCompany(project.getCompany());
+			final List<CActivityPriority> availablePriorities =
+					activityPriorityService.listByCompany(project.getCompany());
 			final List<CUser> availableUsers = userService.listByCompany(project.getCompany());
 			final CEpic[] parentEpics = {
 					sampleEpic1, sampleEpic2
@@ -164,8 +169,9 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 			for (final FeatureSeed seed : seeds) {
 				final CFeatureType type = availableTypes.isEmpty() ? featureTypeService.getRandom(project.getCompany())
 						: availableTypes.get(createdCount % availableTypes.size());
-				final CActivityPriority priority = availablePriorities.isEmpty() ? activityPriorityService.getRandom(project.getCompany())
-						: availablePriorities.get(createdCount % availablePriorities.size());
+				final CActivityPriority priority =
+						availablePriorities.isEmpty() ? activityPriorityService.getRandom(project.getCompany())
+								: availablePriorities.get(createdCount % availablePriorities.size());
 				final CUser user = availableUsers.isEmpty() ? userService.getRandom(project.getCompany())
 						: availableUsers.get(createdCount % availableUsers.size());
 				CFeature feature = new CFeature(seed.name(), project);
@@ -192,8 +198,9 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 						feature.setStatus(initialStatuses.get(0));
 					}
 				}
-				CEpic parentEpic = !availableEpics.isEmpty() ? availableEpics.get(seed.parentEpicIndex() % availableEpics.size())
-						: parentEpics[Math.min(seed.parentEpicIndex(), parentEpics.length - 1)];
+				CEpic parentEpic =
+						!availableEpics.isEmpty() ? availableEpics.get(seed.parentEpicIndex() % availableEpics.size())
+								: parentEpics[Math.min(seed.parentEpicIndex(), parentEpics.length - 1)];
 				if (!minimal && sampleEpic1 != null && createdCount < 2) {
 					// Ensure the first two sample features form an explicit sub-requirement chain under the first epic.
 					parentEpic = sampleEpic1;
@@ -216,7 +223,8 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 			LOGGER.debug("Created {} sample feature(s) for project: {}", createdCount, project.getName());
 			return createdFeatures;
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample features for project: {} reason={}", project.getName(), e.getMessage());
+			LOGGER.error("Error initializing sample features for project: {} reason={}", project.getName(),
+					e.getMessage());
 			throw new RuntimeException("Failed to initialize sample features for project: " + project.getName(), e);
 		}
 	}

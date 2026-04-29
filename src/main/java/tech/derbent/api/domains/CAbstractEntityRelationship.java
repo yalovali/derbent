@@ -10,32 +10,32 @@ import tech.derbent.api.entity.domain.CEntityDB;
  * between entities with ownership levels and privileges.
  * @param <RelationshipClass> The concrete relationship entity class */
 @MappedSuperclass
-public abstract class CAbstractEntityRelationship<RelationshipClass> extends CEntityDB<RelationshipClass> {
+public abstract class CAbstractEntityRelationship<RelationshipClass>
+		extends CEntityDB<RelationshipClass> {
 
-	@Column (name = "active", nullable = false)
-	@AMetaData (
-			displayName = "Active", required = true, readOnly = false, defaultValue = "true",
-			description = "Whether this relationship is currently active", hidden = false
-	)
-	private Boolean active = Boolean.TRUE;
 	@Column (name = "granted_by_user_id", nullable = true)
 	@AMetaData (
-			displayName = "Granted By", required = false, readOnly = true, description = "ID of the user who granted this relationship",
+			displayName = "Granted By", required = false, readOnly = true,
+			description = "ID of the user who granted this relationship",
 			hidden = false
 	)
 	private Long grantedByUserId;
 	@Column (name = "ownership_level", nullable = false, length = 50)
 	@Size (max = 50)
 	@AMetaData (
-			displayName = "Ownership Level", required = true, readOnly = false, defaultValue = "MEMBER",
-			description = "Level of ownership/privileges in this relationship", hidden = false
+			displayName = "Ownership Level", required = true, readOnly = false,
+			defaultValue = "MEMBER",
+			description = "Level of ownership/privileges in this relationship",
+			hidden = false
 	)
 	private String ownershipLevel = "MEMBER";
 	@Column (name = "privileges", nullable = true, length = 500)
 	@Size (max = 500)
 	@AMetaData (
-			displayName = "Privileges", required = false, readOnly = false, defaultValue = "",
-			description = "Comma-separated list of specific privileges", hidden = false
+			displayName = "Privileges", required = false, readOnly = false,
+			defaultValue = "",
+			description = "Comma-separated list of specific privileges",
+			hidden = false
 	)
 	private String privileges;
 
@@ -60,9 +60,6 @@ public abstract class CAbstractEntityRelationship<RelationshipClass> extends CEn
 			privileges += "," + normalizedPrivilege;
 		}
 	}
-
-	@Override
-	public Boolean getActive() { return active; }
 
 	public Long getGrantedByUserId() { return grantedByUserId; }
 
@@ -90,12 +87,15 @@ public abstract class CAbstractEntityRelationship<RelationshipClass> extends CEn
 	/** Check if this relationship grants member privileges (OWNER, ADMIN, or MEMBER level).
 	 * @return true if ownership level is OWNER, ADMIN, or MEMBER */
 	public boolean isMember() {
-		return "OWNER".equals(ownershipLevel) || "ADMIN".equals(ownershipLevel) || "MEMBER".equals(ownershipLevel);
+		return "OWNER".equals(ownershipLevel) || "ADMIN".equals(ownershipLevel)
+				|| "MEMBER".equals(ownershipLevel);
 	}
 
 	/** Check if this relationship grants ownership (OWNER level).
 	 * @return true if ownership level is OWNER */
-	public boolean isOwner() { return "OWNER".equals(ownershipLevel); }
+	public boolean isOwner() {
+		return "OWNER".equals(ownershipLevel);
+	}
 
 	/** Remove a privilege from this relationship.
 	 * @param privilege The privilege to remove */
@@ -118,12 +118,16 @@ public abstract class CAbstractEntityRelationship<RelationshipClass> extends CEn
 		privileges = newPrivileges.toString();
 	}
 
-	@Override
-	public void setActive(Boolean active) { this.active = active != null ? active : Boolean.TRUE; }
+	public void setGrantedByUserId(Long grantedByUserId) {
+		this.grantedByUserId = grantedByUserId;
+	}
 
-	public void setGrantedByUserId(Long grantedByUserId) { this.grantedByUserId = grantedByUserId; }
+	public void setOwnershipLevel(String ownershipLevel) {
+		this.ownershipLevel =
+				ownershipLevel != null ? ownershipLevel : "MEMBER";
+	}
 
-	public void setOwnershipLevel(String ownershipLevel) { this.ownershipLevel = ownershipLevel != null ? ownershipLevel : "MEMBER"; }
-
-	public void setPrivileges(String privileges) { this.privileges = privileges; }
+	public void setPrivileges(String privileges) {
+		this.privileges = privileges;
+	}
 }

@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.html.Span;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CLabelEntity;
@@ -21,6 +20,7 @@ import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
@@ -30,11 +30,13 @@ import tech.derbent.plm.issues.issue.domain.CIssue;
 import tech.derbent.plm.issues.issue.service.CIssueService;
 import tech.derbent.plm.meetings.domain.CMeeting;
 import tech.derbent.plm.meetings.service.CMeetingService;
-import tech.derbent.api.projects.domain.CProject;
 
-public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>> implements IPageServiceAutoRegistrable, IHasSelectionNotification {
+public class CComponentBacklog
+		extends CComponentEntitySelection<CProjectItem<?>>
+		implements IPageServiceAutoRegistrable, IHasSelectionNotification {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentBacklog.class);
+	private static final Logger LOGGER =
+			LoggerFactory.getLogger(CComponentBacklog.class);
 	private static final long serialVersionUID = 1L;
 
 	/** Creates the list of entity type configurations for the backlog.
@@ -46,13 +48,19 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	private static List<EntityTypeConfig<?>> createEntityTypes() {
 		final List<EntityTypeConfig<?>> entityTypes = new ArrayList<>();
 		// Get services from Spring context
-		final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
-		final CMeetingService meetingService = CSpringContext.getBean(CMeetingService.class);
-		final CIssueService issueService = CSpringContext.getBean(CIssueService.class);
+		final CActivityService activityService =
+				CSpringContext.getBean(CActivityService.class);
+		final CMeetingService meetingService =
+				CSpringContext.getBean(CMeetingService.class);
+		final CIssueService issueService =
+				CSpringContext.getBean(CIssueService.class);
 		// Use factory method to get human-friendly names from entity registry
-		entityTypes.add(EntityTypeConfig.createWithRegistryName(CActivity.class, activityService));
-		entityTypes.add(EntityTypeConfig.createWithRegistryName(CMeeting.class, meetingService));
-		entityTypes.add(EntityTypeConfig.createWithRegistryName(CIssue.class, issueService));
+		entityTypes.add(EntityTypeConfig.createWithRegistryName(CActivity.class,
+				activityService));
+		entityTypes.add(EntityTypeConfig.createWithRegistryName(CMeeting.class,
+				meetingService));
+		entityTypes.add(EntityTypeConfig.createWithRegistryName(CIssue.class,
+				issueService));
 		return entityTypes;
 	}
 
@@ -60,28 +68,38 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	 * @param project the project to load backlog items for
 	 * @return provider for loading items */
 	@SuppressWarnings ("unchecked")
-	private static ItemsProvider<CProjectItem<?>> createItemsProvider(final CProject<?> project) {
+	private static ItemsProvider<CProjectItem<?>>
+			createItemsProvider(final CProject<?> project) {
 		return config -> {
 			try {
 				if (project == null) {
-					LOGGER.warn("No project available for loading backlog items");
+					LOGGER.warn(
+							"No project available for loading backlog items");
 					return new ArrayList<>();
 				}
 				// Get services from Spring context
-				final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
-				final CMeetingService meetingService = CSpringContext.getBean(CMeetingService.class);
-				final CIssueService issueService = CSpringContext.getBean(CIssueService.class);
+				final CActivityService activityService =
+						CSpringContext.getBean(CActivityService.class);
+				final CMeetingService meetingService =
+						CSpringContext.getBean(CMeetingService.class);
+				final CIssueService issueService =
+						CSpringContext.getBean(CIssueService.class);
 				// Load items ordered by sprintOrder for proper backlog display
 				if (config.getEntityClass() == CActivity.class) {
-					return (List<CProjectItem<?>>) (List<?>) activityService.listForProjectBacklog(project);
+					return (List<CProjectItem<?>>) (List<?>) activityService
+							.listForProjectBacklog(project);
 				} else if (config.getEntityClass() == CMeeting.class) {
-					return (List<CProjectItem<?>>) (List<?>) meetingService.listForProjectBacklog(project);
+					return (List<CProjectItem<?>>) (List<?>) meetingService
+							.listForProjectBacklog(project);
 				} else if (config.getEntityClass() == CIssue.class) {
-					return (List<CProjectItem<?>>) (List<?>) issueService.listForProjectBacklog(project);
+					return (List<CProjectItem<?>>) (List<?>) issueService
+							.listForProjectBacklog(project);
 				}
 				return new ArrayList<>();
 			} catch (final Exception e) {
-				LOGGER.error("Error loading backlog items for entity type: {} reason={}", config.getDisplayName(), e.getMessage());
+				LOGGER.error(
+						"Error loading backlog items for entity type: {} reason={}",
+						config.getDisplayName(), e.getMessage());
 				return new ArrayList<>();
 			}
 		};
@@ -90,16 +108,16 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	/** Creates a selection handler for the backlog.
 	 * @return selection handler that logs selection changes */
 	private static Consumer<Set<CProjectItem<?>>> createSelectionHandler() {
-		return selectedItems -> {
-			LOGGER.debug("Backlog selection changed: {} items selected", selectedItems.size());
-		};
+		return selectedItems -> LOGGER.debug("Backlog selection changed: {} items selected",
+				selectedItems.size());
 	}
 
 	private final boolean compactMode;
 	/** Currently selected backlog item for detail display */
 	private CProjectItem<?> selectedBacklogItem;
 	/** Selection listeners for notification pattern */
-	private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new HashSet<>();
+	private final Set<ComponentEventListener<CSelectEvent>> selectListeners =
+			new HashSet<>();
 
 	/** Constructor for backlog component.
 	 * @param project project to load backlog items for (required) */
@@ -110,9 +128,11 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	/** Constructor for backlog component with compact mode option.
 	 * @param project     project to load backlog items for (required)
 	 * @param compactMode true for compact display (only name column in grid, only type selector in toolbar), false for full display */
-	public CComponentBacklog(final CProject<?> project, final boolean compactMode) {
-		super(createEntityTypes(), createItemsProvider(project), createSelectionHandler(), false, null, AlreadySelectedMode.HIDE_ALREADY_SELECTED,
-				false);
+	public CComponentBacklog(final CProject<?> project,
+			final boolean compactMode) {
+		super(createEntityTypes(), createItemsProvider(project),
+				createSelectionHandler(), false, null,
+				AlreadySelectedMode.HIDE_ALREADY_SELECTED, false);
 		Check.notNull(project, "Project cannot be null");
 		this.compactMode = compactMode;
 		CSpringContext.getBean(CActivityService.class);
@@ -135,9 +155,13 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			enableValuePersistence();
 			// LOGGER.info("[ValuePersistence] CComponentBacklog: Value persistence enabled successfully for backlog with ID '{}'", componentId);
 		} catch (final Exception e) {
-			LOGGER.error("[ValuePersistence] CComponentBacklog: Failed to enable value persistence for backlog: {}", e.getMessage());
+			LOGGER.error(
+					"[ValuePersistence] CComponentBacklog: Failed to enable value persistence for backlog: {}",
+					e.getMessage());
 		}
-		LOGGER.debug("CComponentBacklog created for project: {} (compact mode: {})", project.getId(), compactMode);
+		LOGGER.debug(
+				"CComponentBacklog created for project: {} (compact mode: {})",
+				project.getId(), compactMode);
 	}
 
 	@Override
@@ -155,8 +179,8 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 				}
 				label.getStyle().set("font-size", "var(--lumo-font-size-s)");
 				return label;
-			}).setKey("name").setHeader("Name").setFlexGrow(1).setResizable(true);
-
+			}).setKey("name").setHeader("Name").setFlexGrow(1)
+					.setResizable(true);
 			grid.addComponentColumn(item -> {
 				if (!(item instanceof final ISprintableItem sprintableItem)) {
 					return new Span("");
@@ -169,32 +193,35 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 					label.setValue(sprintableItem.getStatus(), true);
 					return label;
 				} catch (final Exception e) {
-					return new Span(sprintableItem.getStatus().getName() != null ? sprintableItem.getStatus().getName() : "");
+					return new Span(sprintableItem.getStatus().getName() != null
+							? sprintableItem.getStatus().getName() : "");
 				}
-			}).setKey("status").setHeader("Status").setWidth("120px").setFlexGrow(0).setResizable(true);
-
-			grid.addComponentColumn(item -> {
-				return item != null && item.getAssignedTo() != null
-						? CLabelEntity.createCompactUserLabel(item.getAssignedTo())
-						: new Span("");
-			}).setKey("assignedTo").setHeader("Responsible").setWidth("170px").setFlexGrow(0).setResizable(true);
-
-			grid.addDateColumn(CProjectItem::getStartDate, "Start", "startDate");
+			}).setKey("status").setHeader("Status").setWidth("120px")
+					.setFlexGrow(0).setResizable(true);
+			grid.addComponentColumn(item -> item != null && item.getAssignedTo() != null
+					? CLabelEntity.createCompactUserLabel(item.getAssignedTo())
+					: new Span("")).setKey("assignedTo").setHeader("Responsible").setWidth("170px")
+					.setFlexGrow(0).setResizable(true);
+			grid.addDateColumn(CProjectItem::getStartDate, "Start",
+					"startDate");
 			grid.addDateColumn(CProjectItem::getEndDate, "End", "endDate");
-
 			grid.addStoryPointColumn(item -> {
-				Check.instanceOf(item, ISprintableItem.class, "Backlog item must implement ISprintableItem");
+				Check.instanceOf(item, ISprintableItem.class,
+						"Backlog item must implement ISprintableItem");
 				return (ISprintableItem) item;
-			}, this::saveStoryPoint, this::handleStoryPointError, "SP", "storyPoint");
+			}, this::saveStoryPoint, this::handleStoryPointError, "SP",
+					"storyPoint");
 			grid.setHeightFull();
 		} else {
 			// In normal mode, call parent to configure standard columns
 			super.configureGrid(grid);
 			// Add story point column
 			grid.addStoryPointColumn(item -> {
-				Check.instanceOf(item, ISprintableItem.class, "Backlog item must implement ISprintableItem");
+				Check.instanceOf(item, ISprintableItem.class,
+						"Backlog item must implement ISprintableItem");
 				return (ISprintableItem) item;
-			}, this::saveStoryPoint, this::handleStoryPointError, "Story Points", "storyPoint");
+			}, this::saveStoryPoint, this::handleStoryPointError,
+					"Story Points", "storyPoint");
 		}
 	}
 
@@ -202,10 +229,13 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	@Override
 	protected CComponentFilterToolbar create_gridSearchToolbar() {
 		// Create toolbar with compact config if needed
-		final CComponentGridSearchToolbar.ToolbarConfig config = new CComponentGridSearchToolbar.ToolbarConfig();
+		final CComponentGridSearchToolbar.ToolbarConfig config =
+				new CComponentGridSearchToolbar.ToolbarConfig();
 		if (compactMode) {
 			// Compact mode: hide all filters, leaving only the type selector combobox
-			config.setIdFilter(false).setNameFilter(false).setDescriptionFilter(false).setStatusFilter(false).setClearButton(false);
+			config.setIdFilter(false).setNameFilter(false)
+					.setDescriptionFilter(false).setStatusFilter(false)
+					.setClearButton(false);
 		} else {
 			// Normal mode: show all filters
 			config.showAll();
@@ -226,7 +256,8 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			refreshComponent();
 			return;
 		}
-		LOGGER.debug("[BacklogDrag] Drag event processed, refreshing backlog component");
+		LOGGER.debug(
+				"[BacklogDrag] Drag event processed, refreshing backlog component");
 		super.drag_checkEventAfterPass(event);
 		refreshComponent();
 	}
@@ -246,23 +277,29 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 
 	/** Gets the currently selected backlog item.
 	 * @return The selected project item or null if no selection */
-	public CProjectItem<?> getSelectedBacklogItem() { return selectedBacklogItem; }
-
-	private void handleStoryPointError(final Exception exception) {
-		Check.notNull(exception, "Exception cannot be null when handling story point errors");
-		CNotificationService.showException("Error saving story points", exception);
+	public CProjectItem<?> getSelectedBacklogItem() {
+		return selectedBacklogItem;
 	}
 
-	/** Overridden to propagate selection events to listeners (e.g., kanban board). When an item is selected in the backlog grid, this notifies the
-	 * parent container to display the item details in the entity detail view. */
+	private void handleStoryPointError(final Exception exception) {
+		Check.notNull(exception,
+				"Exception cannot be null when handling story point errors");
+		CNotificationService.showException("Error saving story points",
+				exception);
+	}
+
+	/** Overridden to propagate selection events to listeners (e.g., kanban board). When an item is selected in the backlog grid, this notifies the parent
+	 * container to display the item details in the entity detail view. */
 	@Override
-	protected void on_gridItems_singleSelectionChanged(final CProjectItem<?> value) {
+	protected void
+			on_gridItems_singleSelectionChanged(final CProjectItem<?> value) {
 		super.on_gridItems_singleSelectionChanged(value);
 		// Store selected item for retrieval by parent
 		selectedBacklogItem = value;
 		// Propagate selection event to listeners (following kanban postit pattern)
 		if (value != null) {
-			LOGGER.debug("Backlog item selected: {} ({})", value.getId(), value.getClass().getSimpleName());
+			LOGGER.debug("Backlog item selected: {} ({})", value.getId(),
+					value.getClass().getSimpleName());
 			select_notifyEvents(new CSelectEvent(this, true));
 		} else {
 			LOGGER.debug("Backlog selection cleared");
@@ -280,14 +317,17 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		Check.notNull(pageService, "Page service cannot be null");
 		final String componentName = getComponentName();
 		pageService.registerComponent(componentName, this);
-		LOGGER.debug("[BindDebug] {} auto-registered with page service as '{}' (binding will occur during CPageService.bind())",
+		LOGGER.debug(
+				"[BindDebug] {} auto-registered with page service as '{}' (binding will occur during CPageService.bind())",
 				getClass().getSimpleName(), componentName);
 	}
 	// IHasSelectionNotification implementation
 
 	private void saveStoryPoint(final ISprintableItem item) {
-		Check.notNull(item, "Sprintable item cannot be null when saving story points");
-		Check.notNull(item.getId(), "Sprintable item must be persisted before updating story points");
+		Check.notNull(item,
+				"Sprintable item cannot be null when saving story points");
+		Check.notNull(item.getId(),
+				"Sprintable item must be persisted before updating story points");
 		try {
 			item.saveProjectItem();
 			CNotificationService.showSaveSuccess();
@@ -311,7 +351,8 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	}
 
 	@Override
-	public Set<ComponentEventListener<CSelectEvent>> select_getSelectListeners() {
+	public Set<ComponentEventListener<CSelectEvent>>
+			select_getSelectListeners() {
 		return selectListeners;
 	}
 }

@@ -3,20 +3,20 @@ package tech.derbent.api.projects.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyInitializerService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.utils.Check;
 import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.project.service.CProject_BabInitializerService;
 import tech.derbent.plm.project.domain.CProject_Derbent;
 import tech.derbent.plm.project.service.CProject_DerbentInitializerService;
 
-public class CProjectInitializerService extends CInitializerServiceBase {
+public class CProjectInitializerService extends CEntityOfCompanyInitializerService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectInitializerService.class);
 
@@ -50,14 +50,17 @@ public class CProjectInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		Check.notNull(project, "Project cannot be null");
 		if (project instanceof final CProject_Derbent derbentProject) {
-			CProject_DerbentInitializerService.initialize(derbentProject, gridEntityService, detailSectionService, pageEntityService);
+			CProject_DerbentInitializerService.initialize(derbentProject, gridEntityService, detailSectionService,
+					pageEntityService);
 			return;
 		}
 		if (project instanceof final CProject_Bab babProject) {
-			CProject_BabInitializerService.initialize(babProject, gridEntityService, detailSectionService, pageEntityService);
+			CProject_BabInitializerService.initialize(babProject, gridEntityService, detailSectionService,
+					pageEntityService);
 			return;
 		}
 		Check.fail("Unsupported project type: " + project.getClass().getSimpleName());

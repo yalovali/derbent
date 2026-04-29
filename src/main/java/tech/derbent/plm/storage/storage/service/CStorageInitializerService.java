@@ -12,7 +12,7 @@ import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.api.screens.service.CProjectItemInitializerService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
@@ -21,7 +21,7 @@ import tech.derbent.plm.storage.storage.domain.CStorage;
 import tech.derbent.plm.storage.storagetype.domain.CStorageType;
 import tech.derbent.plm.storage.storagetype.service.CStorageTypeService;
 
-public class CStorageInitializerService extends CInitializerServiceBase {
+public class CStorageInitializerService extends CProjectItemInitializerService {
 
 	private static final Class<?> clazz = CStorage.class;
 	@SuppressWarnings ("unused")
@@ -72,16 +72,18 @@ public class CStorageInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "entityType", "parentStorage", "capacity", "capacityUnit", "currentUtilization", "active"));
+		grid.setColumnFields(List.of("id", "name", "entityType", "parentStorage", "capacity", "capacityUnit",
+				"currentUtilization", "active"));
 		return grid;
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {

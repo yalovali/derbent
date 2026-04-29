@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyInitializerService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
@@ -15,12 +16,11 @@ import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 
-public class CUserInitializerService extends CInitializerServiceBase {
+public class CUserInitializerService extends CEntityOfCompanyInitializerService {
 
 	private record UserSeed(String username, String firstName, String lastName, String phone) {}
 
@@ -52,7 +52,8 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "phone"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("System Access"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentPasswordChange"));
+			detailSection.addScreenLine(
+					CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentPasswordChange"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isLDAPUser"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Project & Company Relations"));
 			final CDetailLines line = CDetailLinesService.createLineFromDefaults(clazz, "projectSettings");
@@ -74,7 +75,8 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "activities"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Settings"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeDisplaySectionsAsTabs"));
+			detailSection
+					.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeDisplaySectionsAsTabs"));
 			// Attachments section - standard section for ALL entities
 			CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
 			// Comments section - standard section for discussion entities
@@ -89,30 +91,32 @@ public class CUserInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(
-				List.of("id", "name", "lastname", "login", "email", "phone", "projectSettings", "active", "createdDate", "lastModifiedDate"));
+		grid.setColumnFields(List.of("id", "name", "lastname", "login", "email", "phone", "projectSettings", "active",
+				"createdDate", "lastModifiedDate"));
 		return grid;
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	public static void initializeSample(final CCompany company, final boolean minimal) throws Exception {
 		final CUserService userService = CSpringContext.getBean(CUserService.class);
 		final CUserCompanyRoleService roleService = CSpringContext.getBean(CUserCompanyRoleService.class);
 		final String companyShortName = company.getName().toLowerCase().replaceAll("[^a-z0-9]", "");
-		final List<UserSeed> seeds = List.of(new UserSeed("admin", "Admin", company.getName() + " Yöneticisi", "+90-462-751-1001"),
-				new UserSeed("yasin", "yasin", company.getName() + " Yöneticisi", "+90-462-751-1002"));
+		final List<UserSeed> seeds =
+				List.of(new UserSeed("admin", "Admin", company.getName() + " Yöneticisi", "+90-462-751-1001"),
+						new UserSeed("yasin", "yasin", company.getName() + " Yöneticisi", "+90-462-751-1002"));
 		int created = 0;
 		for (final UserSeed seed : seeds) {
 			final String email = seed.username() + "@" + companyShortName + ".com.tr";
-			final CUser user =
-					userService.createLoginUser(seed.username(), STANDARD_PASSWORD, seed.firstName(), email, company, roleService.getRandom(company));
+			final CUser user = userService.createLoginUser(seed.username(), STANDARD_PASSWORD, seed.firstName(), email,
+					company, roleService.getRandom(company));
 			user.setLastname(seed.lastName());
 			user.setPhone(seed.phone());
 			user.setAttributeDisplaySectionsAsTabs(true);
@@ -128,20 +132,24 @@ public class CUserInitializerService extends CInitializerServiceBase {
 		}
 		LOGGER.info("Creating sample LDAP user for company: {}", company.getName());
 		final String ldapEmail = "ldapuser@" + companyShortName + ".com.tr";
-		final CUser ldapUser = userService.createLoginUser("ldapuser", STANDARD_PASSWORD, "LDAP", ldapEmail, company, roleService.getRandom(company));
+		final CUser ldapUser = userService.createLoginUser("ldapuser", STANDARD_PASSWORD, "LDAP", ldapEmail, company,
+				roleService.getRandom(company));
 		ldapUser.setLastname("Test User");
 		ldapUser.setPhone("+90-462-751-1003");
 		ldapUser.setIsLDAPUser(true); // Mark as LDAP user
 		ldapUser.setActive(false); // Disabled by default (enable after configuring LDAP)
-		ldapUser.setDescription("Sample LDAP user for testing. Enable LDAP authentication in System Settings before activating.");
+		ldapUser.setDescription(
+				"Sample LDAP user for testing. Enable LDAP authentication in System Settings before activating.");
 		userService.save(ldapUser);
 		LOGGER.info("Created sample LDAP user: ldapuser (disabled by default)");
 	}
 
 	/** @param minimal */
-	public static CUser initializeSampleBab(final CCompany company, final CUserCompanyRole adminRole, final boolean minimal) throws Exception {
+	public static CUser initializeSampleBab(final CCompany company, final CUserCompanyRole adminRole,
+			final boolean minimal) throws Exception {
 		final CUserService userService = CSpringContext.getBean(CUserService.class);
-		final CUser user = userService.createLoginUser(BAB_ADMIN_LOGIN, BAB_ADMIN_PASSWORD, BAB_ADMIN_NAME, BAB_ADMIN_EMAIL, company, adminRole);
+		final CUser user = userService.createLoginUser(BAB_ADMIN_LOGIN, BAB_ADMIN_PASSWORD, BAB_ADMIN_NAME,
+				BAB_ADMIN_EMAIL, company, adminRole);
 		user.setLastname(BAB_ADMIN_LASTNAME);
 		userService.save(user);
 		return user;

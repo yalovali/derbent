@@ -789,7 +789,7 @@ To add new quality dimensions:
 - [Multi-User Development Checklist](development/multi-user-development-checklist.md)
 
 ### Testing
-- [Playwright Testing Guide](../PLAYWRIGHT_TESTING_GUIDE.md)
+- [Playwright Testing Guide](../implementation/PLAYWRIGHT_TESTING_GUIDE.md)
 - [Testing Rules](../TESTING_RULES.md)
 
 ---

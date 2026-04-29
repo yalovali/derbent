@@ -10,9 +10,8 @@ import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CEntityOfProjectInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.plm.sprints.planning.domain.CSprintPlanningViewEntity;
 
 /** Initializer for the new sprint planning board view entity.
@@ -20,7 +19,7 @@ import tech.derbent.plm.sprints.planning.domain.CSprintPlanningViewEntity;
  * We create two pages, mirroring the Gnnt board approach: 1) a normal CRUD page, and 2) a dedicated board page where the grid chrome is hidden.
  * </p>
  */
-public class CSprintPlanningViewEntityInitializerService extends CInitializerServiceBase {
+public class CSprintPlanningViewEntityInitializerService extends CEntityOfProjectInitializerService {
 
 	public static final String BOARD_PAGE_NAME = "Sprint Planning Board";
 	public static final String BOARD_PAGE_TITLE = "Sprint Planning";
@@ -33,8 +32,7 @@ public class CSprintPlanningViewEntityInitializerService extends CInitializerSer
 	private static final boolean SHOW_IN_QUICK_TOOLBAR = false;
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
-		final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-		CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+		final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "backlogGridType"));
 		detailSection.addScreenLine(CDetailLinesService.createSection("Sprint Planning Board"));
@@ -56,12 +54,13 @@ public class CSprintPlanningViewEntityInitializerService extends CInitializerSer
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		/* first screen */
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, MENU_TITLE, PAGE_TITLE,
-				PAGE_DESCRIPTION, SHOW_IN_QUICK_TOOLBAR, MENU_ORDER, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				MENU_TITLE, PAGE_TITLE, PAGE_DESCRIPTION, SHOW_IN_QUICK_TOOLBAR, MENU_ORDER, null);
 		/* second, dedicated board page */
 		final CDetailSection boardSection = createBoardView(project);
 		final CGridEntity boardGrid = createGridEntity(project);
@@ -70,18 +69,22 @@ public class CSprintPlanningViewEntityInitializerService extends CInitializerSer
 		// Dedicated board page does not need grid chrome; it is a single-entity experience.
 		boardGrid.setAttributeNone(true);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, boardSection, boardGrid,
-				MenuTitle_PROJECT + "." + CSprintPlanningViewEntity.ENTITY_TITLE_SINGULAR, BOARD_PAGE_TITLE, "Dedicated sprint planning board page",
-				true, MENU_ORDER + ".1", page -> page.setAttributeHideTopCrudtoolbar(true));
+				MenuTitle_PROJECT + "." + CSprintPlanningViewEntity.ENTITY_TITLE_SINGULAR, BOARD_PAGE_TITLE,
+				"Dedicated sprint planning board page", true, MENU_ORDER + ".1",
+				page -> page.setAttributeHideTopCrudtoolbar(true));
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final String[][] sampleViews = {
 				{
-						"Default Sprint Planning", "Day-to-day sprint planning board with backlog + sprint timelines (drag/drop + dialog)."
+						"Default Sprint Planning",
+						"Day-to-day sprint planning board with backlog + sprint timelines (drag/drop + dialog)."
 				}, {
-						"Release Planning", "High-level planning view for mapping Features/Epics into upcoming sprints (leaf-only rule enforced)."
+						"Release Planning",
+						"High-level planning view for mapping Features/Epics into upcoming sprints (leaf-only rule enforced)."
 				}, {
-						"Hotfix Planning", "Fast triage view for moving leaf issues between active sprints during production incidents."
+						"Hotfix Planning",
+						"Fast triage view for moving leaf issues between active sprints during production incidents."
 				}
 		};
 		final CSprintPlanningViewEntityService service = CSpringContext.getBean(CSprintPlanningViewEntityService.class);

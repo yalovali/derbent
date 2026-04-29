@@ -12,14 +12,13 @@ import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CEntityOfProjectInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.validation.validationsuite.domain.CValidationSuite;
 
-public class CValidationSuiteInitializerService extends CInitializerServiceBase {
+public class CValidationSuiteInitializerService extends CEntityOfProjectInitializerService {
 
 	private static final Class<?> clazz = CValidationSuite.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CValidationSuiteInitializerService.class);
@@ -31,8 +30,8 @@ public class CValidationSuiteInitializerService extends CInitializerServiceBase 
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
-			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, false);
+			final CDetailSection detailSection =
+					CEntityOfProjectInitializerService.createBasicView(project, clazz, false);
 			detailSection.addScreenLine(CDetailLinesService.createSection("Suite Details"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "objective"));
@@ -64,25 +63,27 @@ public class CValidationSuiteInitializerService extends CInitializerServiceBase 
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
-	
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final CValidationSuiteService validationSuiteService =
 				(CValidationSuiteService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
 		final List<CValidationSuite> existingScenarios = validationSuiteService.findAll();
 		if (!existingScenarios.isEmpty()) {
-			LOGGER.info("Clearing {} existing validation suites for project: {}", existingScenarios.size(), project.getName());
+			LOGGER.info("Clearing {} existing validation suites for project: {}", existingScenarios.size(),
+					project.getName());
 			for (final CValidationSuite existingScenario : existingScenarios) {
 				try {
 					validationSuiteService.delete(existingScenario);
 				} catch (final Exception e) {
-					LOGGER.warn("Could not delete existing validation suite {}: {}", existingScenario.getId(), e.getMessage());
+					LOGGER.warn("Could not delete existing validation suite {}: {}", existingScenario.getId(),
+							e.getMessage());
 				}
 			}
 		}
@@ -100,13 +101,15 @@ public class CValidationSuiteInitializerService extends CInitializerServiceBase 
 				}
 		};
 		initializeProjectEntity(nameAndDescriptions,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
-				(item, index) -> {
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
+				project, minimal, (item, index) -> {
 					final CValidationSuite scenario = (CValidationSuite) item;
 					// Set objectives
-					scenario.setObjective("Verify all functionality works correctly in the " + scenario.getName() + " workflow");
+					scenario.setObjective(
+							"Verify all functionality works correctly in the " + scenario.getName() + " workflow");
 					// Set prerequisites
-					scenario.setPrerequisites("Validation environment configured, validation data available, user accounts created");
+					scenario.setPrerequisites(
+							"Validation environment configured, validation data available, user accounts created");
 				});
 	}
 }

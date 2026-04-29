@@ -12,9 +12,9 @@ import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CEntityOfProjectInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.api.screens.service.CProjectItemInitializerService;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
@@ -23,7 +23,7 @@ import tech.derbent.plm.validation.validationcase.domain.CValidationCase;
 import tech.derbent.plm.validation.validationcase.domain.CValidationPriority;
 import tech.derbent.plm.validation.validationcase.domain.CValidationSeverity;
 
-public class CValidationCaseInitializerService extends CInitializerServiceBase {
+public class CValidationCaseInitializerService extends CProjectItemInitializerService {
 
 	private static final Class<?> clazz = CValidationCase.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CValidationCaseInitializerService.class);
@@ -35,8 +35,8 @@ public class CValidationCaseInitializerService extends CInitializerServiceBase {
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
-			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+			final CDetailSection detailSection =
+					CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priority"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "severity"));
@@ -69,17 +69,18 @@ public class CValidationCaseInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "entityType", "priority", "severity", "status", "automated", "project",
-				"assignedTo", "validationSuite", "createdDate"));
+		grid.setColumnFields(List.of("id", "name", "description", "entityType", "priority", "severity", "status",
+				"automated", "project", "assignedTo", "validationSuite", "createdDate"));
 		return grid;
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
@@ -87,14 +88,16 @@ public class CValidationCaseInitializerService extends CInitializerServiceBase {
 				(CValidationCaseService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
 		final List<CValidationCase> existingValidationCases = validationCaseService.findAll();
 		if (!existingValidationCases.isEmpty()) {
-			LOGGER.info("Clearing {} existing validation cases for project: {}", existingValidationCases.size(), project.getName());
-			for (final CValidationCase existingValidationCase : existingValidationCases) {
+			LOGGER.info("Clearing {} existing validation cases for project: {}", existingValidationCases.size(),
+					project.getName());
+			existingValidationCases.forEach((final CValidationCase existingValidationCase) -> {
 				try {
 					validationCaseService.delete(existingValidationCase);
 				} catch (final Exception e) {
-					LOGGER.warn("Could not delete existing validation case {}: {}", existingValidationCase.getId(), e.getMessage());
+					LOGGER.warn("Could not delete existing validation case {}: {}", existingValidationCase.getId(),
+							e.getMessage());
 				}
-			}
+			});
 		}
 		final String[][] nameAndDescriptions = {
 				{
@@ -110,7 +113,8 @@ public class CValidationCaseInitializerService extends CInitializerServiceBase {
 				}, {
 						"Mobile Responsive Layout", "Verify UI adapts correctly to mobile and tablet viewports"
 				}, {
-						"API Error Handling", "Validate API error responses return proper HTTP status codes and messages"
+						"API Error Handling",
+						"Validate API error responses return proper HTTP status codes and messages"
 				}, {
 						"Session Timeout Handling", "Verify session timeout after 30 minutes redirects to login page"
 				}, {
@@ -120,14 +124,15 @@ public class CValidationCaseInitializerService extends CInitializerServiceBase {
 				}
 		};
 		initializeProjectEntity(nameAndDescriptions,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
-				(item, index) -> {
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
+				project, minimal, (item, index) -> {
 					final CValidationCase validationCase = (CValidationCase) item;
 					final CUser user = CSpringContext.getBean(CUserService.class).getRandom(project.getCompany());
 					validationCase.setAssignedTo(user);
 					// Set priority and severity
 					validationCase.setPriority(index % 3 == 0 ? CValidationPriority.HIGH : CValidationPriority.MEDIUM);
-					validationCase.setSeverity(index % 2 == 0 ? CValidationSeverity.CRITICAL : CValidationSeverity.NORMAL);
+					validationCase
+							.setSeverity(index % 2 == 0 ? CValidationSeverity.CRITICAL : CValidationSeverity.NORMAL);
 					// Set automated flag for some validations
 					validationCase.setAutomated(index % 4 == 0);
 					if (validationCase.getAutomated()) {

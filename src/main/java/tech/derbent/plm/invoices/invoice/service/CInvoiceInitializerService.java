@@ -13,9 +13,11 @@ import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CEntityOfProjectInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.api.screens.service.CProjectItemInitializerService;
+import tech.derbent.api.users.domain.CUser;
+import tech.derbent.api.users.service.CUserService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.invoices.invoice.domain.CInvoice;
@@ -28,10 +30,8 @@ import tech.derbent.plm.milestones.milestone.domain.CMilestone;
 import tech.derbent.plm.milestones.milestone.service.CMilestoneService;
 import tech.derbent.plm.orders.currency.domain.CCurrency;
 import tech.derbent.plm.orders.currency.service.CCurrencyService;
-import tech.derbent.api.users.domain.CUser;
-import tech.derbent.api.users.service.CUserService;
 
-public class CInvoiceInitializerService extends CInitializerServiceBase {
+public class CInvoiceInitializerService extends CProjectItemInitializerService {
 
 	private static final Class<?> clazz = CInvoice.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CInvoiceInitializerService.class);
@@ -43,8 +43,8 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
-			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+			final CDetailSection detailSection =
+					CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "invoiceNumber"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "invoiceDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dueDate"));
@@ -97,22 +97,24 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "invoiceNumber", "invoiceDate", "dueDate", "customerName", "totalAmount", "paidAmount",
-				"paymentStatus", "isMilestonePayment", "relatedMilestone", "installmentNumber", "paymentPlanInstallments", "status", "project",
-				"issuedBy", "createdDate"));
+		grid.setColumnFields(List.of("id", "name", "invoiceNumber", "invoiceDate", "dueDate", "customerName",
+				"totalAmount", "paidAmount", "paymentStatus", "isMilestonePayment", "relatedMilestone",
+				"installmentNumber", "paymentPlanInstallments", "status", "project", "issuedBy", "createdDate"));
 		return grid;
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
-		final CInvoiceService invoiceService = (CInvoiceService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
+		final CInvoiceService invoiceService =
+				(CInvoiceService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
 		final CInvoiceItemService invoiceItemService = CSpringContext.getBean(CInvoiceItemService.class);
 		final CPaymentService paymentService = CSpringContext.getBean(CPaymentService.class);
 		final CMilestoneService milestoneService = CSpringContext.getBean(CMilestoneService.class);
@@ -121,13 +123,13 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		final List<CInvoice> existingInvoices = invoiceService.findAll();
 		if (!existingInvoices.isEmpty()) {
 			LOGGER.info("Clearing {} existing invoices for project: {}", existingInvoices.size(), project.getName());
-			for (final CInvoice existingInvoice : existingInvoices) {
+			existingInvoices.forEach((final CInvoice existingInvoice) -> {
 				try {
 					invoiceService.delete(existingInvoice);
 				} catch (final Exception e) {
 					LOGGER.warn("Could not delete existing invoice {}: {}", existingInvoice.getId(), e.getMessage());
 				}
-			}
+			});
 		}
 		final CCurrency currency = currencyService.getRandom(project);
 		final CUser issuer = userService.getRandom(project.getCompany());
@@ -136,7 +138,8 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		// Scenario 1: Milestone-based payment invoice (Paid in full upon milestone acceptance)
 		LOGGER.info("Creating Scenario 1: Milestone Acceptance Payment Invoice");
 		CInvoice invoice1 = new CInvoice("Milestone Alpha Release Payment", project);
-		invoice1.setInvoiceNumber(String.format("INV-%s-1001", project.getCompany().getName().substring(0, 3).toUpperCase()));
+		invoice1.setInvoiceNumber(
+				"INV-%s-1001".formatted(project.getCompany().getName().substring(0, 3).toUpperCase()));
 		invoice1.setInvoiceDate(LocalDate.now().minusDays(45));
 		invoice1.setDueDate(invoice1.getInvoiceDate().plusDays(30));
 		invoice1.setCustomerName("Tech Solutions Inc.");
@@ -185,7 +188,8 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		// Scenario 2: Payment Plan Invoice with 4 installments (Currently on installment 2)
 		LOGGER.info("Creating Scenario 2: Payment Plan Invoice - Installment 2 of 4");
 		CInvoice invoice2 = new CInvoice("Annual License Payment - Installment 2", project);
-		invoice2.setInvoiceNumber(String.format("INV-%s-1002", project.getCompany().getName().substring(0, 3).toUpperCase()));
+		invoice2.setInvoiceNumber(
+				"INV-%s-1002".formatted(project.getCompany().getName().substring(0, 3).toUpperCase()));
 		invoice2.setInvoiceDate(LocalDate.now().minusDays(60));
 		invoice2.setDueDate(LocalDate.now().minusDays(30));
 		invoice2.setCustomerName("Global Enterprises Ltd.");
@@ -221,7 +225,8 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		// Scenario 3: Partial Payment Invoice (50% paid, balance due)
 		LOGGER.info("Creating Scenario 3: Partial Payment Invoice");
 		CInvoice invoice3 = new CInvoice("Custom Development Project", project);
-		invoice3.setInvoiceNumber(String.format("INV-%s-1003", project.getCompany().getName().substring(0, 3).toUpperCase()));
+		invoice3.setInvoiceNumber(
+				"INV-%s-1003".formatted(project.getCompany().getName().substring(0, 3).toUpperCase()));
 		invoice3.setInvoiceDate(LocalDate.now().minusDays(20));
 		invoice3.setDueDate(LocalDate.now().plusDays(10));
 		invoice3.setCustomerName("StartupCo Technologies");
@@ -262,7 +267,8 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		// Scenario 4: Overdue Invoice (Late payment)
 		LOGGER.info("Creating Scenario 4: Overdue Invoice");
 		CInvoice invoice4 = new CInvoice("Consulting Services - January 2026", project);
-		invoice4.setInvoiceNumber(String.format("INV-%s-1004", project.getCompany().getName().substring(0, 3).toUpperCase()));
+		invoice4.setInvoiceNumber(
+				"INV-%s-1004".formatted(project.getCompany().getName().substring(0, 3).toUpperCase()));
 		invoice4.setInvoiceDate(LocalDate.now().minusDays(50));
 		invoice4.setDueDate(LocalDate.now().minusDays(20));
 		invoice4.setCustomerName("Legacy Systems Corp");
@@ -286,7 +292,8 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		// Scenario 5: Beta Release Milestone Payment (Pending payment)
 		LOGGER.info("Creating Scenario 5: Beta Release Milestone Payment (Pending)");
 		CInvoice invoice5 = new CInvoice("Milestone Beta Release Payment", project);
-		invoice5.setInvoiceNumber(String.format("INV-%s-1005", project.getCompany().getName().substring(0, 3).toUpperCase()));
+		invoice5.setInvoiceNumber(
+				"INV-%s-1005".formatted(project.getCompany().getName().substring(0, 3).toUpperCase()));
 		invoice5.setInvoiceDate(LocalDate.now().minusDays(10));
 		invoice5.setDueDate(LocalDate.now().plusDays(20));
 		invoice5.setCustomerName("Tech Solutions Inc.");
@@ -321,7 +328,8 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		// Scenario 6: Payment Plan - Installment 3 of 4 (Due soon)
 		LOGGER.info("Creating Scenario 6: Payment Plan - Installment 3 of 4 (Due Soon)");
 		CInvoice invoice6 = new CInvoice("Annual License Payment - Installment 3", project);
-		invoice6.setInvoiceNumber(String.format("INV-%s-1006", project.getCompany().getName().substring(0, 3).toUpperCase()));
+		invoice6.setInvoiceNumber(
+				"INV-%s-1006".formatted(project.getCompany().getName().substring(0, 3).toUpperCase()));
 		invoice6.setInvoiceDate(LocalDate.now().minusDays(5));
 		invoice6.setDueDate(LocalDate.now().plusDays(25));
 		invoice6.setCustomerName("Global Enterprises Ltd.");
@@ -348,7 +356,8 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		// Scenario 7: Maintenance & Support Subscription (Monthly recurring)
 		LOGGER.info("Creating Scenario 7: Monthly Maintenance Subscription");
 		CInvoice invoice7 = new CInvoice("Monthly Maintenance & Support - February 2026", project);
-		invoice7.setInvoiceNumber(String.format("INV-%s-1007", project.getCompany().getName().substring(0, 3).toUpperCase()));
+		invoice7.setInvoiceNumber(
+				"INV-%s-1007".formatted(project.getCompany().getName().substring(0, 3).toUpperCase()));
 		invoice7.setInvoiceDate(LocalDate.now().minusDays(15));
 		invoice7.setDueDate(LocalDate.now().plusDays(15));
 		invoice7.setCustomerName("RetailChain Solutions");
