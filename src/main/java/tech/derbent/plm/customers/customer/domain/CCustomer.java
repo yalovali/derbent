@@ -34,7 +34,8 @@ import tech.derbent.plm.customers.customertype.domain.CCustomerType;
 @Entity
 @Table (name = "ccustomer")
 @AttributeOverride (name = "id", column = @Column (name = "customer_id"))
-public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndWorkflow<CCustomer>, IHasAttachments, IHasComments {
+public class CCustomer extends CProjectItem<CCustomer>
+		implements IHasStatusAndWorkflow<CCustomer>, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#4169E1"; // RoyalBlue - customers
 	public static final String DEFAULT_ICON = "vaadin:briefcase";
@@ -53,43 +54,47 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "customer_id")
 	@AMetaData (
-			displayName = "Attachments", required = false, readOnly = false, description = "Documents and files related to this customer",
-			hidden = false, dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
+			displayName = "Attachments", required = false, readOnly = false,
+			description = "Documents and files related to this customer", hidden = false,
+			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
 	@Column (name = "billing_address", nullable = true, length = 500)
 	@Size (max = 500)
 	@AMetaData (
-			displayName = "Billing Address", required = false, readOnly = false, description = "Full billing address", hidden = false, maxLength = 500
+			displayName = "Billing Address", required = false, readOnly = false, description = "Full billing address",
+			hidden = false, maxLength = 500
 	)
 	private String billingAddress;
 	// One-to-Many relationship with comments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "customer_id")
 	@AMetaData (
-			displayName = "Comments", required = false, readOnly = false, description = "Discussion comments about this customer", hidden = false,
+			displayName = "Comments", required = false, readOnly = false,
+			description = "Discussion comments about this customer", hidden = false,
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@Column (name = "company_name", nullable = false, length = 200)
 	@Size (max = 200)
 	@AMetaData (
-			displayName = "Company Name", required = true, readOnly = false, description = "Official name of the customer company", hidden = false,
-			maxLength = 200
+			displayName = "Company Name", required = true, readOnly = false,
+			description = "Official name of the customer company", hidden = false, maxLength = 200
 	)
 	private String companyName;
 	@Column (name = "company_size", nullable = true, length = 50)
 	@Size (max = 50)
 	@AMetaData (
 			displayName = "Company Size", required = false, readOnly = false,
-			description = "Number of employees (e.g., 1-10, 11-50, 51-200, 201-500, 500+)", hidden = false, maxLength = 50
+			description = "Number of employees (e.g., 1-10, 11-50, 51-200, 201-500, 500+)", hidden = false,
+			maxLength = 50
 	)
 	private String companySize;
 	@Column (name = "customer_notes", nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
-			displayName = "Notes", required = false, readOnly = false, description = "Additional notes about the customer", hidden = false,
-			maxLength = 2000
+			displayName = "Notes", required = false, readOnly = false,
+			description = "Additional notes about the customer", hidden = false, maxLength = 2000
 	)
 	private String customerNotes;
 	@ManyToOne (fetch = FetchType.EAGER)
@@ -103,8 +108,8 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 	@Column (name = "industry", nullable = true, length = 100)
 	@Size (max = 100)
 	@AMetaData (
-			displayName = "Industry", required = false, readOnly = false, description = "Industry sector (e.g., Technology, Healthcare, Finance)",
-			hidden = false, maxLength = 100
+			displayName = "Industry", required = false, readOnly = false,
+			description = "Industry sector (e.g., Technology, Healthcare, Finance)", hidden = false, maxLength = 100
 	)
 	private String industry;
 	@Column (name = "last_interaction_date", nullable = true)
@@ -125,40 +130,43 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 	@Email
 	@Size (max = 150)
 	@AMetaData (
-			displayName = "Primary Contact Email", required = false, readOnly = false, description = "Email of the primary contact", hidden = false,
-			maxLength = 150
+			displayName = "Primary Contact Email", required = false, readOnly = false,
+			description = "Email of the primary contact", hidden = false, maxLength = 150
 	)
 	private String primaryContactEmail;
 	@Column (name = "primary_contact_name", nullable = true, length = 100)
 	@Size (max = 100)
 	@AMetaData (
-			displayName = "Primary Contact Name", required = false, readOnly = false, description = "Name of the main contact person", hidden = false,
-			maxLength = 100
+			displayName = "Primary Contact Name", required = false, readOnly = false,
+			description = "Name of the main contact person", hidden = false, maxLength = 100
 	)
 	private String primaryContactName;
 	@Column (name = "primary_contact_phone", nullable = true, length = 50)
 	@Size (max = 50)
 	@AMetaData (
-			displayName = "Primary Contact Phone", required = false, readOnly = false, description = "Phone number of the primary contact",
-			hidden = false, maxLength = 50
+			displayName = "Primary Contact Phone", required = false, readOnly = false,
+			description = "Phone number of the primary contact", hidden = false, maxLength = 50
 	)
 	private String primaryContactPhone;
 	@Column (name = "relationship_start_date", nullable = true)
 	@AMetaData (
-			displayName = "Relationship Start Date", required = false, readOnly = false, description = "Date when the customer relationship began",
-			hidden = false
+			displayName = "Relationship Start Date", required = false, readOnly = false,
+			description = "Date when the customer relationship began", hidden = false
 	)
-	private LocalDate relationshipStartDate;
+	private LocalDate relationshipStartDate = LocalDate.now();
 	@Column (name = "shipping_address", nullable = true, length = 500)
 	@Size (max = 500)
 	@AMetaData (
-			displayName = "Shipping Address", required = false, readOnly = false, description = "Full shipping address", hidden = false,
-			maxLength = 500
+			displayName = "Shipping Address", required = false, readOnly = false, description = "Full shipping address",
+			hidden = false, maxLength = 500
 	)
 	private String shippingAddress;
 	@Column (name = "website", nullable = true, length = 200)
 	@Size (max = 200)
-	@AMetaData (displayName = "Website", required = false, readOnly = false, description = "Company website URL", hidden = false, maxLength = 200)
+	@AMetaData (
+			displayName = "Website", required = false, readOnly = false, description = "Company website URL",
+			hidden = false, maxLength = 200
+	)
 	private String website;
 
 	/** Default constructor for JPA. */
@@ -285,8 +293,9 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 		Check.notNull(getProject(), "Project must be set before assigning customer type");
 		Check.notNull(getProject().getCompany(), "Project company must be set before assigning customer type");
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning customer type");
-		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
-				+ typeEntity.getCompany().getId() + " does not match customer project company id " + getProject().getCompany().getId());
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
+				"Type entity company id " + typeEntity.getCompany().getId()
+						+ " does not match customer project company id " + getProject().getCompany().getId());
 		entityType = (CCustomerType) typeEntity;
 		updateLastModified();
 	}

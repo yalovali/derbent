@@ -21,10 +21,23 @@ import tech.derbent.bab.utils.CJsonSerializer.EJsonScenario;
 @MappedSuperclass
 public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 
+	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_CONFIGURATION =
+			createExcludedFieldMap_BabConfiguration();
+	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityNamed.class);
-	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_CONFIGURATION = createExcludedFieldMap_BabConfiguration();
-	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
+
+	private static Map<String, Set<String>> createExcludedFieldMap_BabConfiguration() {
+		final Map<String, Set<String>> map = new java.util.HashMap<>();
+		map.put("CEntityNamed", Set.of("createdDate", "description", "lastModifiedDate", "name"));
+		return Map.copyOf(map);
+	}
+
+	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
+		final Map<String, Set<String>> map = new java.util.HashMap<>();
+		map.put("CEntityNamed", Set.of("createdDate", "description", "lastModifiedDate", "name"));
+		return Map.copyOf(map);
+	}
 
 	public static String getDefaultOrderByStatic() { return "name"; }
 
@@ -32,30 +45,31 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	@Column (name = "created_date", nullable = true)
 	@JsonIgnore
 	@AMetaData (
-			displayName = "Created Date", required = false, readOnly = true, description = "Date and time when the activity was created",
-			hidden = false
+			displayName = "Created Date", required = false, readOnly = true,
+			description = "Date and time when the activity was created", hidden = false
 	)
-	private LocalDateTime createdDate;
+	private LocalDateTime createdDate = LocalDateTime.now();
 	@Column (nullable = true, length = 2000)
 	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION, message = ValidationMessages.DESCRIPTION_MAX_LENGTH)
 	@JsonIgnore
 	@AMetaData (
-			displayName = "Description", required = false, readOnly = false, defaultValue = "", description = "Detailed description of the project",
-			hidden = false, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
+			displayName = "Description", required = false, readOnly = false, defaultValue = "",
+			description = "Detailed description of the project", hidden = false,
+			maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String description;
 	@Column (name = "last_modified_date", nullable = true)
 	@JsonIgnore
 	@AMetaData (
-			displayName = "Last Modified", required = false, readOnly = true, description = "Date and time when the activity was last modified",
-			hidden = false
+			displayName = "Last Modified", required = false, readOnly = true,
+			description = "Date and time when the activity was last modified", hidden = false
 	)
 	private LocalDateTime lastModifiedDate;
 	@Column (nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME, message = ValidationMessages.NAME_MAX_LENGTH)
 	@AMetaData (
-			displayName = "Name", required = false, readOnly = false, defaultValue = "", description = "Name", hidden = false,
-			maxLength = CEntityConstants.MAX_LENGTH_NAME, setBackgroundFromColor = true
+			displayName = "Name", required = false, readOnly = false, defaultValue = "", description = "Name",
+			hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME, setBackgroundFromColor = true
 	)
 	private String name;
 
@@ -80,12 +94,6 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 
 	public LocalDateTime getCreatedDate() { return createdDate; }
 
-	@Override
-	public Map<String, Set<String>> getExcludedFieldMapForScenario(final EJsonScenario scenario) {
-		return mergeExcludedFieldMaps(super.getExcludedFieldMapForScenario(scenario),
-				getScenarioExcludedFieldMap(scenario, EXCLUDED_FIELDS_BAB_CONFIGURATION, EXCLUDED_FIELDS_BAB_POLICY));
-	}
-
 	/** Get the default sort field for this entity instance. LEGACY: Consider using getDefaultOrderByStatic() for better performance.
 	 * @return default order field name */
 	@Override
@@ -103,6 +111,12 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 		return description.substring(0, 75) + "...";
 	}
 
+	@Override
+	public Map<String, Set<String>> getExcludedFieldMapForScenario(final EJsonScenario scenario) {
+		return mergeExcludedFieldMaps(super.getExcludedFieldMapForScenario(scenario),
+				getScenarioExcludedFieldMap(scenario, EXCLUDED_FIELDS_BAB_CONFIGURATION, EXCLUDED_FIELDS_BAB_POLICY));
+	}
+
 	public LocalDateTime getLastModifiedDate() { return lastModifiedDate; }
 
 	public String getName() { return name; }
@@ -115,11 +129,11 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 		lastModifiedDate = LocalDateTime.now();
 	}
 
-	/** Checks if this entity matches the given search value in the specified fields. This implementation extends the base class to search in 'name'
-	 * and 'description' fields in addition to inherited fields from CEntityDB. If no field names are specified, searches only in "name" field.
+	/** Checks if this entity matches the given search value in the specified fields. This implementation extends the base class to search in 'name' and
+	 * 'description' fields in addition to inherited fields from CEntityDB. If no field names are specified, searches only in "name" field.
 	 * @param searchValue the value to search for (case-insensitive)
-	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "name" field. Supported field names: "id",
-	 *                    "active", "name", "description"
+	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "name" field. Supported field names: "id", "active",
+	 *                    "name", "description"
 	 * @return true if the entity matches the search criteria in any of the specified fields */
 	@Override
 	public boolean matchesFilter(final String searchValue, @Nullable Collection<String> fieldNames) {
@@ -144,7 +158,8 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 			return true;
 		}
 		final String description1 = getDescription();
-		if (mutableFieldNames.remove("description") && description1 != null && description1.toLowerCase().contains(lowerSearchValue)) {
+		if (mutableFieldNames.remove("description") && description1 != null
+				&& description1.toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
 		return false;
@@ -168,18 +183,6 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	@Override
 	public String toString() {
 		return getName();
-	}
-
-	private static Map<String, Set<String>> createExcludedFieldMap_BabConfiguration() {
-		final Map<String, Set<String>> map = new java.util.HashMap<>();
-		map.put("CEntityNamed", Set.of("createdDate", "description", "lastModifiedDate", "name"));
-		return Map.copyOf(map);
-	}
-
-	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
-		final Map<String, Set<String>> map = new java.util.HashMap<>();
-		map.put("CEntityNamed", Set.of("createdDate", "description", "lastModifiedDate", "name"));
-		return Map.copyOf(map);
 	}
 
 	/** Update the last modified date to now. */

@@ -35,15 +35,15 @@ import tech.derbent.plm.links.domain.CLink;
 import tech.derbent.plm.links.domain.IHasLinks;
 import tech.derbent.plm.requirements.requirementtype.domain.CRequirementType;
 
-/**
- * Project-scoped requirement entity that participates in the generic hierarchy refactor.
- *
- * <p>Unlike agile entities, this class stays on the standard {@link CProjectItem} pattern so the
- * hierarchy layer works for any project item with a typed level.</p>
+/** Project-scoped requirement entity that participates in the generic hierarchy refactor.
+ * <p>
+ * Unlike agile entities, this class stays on the standard {@link CProjectItem} pattern so the hierarchy layer works for any project item with a typed
+ * level.
+ * </p>
  */
 @Entity
-@Table(name = "crequirement")
-@AttributeOverride(name = "id", column = @Column(name = "requirement_id"))
+@Table (name = "crequirement")
+@AttributeOverride (name = "id", column = @Column (name = "requirement_id"))
 public class CRequirement extends CProjectItem<CRequirement>
 		implements IHasStatusAndWorkflow<CRequirement>, IHasAttachments, IHasComments, IHasLinks, IHasParentRelation {
 
@@ -52,88 +52,88 @@ public class CRequirement extends CProjectItem<CRequirement>
 	public static final String ENTITY_TITLE_PLURAL = "Requirements";
 	public static final String ENTITY_TITLE_SINGULAR = "Requirement";
 	public static final String VIEW_NAME = "Requirements View";
-
-	@Column(nullable = true, length = 2000)
-	@Size(max = 2000)
-	@AMetaData(
+	@Column (nullable = true, length = 2000)
+	@Size (max = 2000)
+	@AMetaData (
 			displayName = "Acceptance Criteria", required = false, readOnly = false, defaultValue = "",
-			description = "Testable criteria that define when the requirement is satisfied", hidden = false, maxLength = 2000
+			description = "Testable criteria that define when the requirement is satisfied", hidden = false,
+			maxLength = 2000
 	)
 	private String acceptanceCriteria = "";
-
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn(name = "requirement_id")
-	@AMetaData(
-			displayName = "Attachments", required = false, readOnly = false, description = "Attachments for this requirement", hidden = false,
-			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "requirement_id")
+	@AMetaData (
+			displayName = "Attachments", required = false, readOnly = false,
+			description = "Attachments for this requirement", hidden = false, dataProviderBean = "CAttachmentService",
+			createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
-
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn(name = "requirement_id")
-	@AMetaData(
-			displayName = "Comments", required = false, readOnly = false, description = "Comments for this requirement", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "requirement_id")
+	@AMetaData (
+			displayName = "Comments", required = false, readOnly = false, description = "Comments for this requirement",
+			hidden = false, dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
-
-	@Column(nullable = true)
-	@AMetaData(
-			displayName = "Due Date", required = false, readOnly = false, description = "Target completion or validation date", hidden = false
+	@Column (nullable = true)
+	@AMetaData (
+			displayName = "Due Date", required = false, readOnly = false,
+			description = "Target completion or validation date", hidden = false
 	)
 	private LocalDate dueDate;
-
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "entitytype_id", nullable = true)
-	@AMetaData(
-			displayName = "Requirement Type", required = false, readOnly = false, description = "Hierarchy-aware type of the requirement",
-			hidden = false, dataProviderBean = "CRequirementTypeService", setBackgroundFromColor = true, useIcon = true
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "entitytype_id", nullable = true)
+	@AMetaData (
+			displayName = "Requirement Type", required = false, readOnly = false,
+			description = "Hierarchy-aware type of the requirement", hidden = false,
+			dataProviderBean = "CRequirementTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CRequirementType entityType;
-
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn(name = "requirement_id")
-	@AMetaData(
-			displayName = "Links", required = false, readOnly = false, description = "Related entities linked to this requirement", hidden = false,
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "requirement_id")
+	@AMetaData (
+			displayName = "Links", required = false, readOnly = false,
+			description = "Related entities linked to this requirement", hidden = false,
 			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
 	)
 	private Set<CLink> links = new HashSet<>();
-
-	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name = "agile_parent_relation_id", nullable = false)
-	@NotNull(message = "Parent relation is required for hierarchy")
-	@AMetaData(
-			displayName = "Parent Relation", required = true, readOnly = true, description = "Hierarchy tracking for this requirement", hidden = true
+	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
+	@NotNull (message = "Parent relation is required for hierarchy")
+	@AMetaData (
+			displayName = "Parent Relation", required = true, readOnly = true,
+			description = "Hierarchy tracking for this requirement", hidden = true
 	)
 	private CParentRelation parentRelation;
-
 	@Transient
-	@AMetaData(
-			displayName = "Children", required = false, readOnly = false, description = "Hierarchy children for this requirement", hidden = false,
-			createComponentMethod = "createComponentParentChildren", dataProviderBean = "pageservice", captionVisible = false
-	)
-	private final CProjectItem<?> placeHolder_createComponentParentChildren = null;
-
-	@Transient
-	@AMetaData(
-			displayName = "Parent", required = false, readOnly = false, description = "Hierarchy parent selector for this requirement",
-			hidden = false, createComponentMethod = "createComponentParent", dataProviderBean = "pageservice", captionVisible = false
+	@AMetaData (
+			displayName = "Parent", required = false, readOnly = false,
+			description = "Hierarchy parent selector for this requirement", hidden = false,
+			createComponentMethod = "createComponentParent", dataProviderBean = "pageservice", captionVisible = false
 	)
 	private final CProjectItem<?> placeHolder_createComponentParent = null;
-
-	@Column(nullable = true, length = 500)
-	@Size(max = 500)
-	@AMetaData(
+	@Transient
+	@AMetaData (
+			displayName = "Children", required = false, readOnly = false,
+			description = "Hierarchy children for this requirement", hidden = false,
+			createComponentMethod = "createComponentParentChildren", dataProviderBean = "pageservice",
+			captionVisible = false
+	)
+	private final CProjectItem<?> placeHolder_createComponentParentChildren = null;
+	@Column (nullable = true, length = 500)
+	@Size (max = 500)
+	@AMetaData (
 			displayName = "Source", required = false, readOnly = false, defaultValue = "",
-			description = "Origin of the requirement such as customer request, policy, or roadmap input", hidden = false, maxLength = 500
+			description = "Origin of the requirement such as customer request, policy, or roadmap input",
+			hidden = false, maxLength = 500
 	)
 	private String source = "";
-
-	@Column(nullable = true)
-	@AMetaData(
-			displayName = "Start Date", required = false, readOnly = false, description = "Planned start date for requirement implementation", hidden = false
+	@Column (nullable = true)
+	@AMetaData (
+			displayName = "Start Date", required = false, readOnly = false,
+			description = "Planned start date for requirement implementation", hidden = false
 	)
-	private LocalDate startDate;
+	private LocalDate startDate = LocalDate.now();
 
 	protected CRequirement() {}
 
@@ -174,9 +174,11 @@ public class CRequirement extends CProjectItem<CRequirement>
 	@Override
 	public CParentRelation getParentRelation() { return parentRelation; }
 
-	public CProjectItem<?> getPlaceHolder_createComponentParentChildren() { return placeHolder_createComponentParentChildren; }
-
 	public CProjectItem<?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
+
+	public CProjectItem<?> getPlaceHolder_createComponentParentChildren() {
+		return placeHolder_createComponentParentChildren;
+	}
 
 	public String getSource() { return source; }
 

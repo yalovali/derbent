@@ -2,41 +2,26 @@
 
 Mandatory entry point for AI agents working in `/home/yasin/git/derbent`.
 
-<<<<<<< HEAD
 ## Required read order
 1. `.github/copilot-instructions.md`
 2. `.github/agents/README.md`
 3. `.github/agents/QUICK_REFERENCE.md`
 4. Relevant agent definition: `.github/agents/<agent>/<agent>.agent.md`
 5. Relevant agent config: `.github/agents/<agent>/config/settings.md`
-=======
-## Specialized Entry Points
-- **[CLAUDE.md](CLAUDE.md)** - Specific entry point for Claude Code (CLI + IDE extensions).
-- **[CODEX.md](CODEX.md)** - Specific entry point for Codex CLI agent.
-- **[GEMINI.md](GEMINI.md)** - Specific entry point for Gemini CLI agent.
->>>>>>> branch 'main' of https://github.com/yalovali/derbent
 
-<<<<<<< HEAD
 ## Canonical sources
 - Repository-wide rules: `.github/copilot-instructions.md`
 - Agent operating model: `.github/agents/README.md`
 - Task memory, skills, and artifacts: `.github/agents/_shared/`
 - Architecture and coding rules: `docs/architecture/README.md`
 - BAB-specific rules: `docs/bab/CODING_RULES.md`
-=======
-## Claude Code Integration
-Claude Code must use this root file first, then load **[CLAUDE.md](CLAUDE.md)**. Claude Code starts every Derbent task as the Orchestrator Agent and reuses the shared `.github/agents/` definitions, configs, and `scripts/agents.sh` task artifacts. Project-level settings live in `.claude/settings.json`. This is an additive integration only; Copilot, Gemini, Codex, Cursor, Cline, and AI Digest configs remain independent clients of the same `.github/agents/` system.
 
-## Codex CLI Integration
-Codex CLI must use this root file first, then load **[CODEX.md](CODEX.md)**. Codex must start every Derbent task through the existing `.github/agents/orchestrator/` role and reuse the shared `.github/agents/` definitions, configs, and `scripts/agents.sh` task artifacts. This is an additive integration only; Copilot, Gemini, Cursor, Cline, and AI Digest configs remain independent clients of the same `.github/agents/` system.
+## Per-tool entry points
+- Claude Code: `CLAUDE.md`
+- Codex CLI: `CODEX.md`
+- Gemini CLI: `GEMINI.md`
 
-## Required reading order
-1. `.github/copilot-instructions.md` (master playbook; mandatory rules)
-2. `.github/agents/README.md` (agent roster and workflow)
-3. `.github/agents/QUICK_REFERENCE.md` (quick rules + triggers)
-4. Relevant agent definition (e.g., `.github/agents/coder/coder.agent.md`)
-5. Relevant agent config (e.g., `.github/agents/coder/config/settings.md`)
->>>>>>> branch 'main' of https://github.com/yalovali/derbent
+These are thin pointers. The shared `.github/agents/` system is the SSOT — every tool reuses the same orchestrator, specialists, configs, and `scripts/agents.sh` task helpers.
 
 ## Non-negotiable enforcement
 - Read `.github/` before code changes or test runs.
@@ -44,7 +29,7 @@ Codex CLI must use this root file first, then load **[CODEX.md](CODEX.md)**. Cod
 - Use the orchestrated agent workflow for every task.
 - For code tasks, run compile with warnings visible and fix warnings introduced in touched files.
 - For completed tasks, run at least one selective Playwright test unless the user explicitly forbids tests.
-- Add explanatory comments when changed logic is not obvious.
+- Add explanatory comments only when changed logic is not obvious.
 - Finalize completed tasks with a git commit and push unless the user explicitly says not to or push is unavailable.
 
 ## Critical implementation guards
@@ -71,7 +56,7 @@ Codex CLI must use this root file first, then load **[CODEX.md](CODEX.md)**. Cod
   - `docs/bab/CODING_RULES.md`
   - `docs/implementation/PLAYWRIGHT_TEST_GUIDE.md`
 - Historical material belongs under `docs/archive/**` or `.github/agents/archive/**`.
-- Archive instead of deleting when retiring outdated guidance.
+- Archive instead of deleting when retiring outdated guidance still referenced by code.
 
 ## If instructions conflict
 Stop and ask for clarification before proceeding.

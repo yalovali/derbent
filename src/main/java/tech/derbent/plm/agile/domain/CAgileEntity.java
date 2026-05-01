@@ -22,16 +22,16 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import tech.derbent.api.parentrelation.domain.CParentRelation;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
-import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.interfaces.IHasIcon;
+import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.interfaces.ISprintableItem;
+import tech.derbent.api.parentrelation.domain.CParentRelation;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -47,8 +47,9 @@ import tech.derbent.plm.links.domain.IHasLinks;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 
 @MappedSuperclass
-public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass, TypeClass>, TypeClass extends CTypeEntity<?>>
-		extends CProjectItem<EntityClass> implements IHasStatusAndWorkflow<EntityClass>, IGnntEntityItem, ISprintableItem, IHasIcon, IHasAttachments,
+public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass, TypeClass>,
+		TypeClass extends CTypeEntity<?>> extends CProjectItem<EntityClass>
+		implements IHasStatusAndWorkflow<EntityClass>, IGnntEntityItem, ISprintableItem, IHasIcon, IHasAttachments,
 		IHasComments, IHasLinks, IHasParentRelation {
 
 	@SuppressWarnings ("unused")
@@ -57,15 +58,16 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 	@Size (max = 2000)
 	@AMetaData (
 			displayName = "Acceptance Criteria", required = false, readOnly = false, defaultValue = "",
-			description = "Criteria that must be met for the item to be considered complete", hidden = false, maxLength = 2000
+			description = "Criteria that must be met for the item to be considered complete", hidden = false,
+			maxLength = 2000
 	)
 	private String acceptanceCriteria;
 	@Column (nullable = true, precision = 12, scale = 2)
 	@DecimalMin (value = "0.0", message = "Actual cost must be positive")
 	@DecimalMax (value = "999999.99", message = "Actual cost cannot exceed 999999.99")
 	@AMetaData (
-			displayName = "Actual Cost", required = false, readOnly = false, defaultValue = "0.00", description = "Actual cost spent on this item",
-			hidden = false
+			displayName = "Actual Cost", required = false, readOnly = false, defaultValue = "0.00",
+			description = "Actual cost spent on this item", hidden = false
 	)
 	private BigDecimal actualCost = BigDecimal.ZERO;
 	@Column (nullable = true, precision = 10, scale = 2)
@@ -76,38 +78,38 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 			description = "Actual time spent on this item in hours", hidden = false
 	)
 	private BigDecimal actualHours = BigDecimal.ZERO;
-	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
-	@NotNull (message = "Parent relation is required for hierarchy")
-	@AMetaData (
-			displayName = "Parent Relation", required = true, readOnly = true, description = "Hierarchy tracking for this item",
-			hidden = true
-	)
-	private CParentRelation parentRelation;
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "agile_item_id")
 	@AMetaData (
-			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this item", hidden = false,
-			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
+			displayName = "Attachments", required = false, readOnly = false,
+			description = "File attachments for this item", hidden = false, dataProviderBean = "CAttachmentService",
+			createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "agile_item_id")
 	@AMetaData (
-			displayName = "Comments", required = false, readOnly = false, description = "Comments for this item", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
+			displayName = "Comments", required = false, readOnly = false, description = "Comments for this item",
+			hidden = false, dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@Column (name = "completion_date", nullable = true)
-	@AMetaData (displayName = "Completion Date", required = false, readOnly = true, description = "Actual completion date", hidden = false)
+	@AMetaData (
+			displayName = "Completion Date", required = false, readOnly = true, description = "Actual completion date",
+			hidden = false
+	)
 	private LocalDate completionDate;
 	@AMetaData (
-			displayName = "Component Widget", required = false, readOnly = false, description = "Component Widget for item", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "buildDataProviderComponentWidget"
+			displayName = "Component Widget", required = false, readOnly = false,
+			description = "Component Widget for item", hidden = false, dataProviderBean = "pageservice",
+			dataProviderMethod = "buildDataProviderComponentWidget"
 	)
 	private final CComponentWidgetEntity<EntityClass> componentWidget = null;
 	@Column (nullable = true)
-	@AMetaData (displayName = "Due Date", required = false, readOnly = false, description = "Expected completion date", hidden = false)
+	@AMetaData (
+			displayName = "Due Date", required = false, readOnly = false, description = "Expected completion date",
+			hidden = false
+	)
 	private LocalDate dueDate;
 	// Concrete entities define their own type field/metadata
 	@Column (nullable = true, precision = 12, scale = 2)
@@ -130,49 +132,59 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 	@DecimalMin (value = "0.0", message = "Hourly rate must be positive")
 	@DecimalMax (value = "9999.99", message = "Hourly rate cannot exceed 9999.99")
 	@AMetaData (
-			displayName = "Hourly Rate", required = false, readOnly = false, defaultValue = "0.00", description = "Hourly rate for cost calculation",
-			hidden = false
+			displayName = "Hourly Rate", required = false, readOnly = false, defaultValue = "0.00",
+			description = "Hourly rate for cost calculation", hidden = false
 	)
 	private BigDecimal hourlyRate;
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "agile_item_id")
 	@AMetaData (
-			displayName = "Links", required = false, readOnly = false, description = "Links to other entities", hidden = false,
-			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
+			displayName = "Links", required = false, readOnly = false, description = "Links to other entities",
+			hidden = false, dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
 	)
 	private Set<CLink> links = new HashSet<>();
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
-			displayName = "Notes", required = false, readOnly = false, defaultValue = "", description = "Additional notes and comments",
-			hidden = false, maxLength = 2000
+			displayName = "Notes", required = false, readOnly = false, defaultValue = "",
+			description = "Additional notes and comments", hidden = false, maxLength = 2000
 	)
 	private String notes;
-	@Transient
+	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
+	@NotNull (message = "Parent relation is required for hierarchy")
 	@AMetaData (
-			displayName = "Children", required = false, readOnly = false, description = "Hierarchy children list", hidden = false,
-			createComponentMethod = "createComponentParentChildren", dataProviderBean = "pageservice", captionVisible = false
+			displayName = "Parent Relation", required = true, readOnly = true,
+			description = "Hierarchy tracking for this item", hidden = true
 	)
-	private final CProjectItem<?> placeHolder_createComponentParentChildren = null;
+	private CParentRelation parentRelation;
 	@Transient
 	@AMetaData (
-			displayName = "Parent", required = false, readOnly = false, description = "Hierarchy parent selector", hidden = false,
-			createComponentMethod = "createComponentParent", dataProviderBean = "pageservice", captionVisible = false
+			displayName = "Parent", required = false, readOnly = false, description = "Hierarchy parent selector",
+			hidden = false, createComponentMethod = "createComponentParent", dataProviderBean = "pageservice",
+			captionVisible = false
 	)
 	private final CProjectItem<?> placeHolder_createComponentParent = null;
+	@Transient
+	@AMetaData (
+			displayName = "Children", required = false, readOnly = false, description = "Hierarchy children list",
+			hidden = false, createComponentMethod = "createComponentParentChildren", dataProviderBean = "pageservice",
+			captionVisible = false
+	)
+	private final CProjectItem<?> placeHolder_createComponentParentChildren = null;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "cactivitypriority_id", nullable = true)
 	@AMetaData (
-			displayName = "Priority", required = false, readOnly = false, description = "Priority level", hidden = false,
-			dataProviderBean = "CActivityPriorityService", setBackgroundFromColor = true, useIcon = true
+			displayName = "Priority", required = false, readOnly = false, description = "Priority level",
+			hidden = false, dataProviderBean = "CActivityPriorityService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CActivityPriority priority;
 	@Column (nullable = true)
 	@Min (value = 0, message = "Progress percentage must be between 0 and 100")
 	@Max (value = 100, message = "Progress percentage must be between 0 and 100")
 	@AMetaData (
-			displayName = "Progress %", required = false, readOnly = false, defaultValue = "0", description = "Completion percentage (0-100)",
-			hidden = false
+			displayName = "Progress %", required = false, readOnly = false, defaultValue = "0",
+			description = "Completion percentage (0-100)", hidden = false
 	)
 	private Integer progressPercentage = 0;
 	@Column (nullable = true, precision = 10, scale = 2)
@@ -186,14 +198,17 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
-			displayName = "Results", required = false, readOnly = false, defaultValue = "", description = "Results and outcomes of the item",
-			hidden = false, maxLength = 2000
+			displayName = "Results", required = false, readOnly = false, defaultValue = "",
+			description = "Results and outcomes of the item", hidden = false, maxLength = 2000
 	)
 	private String results;
 	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn (name = "sprintitem_id", nullable = false)
 	@NotNull (message = "Sprint item is required for progress tracking")
-	@AMetaData (displayName = "Sprint Item", required = true, readOnly = true, description = "Progress tracking for this item", hidden = true)
+	@AMetaData (
+			displayName = "Sprint Item", required = true, readOnly = true,
+			description = "Progress tracking for this item", hidden = true
+	)
 	private CSprintItem sprintItem;
 	@Column (name = "sprint_order", nullable = true)
 	@Min (value = 1, message = "Sprint order must be positive")
@@ -204,9 +219,10 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 	private Integer sprintOrder;
 	@Column (nullable = true)
 	@AMetaData (
-			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the item", hidden = false
+			displayName = "Start Date", required = false, readOnly = false,
+			description = "Planned or actual start date of the item", hidden = false
 	)
-	private LocalDate startDate;
+	private LocalDate startDate = LocalDate.now();
 	@Column (nullable = true)
 	@AMetaData (
 			displayName = "Story Points", required = false, readOnly = false, defaultValue = "0",
@@ -272,9 +288,11 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 	@Override
 	public CParentRelation getParentRelation() { return parentRelation; }
 
-	public CProjectItem<?> getPlaceHolder_createComponentParentChildren() { return placeHolder_createComponentParentChildren; }
-
 	public CProjectItem<?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
+
+	public CProjectItem<?> getPlaceHolder_createComponentParentChildren() {
+		return placeHolder_createComponentParentChildren;
+	}
 
 	public CActivityPriority getPriority() { return priority; }
 
@@ -342,10 +360,12 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 			return true;
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
-		if (fieldNames.remove("entityType") && getEntityType() != null && getEntityType().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
+		if (fieldNames.remove("entityType") && getEntityType() != null
+				&& getEntityType().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
-		if (fieldNames.remove("priority") && getPriority() != null && getPriority().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
+		if (fieldNames.remove("priority") && getPriority() != null
+				&& getPriority().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
 		return false;
@@ -415,13 +435,13 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		updateLastModified();
 	}
 
-	@Override
-	public void setParentRelation(final CParentRelation parentRelation) { this.parentRelation = parentRelation; }
-
 	public void setNotes(final String notes) {
 		this.notes = notes;
 		updateLastModified();
 	}
+
+	@Override
+	public void setParentRelation(final CParentRelation parentRelation) { this.parentRelation = parentRelation; }
 
 	public void setPriority(final CActivityPriority priority) {
 		this.priority = priority;

@@ -53,6 +53,11 @@ public class CSprint extends CProjectItem<CSprint>
 	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CSprint.class);
 	public static final String VIEW_NAME = "Sprints View";
 
+	/** Get the default sort field for this entity type. PERFORMANCE OPTIMIZED: Static method for sprint planning. Sprints should be sorted by start date
+	 * (chronological order).
+	 * @return default order field name */
+	public static String getDefaultOrderByStatic() { return "startDate"; }
+
 	private static boolean isSameSprintable(final ISprintableItem item, final CSprintItem sprintItem) {
 		return sprintItem.getParentItem() != null && sprintItem.getParentItem().equals(item);
 	}
@@ -61,8 +66,9 @@ public class CSprint extends CProjectItem<CSprint>
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "sprint_id")
 	@AMetaData (
-			displayName = "Attachments", required = false, readOnly = false, description = "Sprint documentation and files", hidden = false,
-			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
+			displayName = "Attachments", required = false, readOnly = false,
+			description = "Sprint documentation and files", hidden = false, dataProviderBean = "CAttachmentService",
+			createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
 	@Column (nullable = true, length = 7)
@@ -76,48 +82,54 @@ public class CSprint extends CProjectItem<CSprint>
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "sprint_id")
 	@AMetaData (
-			displayName = "Comments", required = false, readOnly = false, description = "Comments for this sprint", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
+			displayName = "Comments", required = false, readOnly = false, description = "Comments for this sprint",
+			hidden = false, dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@Transient
 	@AMetaData (
-			displayName = "Component Widget", required = false, readOnly = false, description = "Component Widget for item", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "buildDataProviderComponentWidget"
+			displayName = "Component Widget", required = false, readOnly = false,
+			description = "Component Widget for item", hidden = false, dataProviderBean = "pageservice",
+			dataProviderMethod = "buildDataProviderComponentWidget"
 	)
 	private final CComponentWidgetEntity<CSprint> componentWidget = null;
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
 			displayName = "Definition of Done", required = false, readOnly = false,
-			description = "Shared understanding of what it means for work to be complete - Scrum Guide 2020", hidden = false, maxLength = 2000
+			description = "Shared understanding of what it means for work to be complete - Scrum Guide 2020",
+			hidden = false, maxLength = 2000
 	)
 	private String definitionOfDone;
 	@Column (nullable = true)
-	@AMetaData (displayName = "End Date", required = true, readOnly = false, description = "Sprint end date", hidden = false)
+	@AMetaData (
+			displayName = "End Date", required = true, readOnly = false, description = "Sprint end date", hidden = false
+	)
 	private LocalDate endDate;
 	// Type Management - using CSprintType
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
-			displayName = "Sprint Type", required = false, readOnly = false, description = "Type/category of the sprint", hidden = false,
-			dataProviderBean = "CSprintTypeService", setBackgroundFromColor = true, useIcon = true
+			displayName = "Sprint Type", required = false, readOnly = false,
+			description = "Type/category of the sprint", hidden = false, dataProviderBean = "CSprintTypeService",
+			setBackgroundFromColor = true, useIcon = true
 	)
 	private CSprintType entityType;
 	// Calculated field for display - populated automatically after entity load via @PostLoad
 	// Service callback: CSprintService.getCalculatedValueOfItemCount(CSprint)
 	@Transient
 	@AMetaData (
-			displayName = "Item Count", required = false, readOnly = true, description = "Total number of items in this sprint", hidden = false,
-			dataProviderBean = "CSprintService", dataProviderMethod = "getCalculatedValueOfItemCount", autoCalculate = true, dataProviderParamMethod = "this"
+			displayName = "Item Count", required = false, readOnly = true,
+			description = "Total number of items in this sprint", hidden = false, dataProviderBean = "CSprintService",
+			dataProviderMethod = "getCalculatedValueOfItemCount", autoCalculate = true, dataProviderParamMethod = "this"
 	)
 	private Integer itemCount;
-
 	@Column (nullable = true, length = 4000)
 	@Size (max = 4000)
 	@AMetaData (
 			displayName = "Retrospective Notes", required = false, readOnly = false,
-			description = "What went well, what needs improvement, action items - Scrum Guide 2020", hidden = false, maxLength = 4000
+			description = "What went well, what needs improvement, action items - Scrum Guide 2020", hidden = false,
+			maxLength = 4000
 	)
 	private String retrospectiveNotes;
 	// Scrum Guide 2020 - Core Sprint Artifacts
@@ -125,7 +137,8 @@ public class CSprint extends CProjectItem<CSprint>
 	@Size (max = 500)
 	@AMetaData (
 			displayName = "Sprint Goal", required = false, readOnly = false,
-			description = "The single objective for the Sprint - Scrum Guide 2020 core artifact", hidden = false, maxLength = 500
+			description = "The single objective for the Sprint - Scrum Guide 2020 core artifact", hidden = false,
+			maxLength = 500
 	)
 	private String sprintGoal;
 	// Sprint Items - Collection of progress tracking items for activities/meetings in this sprint
@@ -137,27 +150,30 @@ public class CSprint extends CProjectItem<CSprint>
 	@AMetaData (
 			displayName = "Sprint Items", required = false, readOnly = false,
 			description = "Progress tracking items for activities/meetings in this sprint", hidden = false,
-			createComponentMethod = "createSpritActivitiesComponent", dataProviderBean = "pageservice", captionVisible = false
+			createComponentMethod = "createSpritActivitiesComponent", dataProviderBean = "pageservice",
+			captionVisible = false
 	)
 	private List<CSprintItem> sprintItems = new ArrayList<>();
 	@Column (nullable = true)
 	@AMetaData (
-			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the sprint", hidden = false
+			displayName = "Start Date", required = false, readOnly = false,
+			description = "Planned or actual start date of the sprint", hidden = false
 	)
-	private LocalDate startDate;
+	private LocalDate startDate = LocalDate.now();
 	// Calculated field for total story points - populated automatically after entity load via @PostLoad
 	// Service callback: CSprintService.getCalculatedValueOfTotalStoryPoints(CSprint)
 	@Transient
 	@AMetaData (
-			displayName = "Total Story Points", required = false, readOnly = true, description = "Sum of story points for all items in this sprint",
-			hidden = false, dataProviderBean = "CSprintService", dataProviderMethod = "getCalculatedValueOfTotalStoryPoints", autoCalculate = true,
-			dataProviderParamMethod = "this"
+			displayName = "Total Story Points", required = false, readOnly = true,
+			description = "Sum of story points for all items in this sprint", hidden = false,
+			dataProviderBean = "CSprintService", dataProviderMethod = "getCalculatedValueOfTotalStoryPoints",
+			autoCalculate = true, dataProviderParamMethod = "this"
 	)
 	private Long totalStoryPoints;
 	@Column (nullable = true)
 	@AMetaData (
-			displayName = "Velocity", required = false, readOnly = true, description = "Story points completed in this sprint - Agile metric",
-			hidden = false
+			displayName = "Velocity", required = false, readOnly = true,
+			description = "Story points completed in this sprint - Agile metric", hidden = false
 	)
 	private Integer velocity;
 
@@ -211,8 +227,12 @@ public class CSprint extends CProjectItem<CSprint>
 		updateLastModified();
 	}
 
-	/** Calculate velocity from completed sprint items (Scrum Guide 2020 metric). Velocity is the sum of story points for items that have reached a
-	 * final status. This method should be called at sprint completion to record historical velocity. */
+	public CComponentWidgetEntity<CSprint> buildDataProviderComponentWidget() {
+		return componentWidget;
+	}
+
+	/** Calculate velocity from completed sprint items (Scrum Guide 2020 metric). Velocity is the sum of story points for items that have reached a final
+	 * status. This method should be called at sprint completion to record historical velocity. */
 	public void calculateVelocity() {
 		if (sprintItems == null) {
 			velocity = 0;
@@ -233,7 +253,9 @@ public class CSprint extends CProjectItem<CSprint>
 	public List<CActivity> getActivities() {
 		final List<CActivity> activities = new ArrayList<>();
 		if (sprintItems != null) {
-			sprintItems.stream().filter((final CSprintItem sprintItem) -> sprintItem.getParentItem() instanceof CActivity).forEach((final CSprintItem sprintItem) -> activities.add((CActivity) sprintItem.getParentItem()));
+			sprintItems.stream()
+					.filter((final CSprintItem sprintItem) -> sprintItem.getParentItem() instanceof CActivity)
+					.forEach((final CSprintItem sprintItem) -> activities.add((CActivity) sprintItem.getParentItem()));
 		}
 		return activities;
 	}
@@ -242,6 +264,28 @@ public class CSprint extends CProjectItem<CSprint>
 	@Override
 	public Set<CAttachment> getAttachments() { return attachments; }
 
+	/** Get the total number of items in this sprint. This is a calculated field for UI display.
+	 * @return total count of sprint items */
+	public Integer getCalculatedValueOfItemCount() {
+		return sprintItems != null ? sprintItems.size() : 0;
+	}
+
+	/** Get the total story points for all items in this sprint. This is a calculated field for UI display.
+	 * @return total story points, or 0 if no items have story points */
+	public Long getCalculatedValueOfTotalStoryPoints() {
+		if (sprintItems == null || sprintItems.isEmpty()) {
+			return 0L;
+		}
+		long total = 0L;
+		for (final CSprintItem sprintItem : sprintItems) {
+			final Long itemStoryPoint = sprintItem.getStoryPoint();
+			if (itemStoryPoint != null) {
+				total += itemStoryPoint;
+			}
+		}
+		return total;
+	}
+
 	@Override
 	public String getColor() { return color; }
 
@@ -249,10 +293,12 @@ public class CSprint extends CProjectItem<CSprint>
 	@Override
 	public Set<CComment> getComments() { return comments; }
 
-	public CComponentWidgetEntity<CSprint> buildDataProviderComponentWidget() { return componentWidget; }
-
 	public CComponentWidgetEntity<CSprint> getComponentWidget() { return componentWidget; }
 
+	/** Get the default sort field for this entity instance. LEGACY: Consider using getDefaultOrderByStatic() for better performance.
+	 * @return default order field name */
+	@Override
+	public String getDefaultOrderBy() { return getDefaultOrderByStatic(); }
 
 	public String getDefinitionOfDone() { return definitionOfDone; }
 
@@ -269,16 +315,15 @@ public class CSprint extends CProjectItem<CSprint>
 	@Override
 	public String getIconString() { return DEFAULT_ICON; }
 
-	/** Get the total number of items in this sprint. This is a calculated field for UI display.
-	 * @return total count of sprint items */
-	public Integer getCalculatedValueOfItemCount() { return sprintItems != null ? sprintItems.size() : 0; }
+	public Integer getItemCount() { return itemCount; }
 
 	/** Get all sprint items (activities and meetings combined) as a list. This is a convenience method for backward compatibility.
 	 * @return combined list of all sprint items */
 	public List<ISprintableItem> getItems() {
 		final List<ISprintableItem> allItems = new ArrayList<>();
 		if (sprintItems != null) {
-			sprintItems.stream().filter((final CSprintItem sprintItem) -> sprintItem.getParentItem() != null).forEach((final CSprintItem sprintItem) -> allItems.add(sprintItem.getParentItem()));
+			sprintItems.stream().filter((final CSprintItem sprintItem) -> sprintItem.getParentItem() != null)
+					.forEach((final CSprintItem sprintItem) -> allItems.add(sprintItem.getParentItem()));
 		}
 		return allItems;
 	}
@@ -288,7 +333,9 @@ public class CSprint extends CProjectItem<CSprint>
 	public List<CMeeting> getMeetings() {
 		final List<CMeeting> meetings = new ArrayList<>();
 		if (sprintItems != null) {
-			sprintItems.stream().filter((final CSprintItem sprintItem) -> sprintItem.getParentItem() instanceof CMeeting).forEach((final CSprintItem sprintItem) -> meetings.add((CMeeting) sprintItem.getParentItem()));
+			sprintItems.stream()
+					.filter((final CSprintItem sprintItem) -> sprintItem.getParentItem() instanceof CMeeting)
+					.forEach((final CSprintItem sprintItem) -> meetings.add((CMeeting) sprintItem.getParentItem()));
 		}
 		return meetings;
 	}
@@ -315,26 +362,14 @@ public class CSprint extends CProjectItem<CSprint>
 
 	/** Gets the sprint items collection.
 	 * @return list of sprint items */
-	public List<CSprintItem> getSprintItems() { return sprintItems != null ? sprintItems : new ArrayList<>(); }
+	public List<CSprintItem> getSprintItems() {
+		return sprintItems != null ? sprintItems : new ArrayList<>();
+	}
 
 	@Override
 	public LocalDate getStartDate() { return startDate; }
 
-	/** Get the total story points for all items in this sprint. This is a calculated field for UI display.
-	 * @return total story points, or 0 if no items have story points */
-	public Long getCalculatedValueOfTotalStoryPoints() {
-		if (sprintItems == null || sprintItems.isEmpty()) {
-			return 0L;
-		}
-		long total = 0L;
-		for (final CSprintItem sprintItem : sprintItems) {
-			final Long itemStoryPoint = sprintItem.getStoryPoint();
-			if (itemStoryPoint != null) {
-				total += itemStoryPoint;
-			}
-		}
-		return total;
-	}
+	public Long getTotalStoryPoints() { return totalStoryPoints; }
 
 	public Integer getVelocity() { return velocity; }
 
@@ -454,11 +489,14 @@ public class CSprint extends CProjectItem<CSprint>
 	public void setActivities(final List<CActivity> activities) {
 		// Remove all current activities from sprint
 		if (sprintItems != null) {
-			new ArrayList<>(sprintItems).stream().filter((final CSprintItem si) -> si.getParentItem() instanceof CActivity).forEach((final CSprintItem si) -> si.setSprint(null));
+			new ArrayList<>(sprintItems).stream()
+					.filter((final CSprintItem si) -> si.getParentItem() instanceof CActivity)
+					.forEach((final CSprintItem si) -> si.setSprint(null));
 		}
 		// Add new activities
 		if (activities != null) {
-			activities.stream().filter((final CActivity activity) -> activity.getSprintItem() != null).forEach((final CActivity activity) -> activity.getSprintItem().setSprint(this));
+			activities.stream().filter((final CActivity activity) -> activity.getSprintItem() != null)
+					.forEach((final CActivity activity) -> activity.getSprintItem().setSprint(this));
 		}
 		updateLastModified();
 	}
@@ -493,14 +531,13 @@ public class CSprint extends CProjectItem<CSprint>
 		Check.notNull(getProject(), "Project must be set before assigning sprint type");
 		Check.notNull(getProject().getCompany(), "Project company must be set before assigning sprint type");
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning sprint type");
-		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
-				+ typeEntity.getCompany().getId() + " does not match sprint project company id " + getProject().getCompany().getId());
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
+				"Type entity company id " + typeEntity.getCompany().getId()
+						+ " does not match sprint project company id " + getProject().getCompany().getId());
 		entityType = (CSprintType) typeEntity;
 		updateLastModified();
 	}
 	// Scrum Guide 2020 - Getters/Setters
-
-	public Integer getItemCount() { return itemCount; }
 
 	public void setItemCount(final Integer itemCount) { this.itemCount = itemCount; }
 	// IHasStatusAndWorkflow implementation
@@ -512,7 +549,8 @@ public class CSprint extends CProjectItem<CSprint>
 		}
 		// Add new items
 		if (items != null) {
-			items.stream().filter((final ISprintableItem item) -> item.getSprintItem() != null).forEach((final ISprintableItem item) -> item.getSprintItem().setSprint(this));
+			items.stream().filter((final ISprintableItem item) -> item.getSprintItem() != null)
+					.forEach((final ISprintableItem item) -> item.getSprintItem().setSprint(this));
 		}
 		updateLastModified();
 	}
@@ -522,11 +560,14 @@ public class CSprint extends CProjectItem<CSprint>
 	public void setMeetings(final List<CMeeting> meetings) {
 		// Remove all current meetings from sprint
 		if (sprintItems != null) {
-			new ArrayList<>(sprintItems).stream().filter((final CSprintItem si) -> si.getParentItem() instanceof CMeeting).forEach((final CSprintItem si) -> si.setSprint(null));
+			new ArrayList<>(sprintItems).stream()
+					.filter((final CSprintItem si) -> si.getParentItem() instanceof CMeeting)
+					.forEach((final CSprintItem si) -> si.setSprint(null));
 		}
 		// Add new meetings
 		if (meetings != null) {
-			meetings.stream().filter((final CMeeting meeting) -> meeting.getSprintItem() != null).forEach((final CMeeting meeting) -> meeting.getSprintItem().setSprint(this));
+			meetings.stream().filter((final CMeeting meeting) -> meeting.getSprintItem() != null)
+					.forEach((final CMeeting meeting) -> meeting.getSprintItem().setSprint(this));
 		}
 		updateLastModified();
 	}
@@ -550,8 +591,6 @@ public class CSprint extends CProjectItem<CSprint>
 
 	public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
 
-	public Long getTotalStoryPoints() { return totalStoryPoints; }
-
 	/** Sets the total story points. This is populated automatically via @PostLoad after entity is loaded.
 	 * @param totalStoryPoints the total story points value */
 	public void setTotalStoryPoints(final Long totalStoryPoints) {
@@ -561,27 +600,5 @@ public class CSprint extends CProjectItem<CSprint>
 	public void setVelocity(final Integer velocity) {
 		this.velocity = velocity;
 		updateLastModified();
-	}
-
-	/**
-	 * Get the default sort field for this entity type.
-	 * PERFORMANCE OPTIMIZED: Static method for sprint planning.
-	 * Sprints should be sorted by start date (chronological order).
-	 * 
-	 * @return default order field name
-	 */
-	public static String getDefaultOrderByStatic() {
-		return "startDate";
-	}
-
-	/**
-	 * Get the default sort field for this entity instance.
-	 * LEGACY: Consider using getDefaultOrderByStatic() for better performance.
-	 * 
-	 * @return default order field name
-	 */
-	@Override
-	public String getDefaultOrderBy() { 
-		return getDefaultOrderByStatic(); 
 	}
 }

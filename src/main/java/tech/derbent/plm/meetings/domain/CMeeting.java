@@ -23,7 +23,6 @@ import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import tech.derbent.api.parentrelation.domain.CParentRelation;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityConstants;
@@ -32,11 +31,12 @@ import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.interfaces.ISprintableItem;
+import tech.derbent.api.parentrelation.domain.CParentRelation;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.api.users.domain.CUser;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
@@ -51,85 +51,89 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 // in lowercase
 @AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
 @AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "meeting_status_id"))
-public class CMeeting extends CProjectItem<CMeeting>
-		implements IHasStatusAndWorkflow<CMeeting>, IGnntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments, IHasParentRelation {
+public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWorkflow<CMeeting>, IGnntEntityItem,
+		ISprintableItem, IHasIcon, IHasAttachments, IHasComments, IHasParentRelation {
 
 	public static final String DEFAULT_COLOR = "#DAA520"; // X11 Goldenrod - calendar events (darker)
 	public static final String DEFAULT_ICON = "vaadin:calendar";
 	public static final String ENTITY_TITLE_PLURAL = "Meetings";
 	public static final String ENTITY_TITLE_SINGULAR = "Meeting";
 	public static final String VIEW_NAME = "Meetings View";
+
+	/** Get the default sort field for this entity type. PERFORMANCE OPTIMIZED: Static method for calendar events. Meetings should be sorted by start date
+	 * (chronological order).
+	 * @return default order field name */
+	public static String getDefaultOrderByStatic() { return "startDate"; }
+
 	@Column (name = "agenda", nullable = true, length = 4000)
 	@Size (max = 4000)
 	@AMetaData (
-			displayName = "Agenda", required = false, readOnly = false, defaultValue = "", description = "Meeting agenda and topics to be discussed",
-			hidden = false, maxLength = 4000
+			displayName = "Agenda", required = false, readOnly = false, defaultValue = "",
+			description = "Meeting agenda and topics to be discussed", hidden = false, maxLength = 4000
 	)
 	private String agenda;
-	// Agile Parent Relation - REQUIRED: every meeting must have an agile parent relation for agile hierarchy
-	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
-	@NotNull (message = "Agile parent relation is required for agile hierarchy")
-	@AMetaData (
-			displayName = "Agile Parent Relation", required = true, readOnly = true, description = "Agile hierarchy tracking for this meeting",
-			hidden = true
-	)
-	private CParentRelation parentRelation;
-	@Transient
-	@AMetaData (
-			displayName = "Agile Parent", required = false, readOnly = false, description = "Agile hierarchy parent selector", hidden = false,
-			createComponentMethod = "createComponentParent", dataProviderBean = "pageservice", captionVisible = false
-	)
-	private final CProjectItem<?> placeHolder_createComponentParent = null;
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "meeting_id")
 	@AMetaData (
-			displayName = "Attachments", required = false, readOnly = false, description = "Meeting documents and files", hidden = false,
-			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
+			displayName = "Attachments", required = false, readOnly = false,
+			description = "Meeting documents and files", hidden = false, dataProviderBean = "CAttachmentService",
+			createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
 	@ManyToMany (fetch = FetchType.EAGER)
-	@JoinTable (name = "cmeeting_attendees", joinColumns = @JoinColumn (name = "meeting_id"), inverseJoinColumns = @JoinColumn (name = "user_id"))
+	@JoinTable (
+			name = "cmeeting_attendees", joinColumns = @JoinColumn (name = "meeting_id"),
+			inverseJoinColumns = @JoinColumn (name = "user_id")
+	)
 	@AMetaData (
-			displayName = "Attendees", required = false, readOnly = false, description = "Users who actually attended the meeting", hidden = false,
-			dataProviderBean = "CUserService"
+			displayName = "Attendees", required = false, readOnly = false,
+			description = "Users who actually attended the meeting", hidden = false, dataProviderBean = "CUserService"
 	)
 	private Set<CUser> attendees = new HashSet<>();
 	// One-to-Many relationship with comments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "meeting_id")
 	@AMetaData (
-			displayName = "Comments", required = false, readOnly = false, description = "Discussion comments for this meeting", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
+			displayName = "Comments", required = false, readOnly = false,
+			description = "Discussion comments for this meeting", hidden = false, dataProviderBean = "CCommentService",
+			createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@Column (name = "end_date", nullable = true)
-	@AMetaData (displayName = "End Time", required = false, readOnly = false, description = "End date and time of the meeting", hidden = false)
+	@AMetaData (
+			displayName = "End Time", required = false, readOnly = false,
+			description = "End date and time of the meeting", hidden = false
+	)
 	private LocalDate endDate;
 	@Column (name = "endTime", nullable = true)
-	@AMetaData (displayName = "End Time", required = false, readOnly = false, description = "Start date and time of the meeting", hidden = false)
+	@AMetaData (
+			displayName = "End Time", required = false, readOnly = false,
+			description = "Start date and time of the meeting", hidden = false
+	)
 	private LocalTime endTime;
 	// Type Management - concrete implementation of parent's typeEntity
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
-			displayName = "Meeting Type", required = false, readOnly = false, description = "Type category of the meeting", hidden = false,
-			dataProviderBean = "CMeetingTypeService"
+			displayName = "Meeting Type", required = false, readOnly = false,
+			description = "Type category of the meeting", hidden = false, dataProviderBean = "CMeetingTypeService"
 	)
 	private CMeetingType entityType;
 	@Column (name = "linked_element", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@AMetaData (
 			displayName = "Linked Element", required = false, readOnly = false, defaultValue = "",
-			description = "Reference to external documents, systems, or elements", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
+			description = "Reference to external documents, systems, or elements", hidden = false,
+			maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String linkedElement;
 	@Column (name = "location", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@AMetaData (
 			displayName = "Location", required = false, readOnly = false, defaultValue = "",
-			description = "Physical or virtual location of the meeting", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
+			description = "Physical or virtual location of the meeting", hidden = false,
+			maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String location;
 	@Column (name = "minutes", nullable = true, length = 4000)
@@ -139,25 +143,49 @@ public class CMeeting extends CProjectItem<CMeeting>
 			description = "Notes and minutes from the meeting", hidden = false, maxLength = 4000
 	)
 	private String minutes;
-	@ManyToMany (fetch = FetchType.EAGER)
-	@JoinTable (name = "cmeeting_participants", joinColumns = @JoinColumn (name = "meeting_id"), inverseJoinColumns = @JoinColumn (name = "user_id"))
+	// Agile Parent Relation - REQUIRED: every meeting must have an agile parent relation for agile hierarchy
+	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
+	@NotNull (message = "Agile parent relation is required for agile hierarchy")
 	@AMetaData (
-			displayName = "Participants", required = false, readOnly = false, description = "Users invited to participate in the meeting",
-			hidden = false, dataProviderBean = "CUserService"
+			displayName = "Agile Parent Relation", required = true, readOnly = true,
+			description = "Agile hierarchy tracking for this meeting", hidden = true
+	)
+	private CParentRelation parentRelation;
+	@ManyToMany (fetch = FetchType.EAGER)
+	@JoinTable (
+			name = "cmeeting_participants", joinColumns = @JoinColumn (name = "meeting_id"),
+			inverseJoinColumns = @JoinColumn (name = "user_id")
+	)
+	@AMetaData (
+			displayName = "Participants", required = false, readOnly = false,
+			description = "Users invited to participate in the meeting", hidden = false,
+			dataProviderBean = "CUserService"
 	)
 	private Set<CUser> participants = new HashSet<>();
+	@Transient
+	@AMetaData (
+			displayName = "Agile Parent", required = false, readOnly = false,
+			description = "Agile hierarchy parent selector", hidden = false,
+			createComponentMethod = "createComponentParent", dataProviderBean = "pageservice", captionVisible = false
+	)
+	private final CProjectItem<?> placeHolder_createComponentParent = null;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "related_activity_id", nullable = true)
 	@AMetaData (
-			displayName = "Related Activity", required = false, readOnly = false, description = "Project activity related to this meeting",
-			hidden = false, dataProviderBean = "CActivityService"
+			displayName = "Related Activity", required = false, readOnly = false,
+			description = "Project activity related to this meeting", hidden = false,
+			dataProviderBean = "CActivityService"
 	)
 	private CActivity relatedActivity;
 	// Sprint Item relationship - REQUIRED: every meeting must have a sprint item for progress tracking
 	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn (name = "sprintitem_id", nullable = false)
 	@NotNull (message = "Sprint item is required for progress tracking")
-	@AMetaData (displayName = "Sprint Item", required = true, readOnly = true, description = "Progress tracking for this meeting", hidden = true)
+	@AMetaData (
+			displayName = "Sprint Item", required = true, readOnly = true,
+			description = "Progress tracking for this meeting", hidden = true
+	)
 	private CSprintItem sprintItem;
 	@Column (name = "sprint_order", nullable = true)
 	@Min (value = 1, message = "Sprint order must be positive")
@@ -168,13 +196,16 @@ public class CMeeting extends CProjectItem<CMeeting>
 	private Integer sprintOrder;
 	@Column (nullable = true)
 	@AMetaData (
-			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the activity",
-			hidden = false
+			displayName = "Start Date", required = false, readOnly = false,
+			description = "Planned or actual start date of the activity", hidden = false
 	)
-	private LocalDate startDate;
+	private LocalDate startDate = LocalDate.now();
 	@Column (name = "startTime", nullable = true)
-	@AMetaData (displayName = "Start Time", required = false, readOnly = false, description = "Start date and time of the meeting", hidden = false)
-	private LocalTime startTime;
+	@AMetaData (
+			displayName = "Start Time", required = false, readOnly = false,
+			description = "Start date and time of the meeting", hidden = false
+	)
+	private LocalTime startTime = LocalTime.now();
 	@Column (nullable = true)
 	@AMetaData (
 			displayName = "Story Points", required = false, readOnly = false, defaultValue = "0",
@@ -209,7 +240,6 @@ public class CMeeting extends CProjectItem<CMeeting>
 	/** Copies meeting fields to target using copyField pattern. Always call super.copyEntityTo() first!
 	 * @param target  The target entity
 	 * @param options Clone options */
-	
 	@PostLoad
 	protected void ensureSprintItemParent() {
 		Check.notNull(sprintItem, "Sprint item must not be null after loading from database");
@@ -219,7 +249,6 @@ public class CMeeting extends CProjectItem<CMeeting>
 	}
 
 	public String getAgenda() { return agenda; }
-	public CProjectItem<?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
 
 	// IHasAttachments interface methods
 	@Override
@@ -232,6 +261,11 @@ public class CMeeting extends CProjectItem<CMeeting>
 
 	@Override
 	public Set<CComment> getComments() { return comments; }
+
+	/** Get the default sort field for this entity instance. LEGACY: Consider using getDefaultOrderByStatic() for better performance.
+	 * @return default order field name */
+	@Override
+	public String getDefaultOrderBy() { return getDefaultOrderByStatic(); }
 
 	@Override
 	public LocalDate getEndDate() { return endDate; }
@@ -257,6 +291,8 @@ public class CMeeting extends CProjectItem<CMeeting>
 	public CParentRelation getParentRelation() { return parentRelation; }
 
 	public Set<CUser> getParticipants() { return participants == null ? new HashSet<>() : new HashSet<>(participants); }
+
+	public CProjectItem<?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
 
 	@Override
 	public Integer getProgressPercentage() {
@@ -316,8 +352,8 @@ public class CMeeting extends CProjectItem<CMeeting>
 	/** Checks if this entity matches the given search value in the specified fields. This implementation extends CProjectItem to also search in
 	 * meeting-specific entity fields.
 	 * @param searchValue the value to search for (case-insensitive)
-	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "name" field. Supported field names: all parent
-	 *                    fields plus "entityType", "relatedActivity",
+	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "name" field. Supported field names: all parent fields
+	 *                    plus "entityType", "relatedActivity",
 	 * @return true if the entity matches the search criteria in any of the specified fields */
 	@Override
 	public boolean matchesFilter(final String searchValue, final java.util.Collection<String> fieldNames) {
@@ -329,14 +365,16 @@ public class CMeeting extends CProjectItem<CMeeting>
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
 		// Check entity fields
-		if (fieldNames.remove("entityType") && getEntityType() != null && getEntityType().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
+		if (fieldNames.remove("entityType") && getEntityType() != null
+				&& getEntityType().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
 		if (fieldNames.remove("relatedActivity") && getRelatedActivity() != null
 				&& getRelatedActivity().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
-		if (fieldNames.remove("assignedTo") && getAssignedTo() != null && getAssignedTo().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
+		if (fieldNames.remove("assignedTo") && getAssignedTo() != null
+				&& getAssignedTo().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
 		return false;
@@ -360,9 +398,12 @@ public class CMeeting extends CProjectItem<CMeeting>
 
 	public void setAgenda(final String agenda) { this.agenda = agenda; }
 
+	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
-	public void setAttendees(final Set<CUser> attendees) { this.attendees = attendees != null ? attendees : new HashSet<>(); }
+	public void setAttendees(final Set<CUser> attendees) {
+		this.attendees = attendees != null ? attendees : new HashSet<>();
+	}
 
 	@Override
 	public void setColor(String color) { /*****/
@@ -384,8 +425,9 @@ public class CMeeting extends CProjectItem<CMeeting>
 		Check.notNull(getProject(), "Project must be set before assigning meeting type");
 		Check.notNull(getProject().getCompany(), "Project company must be set before assigning meeting type");
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning meeting type");
-		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
-				+ typeEntity.getCompany().getId() + " does not match meeting project company id " + getProject().getCompany().getId());
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
+				"Type entity company id " + typeEntity.getCompany().getId()
+						+ " does not match meeting project company id " + getProject().getCompany().getId());
 		entityType = (CMeetingType) typeEntity;
 		updateLastModified();
 	}
@@ -399,7 +441,9 @@ public class CMeeting extends CProjectItem<CMeeting>
 	@Override
 	public void setParentRelation(final CParentRelation parentRelation) { this.parentRelation = parentRelation; }
 
-	public void setParticipants(final Set<CUser> participants) { this.participants = participants != null ? participants : new HashSet<>(); }
+	public void setParticipants(final Set<CUser> participants) {
+		this.participants = participants != null ? participants : new HashSet<>();
+	}
 
 	public void setRelatedActivity(final CActivity relatedActivity) { this.relatedActivity = relatedActivity; }
 
@@ -422,27 +466,5 @@ public class CMeeting extends CProjectItem<CMeeting>
 		Check.notNull(sprintItem, "Sprint item must not be null");
 		this.storyPoint = storyPoint; // Keep for backward compatibility
 		sprintItem.setStoryPoint(storyPoint);
-	}
-
-	/**
-	 * Get the default sort field for this entity type.
-	 * PERFORMANCE OPTIMIZED: Static method for calendar events.
-	 * Meetings should be sorted by start date (chronological order).
-	 * 
-	 * @return default order field name
-	 */
-	public static String getDefaultOrderByStatic() {
-		return "startDate";
-	}
-
-	/**
-	 * Get the default sort field for this entity instance.
-	 * LEGACY: Consider using getDefaultOrderByStatic() for better performance.
-	 * 
-	 * @return default order field name
-	 */
-	@Override
-	public String getDefaultOrderBy() { 
-		return getDefaultOrderByStatic(); 
 	}
 }

@@ -93,25 +93,27 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 	public static final String ENTITY_TITLE_SINGULAR = "Sprint Item";
 	public static final String VIEW_NAME = "Sprint Items View";
 	@Column (name = "completion_date", nullable = true)
-	@AMetaData (displayName = "Completion Date", required = false, readOnly = true, description = "Actual completion date", hidden = false)
+	@AMetaData (
+			displayName = "Completion Date", required = false, readOnly = true, description = "Actual completion date",
+			hidden = false
+	)
 	private LocalDate completionDate;
 	@AMetaData (
-			displayName = "Component Widget", required = false, readOnly = false, description = "Component Widget for item", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "buildDataProviderComponentWidget"
+			displayName = "Component Widget", required = false, readOnly = false,
+			description = "Component Widget for item", hidden = false, dataProviderBean = "pageservice",
+			dataProviderMethod = "buildDataProviderComponentWidget"
 	)
 	private final CComponentWidgetEntity<CSprintItem> componentWidget = null;
 	@Column (name = "due_date", nullable = true)
-	@AMetaData (displayName = "Due Date", required = false, readOnly = false, description = "Expected completion date", hidden = false)
+	@AMetaData (
+			displayName = "Due Date", required = false, readOnly = false, description = "Expected completion date",
+			hidden = false
+	)
 	private LocalDate dueDate;
-	// Item order within sprint or backlog
-	@Column (name = "item_order", nullable = true)
-	@AMetaData (displayName = "Order", required = false, readOnly = false, description = "Display order within sprint or backlog", hidden = false)
-	private Integer itemOrder;
-
-	/**
-	 * Editable flag for grid/timeline renderers.
-	 *
-	 * <p>When false, UI renderers should treat the sprint line as read-only (no inline story point edits, no drag/drop moves).</p>
+	/** Editable flag for grid/timeline renderers.
+	 * <p>
+	 * When false, UI renderers should treat the sprint line as read-only (no inline story point edits, no drag/drop moves).
+	 * </p>
 	 */
 	@Column (name = "is_editable", nullable = true)
 	@AMetaData (
@@ -119,6 +121,13 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 			description = "Controls whether sprint planning grids allow inline edits for this item", hidden = true
 	)
 	private Boolean isEditable = true;
+	// Item order within sprint or backlog
+	@Column (name = "item_order", nullable = true)
+	@AMetaData (
+			displayName = "Order", required = false, readOnly = false,
+			description = "Display order within sprint or backlog", hidden = false
+	)
+	private Integer itemOrder;
 	// Transient field for kanban board display - temporary column assignment
 	@Transient
 	private Long kanbanColumnId;
@@ -130,8 +139,8 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 	@Min (value = 0, message = "Progress percentage must be between 0 and 100")
 	@Max (value = 100, message = "Progress percentage must be between 0 and 100")
 	@AMetaData (
-			displayName = "Progress %", required = false, readOnly = false, defaultValue = "0", description = "Completion percentage (0-100)",
-			hidden = false
+			displayName = "Progress %", required = false, readOnly = false, defaultValue = "0",
+			description = "Completion percentage (0-100)", hidden = false
 	)
 	private Integer progressPercentage = 0;
 	// Sprint reference - nullable to support backlog items (sprint = null means in
@@ -139,17 +148,21 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "sprint_id", nullable = true)
 	@AMetaData (
-			displayName = "Sprint", required = false, readOnly = false, description = "The sprint this item belongs to (null = backlog)",
-			hidden = false, dataProviderBean = "CSprintService"
+			displayName = "Sprint", required = false, readOnly = false,
+			description = "The sprint this item belongs to (null = backlog)", hidden = false,
+			dataProviderBean = "CSprintService"
 	)
 	private CSprint sprint;
 	@Column (name = "start_date", nullable = true)
-	@AMetaData (displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date", hidden = false)
-	private LocalDate startDate;
+	@AMetaData (
+			displayName = "Start Date", required = false, readOnly = false,
+			description = "Planned or actual start date", hidden = false
+	)
+	private LocalDate startDate = LocalDate.now();
 	@Transient
 	@AMetaData (
-			displayName = "Status", required = false, readOnly = false, description = "Current status of the item", hidden = false,
-			setBackgroundFromColor = true, useIcon = true
+			displayName = "Status", required = false, readOnly = false, description = "Current status of the item",
+			hidden = false, setBackgroundFromColor = true, useIcon = true
 	)
 	protected CProjectItemStatus status;
 	// Progress tracking fields - moved from CActivity/CMeeting
@@ -168,14 +181,16 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 		initializeDefaults();
 	}
 
+	public CComponentWidgetEntity<CSprintItem> buildDataProviderComponentWidget() {
+		return componentWidget;
+	}
+
 	public CUser getAssignedTo() { return parentItem != null ? parentItem.getAssignedTo() : null; }
 
 	@Override
 	public String getColor() { return DEFAULT_COLOR; }
 
 	public LocalDate getCompletionDate() { return completionDate; }
-
-	public CComponentWidgetEntity<CSprintItem> buildDataProviderComponentWidget() { return componentWidget; }
 
 	public CComponentWidgetEntity<CSprintItem> getComponentWidget() { return componentWidget; }
 
@@ -187,22 +202,14 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 	@Override
 	public String getIconString() { return DEFAULT_ICON; }
 
+	/** UI helper flag (nullable for backward compatibility).
+	 * @return true when the item should be editable in sprint planning/Gnnt grids. */
+	public Boolean getIsEditable() { return isEditable; }
+
 	public Long getItemId() { return parentItem != null ? parentItem.getId() : null; }
 
 	@Override
 	public Integer getItemOrder() { return itemOrder; }
-
-	/**
-	 * UI helper flag (nullable for backward compatibility).
-	 *
-	 * @return true when the item should be editable in sprint planning/Gnnt grids.
-	 */
-	public Boolean getIsEditable() { return isEditable; }
-
-	/**
-	 * Sets the editability flag for UI renderers.
-	 */
-	public void setIsEditable(final Boolean isEditable) { this.isEditable = isEditable; }
 
 	/** Get the kanban column ID for transient display purposes.
 	 * @return the kanban column ID, or null if not set */
@@ -221,8 +228,6 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 	public LocalDate getStartDate() { return startDate; }
 
 	public CProjectItemStatus getStatus() { return status; }
-
-	public void setStatus(final CProjectItemStatus status) { this.status = status; }
 
 	public Long getStoryPoint() { return storyPoint; }
 
@@ -255,17 +260,24 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 
 	public void setDueDate(final LocalDate dueDate) { this.dueDate = dueDate; }
 
+	/** Sets the editability flag for UI renderers. */
+	public void setIsEditable(final Boolean isEditable) { this.isEditable = isEditable; }
+
 	@Override
 	public void setItemOrder(final Integer itemOrder) { this.itemOrder = itemOrder; }
 
 	/** Set the kanban column ID for transient display purposes. Used to track which kanban column this item is displayed in.
 	 * @param kanbanColumnId the kanban column ID */
-	public void setKanbanColumnId(final Long kanbanColumnId) { this.kanbanColumnId = kanbanColumnId; }
+	public void setKanbanColumnId(final Long kanbanColumnId) {
+		this.kanbanColumnId = kanbanColumnId;
+	}
 	// IOrderedEntity implementation
 
 	/** Set the parent sprintable item (CActivity/CMeeting).
 	 * @param parentItem the parent item */
-	public void setParentItem(final ISprintableItem parentItem) { this.parentItem = parentItem; }
+	public void setParentItem(final ISprintableItem parentItem) {
+		this.parentItem = parentItem;
+	}
 
 	public void setProgressPercentage(final Integer progressPercentage) {
 		this.progressPercentage = progressPercentage != null ? progressPercentage : 0;
@@ -279,6 +291,8 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 	public void setSprint(final CSprint sprint) { this.sprint = sprint; }
 
 	public void setStartDate(final LocalDate startDate) { this.startDate = startDate; }
+
+	public void setStatus(final CProjectItemStatus status) { this.status = status; }
 
 	public void setStoryPoint(final Long storyPoint) { this.storyPoint = storyPoint; }
 
@@ -295,7 +309,6 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 			}
 		}
 		return "CSprintItem{id=%d, sprint=%s, storyPoint=%d, progress=%d%%}".formatted(getId(), sprintLabel,
-				storyPoint != null ? storyPoint : 0,
-				progressPercentage != null ? progressPercentage : 0);
+				storyPoint != null ? storyPoint : 0, progressPercentage != null ? progressPercentage : 0);
 	}
 }

@@ -18,20 +18,8 @@ import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 
-@Tag("div")
+@Tag ("div")
 public class CGnntTimelineHeader extends CVerticalLayout {
-
-	public static final String ID_BUTTON_DECREASE_WIDTH = "custom-gnnt-timeline-width-decrease";
-	public static final String ID_BUTTON_FOCUS_MIDDLE = "custom-gnnt-timeline-focus-middle";
-	public static final String ID_BUTTON_FOCUS_PROJECT_START = "custom-gnnt-timeline-focus-project-start";
-	public static final String ID_BUTTON_FOCUS_TODAY = "custom-gnnt-timeline-focus-today";
-	public static final String ID_BUTTON_INCREASE_WIDTH = "custom-gnnt-timeline-width-increase";
-	public static final String ID_BUTTON_RESET = "custom-gnnt-timeline-reset";
-	public static final String ID_BUTTON_SCROLL_BACK = "custom-gnnt-timeline-scroll-left";
-	public static final String ID_BUTTON_SCROLL_FORWARD = "custom-gnnt-timeline-scroll-right";
-	public static final String ID_BUTTON_ZOOM_IN = "custom-gnnt-timeline-zoom-in";
-	public static final String ID_BUTTON_ZOOM_OUT = "custom-gnnt-timeline-zoom-out";
-	public static final String ID_SCALE_SELECTOR = "custom-gnnt-timeline-scale";
 
 	public enum CTimelineScale {
 
@@ -43,13 +31,10 @@ public class CGnntTimelineHeader extends CVerticalLayout {
 			this.label = label;
 		}
 
-		public String getLabel() {
-			return label;
-		}
+		public String getLabel() { return label; }
 	}
 
-	public record CGanttTimelineRange(LocalDate startDate, LocalDate endDate) {
-	}
+	public record CGanttTimelineRange(LocalDate startDate, LocalDate endDate) {}
 
 	@FunctionalInterface
 	public interface IGanttTimelineChangeListener {
@@ -63,10 +48,22 @@ public class CGnntTimelineHeader extends CVerticalLayout {
 		void onWidthChange(int newWidth);
 	}
 
+	public static final String ID_BUTTON_DECREASE_WIDTH = "custom-gnnt-timeline-width-decrease";
+	public static final String ID_BUTTON_FOCUS_MIDDLE = "custom-gnnt-timeline-focus-middle";
+	public static final String ID_BUTTON_FOCUS_PROJECT_START = "custom-gnnt-timeline-focus-project-start";
+	public static final String ID_BUTTON_FOCUS_TODAY = "custom-gnnt-timeline-focus-today";
+	public static final String ID_BUTTON_INCREASE_WIDTH = "custom-gnnt-timeline-width-increase";
+	public static final String ID_BUTTON_RESET = "custom-gnnt-timeline-reset";
+	public static final String ID_BUTTON_SCROLL_BACK = "custom-gnnt-timeline-scroll-left";
+	public static final String ID_BUTTON_SCROLL_FORWARD = "custom-gnnt-timeline-scroll-right";
+	public static final String ID_BUTTON_ZOOM_IN = "custom-gnnt-timeline-zoom-in";
+	public static final String ID_BUTTON_ZOOM_OUT = "custom-gnnt-timeline-zoom-out";
+	public static final String ID_SCALE_SELECTOR = "custom-gnnt-timeline-scale";
 	private static final long MIN_DURATION_DAYS = 7;
 	private static final long serialVersionUID = 1L;
 
-	private static CButton createControlButton(final String id, final String iconName, final String tooltip, final Runnable action) {
+	private static CButton createControlButton(final String id, final String iconName, final String tooltip,
+			final Runnable action) {
 		final CButton button = new CButton("", CColorUtils.createStyledIcon(iconName));
 		button.setId(id);
 		button.addClickListener(event -> action.run());
@@ -83,7 +80,7 @@ public class CGnntTimelineHeader extends CVerticalLayout {
 	private final LocalDate fullRangeEnd;
 	private final LocalDate fullRangeStart;
 	private final Select<CTimelineScale> scaleSelector = new Select<>();
-	private LocalDate startDate;
+	private LocalDate startDate = LocalDate.now();
 	private final Div timelineWrapper = new Div();
 	private final int totalWidth;
 	private final boolean useRandomColors = false;
@@ -119,22 +116,26 @@ public class CGnntTimelineHeader extends CVerticalLayout {
 		controlBar.setMargin(false);
 		controlBar.setPadding(false);
 		controlBar.setSpacing(false);
-		final CButton scrollBack = createControlButton(ID_BUTTON_SCROLL_BACK, "vaadin:angle-left", "Scroll left", () -> on_actionScroll(-1));
-		final CButton scrollForward = createControlButton(ID_BUTTON_SCROLL_FORWARD, "vaadin:angle-right", "Scroll right", () -> on_actionScroll(1));
-		final CButton zoomIn = createControlButton(ID_BUTTON_ZOOM_IN, "vaadin:search-plus", "Zoom in", () -> on_actionZoom(0.7));
-		final CButton zoomOut = createControlButton(ID_BUTTON_ZOOM_OUT, "vaadin:search-minus", "Zoom out", () -> on_actionZoom(1.5));
+		final CButton scrollBack = createControlButton(ID_BUTTON_SCROLL_BACK, "vaadin:angle-left", "Scroll left",
+				() -> on_actionScroll(-1));
+		final CButton scrollForward = createControlButton(ID_BUTTON_SCROLL_FORWARD, "vaadin:angle-right",
+				"Scroll right", () -> on_actionScroll(1));
+		final CButton zoomIn =
+				createControlButton(ID_BUTTON_ZOOM_IN, "vaadin:search-plus", "Zoom in", () -> on_actionZoom(0.7));
+		final CButton zoomOut =
+				createControlButton(ID_BUTTON_ZOOM_OUT, "vaadin:search-minus", "Zoom out", () -> on_actionZoom(1.5));
 		final CButton reset = createControlButton(ID_BUTTON_RESET, "vaadin:refresh", "Reset to full range",
 				() -> on_actionApplyRange(fullRangeStart, fullRangeEnd, true));
-		final CButton focusProjectStart = createControlButton(ID_BUTTON_FOCUS_PROJECT_START, "vaadin:home", "Focus project start",
-				() -> on_actionFocusProjectStart());
+		final CButton focusProjectStart = createControlButton(ID_BUTTON_FOCUS_PROJECT_START, "vaadin:home",
+				"Focus project start", () -> on_actionFocusProjectStart());
 		final CButton focusToday = createControlButton(ID_BUTTON_FOCUS_TODAY, "vaadin:calendar", "Focus today",
 				() -> on_actionFocusToToday());
-		final CButton focusMiddle = createControlButton(ID_BUTTON_FOCUS_MIDDLE, "vaadin:crosshairs", "Focus to middle of timeline",
-				() -> on_actionFocusToMiddle());
-		final CButton increaseWidth = createControlButton(ID_BUTTON_INCREASE_WIDTH, "vaadin:expand", "Increase timeline width",
-				() -> on_actionAdjustWidth(100));
-		final CButton decreaseWidth = createControlButton(ID_BUTTON_DECREASE_WIDTH, "vaadin:compress", "Decrease timeline width",
-				() -> on_actionAdjustWidth(-100));
+		final CButton focusMiddle = createControlButton(ID_BUTTON_FOCUS_MIDDLE, "vaadin:crosshairs",
+				"Focus to middle of timeline", () -> on_actionFocusToMiddle());
+		final CButton increaseWidth = createControlButton(ID_BUTTON_INCREASE_WIDTH, "vaadin:expand",
+				"Increase timeline width", () -> on_actionAdjustWidth(100));
+		final CButton decreaseWidth = createControlButton(ID_BUTTON_DECREASE_WIDTH, "vaadin:compress",
+				"Decrease timeline width", () -> on_actionAdjustWidth(-100));
 		scaleSelector.setItems(CTimelineScale.values());
 		scaleSelector.setId(ID_SCALE_SELECTOR);
 		scaleSelector.setValue(currentScale);
@@ -146,8 +147,8 @@ public class CGnntTimelineHeader extends CVerticalLayout {
 		scaleSelector.addClassName("gantt-timeline-scale-select");
 		windowSummary.addClassName("gantt-timeline-summary");
 		updateWindowSummary();
-		controlBar.add(scrollBack, scrollForward, zoomIn, zoomOut, reset, focusProjectStart, focusToday, focusMiddle, decreaseWidth, increaseWidth,
-				scaleSelector, windowSummary);
+		controlBar.add(scrollBack, scrollForward, zoomIn, zoomOut, reset, focusProjectStart, focusToday, focusMiddle,
+				decreaseWidth, increaseWidth, scaleSelector, windowSummary);
 	}
 
 	private void configureTimelineWrapper() {
@@ -183,9 +184,7 @@ public class CGnntTimelineHeader extends CVerticalLayout {
 		return container;
 	}
 
-	public LinkedHashMap<LocalDate, Integer> getDateToPixelMap() {
-		return dateToPixelMap;
-	}
+	public LinkedHashMap<LocalDate, Integer> getDateToPixelMap() { return dateToPixelMap; }
 
 	private void on_actionAdjustWidth(final int deltaPixels) {
 		if (widthChangeListener != null) {
@@ -194,7 +193,8 @@ public class CGnntTimelineHeader extends CVerticalLayout {
 		}
 	}
 
-	private void on_actionApplyRange(final LocalDate desiredStart, final LocalDate desiredEnd, final boolean notifyChange) {
+	private void on_actionApplyRange(final LocalDate desiredStart, final LocalDate desiredEnd,
+			final boolean notifyChange) {
 		Check.notNull(desiredStart, "desiredStart cannot be null");
 		Check.notNull(desiredEnd, "desiredEnd cannot be null");
 		LocalDate normalizedStart = desiredStart;
@@ -237,15 +237,6 @@ public class CGnntTimelineHeader extends CVerticalLayout {
 		on_actionApplyRange(fullRangeStart, fullRangeStart.plusDays(Math.max(MIN_DURATION_DAYS, windowDays) - 1), true);
 	}
 
-	private void on_actionFocusToToday() {
-		// Focus around today while preserving the current window size.
-		final long windowDays = ChronoUnit.DAYS.between(startDate, endDate) + 1;
-		final LocalDate today = LocalDate.now();
-		final LocalDate center = today.isBefore(fullRangeStart) ? fullRangeStart : today.isAfter(fullRangeEnd) ? fullRangeEnd : today;
-		final long halfWindow = Math.max(MIN_DURATION_DAYS, windowDays) / 2;
-		on_actionApplyRange(center.minusDays(halfWindow), center.plusDays(halfWindow), true);
-	}
-
 	private void on_actionFocusToMiddle() {
 		final long fullDuration = ChronoUnit.DAYS.between(fullRangeStart, fullRangeEnd) + 1;
 		final LocalDate middleDate = fullRangeStart.plusDays(fullDuration / 2);
@@ -254,6 +245,16 @@ public class CGnntTimelineHeader extends CVerticalLayout {
 		final LocalDate newStart = middleDate.minusDays(halfWindow);
 		final LocalDate newEnd = middleDate.plusDays(halfWindow);
 		on_actionApplyRange(newStart, newEnd, true);
+	}
+
+	private void on_actionFocusToToday() {
+		// Focus around today while preserving the current window size.
+		final long windowDays = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+		final LocalDate today = LocalDate.now();
+		final LocalDate center =
+				today.isBefore(fullRangeStart) ? fullRangeStart : today.isAfter(fullRangeEnd) ? fullRangeEnd : today;
+		final long halfWindow = Math.max(MIN_DURATION_DAYS, windowDays) / 2;
+		on_actionApplyRange(center.minusDays(halfWindow), center.plusDays(halfWindow), true);
 	}
 
 	private void on_actionScroll(final int direction) {
@@ -371,7 +372,8 @@ public class CGnntTimelineHeader extends CVerticalLayout {
 		LocalDate current = startDate.with(DayOfWeek.MONDAY);
 		while (!current.isAfter(endDate)) {
 			final LocalDate weekStart = current.isBefore(startDate) ? startDate : current;
-			final LocalDate weekEnd = current.plusWeeks(1).minusDays(1).isAfter(endDate) ? endDate : current.plusWeeks(1).minusDays(1);
+			final LocalDate weekEnd =
+					current.plusWeeks(1).minusDays(1).isAfter(endDate) ? endDate : current.plusWeeks(1).minusDays(1);
 			final long duration = ChronoUnit.DAYS.between(weekStart, weekEnd) + 1;
 			final int width = (int) (duration * totalWidth / (double) totalDays);
 			final int weekNumber = current.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
