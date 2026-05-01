@@ -410,7 +410,7 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 				if (selectedItem == null) {
 					setPrefixComponent(null);
 					getElement().getStyle().remove("--vaadin-input-field-background");
-					getElement().executeJs("this.inputElement.style.color = ''");
+					getElement().executeJs("if (this.inputElement) { this.inputElement.style.color = ''; }");
 					return;
 				}
 				String backgroundColor = null;
@@ -420,8 +420,8 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 					backgroundColor = "#1F3FcF";
 				}
 				final String textColor = CColorUtils.getContrastTextColor(backgroundColor);
-				getElement().executeJs("this.inputElement.style.color = $0", textColor);
-				getElement().executeJs("this.inputElement.style.background = $0", backgroundColor);
+				getElement().executeJs("if (this.inputElement) { this.inputElement.style.color = $0; }", textColor);
+				getElement().executeJs("if (this.inputElement) { this.inputElement.style.background = $0; }", backgroundColor);
 				// Always resolve the icon, even if the entity does not implement IHasIcon.
 				// (The dropdown renderer already shows static icons; selected value must match.)
 				final Icon icon = CColorUtils.getIconForEntity(selectedItem);
@@ -438,8 +438,10 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 					icon.getElement().getStyle().set("border-bottom-left-radius", "4px");
 				} else {
 					setPrefixComponent(null);
-					getElement().executeJs("this.inputElement.style['border-top-left-radius'] = $0", "4px");
-					getElement().executeJs("this.inputElement.style['border-bottom-left-radius'] = $0", "4px");
+					getElement().executeJs(
+							"if (this.inputElement) { this.inputElement.style['border-top-left-radius'] = $0; }", "4px");
+					getElement().executeJs(
+							"if (this.inputElement) { this.inputElement.style['border-bottom-left-radius'] = $0; }", "4px");
 				}
 			} catch (final Exception e) {
 				LOGGER.error("Error updating selected value display in CColorAwareComboBox: {}", e.getMessage());

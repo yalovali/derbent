@@ -13,11 +13,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import automated_tests.tech.derbent.ui.automation.CBaseUITest;
 import tech.derbent.Application;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.plm.activities.domain.CActivity;
+import tech.derbent.plm.activities.service.IActivityRepository;
 
 /**
  * Playwright tests for the inline Grid.Editor architecture.
@@ -90,14 +94,15 @@ public class CGridInlineEditTest extends CBaseUITest {
 			snap("02-activity-page");
 
 			page.waitForSelector("vaadin-grid", new Page.WaitForSelectorOptions().setTimeout(15000));
+			final long maxIdBeforeCreate = getMaxActivityId();
 
 			// ── Step 3: create a test activity so the grid has data ───────────────────
 			LOGGER.info("Creating test activity '{}'", ACTIVITY_ORIGINAL_NAME);
 			clickNew();
 			wait_1000();
 			snap("03-new-dialog");
-			// Use #field-name (same pattern as CPageComprehensiveTest) to avoid filling the search bar
-			fillFieldByIdOrFallback("field-name", ACTIVITY_ORIGINAL_NAME);
+			// CFormBuilder assigns deterministic IDs: field-<entitySimpleName>-<fieldName> (normalized)
+			fillFieldByIdOrFallback("field-cactivity-name", ACTIVITY_ORIGINAL_NAME);
 			wait_500();
 			clickSave();
 			wait_2000();
@@ -105,6 +110,10 @@ public class CGridInlineEditTest extends CBaseUITest {
 			snap("04-activity-created");
 			clickRefresh();
 			wait_1000();
+			final Long createdActivityId = locateNewestActivityIdAfter(maxIdBeforeCreate);
+			assertTrue(createdActivityId != null, "Created activity not found in DB (maxIdBefore=" + maxIdBeforeCreate + ")");
+			assertTrue(isActivityNamePersisted(createdActivityId, ACTIVITY_ORIGINAL_NAME),
+					"Created activity name mismatch; expected='" + ACTIVITY_ORIGINAL_NAME + "'" );
 
 			// ── Step 4: verify at least one header has the ✏ pencil ────────────────
 			LOGGER.info("Verifying pencil prefix on editable column headers");
@@ -118,9 +127,12 @@ public class CGridInlineEditTest extends CBaseUITest {
 					"'id' column should not have a ✏ prefix");
 
 			// ── Step 6: click an editable Name cell to activate the editor ──────────
-			LOGGER.info("Clicking Name cell to activate inline editor");
-			assertTrue(clickEditableCellByHeaderText("Name"),
-					"Inline editor did not activate after cell click");
+			LOGGER.info("Clicking Activity id={} row to activate inline editor", createdActivityId);
+			final Locator idCell = page.locator("vaadin-grid-cell-content")
+					.filter(new Locator.FilterOptions().setHasText(String.valueOf(createdActivityId)))
+					.first();
+			assertTrue(idCell.count() > 0, "Could not locate grid row for activity id: " + createdActivityId);
+			idCell.click();
 			wait_500();
 			snap("06-editor-activated");
 
@@ -141,6 +153,8 @@ public class CGridInlineEditTest extends CBaseUITest {
 			editorInput.click(new Locator.ClickOptions().setClickCount(3));
 			wait_200();
 			editorInput.fill(ACTIVITY_EDITED_NAME);
+			// Force a value-change roundtrip before the editor closes; TextField default change mode is not eager.
+			page.keyboard().press("Tab");
 			wait_500();
 			snap("08-name-typed");
 
@@ -157,15 +171,17 @@ public class CGridInlineEditTest extends CBaseUITest {
 			wait_2000();
 			snap("10-after-refresh");
 
-			assertTrue(isTextVisibleInGrid(ACTIVITY_EDITED_NAME),
-					"Edited name '" + ACTIVITY_EDITED_NAME + "' not visible in grid – auto-save may have failed");
-			assertFalse(isTextVisibleInGrid(ACTIVITY_ORIGINAL_NAME),
-					"Original name '" + ACTIVITY_ORIGINAL_NAME + "' still visible – edit was not applied");
+			assertTrue(isActivityNamePersisted(createdActivityId, ACTIVITY_EDITED_NAME),
+					"Edited name '" + ACTIVITY_EDITED_NAME + "' not persisted in DB – auto-save may have failed");
+			assertFalse(isActivityNamePersisted(createdActivityId, ACTIVITY_ORIGINAL_NAME),
+					"Original name '" + ACTIVITY_ORIGINAL_NAME + "' still persisted – edit was not applied");
 			snap("11-edited-name-confirmed");
 
 			// ── Step 11: clean up ─────────────────────────────────────────────────────
 			LOGGER.info("Cleaning up test activity");
-			clickFirstGridRow();
+			page.locator("vaadin-grid-cell-content")
+					.filter(new Locator.FilterOptions().setHasText(ACTIVITY_EDITED_NAME))
+					.first().click();
 			wait_500();
 			clickDelete();
 			wait_500();
@@ -445,19 +461,21 @@ public class CGridInlineEditTest extends CBaseUITest {
 	 */
 	private void closeEditorByClickingOutside() {
 		try {
-			// Click a grid header sorter to move focus away from the editor row
-			final Locator sorter = page.locator("vaadin-grid-sorter").first();
-			if (sorter.count() > 0) {
-				sorter.first().click();
+			// Prefer Escape: it maps to editor.cancel() and is deterministic in headless runs.
+			page.keyboard().press("Escape");
+			wait_500();
+			if (!isEditorInputVisible()) {
 				return;
 			}
-			// Fallback: click the toolbar area above the grid
-			final Locator toolbar = page.locator(".crud-toolbar, .view-toolbar").first();
-			if (toolbar.count() > 0) {
-				toolbar.first().click();
+			// Fallback: click a different row (row-switch triggers cancel + auto-save).
+			final Locator grid = page.locator("vaadin-grid").first();
+			final com.microsoft.playwright.options.BoundingBox gridBox = grid.boundingBox();
+			if (gridBox != null) {
+				final double x = gridBox.x + 50;
+				final double yOtherRow = gridBox.y + 40 + 25 + 160;
+				page.mouse().click(x, yOtherRow);
 				return;
 			}
-			// Last resort: press Escape (closes editor without save in some Vaadin configs)
 			page.keyboard().press("Tab");
 		} catch (final Exception e) {
 			LOGGER.warn("closeEditorByClickingOutside fallback: {}", e.getMessage());
@@ -473,6 +491,48 @@ public class CGridInlineEditTest extends CBaseUITest {
 	 * then falls back to page.locator("vaadin-text-field").first()). Avoids
 	 * accidentally filling the search/filter bar at the top of the page.
 	 */
+	private long getMaxActivityId() {
+		try {
+			final IActivityRepository repo = CSpringContext.getBean(IActivityRepository.class);
+			return repo.findAllForPageView(Sort.by(Sort.Direction.DESC, "id")).stream()
+					.map(CActivity::getId)
+					.filter(id -> id != null)
+					.findFirst()
+					.orElse(0L);
+		} catch (final Exception e) {
+			LOGGER.warn("Failed to determine max activity id: {}", e.getMessage());
+			return 0L;
+		}
+	}
+
+	private Long locateNewestActivityIdAfter(final long maxIdBefore) {
+		try {
+			final IActivityRepository repo = CSpringContext.getBean(IActivityRepository.class);
+			return repo.findAllForPageView(Sort.by(Sort.Direction.DESC, "id")).stream()
+					.map(CActivity::getId)
+					.filter(id -> id != null && id > maxIdBefore)
+					.findFirst()
+					.orElse(null);
+		} catch (final Exception e) {
+			LOGGER.warn("Failed to locate newest activity after {}: {}", maxIdBefore, e.getMessage());
+			return null;
+		}
+	}
+
+	private boolean isActivityNamePersisted(final Long activityId, final String expectedName) {
+		if (activityId == null) {
+			return false;
+		}
+		try {
+			final IActivityRepository repo = CSpringContext.getBean(IActivityRepository.class);
+			final String actual = repo.findById(activityId).map(CActivity::getName).orElse("");
+			return expectedName != null && expectedName.equals(actual);
+		} catch (final Exception e) {
+			LOGGER.warn("Failed to read activity {}: {}", activityId, e.getMessage());
+			return false;
+		}
+	}
+
 	private void fillFieldByIdOrFallback(final String fieldId, final String value) {
 		try {
 			final Locator host = page.locator("#" + fieldId);

@@ -335,7 +335,8 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 		itemContextMenu.removeAll();
 		itemContextMenuItemsByKey.clear();
 		for (final CContextActionDefinition<CGnntItem> action : itemContextActions) {
-			final GridMenuItem<CGnntItem> menuItem = CContextMenuSupport.registerGridAction(itemContextMenu, action, () -> lastContextMenuItem);
+			final GridMenuItem<CGnntItem> menuItem = itemContextMenu.addItem(CContextMenuSupport.createActionContent(action),
+					event -> action.execute(event.getItem().orElse(lastContextMenuItem)));
 			itemContextMenuItemsByKey.put(action.getKey(), menuItem);
 		}
 	}

@@ -1261,8 +1261,10 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		grid.addItemClickListener(event ->
 				activateEditorForRow(rawEditor, event.getItem(), event.getColumn()));
 
-		// Persist to DB whenever the currently-edited row loses focus (unbuffered → bean is up-to-date)
-		// EditorCloseEvent is raw here because rawEditor is raw; getItem() returns Object
+		// Persist to DB whenever the currently-edited row loses focus (unbuffered → bean is up-to-date).
+		// NOTE: Vaadin dispatches row-switch closure via EditorCancelEvent (editor.cancel()), so we listen to both cancel + close.
+		// Editor*Event is raw here because rawEditor is raw; getItem() returns Object.
+		rawEditor.addCancelListener(event -> saveEditorItem(event.getItem()));
 		rawEditor.addCloseListener(event -> saveEditorItem(event.getItem()));
 
 		LOGGER.info("Grid.Editor wired: {} editable column(s) for entity {}",

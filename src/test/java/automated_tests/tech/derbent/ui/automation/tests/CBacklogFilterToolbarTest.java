@@ -44,14 +44,22 @@ public class CBacklogFilterToolbarTest extends CBaseUITest {
 	private static final String SPRINT_NAME = "Sprint 1";
 
 	private void clickContextMenuItem(final String text) {
-		final Locator menuItem = page.locator("vaadin-context-menu-item")
+		final Locator overlay = page.locator("vaadin-context-menu-overlay[opened]");
+		Locator menuItem = overlay.locator("vaadin-context-menu-item")
 				.filter(new Locator.FilterOptions().setHasText(text)).first();
 		if (menuItem.count() == 0) {
-			final java.util.List<String> availableItems =
-					page.locator("vaadin-context-menu-item").allTextContents();
+			// Fallback for older Vaadin versions/layouts that do not expose an overlay root.
+			menuItem = page.locator("vaadin-context-menu-item")
+					.filter(new Locator.FilterOptions().setHasText(text)).first();
+		}
+		if (menuItem.count() == 0) {
+			final java.util.List<String> availableItems = overlay.count() > 0
+					? overlay.locator("vaadin-context-menu-item").allTextContents()
+					: page.locator("vaadin-context-menu-item").allTextContents();
 			throw new AssertionError("Context menu item not found: " + text
 					+ " available=" + availableItems);
 		}
+		assertTrue(menuItem.isEnabled(), "Context menu item not enabled: " + text);
 		menuItem.click();
 		wait_500();
 	}
@@ -85,16 +93,21 @@ public class CBacklogFilterToolbarTest extends CBaseUITest {
 				continue;
 			}
 			openContextMenu(candidate);
-			final Locator addToSprintMenuItem =
-					page.locator("vaadin-context-menu-item")
-							.filter(new Locator.FilterOptions()
-									.setHasText("Add to sprint"))
-							.first();
-			if (addToSprintMenuItem.count() > 0
-					&& addToSprintMenuItem.isVisible()) {
-				page.keyboard().press("Escape");
-				wait_500();
-				return candidate;
+			final Locator overlay = page.locator("vaadin-context-menu-overlay[opened]");
+			Locator addToSprintMenuItem = overlay.locator("vaadin-context-menu-item")
+					.filter(new Locator.FilterOptions().setHasText("Add to sprint"))
+					.first();
+			if (addToSprintMenuItem.count() == 0) {
+				addToSprintMenuItem = page.locator("vaadin-context-menu-item")
+						.filter(new Locator.FilterOptions().setHasText("Add to sprint"))
+						.first();
+			}
+			if (addToSprintMenuItem.count() > 0 && addToSprintMenuItem.isVisible()) {
+				if (addToSprintMenuItem.isEnabled()) {
+					page.keyboard().press("Escape");
+					wait_500();
+					return candidate;
+				}
 			}
 			page.keyboard().press("Escape");
 			wait_500();
@@ -253,9 +266,12 @@ public class CBacklogFilterToolbarTest extends CBaseUITest {
 		final Locator gridSprints = page.locator(ID_SPRINT_GRID);
 		assertTrue(gridLeaves.count() > 0, "Backlog leaf grid not found");
 		assertTrue(gridSprints.count() > 0, "Sprint grid not found");
-		// Text search is hosted in the backlog parent browser header quick-access panel.
-		final Locator searchInput = page
-				.locator("#custom-sprint-planning-backlog-search-field input");
+		// Backlog search is attached to the leaf grid quick-access panel (see CSprintPlanningFilterToolbar#getBacklogLeafFilterComponents).
+		Locator searchInput = page.locator("#custom-sprint-planning-backlog-leaf-search-field input");
+		if (searchInput.count() == 0) {
+			// Backward-compatible fallback for older sprint planning layouts.
+			searchInput = page.locator("#custom-sprint-planning-backlog-parent-search-field input");
+		}
 		assertTrue(searchInput.count() > 0, "Backlog search input not found");
 		searchInput.first().fill(BACKLOG_SEARCH_TEXT);
 		wait_500();

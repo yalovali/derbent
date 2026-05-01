@@ -11,6 +11,7 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
@@ -100,6 +101,8 @@ public final class CGridEditorFactory {
 		final CTextField tf = new CTextField();
 		tf.setWidthFull();
 		tf.setClearButtonVisible(true);
+		// Inline editors should sync immediately so row-switch close listeners persist the latest text.
+		tf.setValueChangeMode(ValueChangeMode.EAGER);
 		// Honour @AMetaData.maxLength so the editor matches domain constraints
 		if (fieldInfo.getMaxLength() > 0) {
 			tf.setMaxLength(fieldInfo.getMaxLength());
