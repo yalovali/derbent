@@ -32,8 +32,7 @@ public class CDecisionTypeInitializerService extends CEntityTypeInitializerServi
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		try {
-			final CDetailSection detailSection =
-					CEntityOfProjectInitializerService.createBasicView(project, clazz);
+			final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workflow"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Decision Configuration"));
@@ -43,10 +42,6 @@ public class CDecisionTypeInitializerService extends CEntityTypeInitializerServi
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "level"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

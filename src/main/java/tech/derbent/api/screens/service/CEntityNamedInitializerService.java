@@ -17,6 +17,9 @@ public abstract class CEntityNamedInitializerService extends CInitializerService
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id", true, "10%"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name", false, "100%"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate", true, ""));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate", true, ""));
 	}
 
 	/** Creates a standard detail view for company-scoped type entities (CXxxType classes). Generates: named entity fields (id, name, description),
@@ -42,11 +45,6 @@ public abstract class CEntityNamedInitializerService extends CInitializerService
 		}
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-		if (includeAudit) {
-			scr.addScreenLine(CDetailLinesService.createSection("Audit"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-		}
 		scr.debug_printScreenInformation();
 		return scr;
 	}

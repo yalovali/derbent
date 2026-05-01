@@ -70,10 +70,7 @@ public class CUserInitializerService extends CEntityOfCompanyInitializerService 
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "profilePictureData"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Additional Information"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "activities"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Settings"));
 			detailSection

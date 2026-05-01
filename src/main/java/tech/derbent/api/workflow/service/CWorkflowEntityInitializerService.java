@@ -41,10 +41,7 @@ public class CWorkflowEntityInitializerService extends CWorkflowBaseInitializati
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			CEntityNamedInitializerService.createScreenLines(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "statusRelations"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

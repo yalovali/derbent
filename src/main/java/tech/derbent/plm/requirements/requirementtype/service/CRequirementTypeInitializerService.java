@@ -30,8 +30,7 @@ public class CRequirementTypeInitializerService extends CEntityTypeInitializerSe
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		try {
-			final CDetailSection detailSection =
-					CEntityOfProjectInitializerService.createBasicView(project, clazz);
+			final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workflow"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Hierarchy Configuration"));
@@ -41,10 +40,6 @@ public class CRequirementTypeInitializerService extends CEntityTypeInitializerSe
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			return detailSection;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating requirement type view.");
@@ -82,15 +77,19 @@ public class CRequirementTypeInitializerService extends CEntityTypeInitializerSe
 		// Use the concrete service bean to keep this initializer type-safe (no unchecked casts).
 		final CRequirementTypeService requirementTypeService = CSpringContext.getBean(CRequirementTypeService.class);
 		initializeCompanyEntity(seeds, requirementTypeService, company, minimal, (requirementType, index) -> {
-			if (index == 0) {
+			switch (index) {
+			case 0 -> {
 				requirementType.setLevel(0);
 				requirementType.setCanHaveChildren(true);
-			} else if (index == 1) {
+			}
+			case 1 -> {
 				requirementType.setLevel(1);
 				requirementType.setCanHaveChildren(true);
-			} else {
+			}
+			default -> {
 				requirementType.setLevel(-1);
 				requirementType.setCanHaveChildren(false);
+			}
 			}
 		});
 	}

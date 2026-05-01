@@ -8,6 +8,7 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.services.COneToOneRelationBaseInitializationService;
+import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
 
 /** Initializer service for CParentRelation components. Provides factory methods to create standard parent hierarchy sections in entity detail
@@ -37,7 +38,7 @@ public final class CParentRelationInitializerService extends COneToOneRelationBa
 		Check.notNull(entityClass, "entityClass cannot be null");
 		Check.notNull(project, "project cannot be null");
 		if (CSpringContext.isBabProfile()
-				|| !hasFieldInHierarchy(entityClass, FIELD_NAME_PARENT_CHILDREN_PLACEHOLDER)) {
+				|| !CAuxillaries.hasField(entityClass, FIELD_NAME_PARENT_CHILDREN_PLACEHOLDER)) {
 			return;
 		}
 		detailSection.addScreenLine(CDetailLinesService.createSection(SECTION_NAME_CHILDREN));
@@ -66,22 +67,9 @@ public final class CParentRelationInitializerService extends COneToOneRelationBa
 			return;
 		}
 		detailSection.addScreenLine(CDetailLinesService.createSection(SECTION_NAME_PARENT));
-		final String fieldName = hasFieldInHierarchy(entityClass, FIELD_NAME_PARENT_PLACEHOLDER)
+		final String fieldName = CAuxillaries.hasField(entityClass, FIELD_NAME_PARENT_PLACEHOLDER)
 				? FIELD_NAME_PARENT_PLACEHOLDER : FIELD_NAME_PARENT_RELATION;
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, fieldName));
-	}
-
-	private static boolean hasFieldInHierarchy(final Class<?> entityClass, final String fieldName) {
-		Class<?> current = entityClass;
-		while (current != null) {
-			try {
-				current.getDeclaredField(fieldName);
-				return true;
-			} catch (@SuppressWarnings ("unused") final Exception e) {
-				current = current.getSuperclass();
-			}
-		}
-		return false;
 	}
 
 	private CParentRelationInitializerService() {

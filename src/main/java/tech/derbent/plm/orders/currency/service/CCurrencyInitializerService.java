@@ -28,18 +28,11 @@ public class CCurrencyInitializerService extends CEntityOfProjectInitializerServ
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
-			final CDetailSection detailSection =
-					CEntityOfProjectInitializerService.createBasicView(project, clazz);
+			final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "currencyCode"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "currencySymbol"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Display Configuration"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

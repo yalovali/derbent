@@ -42,10 +42,6 @@ public class CTicketPriorityInitializerService extends CEntityTypeInitializerSer
 			scr.addScreenLine(CDetailLinesService.createSection("Behavior"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isDefault"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			scr.addScreenLine(CDetailLinesService.createSection("Audit"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {

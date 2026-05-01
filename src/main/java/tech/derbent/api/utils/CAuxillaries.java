@@ -1,5 +1,6 @@
 package tech.derbent.api.utils;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -18,41 +19,65 @@ public class CAuxillaries {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(CAuxillaries.class);
 
-	public static String formatWidthPx(final int i) {
-		if (i <= 0) {
-			return null;
+	private static boolean areArgumentsCompatible(final Class<?>[] parameterTypes, final Object[] args) {
+		for (int i = 0; i < parameterTypes.length; i++) {
+			if (!isCompatibleParameter(parameterTypes[i], args[i])) {
+				return false;
+			}
 		}
-		return i + "px";
+		return true;
 	}
 
-	/**
-	 * Generates a stable, human-readable ID for a component based on its text content.
+	private static Method findCompatibleMethod(final Class<?> clazz, final String methodName, final Object... args) {
+		return Arrays.stream(getCandidateMethods(clazz)).filter(method -> method.getName().equals(methodName))
+				.filter(method -> method.getParameterCount() == args.length)
+				.filter(method -> areArgumentsCompatible(method.getParameterTypes(), args))
+				.sorted((left, right) -> Integer.compare(getMethodSpecificityScore(left, args),
+						getMethodSpecificityScore(right, args)))
+				.findFirst().map(method -> {
+					method.setAccessible(true);
+					return method;
+				}).orElse(null);
+	}
+
+	public static Field findField(final Class<?> clazz, final String fieldName) {
+		Class<?> currentClazz = clazz;
+		while (currentClazz != null) {
+			try {
+				return currentClazz.getDeclaredField(fieldName);
+			} catch (final NoSuchFieldException e) {
+				currentClazz = currentClazz.getSuperclass();
+			}
+		}
+		return null;
+	}
+
+	public static String formatWidthPx(final int i) {
+		return i <= 0 ? null : i + "px";
+	}
+
+	/** Generates a stable, human-readable ID for a component based on its text content.
 	 * <p>
-	 * The ID is stable only if the component's text content doesn't change.
-	 * For components requiring value persistence across recreations, prefer setting
+	 * The ID is stable only if the component's text content doesn't change. For components requiring value persistence across recreations, prefer setting
 	 * an explicit ID using component.setId("uniqueId") instead.
 	 * </p>
 	 * <p>
-	 * ID Format:
-	 * - If component has text: "classname-sanitized-text"
-	 * - If component has no text: "classname-tag" (no timestamp - stable for same tag)
-	 * - Last resort: "classname-default" (stable fallback)
+	 * ID Format: - If component has text: "classname-sanitized-text" - If component has no text: "classname-tag" (no timestamp - stable for same tag) -
+	 * Last resort: "classname-default" (stable fallback)
 	 * </p>
-	 * 
 	 * @param component The component to generate an ID for
-	 * @return A stable ID string based on component class and content
-	 */
+	 * @return A stable ID string based on component class and content */
 	public static String generateId(final Component component) {
 		final String prefix = component.getClass().getSimpleName().toLowerCase();
-		String suffix;
+		final String suffix;
 		final String text = getComponentText(component);
-		if ((text != null) && !text.trim().isEmpty()) {
+		if (text != null && !text.trim().isEmpty()) {
 			// Text-based ID: stable as long as text doesn't change
 			suffix = text.toLowerCase().trim().replaceAll("[^a-z0-9]+", "-").replaceAll("(^-|-$)", "");
 		} else {
 			// No text: use tag as stable identifier
 			final String tag = component.getElement().getTag();
-			if ((tag != null) && !tag.trim().isEmpty()) {
+			if (tag != null && !tag.trim().isEmpty()) {
 				suffix = tag.toLowerCase();
 			} else {
 				// Last resort: use generic "default" suffix (stable)
@@ -61,42 +86,21 @@ public class CAuxillaries {
 		}
 		return prefix + "-" + suffix;
 	}
-	
-	/**
-	 * Sets a stable ID on a component for use with value persistence.
-	 * <p>
-	 * This method is suitable for components that need persistence ONLY if:
-	 * - Component has stable text content that doesn't change
-	 * - Component is unique within its context
-	 * </p>
-	 * <p>
-	 * For components implementing IHasSelectedValueStorage, prefer setting
-	 * an explicit ID manually in the constructor to guarantee stability:
-	 * <pre>
-	 * public MyComponent() {
-	 *     setId("mycomponent-uniquecontext");
-	 *     // ... rest of initialization
-	 * }
-	 * </pre>
-	 * </p>
-	 * 
-	 * @param component The component to set an ID on
-	 */
-	public static void setId(final Component component) {
-		Check.notNull(component, "component is null");
-		// Only set ID if not already set
-		if (component.getId().isEmpty()) {
-			final String id = generateId(component);
-			component.setId(id);
-		}
-		// Always add class name as CSS class for styling
-		component.addClassName(component.getClass().getSimpleName().toLowerCase());
-	}
-	
+
 	/** Get available entity types for screen configuration.
 	 * @return list of entity types */
 	public static List<String> getAvailableEntityTypes() {
 		return List.of("CActivity", "CMeeting", "CRisk", "CProject", "CUser");
+	}
+
+	private static Method[] getCandidateMethods(final Class<?> clazz) {
+		final Class<?> userClass = ProxyUtils.getUserClass(clazz);
+		if (userClass == null || userClass == clazz) {
+			return clazz.getMethods();
+		}
+		return Arrays.stream(new Method[][] {
+				clazz.getMethods(), userClass.getMethods()
+		}).flatMap(Arrays::stream).distinct().toArray(Method[]::new);
 	}
 
 	private static Method getClazzMethod(final Class<?> clazz, final String methodName) throws Exception {
@@ -105,10 +109,12 @@ public class CAuxillaries {
 			Check.notNull(clazz, "clazz is null");
 			final Method method = clazz.getMethod(methodName);
 			Check.notNull(method, "Method " + methodName + " not found in class " + clazz.getName());
-			Check.isTrue(method.getParameterCount() == 0, "Method " + methodName + " in class " + clazz.getName() + " has parameters");
+			Check.isTrue(method.getParameterCount() == 0,
+					"Method " + methodName + " in class " + clazz.getName() + " has parameters");
 			return method;
 		} catch (final Exception e) {
-			LOGGER.error("Error getting method {} from class {}. reason={}", methodName, clazz.getName(), e.getMessage());
+			LOGGER.error("Error getting method {} from class {}. reason={}", methodName, clazz.getName(),
+					e.getMessage());
 			throw e;
 		}
 	}
@@ -121,9 +127,11 @@ public class CAuxillaries {
 			if (Modifier.isStatic(method.getModifiers())) {
 				return method;
 			}
-			throw new IllegalArgumentException("Method " + methodName + " in class " + clazz.getName() + " is not statric");
+			throw new IllegalArgumentException(
+					"Method " + methodName + " in class " + clazz.getName() + " is not statric");
 		} catch (final Exception e) {
-			LOGGER.error("Error getting method {} from class {}. reason={}", methodName, clazz.getName(), e.getMessage());
+			LOGGER.error("Error getting method {} from class {}. reason={}", methodName, clazz.getName(),
+					e.getMessage());
 			throw e;
 		}
 	}
@@ -170,39 +178,6 @@ public class CAuxillaries {
 		}
 	}
 
-	private static Method findCompatibleMethod(final Class<?> clazz, final String methodName, final Object... args) {
-		return Arrays.stream(getCandidateMethods(clazz))
-				.filter(method -> method.getName().equals(methodName))
-				.filter(method -> method.getParameterCount() == args.length)
-				.filter(method -> areArgumentsCompatible(method.getParameterTypes(), args))
-				.sorted((left, right) -> Integer.compare(getMethodSpecificityScore(left, args), getMethodSpecificityScore(right, args)))
-				.findFirst()
-				.map(method -> {
-					method.setAccessible(true);
-					return method;
-				})
-				.orElse(null);
-	}
-
-	private static Method[] getCandidateMethods(final Class<?> clazz) {
-		final Class<?> userClass = ProxyUtils.getUserClass(clazz);
-		if (userClass == null || userClass == clazz) {
-			return clazz.getMethods();
-		}
-		return Arrays.stream(new Method[][] {
-				clazz.getMethods(), userClass.getMethods()
-		}).flatMap(Arrays::stream).distinct().toArray(Method[]::new);
-	}
-
-	private static boolean areArgumentsCompatible(final Class<?>[] parameterTypes, final Object[] args) {
-		for (int i = 0; i < parameterTypes.length; i++) {
-			if (!isCompatibleParameter(parameterTypes[i], args[i])) {
-				return false;
-			}
-		}
-		return true;
-	}
-
 	private static int getMethodSpecificityScore(final Method method, final Object[] args) {
 		int score = 0;
 		final Class<?>[] parameterTypes = method.getParameterTypes();
@@ -219,40 +194,19 @@ public class CAuxillaries {
 		return score;
 	}
 
-	private static boolean isCompatibleParameter(final Class<?> parameterType, final Object arg) {
-		if (arg == null) {
-			return !parameterType.isPrimitive();
-		}
-		return wrapPrimitive(parameterType).isAssignableFrom(arg.getClass());
+	public static boolean hasField(final Class<?> clazz, final String fieldName) {
+		return CAuxillaries.findField(clazz, fieldName) != null;
 	}
 
-	private static Class<?> wrapPrimitive(final Class<?> clazz) {
-		if (!clazz.isPrimitive()) {
-			return clazz;
-		}
-		return switch (clazz.getName()) {
-		case "boolean" -> Boolean.class;
-		case "byte" -> Byte.class;
-		case "char" -> Character.class;
-		case "double" -> Double.class;
-		case "float" -> Float.class;
-		case "int" -> Integer.class;
-		case "long" -> Long.class;
-		case "short" -> Short.class;
-		default -> clazz;
-		};
-	}
-
-	public static Object invokeMethod(final Object target, final String methodName, final Object... args) throws Exception {
+	public static Object invokeMethod(final Object target, final String methodName, final Object... args)
+			throws Exception {
 		final String targetName = target != null ? target.getClass().getSimpleName() : "null";
 		try {
 			Check.notBlank(methodName, "methodName is blank");
 			Check.notNull(target, "target is null");
-
 			final Class<?> proxyClass = target.getClass();
 			// Spring AOP proxies (CGLIB/JDK) can hide user-defined methods from reflection; resolve on the ultimate target class.
 			final Class<?> targetClass = AopProxyUtils.ultimateTargetClass(target);
-
 			Method method = findCompatibleMethod(proxyClass, methodName, args);
 			if (method == null && targetClass != null && targetClass != proxyClass) {
 				method = findCompatibleMethod(targetClass, methodName, args);
@@ -264,21 +218,17 @@ public class CAuxillaries {
 				}
 			}
 			Check.notNull(method, "Method " + methodName + " not found in class " + proxyClass.getName());
-
 			// Opt-in request-scoped tracking for accidental duplicate invocations during a single Vaadin roundtrip.
 			CPerfInvocationTracker.recordInvocation(target, method);
-
 			if (Modifier.isStatic(method.getModifiers())) {
 				return method.invoke(null, args);
 			}
-
 			// JDK proxies are not instances of the concrete service class, so invoke on the unwrapped singleton target when needed.
 			// This keeps metadata-driven component factory methods working even when the bean is proxied.
 			Object invocationTarget = target;
 			if (!method.getDeclaringClass().isInstance(invocationTarget)) {
 				final Object unwrapped = AopProxyUtils.getSingletonTarget(target);
-				if (unwrapped != null
-						&& method.getDeclaringClass().isInstance(unwrapped)) {
+				if (unwrapped != null && method.getDeclaringClass().isInstance(unwrapped)) {
 					invocationTarget = unwrapped;
 				}
 			}
@@ -308,7 +258,8 @@ public class CAuxillaries {
 			// invoke the method and get the result
 			return (String) method.invoke(entity);
 		} catch (final Exception e) {
-			LOGGER.error("Error invoking method {} of class {}. reason={}", methodName, entity.getClass().getName(), e.getMessage());
+			LOGGER.error("Error invoking method {} of class {}. reason={}", methodName, entity.getClass().getName(),
+					e.getMessage());
 			throw e;
 		}
 	}
@@ -320,29 +271,33 @@ public class CAuxillaries {
 			final Method method = getClazzMethod(clazz, methodName);
 			Check.notNull(method, "Method " + methodName + " not found in class " + clazz.getName());
 			if (method.getReturnType() != void.class) {
-				throw new RuntimeException("Method " + methodName + " in class " + clazz.getName() + " does not return void");
+				throw new RuntimeException(
+						"Method " + methodName + " in class " + clazz.getName() + " does not return void");
 			}
 			method.invoke(null);
 		} catch (final Exception e) {
-			LOGGER.error("Error invoking method {} of class {}. reason={}", methodName, clazz.getName(), e.getMessage());
+			LOGGER.error("Error invoking method {} of class {}. reason={}", methodName, clazz.getName(),
+					e.getMessage());
 			throw e;
 		}
 	}
 
-	public static List<String> invokeStaticMethodOfList(final String className, final String methodName) throws Exception {
+	public static List<String> invokeStaticMethodOfList(final String className, final String methodName)
+			throws Exception {
 		try {
 			Check.notBlank(className, "className is blank");
 			Check.notBlank(methodName, "methodName is blank");
 			final Method method = getClazzMethodStatic(className, methodName);
 			if (!List.class.isAssignableFrom(method.getReturnType())) {
-				throw new IllegalArgumentException(
-						"Method " + methodName + " in class " + className + " is not static or does not return List<String>");
+				throw new IllegalArgumentException("Method " + methodName + " in class " + className
+						+ " is not static or does not return List<String>");
 			}
 			@SuppressWarnings ("unchecked")
 			final List<String> result = (List<String>) method.invoke(null);
 			return result;
 		} catch (final Exception e) {
-			LOGGER.error("Error invoking static method {} of class {}. reason={}", methodName, className, e.getMessage());
+			LOGGER.error("Error invoking static method {} of class {}. reason={}", methodName, className,
+					e.getMessage());
 			throw e;
 		}
 	}
@@ -354,11 +309,13 @@ public class CAuxillaries {
 			final Method method = getClazzMethodStatic(clazz, methodName);
 			Check.notNull(method, "Method " + methodName + " not found in class " + clazz.getName());
 			if (method.getReturnType() != String.class) {
-				throw new RuntimeException("Method " + methodName + " in class " + clazz.getName() + " does not return String");
+				throw new RuntimeException(
+						"Method " + methodName + " in class " + clazz.getName() + " does not return String");
 			}
 			return (String) method.invoke(null);
 		} catch (final Exception e) {
-			LOGGER.error("Error invoking static method {} of class {}. reason={}", methodName, clazz.getName(), e.getMessage());
+			LOGGER.error("Error invoking static method {} of class {}. reason={}", methodName, clazz.getName(),
+					e.getMessage());
 			throw e;
 		}
 	}
@@ -373,9 +330,17 @@ public class CAuxillaries {
 			Check.notNull(clazz, "Class " + className + " not found");
 			return invokeStaticMethodOfStr(clazz, methodName);
 		} catch (final Exception e) {
-			LOGGER.error("Error invoking static method {} of class {}. reason={}", methodName, className, e.getMessage());
+			LOGGER.error("Error invoking static method {} of class {}. reason={}", methodName, className,
+					e.getMessage());
 			throw e;
 		}
+	}
+
+	private static boolean isCompatibleParameter(final Class<?> parameterType, final Object arg) {
+		if (arg == null) {
+			return !parameterType.isPrimitive();
+		}
+		return wrapPrimitive(parameterType).isAssignableFrom(arg.getClass());
 	}
 
 	public static String safeTrim(String text, int maxLength) {
@@ -392,5 +357,50 @@ public class CAuxillaries {
 		// Trim at a valid Unicode code point boundary
 		final int endIndex = text.offsetByCodePoints(0, maxLength);
 		return text.substring(0, endIndex) + "...";
+	}
+
+	/** Sets a stable ID on a component for use with value persistence.
+	 * <p>
+	 * This method is suitable for components that need persistence ONLY if: - Component has stable text content that doesn't change - Component is unique
+	 * within its context
+	 * </p>
+	 * <p>
+	 * For components implementing IHasSelectedValueStorage, prefer setting an explicit ID manually in the constructor to guarantee stability:
+	 *
+	 * <pre>
+	 *
+	 * public MyComponent() {
+	 * 	setId("mycomponent-uniquecontext");
+	 * 	// ... rest of initialization
+	 * }
+	 * </pre>
+	 * </p>
+	 * @param component The component to set an ID on */
+	public static void setId(final Component component) {
+		Check.notNull(component, "component is null");
+		// Only set ID if not already set
+		if (component.getId().isEmpty()) {
+			final String id = generateId(component);
+			component.setId(id);
+		}
+		// Always add class name as CSS class for styling
+		component.addClassName(component.getClass().getSimpleName().toLowerCase());
+	}
+
+	private static Class<?> wrapPrimitive(final Class<?> clazz) {
+		if (!clazz.isPrimitive()) {
+			return clazz;
+		}
+		return switch (clazz.getName()) {
+		case "boolean" -> Boolean.class;
+		case "byte" -> Byte.class;
+		case "char" -> Character.class;
+		case "double" -> Double.class;
+		case "float" -> Float.class;
+		case "int" -> Integer.class;
+		case "long" -> Long.class;
+		case "short" -> Short.class;
+		default -> clazz;
+		};
 	}
 }

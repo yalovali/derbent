@@ -40,10 +40,6 @@ public class CStorageTypeInitializerService extends CEntityTypeInitializerServic
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
-		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-		detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 		detailSection.debug_printScreenInformation();
 		return detailSection;
 	}

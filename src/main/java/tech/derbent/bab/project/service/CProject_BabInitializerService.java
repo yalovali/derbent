@@ -32,18 +32,13 @@ public class CProject_BabInitializerService extends CProjectInitializerService {
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
-			final CDetailSection detailSection =
-					CEntityOfProjectInitializerService.createBasicView(project, clazz);
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
+			final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz);
 			final CDetailLines companyLine = CDetailLinesService.createLineFromDefaults(clazz, "company");
 			companyLine.setIsReadonly(true);
 			detailSection.addScreenLine(companyLine);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "ipAddress"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "authToken"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			final CDetailLines line = CDetailLinesService.createLineFromDefaults(clazz, "userSettings");
 			line.setRelationFieldName("userSettings");
 			line.setFieldCaption("userSettings");

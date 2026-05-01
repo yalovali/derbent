@@ -3,16 +3,13 @@ package tech.derbent.plm.activities.service;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import jakarta.persistence.EntityNotFoundException;
-
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
@@ -41,13 +38,12 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 public class CActivityService extends CProjectItemService<CActivity> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityService.class);
-
 	private final CActivityPriorityService activityPriorityService;
 	private final CActivityTypeService typeService;
 
-	public CActivityService(final IActivityRepository repository, final Clock clock, final ISessionService sessionService,
-			final CActivityTypeService activityTypeService, final CProjectItemStatusService statusService,
-			final CActivityPriorityService activityPriorityService) {
+	public CActivityService(final IActivityRepository repository, final Clock clock,
+			final ISessionService sessionService, final CActivityTypeService activityTypeService,
+			final CProjectItemStatusService statusService, final CActivityPriorityService activityPriorityService) {
 		super(repository, clock, sessionService, statusService);
 		typeService = activityTypeService;
 		this.activityPriorityService = activityPriorityService;
@@ -58,8 +54,8 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		return super.checkDeleteAllowed(activity);
 	}
 
-	/** Service-level method to copy CActivity-specific fields using getters/setters. This method implements the service-based copy pattern for
-	 * Activity entities.
+	/** Service-level method to copy CActivity-specific fields using getters/setters. This method implements the service-based copy pattern for Activity
+	 * entities.
 	 * @param source  the source activity to copy from
 	 * @param target  the target entity to copy to
 	 * @param options clone options controlling what fields to copy */
@@ -76,12 +72,7 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		targetActivity.setNotes(source.getNotes());
 		targetActivity.setResults(source.getResults());
 		// Copy numeric fields - direct setter/getter
-		targetActivity.setActualCost(source.getActualCost());
-		targetActivity.setActualHours(source.getActualHours());
-		targetActivity.setEstimatedCost(source.getEstimatedCost());
 		targetActivity.setEstimatedHours(source.getEstimatedHours());
-		targetActivity.setHourlyRate(source.getHourlyRate());
-		targetActivity.setRemainingHours(source.getRemainingHours());
 		// Copy priority and type - direct setter/getter
 		targetActivity.setPriority(source.getPriority());
 		targetActivity.setEntityType(source.getEntityType());
@@ -115,14 +106,14 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	@Transactional
 	public void delete(final Long id) {
 		Check.notNull(id, "Activity ID cannot be null");
-		final CActivity activity = repository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException("Activity not found: " + id));
+		final CActivity activity =
+				repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Activity not found: " + id));
 		delete(activity);
 	}
 
 	public List<CActivity> getDataProviderValuesOfUser() {
-		final CUser currentUser =
-				sessionService.getActiveUser().orElseThrow(() -> new CInitializationException("No active user in session - cannot list activities"));
+		final CUser currentUser = sessionService.getActiveUser()
+				.orElseThrow(() -> new CInitializationException("No active user in session - cannot list activities"));
 		return ((IActivityRepository) repository).getDataProviderValuesOfUser(currentUser);
 	}
 
@@ -142,10 +133,10 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
 		final CActivity entityCasted = (CActivity) entity;
-		final CProject<?> currentProject = sessionService.getActiveProject()
-				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize activity"));
-		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
-				statusService);
+		final CProject<?> currentProject = sessionService.getActiveProject().orElseThrow(
+				() -> new CInitializationException("No active project in session - cannot initialize activity"));
+		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity,
+				sessionService.getActiveCompany().orElseThrow(), typeService, statusService);
 		if (entityCasted.getSprintItem() == null) {
 			final CSprintItem sprintItem = new CSprintItem(true);
 			sprintItem.setParentItem(entityCasted);
@@ -160,8 +151,8 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		}
 		// Initialize priority (Context-aware: depends on Company)
 		final List<CActivityPriority> priorities = activityPriorityService.listByCompany(currentProject.getCompany());
-		Check.notEmpty(priorities,
-				"No activity priorities available in company " + currentProject.getCompany().getName() + " - cannot initialize new activity");
+		Check.notEmpty(priorities, "No activity priorities available in company "
+				+ currentProject.getCompany().getName() + " - cannot initialize new activity");
 		entityCasted.setPriority(priorities.get(0));
 	}
 
@@ -182,17 +173,12 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		// 3. Unique Checks - use base class helper
 		validateUniqueNameInProject((IActivityRepository) repository, entity, entity.getName(), entity.getProject());
 		// 4. Numeric Checks
-		validateNumericField(entity.getActualCost(), "Actual Cost", new BigDecimal("999999.99"));
-		validateNumericField(entity.getEstimatedCost(), "Estimated Cost", new BigDecimal("999999.99"));
-		validateNumericField(entity.getActualHours(), "Actual Hours", new BigDecimal("9999.99"));
 		validateNumericField(entity.getEstimatedHours(), "Estimated Hours", new BigDecimal("9999.99"));
-		validateNumericField(entity.getHourlyRate(), "Hourly Rate", new BigDecimal("9999.99"));
-		validateNumericField(entity.getRemainingHours(), "Remaining Hours", new BigDecimal("9999.99"));
-		final boolean condition =
-				entity.getProgressPercentage() != null && (entity.getProgressPercentage() < 0 || entity.getProgressPercentage() > 100);
+		final boolean condition = entity.getProgressPercentage() != null
+				&& (entity.getProgressPercentage() < 0 || entity.getProgressPercentage() > 100);
 		if (condition) {
-			throw new CValidationException(
-					ValidationMessages.formatRange(ValidationMessages.VALUE_RANGE, 0, 100).replace("Value", "Progress percentage"));
+			throw new CValidationException(ValidationMessages.formatRange(ValidationMessages.VALUE_RANGE, 0, 100)
+					.replace("Value", "Progress percentage"));
 		}
 	}
 }

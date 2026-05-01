@@ -42,9 +42,6 @@ public class CTeamInitializerService extends CEntityOfCompanyInitializerService 
 			detailSection.addScreenLine(CDetailLinesService.createSection("Team Members"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "members"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("System Information"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
 			CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
 			// Comments section - standard section for discussion entities

@@ -42,12 +42,8 @@ public class CTicketServiceDepartmentInitializerService extends CEntityOfCompany
 			detailSection.addScreenLine(CDetailLinesService.createSection("Responsible Users"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "responsibleUsers"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Settings"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "emailNotificationEnabled"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("System Information"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
 			CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
 			CCommentInitializerService.addDefaultSection(detailSection, clazz);

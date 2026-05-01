@@ -42,8 +42,7 @@ public class CRiskInitializerService extends CProjectItemInitializerService {
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
-			final CDetailSection detailSection =
-					CEntityOfProjectInitializerService.createBasicView(project, clazz);
+			final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "riskSeverity"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
@@ -70,8 +69,6 @@ public class CRiskInitializerService extends CProjectItemInitializerService {
 			CCommentInitializerService.addDefaultSection(detailSection, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

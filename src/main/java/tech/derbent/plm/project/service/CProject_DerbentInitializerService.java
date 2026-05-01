@@ -33,15 +33,11 @@ public class CProject_DerbentInitializerService extends CProjectInitializerServi
 	public static CDetailSection createBasicView(final CProject_Derbent project) throws Exception {
 		try {
 			final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz);
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			final CDetailLines companyLine = CDetailLinesService.createLineFromDefaults(clazz, "company");
 			companyLine.setIsReadonly(true);
 			detailSection.addScreenLine(companyLine);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "kanbanLine"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			final CDetailLines line = CDetailLinesService.createLineFromDefaults(clazz, "userSettings");
 			line.setRelationFieldName("userSettings");
 			line.setFieldCaption("userSettings");

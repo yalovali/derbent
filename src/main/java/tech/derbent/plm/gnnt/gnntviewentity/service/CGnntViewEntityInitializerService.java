@@ -33,9 +33,6 @@ public class CGnntViewEntityInitializerService extends CEntityOfProjectInitializ
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "gridType"));
 		detailSection.addScreenLine(CDetailLinesService.createSection("Gnnt Board"));
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "gnntBoard"));
-		detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 		return detailSection;
 	}
 

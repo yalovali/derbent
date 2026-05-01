@@ -39,8 +39,7 @@ public class CBabDeviceInitializerService extends CEntityOfCompanyInitializerSer
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		try {
-			final CDetailSection detailSection =
-					CEntityOfProjectInitializerService.createBasicView(project, clazz);
+			final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection("Device Information"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "serialNumber"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "firmwareVersion"));
@@ -53,10 +52,6 @@ public class CBabDeviceInitializerService extends CEntityOfCompanyInitializerSer
 			detailSection.addScreenLine(CDetailLinesService.createSection("System"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

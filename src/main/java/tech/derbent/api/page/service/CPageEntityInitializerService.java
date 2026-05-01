@@ -30,7 +30,6 @@ public class CPageEntityInitializerService extends CProjectItemInitializerServic
 			CEntityNamedInitializerService.createScreenLines(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "pageService"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Navigation"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "menuTitle"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "menuOrder"));
@@ -46,9 +45,6 @@ public class CPageEntityInitializerService extends CProjectItemInitializerServic
 					.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeShowInQuickToolbar"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeReadonly"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

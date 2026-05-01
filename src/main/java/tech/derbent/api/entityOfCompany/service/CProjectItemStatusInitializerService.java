@@ -33,11 +33,7 @@ public class CProjectItemStatusInitializerService extends CStatusInitializerServ
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "finalStatus"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
-			scr.addScreenLine(CDetailLinesService.createSection("Audit"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {

@@ -18,6 +18,7 @@ import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
@@ -69,7 +70,8 @@ public abstract class CInitializerServiceBase {
 		}
 	}
 
-	protected static CDetailSection createBaseScreenEntity(final CProject<?> project, final Class<?> clazz) throws Exception {
+	protected static CDetailSection createBaseScreenEntity(final CProject<?> project, final Class<?> clazz)
+			throws Exception {
 		try {
 			final String baseViewName = (String) clazz.getField("VIEW_NAME").get(null);
 			return createBaseScreenEntity(project, clazz, baseViewName);
@@ -78,7 +80,8 @@ public abstract class CInitializerServiceBase {
 		}
 	}
 
-	protected static CDetailSection createBaseScreenEntity(final CProject<?> project, final Class<?> clazz, final String baseViewName) {
+	protected static CDetailSection createBaseScreenEntity(final CProject<?> project, final Class<?> clazz,
+			final String baseViewName) {
 		final CDetailSection scr = new CDetailSection(baseViewName, project);
 		scr.setEntityType(clazz.getSimpleName());
 		scr.setHeaderText(baseViewName);
@@ -90,9 +93,9 @@ public abstract class CInitializerServiceBase {
 		return scr;
 	}
 
-	protected static CPageEntity createPageEntity(final Class<?> entityClass, final CProject<?> project, final CGridEntity grid,
-			final CDetailSection detailSection, final String menuLocation, final String pageTitle, final String description, final String order)
-			throws Exception {
+	protected static CPageEntity createPageEntity(final Class<?> entityClass, final CProject<?> project,
+			final CGridEntity grid, final CDetailSection detailSection, final String menuLocation,
+			final String pageTitle, final String description, final String order) throws Exception {
 		final CPageEntity page = new CPageEntity(grid.getName(), project);
 		page.setDescription(description);
 		page.setMenuTitle(menuLocation);
@@ -119,22 +122,10 @@ public abstract class CInitializerServiceBase {
 	 * @param clazz     the class to search
 	 * @param fieldName the field name to find
 	 * @return the field or null if not found */
-	private static Field findFieldInHierarchy(final Class<?> clazz, final String fieldName) {
-		Class<?> currentClazz = clazz;
-		while (currentClazz != null) {
-			try {
-				return currentClazz.getDeclaredField(fieldName);
-			} catch (final NoSuchFieldException e) {
-				currentClazz = currentClazz.getSuperclass();
-			}
-		}
-		return null;
-	}
-
 	@SuppressWarnings ("unused")
 	private static <EntityClass extends CTypeEntity<EntityClass>> CTypeEntityService<?>
 			getEntityTypeService(final IHasStatusAndWorkflow<?> statusItem) {
-		final Field field = findFieldInHierarchy(statusItem.getClass(), "entityType");
+		final Field field = CAuxillaries.findField(statusItem.getClass(), "entityType");
 		Check.notNull(field, "Field 'entityType' not found in class hierarchy of " + statusItem.getClass().getName());
 		final Class<?> returnType = field.getType();
 		final Class<?> serviceClass = CEntityRegistry.getEntityServiceClass(returnType.getSimpleName());
@@ -142,37 +133,40 @@ public abstract class CInitializerServiceBase {
 		// if (!CTypeEntityService.class.isAssignableFrom(serviceClass)) {
 		// throw new IllegalStateException("Service class " + serviceClass.getName() + " is not a CTypeEntityService");
 		// }
-		Check.instanceOf(serviceClass, CTypeEntityService.class, "Service class " + serviceClass.getName() + " is not a CTypeEntityService");
+		Check.instanceOf(serviceClass, CTypeEntityService.class,
+				"Service class " + serviceClass.getName() + " is not a CTypeEntityService");
 		final CTypeEntityService<?> typeService = (CTypeEntityService<?>) CSpringContext.getBean(serviceClass);
 		Check.notNull(typeService, "Could not get bean of type " + serviceClass.getName());
 		return typeService;
 	}
 
-	public static void initBase(final Class<?> clazz, final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, final CDetailSection detailSection,
-			final CGridEntity grid, final String menuTitle, final String pageTitle, final String pageDescription, final boolean showInQuickToolbar,
-			final String order, final Consumer<CPageEntity> pageCustomizer) throws Exception {
+	public static void initBase(final Class<?> clazz, final CProject<?> project,
+			final CGridEntityService gridEntityService, final CDetailSectionService detailSectionService,
+			final CPageEntityService pageEntityService, final CDetailSection detailSection, final CGridEntity grid,
+			final String menuTitle, final String pageTitle, final String pageDescription,
+			final boolean showInQuickToolbar, final String order, final Consumer<CPageEntity> pageCustomizer)
+			throws Exception {
 		Check.notNull(project, "project cannot be null");
 		Check.notNull(gridEntityService, "gridEntityService cannot be null");
 		Check.notNull(detailSectionService, "detailSectionService cannot be null");
 		Check.notNull(pageEntityService, "pageEntityService cannot be null");
 		detailSectionService.save(detailSection);
 		gridEntityService.save(grid);
-		final CPageEntity page = createPageEntity(clazz, project, grid, detailSection, menuTitle, pageTitle, pageDescription, order);
+		final CPageEntity page =
+				createPageEntity(clazz, project, grid, detailSection, menuTitle, pageTitle, pageDescription, order);
 		page.setAttributeShowInQuickToolbar(showInQuickToolbar);
-		
 		// Apply custom modifications if provided
 		if (pageCustomizer != null) {
 			pageCustomizer.accept(page);
 		}
-		
 		pageEntityService.save(page);
 	}
 
 	@SuppressWarnings ("unchecked")
-	protected static <EntityClass extends CEntityOfCompany<EntityClass>> void initializeCompanyEntity(final String[][] nameAndDescription,
-			final CEntityOfCompanyService<EntityClass> service, final CCompany company, final boolean minimal,
-			final ObjIntConsumer<EntityClass> customizer) throws Exception {
+	protected static <EntityClass extends CEntityOfCompany<EntityClass>> void initializeCompanyEntity(
+			final String[][] nameAndDescription, final CEntityOfCompanyService<EntityClass> service,
+			final CCompany company, final boolean minimal, final ObjIntConsumer<EntityClass> customizer)
+			throws Exception {
 		try {
 			// set session Company
 			final ISessionService sessionService = CSpringContext.getBean(ISessionService.class);
@@ -196,9 +190,10 @@ public abstract class CInitializerServiceBase {
 	}
 
 	@SuppressWarnings ("unchecked")
-	protected static <EntityClass extends CEntityOfProject<EntityClass>> void initializeProjectEntity(final String[][] nameAndDescription,
-			final CEntityOfProjectService<EntityClass> service, final CProject<?> project, final boolean minimal,
-			final ObjIntConsumer<EntityClass> customizer) throws Exception {
+	protected static <EntityClass extends CEntityOfProject<EntityClass>> void initializeProjectEntity(
+			final String[][] nameAndDescription, final CEntityOfProjectService<EntityClass> service,
+			final CProject<?> project, final boolean minimal, final ObjIntConsumer<EntityClass> customizer)
+			throws Exception {
 		try {
 			int index = 0;
 			for (final String[] typeData : nameAndDescription) {
