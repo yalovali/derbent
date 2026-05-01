@@ -9,7 +9,6 @@ import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.api.screens.service.CEntityNamedInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CProjectItemInitializerService;
 import tech.derbent.api.utils.Check;
@@ -27,7 +26,7 @@ public class CPageEntityInitializerService extends CProjectItemInitializerServic
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			CEntityNamedInitializerService.createScreenLines(detailSection, clazz, project, true);
+			CProjectItemInitializerService.createScreenLines(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "pageService"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Navigation"));

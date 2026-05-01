@@ -12,7 +12,6 @@ import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.api.screens.service.CEntityNamedInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CProjectItemInitializerService;
 import tech.derbent.api.users.domain.CUser;
@@ -36,7 +35,7 @@ public class CAssetInitializerService extends CProjectItemInitializerService {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			// Basic Information Section
-			CEntityNamedInitializerService.createScreenLines(detailSection, clazz, project, true);
+			CProjectItemInitializerService.createScreenLines(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "brand"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "model"));

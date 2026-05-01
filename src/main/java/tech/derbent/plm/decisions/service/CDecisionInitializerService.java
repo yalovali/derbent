@@ -13,7 +13,6 @@ import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.api.screens.service.CEntityNamedInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CProjectItemInitializerService;
 import tech.derbent.api.users.domain.CUser;
@@ -78,7 +77,7 @@ public class CDecisionInitializerService extends CProjectItemInitializerService 
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			// create screen lines
-			CEntityNamedInitializerService.createScreenLines(detailSection, clazz, project, true);
+			CProjectItemInitializerService.createScreenLines(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Schedule"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));

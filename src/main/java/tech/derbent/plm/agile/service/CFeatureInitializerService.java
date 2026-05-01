@@ -15,7 +15,6 @@ import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.api.screens.service.CEntityNamedInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CProjectItemInitializerService;
 import tech.derbent.api.users.domain.CUser;
@@ -42,7 +41,7 @@ public class CFeatureInitializerService extends CProjectItemInitializerService {
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
-			CEntityNamedInitializerService.createScreenLines(scr, clazz, project, true);
+			CProjectItemInitializerService.createScreenLines(scr, clazz, project, true);
 			scr.addScreenLine(CDetailLinesService.createSection("System Access"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
