@@ -24,6 +24,7 @@ import tech.derbent.plm.attachments.domain.CAttachment;
  * sections with consistent naming, behavior, and appearance. */
 public final class CAttachmentInitializerService extends CEntityOfCompanyInitializerService {
 
+	@SuppressWarnings ("hiding")
 	public static final String BASE_PANEL_NAME = "Attachment Details";
 	private static final Class<?> clazz = CAttachment.class;
 	/** Standard field name - must match entity field name */

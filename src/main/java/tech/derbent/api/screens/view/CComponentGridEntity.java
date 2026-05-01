@@ -24,7 +24,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.grid.Grid;
@@ -1301,7 +1300,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	 */
 	@SuppressWarnings ({"rawtypes", "unchecked"})
 	private static void activateEditorForRow(final Editor rawEditor,
-			final Object item, final Grid.Column<?> clickedColumn) {
+			final Object item, @SuppressWarnings ("unused") final Grid.Column<?> clickedColumn) {
 		try {
 			if (rawEditor.isOpen()) {
 				// Clicking the same row that is already being edited – no-op

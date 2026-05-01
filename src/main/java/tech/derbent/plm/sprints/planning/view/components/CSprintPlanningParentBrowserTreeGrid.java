@@ -48,14 +48,14 @@ public final class CSprintPlanningParentBrowserTreeGrid
 
 	private Map<String, CGnntItem>
 			buildItemKeyMap(final List<CGnntItem> flatItems) {
-		final Map<String, CGnntItem> itemByKey = new HashMap<>();
+		final Map<String, CGnntItem> itemsByKey = new HashMap<>();
 		flatItems.forEach((final CGnntItem item) -> {
 			final String key = item != null ? item.getEntityKey() : null;
 			if (key != null) {
-				itemByKey.put(key, item);
+				itemsByKey.put(key, item);
 			}
 		});
-		return itemByKey;
+		return itemsByKey;
 	}
 
 	@Override

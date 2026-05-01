@@ -28,6 +28,7 @@ import tech.derbent.plm.meetings.domain.CMeetingType;
 
 public class CMeetingInitializerService extends CProjectItemInitializerService {
 
+	@SuppressWarnings ("hiding")
 	public static final String BASE_PANEL_NAME = "Meeting Information";
 	private static final Class<?> ENTITY_CLASS = CMeeting.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingInitializerService.class);

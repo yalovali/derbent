@@ -13,6 +13,7 @@ import tech.derbent.api.entityOfCompany.domain.CStatus;
 @AttributeOverride (name = "id", column = @Column (name = "approval_status_id"))
 public class CApprovalStatus extends CStatus<CApprovalStatus> {
 
+	@SuppressWarnings ("hiding")
 	public static final String DEFAULT_COLOR = "#A9A08B"; // OpenWindows Disabled Gray - status
 	@SuppressWarnings ("hiding")
 	public static final String DEFAULT_ICON = "vaadin:check";

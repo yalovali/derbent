@@ -205,14 +205,14 @@ public final class CSprintPlanningTreeGrid extends CAbstractSprintPlanningTreeGr
 	}
 
 	private Map<String, CGnntItem> buildItemKeyMap(final List<CGnntItem> flatItems) {
-		final Map<String, CGnntItem> itemByKey = new HashMap<>();
+		final Map<String, CGnntItem> itemsByKey = new HashMap<>();
 		for (final CGnntItem item : flatItems) {
 			final String key = item != null ? item.getEntityKey() : null;
 			if (key != null) {
-				itemByKey.put(key, item);
+				itemsByKey.put(key, item);
 			}
 		}
-		return itemByKey;
+		return itemsByKey;
 	}
 
 

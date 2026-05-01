@@ -17,6 +17,7 @@ import tech.derbent.api.utils.CColorUtils;
 
 public class CUserProjectRoleInitializerService extends CRoleInitializationService {
 
+	@SuppressWarnings ("hiding")
 	public static final String BASE_PANEL_NAME = "Project Role Details";
 	private static final Class<?> ENTITY_CLASS = CUserProjectRole.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserProjectRoleInitializerService.class);

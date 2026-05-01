@@ -29,6 +29,7 @@ public class CUserInitializerService extends CEntityOfCompanyInitializerService 
 	private static final String BAB_ADMIN_LOGIN = "admin";
 	private static final String BAB_ADMIN_NAME = "Admin";
 	private static final String BAB_ADMIN_PASSWORD = "test123";
+	@SuppressWarnings ("hiding")
 	public static final String BASE_PANEL_NAME = "User Information";
 	static final Class<?> clazz = CUser.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserInitializerService.class);
