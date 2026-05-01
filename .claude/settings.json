@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(source ./setup-java-env.sh)",
+      "Bash(./mvnw *)",
+      "Bash(mvn *)",
+      "Bash(./scripts/agents.sh *)",
+      "Bash(./run-playwright-tests.sh *)",
+      "Bash(.github/agents/verifier/scripts/*.sh *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git branch *)",
+      "Bash(find . *)",
+      "Bash(grep *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(java *)",
+      "Bash(python3 *)"
+    ],
+    "deny": []
+  }
+}

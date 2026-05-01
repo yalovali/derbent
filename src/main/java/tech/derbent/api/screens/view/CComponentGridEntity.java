@@ -688,8 +688,18 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			}
 			final String serviceBeanName = gridEntity.getDataServiceBeanName();
 			Check.notNull(serviceBeanName, "Data service bean name is not set in grid entity");
-			// Get the entity class from the service bean
-			entityClass = getEntityClassFromService(serviceBeanName);
+			// Get the entity class from the service bean. Support special "pageservice" which indicates that the
+			// containing page's page service (contentOwner) provides the entity service.
+			if ("pageservice".equals(serviceBeanName)) {
+				if (contentOwner instanceof final IPageServiceImplementer<?> pageServiceImplementer) {
+					final CAbstractService<?> abstractService = pageServiceImplementer.getEntityService();
+					entityClass = getEntityClassFromService(abstractService);
+				} else {
+					throw new IllegalStateException("Data service bean 'pageservice' cannot be resolved because contentOwner is not IPageServiceImplementer");
+				}
+			} else {
+				entityClass = getEntityClassFromService(serviceBeanName);
+			}
 			Check.notNull(entityClass, "Could not determine entity class from service: " + serviceBeanName);
 			grid = new CGrid(entityClass);
 			grid.asSingleSelect().addValueChangeListener(this::onSelectionChange);

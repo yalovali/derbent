@@ -462,6 +462,18 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		return addCustomColumn(valueProvider, header, WIDTH_INTEGER, key, 0);
 	}
 
+	/**
+	 * Adds a long (64-bit) numeric column to the grid.
+	 * @param valueProvider provider for Long values
+	 * @param header column header text
+	 * @param key column key
+	 * @return created column
+	 */
+	public Column<EntityClass> addLongColumn(final ValueProvider<EntityClass, Long> valueProvider, final String header, final String key) {
+		Check.notNull(valueProvider, "Value provider cannot be null");
+		return addCustomColumn(valueProvider, header, WIDTH_INTEGER, key, 0);
+	}
+
 	public Column<EntityClass> addLongTextColumn(final ValueProvider<EntityClass, String> valueProvider, final String header, final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		return addCustomColumn(valueProvider, header, WIDTH_LONG_TEXT, key, 0);
