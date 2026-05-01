@@ -188,11 +188,25 @@ public class CFeatureInitializerService extends CProjectItemInitializerService {
 				feature.setActualCost(feature.getHourlyRate().multiply(feature.getActualHours()));
 				feature.setProgressPercentage(seed.progressPercentage());
 				feature.setResults(seed.progressPercentage() >= 35 ? "Cross-team delivery slices are underway." : "");
-				if (type != null && type.getWorkflow() != null) {
-					final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(feature);
-					if (!initialStatuses.isEmpty()) {
-						feature.setStatus(initialStatuses.get(0));
+				final List<CProjectItemStatus> allStatuses = statusService.listByCompany(project.getCompany());
+				CProjectItemStatus assignedStatus;
+				if (seed.progressPercentage() >= 75) {
+					assignedStatus = findStatusByName(allStatuses, "In Review");
+					if (assignedStatus == null) assignedStatus = findStatusByName(allStatuses, "Done");
+				} else if (seed.progressPercentage() >= 20) {
+					if (createdCount % 5 == 4) {
+						assignedStatus = findStatusByName(allStatuses, "Blocked");
+					} else {
+						assignedStatus = findStatusByName(allStatuses, "In Progress");
 					}
+				} else {
+					assignedStatus = findStatusByName(allStatuses, "To Do");
+				}
+				if (assignedStatus == null && !allStatuses.isEmpty()) {
+					assignedStatus = allStatuses.get(0);
+				}
+				if (assignedStatus != null) {
+					feature.setStatus(assignedStatus);
 				}
 				CEpic parentEpic =
 						!availableEpics.isEmpty() ? availableEpics.get(seed.parentEpicIndex() % availableEpics.size())
@@ -212,7 +226,7 @@ public class CFeatureInitializerService extends CProjectItemInitializerService {
 				if (returnIndex < createdFeatures.length) {
 					createdFeatures[returnIndex++] = feature;
 				}
-				if (minimal) {
+				if (minimal && createdCount >= 2) {
 					break;
 				}
 			}
@@ -223,5 +237,9 @@ public class CFeatureInitializerService extends CProjectItemInitializerService {
 					e.getMessage());
 			throw new RuntimeException("Failed to initialize sample features for project: " + project.getName(), e);
 		}
+	}
+
+	private static CProjectItemStatus findStatusByName(final List<CProjectItemStatus> statuses, final String name) {
+		return statuses.stream().filter(s -> s != null && name.equalsIgnoreCase(s.getName())).findFirst().orElse(null);
 	}
 }

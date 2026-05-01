@@ -66,7 +66,7 @@ public class CCommentComponentTester extends CBaseComponentTester {
 			}
 			addButton.click();
 			waitMs(page, 500);
-			final Locator dialog = waitForDialogWithText(page, "Add Comment");
+			final Locator dialog = waitForDialogWithText(page, "New Comment");
 			if (dialog.count() == 0) {
 				LOGGER.warn("         ⚠️ Add comment dialog did not open");
 				return;

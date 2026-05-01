@@ -123,7 +123,7 @@ public class CCommentPlaywrightTest extends CBaseUITest {
 			final Locator addButton = locateCommentToolbarButton(commentsContainer, "vaadin:plus");
 			addButton.click();
 			wait_500();
-			final Locator dialog = waitForDialogWithText("Add Comment");
+			final Locator dialog = waitForDialogWithText("New Comment");
 			final Locator commentTextArea = dialog.locator("vaadin-text-area");
 			final String commentText = "Test comment created at " + System.currentTimeMillis();
 			commentTextArea.fill(commentText);

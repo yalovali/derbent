@@ -174,11 +174,25 @@ public class CEpicInitializerService extends CProjectItemInitializerService {
 				epic.setProgressPercentage(seed.progressPercentage());
 				epic.setResults(seed.progressPercentage() >= 50
 						? "Discovery, architecture, and dependency mapping are progressing." : "");
-				if (type != null && type.getWorkflow() != null) {
-					final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(epic);
-					if (!initialStatuses.isEmpty()) {
-						epic.setStatus(initialStatuses.get(0));
+				final List<CProjectItemStatus> allStatuses = statusService.listByCompany(project.getCompany());
+				CProjectItemStatus assignedStatus;
+				if (seed.progressPercentage() >= 75) {
+					assignedStatus = findStatusByName(allStatuses, "In Review");
+					if (assignedStatus == null) assignedStatus = findStatusByName(allStatuses, "Done");
+				} else if (seed.progressPercentage() >= 20) {
+					if (createdCount % 5 == 4) {
+						assignedStatus = findStatusByName(allStatuses, "Blocked");
+					} else {
+						assignedStatus = findStatusByName(allStatuses, "In Progress");
 					}
+				} else {
+					assignedStatus = findStatusByName(allStatuses, "To Do");
+				}
+				if (assignedStatus == null && !allStatuses.isEmpty()) {
+					assignedStatus = allStatuses.get(0);
+				}
+				if (assignedStatus != null) {
+					epic.setStatus(assignedStatus);
 				}
 				// Epic has no parent - it's root level
 				epic = epicService.save(epic);
@@ -186,7 +200,7 @@ public class CEpicInitializerService extends CProjectItemInitializerService {
 				if (returnIndex < createdEpics.length) {
 					createdEpics[returnIndex++] = epic;
 				}
-				if (minimal) {
+				if (minimal && createdCount >= 2) {
 					break;
 				}
 			}
@@ -197,5 +211,9 @@ public class CEpicInitializerService extends CProjectItemInitializerService {
 					e.getMessage());
 			throw new RuntimeException("Failed to initialize sample epics for project: " + project.getName(), e);
 		}
+	}
+
+	private static CProjectItemStatus findStatusByName(final List<CProjectItemStatus> statuses, final String name) {
+		return statuses.stream().filter(s -> s != null && name.equalsIgnoreCase(s.getName())).findFirst().orElse(null);
 	}
 }

@@ -51,12 +51,12 @@ public class CAttachmentPlaywrightTest extends CBaseUITest {
 			if (!navigated) {
 				if ("CActivity".equals(entityType)) {
 					LOGGER.warn("⚠️ Menu navigation failed for CActivity, trying direct route fallback");
-					navigateToDynamicPageByEntityType("CActivity");
+					page.navigate("http://localhost:" + port + "/cdynamicpagerouter/page:3");
+					wait_2000();
 				} else {
 					throw new AssertionError("Navigation failed for entity type: " + entityType);
 				}
 			}
-			page.waitForSelector("vaadin-grid", new Page.WaitForSelectorOptions().setTimeout(15000));
 			page.waitForSelector("vaadin-grid", new Page.WaitForSelectorOptions().setTimeout(15000));
 			clickFirstGridRow();
 			wait_1000();
@@ -75,7 +75,7 @@ public class CAttachmentPlaywrightTest extends CBaseUITest {
 			Files.writeString(tempFile, "Attachment upload test content " + System.currentTimeMillis());
 			dialog.locator("vaadin-upload input[type='file']").setInputFiles(tempFile);
 
-			final Locator dialogUploadButton = dialog.locator("#cbutton-upload");
+			final Locator dialogUploadButton = dialog.locator("#cbutton-save");
 			waitForButtonEnabled(dialogUploadButton);
 			takeScreenshot(String.format("%03d-upload-ready", screenshotCounter++), false);
 			dialogUploadButton.click();

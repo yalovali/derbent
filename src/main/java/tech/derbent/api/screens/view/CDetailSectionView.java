@@ -77,7 +77,9 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 
 	@Override
 	public void selectFirstInGrid() {
-		/***/
+		if (masterViewSection != null) {
+			masterViewSection.selectLastOrFirst(null);
+		}
 	}
 
 	@Override

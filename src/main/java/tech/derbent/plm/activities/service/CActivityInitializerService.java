@@ -162,9 +162,13 @@ public class CActivityInitializerService extends CProjectItemInitializerService 
 				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
+	private static CProjectItemStatus findStatusByName(final List<CProjectItemStatus> statuses, final String name) {
+		return statuses.stream().filter(s -> s != null && name.equalsIgnoreCase(s.getName())).findFirst().orElse(null);
+	}
+
 	/** Initialize sample activities for a project with relationships (comments, attachments, links).
 	 * @param project          the project to create activities for
-	 * @param minimal          if true, creates only 1 activity; if false, creates 3 activities
+	 * @param minimal          if true, creates only 6 activities; if false, creates all 25 activities
 	 * @param sampleUserStory1 the first user story to link activities to (can be null)
 	 * @param sampleUserStory2 the second user story to link third activity to (can be null) */
 	public static void initializeSample(final CProject<?> project, final boolean minimal,
@@ -216,7 +220,67 @@ public class CActivityInitializerService extends CProjectItemInitializerService 
 						"Refresh incident, rollback, and communication runbooks for the release program.",
 						"Runbooks include rollback owner, communication template, and on-call handoff instructions.",
 						"Documentation-heavy backlog item that complements the release readiness epic.", 5, 0, 5, 2, 8,
-						0, 0));
+						0, 0),
+				new ActivitySeed("Implement MFA Recovery Code Export",
+						"Allow users to export backup recovery codes in a secure, one-time download.",
+						"Recovery codes are downloadable as a text file after re-authentication, and prior codes are invalidated.",
+						"Security requirement tied to the MFA enrollment epic.", 0, 20, 6, 3, 12, 9, 80),
+				new ActivitySeed("Add Session Activity Log Panel",
+						"Show a chronological activity log for each active session, including login source and actions.",
+						"Session log is accessible from account security settings with pagination and date filter.",
+						"Needed for audit and SOC2 compliance controls.", 1, 18, 7, 4, 16, 10, 62),
+				new ActivitySeed("Build Workspace Role Assignment UI",
+						"Create the interface for assigning and revoking workspace roles for users and teams.",
+						"Roles can be assigned, changed, and revoked with confirmation and audit trail.",
+						"Prerequisite for the access modernization epic.", 0, 15, 8, 5, 20, 8, 45),
+				new ActivitySeed("Implement Payment Method Update Form",
+						"Allow customers to update their payment method directly from the billing workspace.",
+						"Payment method form validates card details, previews changes, and updates on save.",
+						"High-priority customer request for self-service billing management.", 2, 12, 6, 4, 14, 5, 38),
+				new ActivitySeed("Create Invoice Dispute API Endpoints",
+						"Build the REST endpoints for creating, updating, and resolving invoice disputes.",
+						"Endpoints support dispute CRUD, SLA tracking, and evidence attachment.",
+						"Backend foundation for the billing operations epic.", 4, 10, 9, 5, 22, 7, 30),
+				new ActivitySeed("Wire Dashboard Activity Feed Widget",
+						"Add a real-time activity feed widget to the main dashboard showing recent project events.",
+						"Feed updates in real time, shows action type, actor, and timestamp for the last 50 events.",
+						"Requested by project managers for status overview.", 3, 9, 7, 4, 18, 4, 22),
+				new ActivitySeed("Implement Sprint Burndown Chart",
+						"Render a burndown chart for each sprint showing remaining story points over time.",
+						"Chart updates daily, includes trend line, and is visible from the sprint planning view.",
+						"Key visibility tool for scrum masters and release managers.", 5, 8, 8, 5, 20, 3, 15),
+				new ActivitySeed("Create Team Capacity Planner",
+						"Build a capacity planning tool that shows developer availability across sprints.",
+						"Planner shows available hours per sprint per team member and flags over-allocation.",
+						"Long-requested feature for sprint planning accuracy.", 3, 6, 10, 5, 24, 2, 8),
+				new ActivitySeed("Build API Rate Limit Dashboard",
+						"Show real-time API usage, rate limit consumption, and throttling events per tenant.",
+						"Dashboard displays current usage vs. limits and alerts on approaching thresholds.",
+						"Required for enterprise tenants with strict API SLA agreements.", 5, 5, 8, 4, 18, 0, 5),
+				new ActivitySeed("Implement Webhook Event Delivery Retries",
+						"Add automatic retry logic with exponential backoff for failed webhook deliveries.",
+						"Failed deliveries are retried up to 5 times with full delivery log visible to customers.",
+						"Reliability improvement for customers using event-driven integrations.", 5, 3, 9, 5, 20, 0, 0),
+				new ActivitySeed("Add Tenant Isolation Audit Report",
+						"Generate a periodic report confirming data isolation between tenants.",
+						"Report covers storage, API access, and search index boundaries across all tenant contexts.",
+						"Compliance requirement for multi-tenant SaaS certification.", 1, 2, 7, 3, 16, 0, 0),
+				new ActivitySeed("Create Release Rollback Orchestrator",
+						"Implement automated rollback logic that triggers on critical health-check failure post-deploy.",
+						"Rollback completes within 5 minutes, notifies on-call channel, and records a rollback event.",
+						"Critical safety net for zero-downtime deploy strategy.", 5, 1, 10, 5, 22, 0, 0),
+				new ActivitySeed("Write Integration Test Suite for Auth Flow",
+						"Build an automated integration test suite covering the full MFA login and session lifecycle.",
+						"Suite covers enrollment, login with MFA, session revocation, and re-authentication.",
+						"Test infrastructure investment for the identity modernization epic.", 0, 0, 12, 5, 28, 0, 0),
+				new ActivitySeed("Document API Contract for Billing Endpoints",
+						"Write OpenAPI specs and developer guide for all billing dispute and payment endpoints.",
+						"Specs are published to the developer portal and cover all request/response schemas.",
+						"Required before partner integrations begin.", 4, 0, 6, 2, 10, 0, 0),
+				new ActivitySeed("Prototype AI-Assisted Dispute Triage",
+						"Build a proof-of-concept that uses ML to classify and prioritize incoming invoice disputes.",
+						"Prototype classifies dispute type with 80% accuracy and routes to the correct team queue.",
+						"Exploratory R&D backlog item; not sprint-committed.", 4, 0, 14, 3, 16, 0, 0));
 		try {
 			final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
 			final CActivityTypeService activityTypeService = CSpringContext.getBean(CActivityTypeService.class);
@@ -265,11 +329,29 @@ public class CActivityInitializerService extends CProjectItemInitializerService 
 				activity.setProgressPercentage(seed.progressPercentage());
 				activity.setResults(
 						seed.progressPercentage() >= 45 ? "Implementation slice reviewed with product and QA." : "");
-				if (type != null && type.getWorkflow() != null) {
-					final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(activity);
-					if (!initialStatuses.isEmpty()) {
-						activity.setStatus(initialStatuses.get(0));
+				final List<CProjectItemStatus> allStatuses = statusService.listByCompany(project.getCompany());
+				// Assign realistic status based on progress
+				CProjectItemStatus assignedStatus;
+				if (seed.progressPercentage() >= 75) {
+					assignedStatus = findStatusByName(allStatuses, "In Review");
+					if (assignedStatus == null) {
+						assignedStatus = findStatusByName(allStatuses, "Done");
 					}
+				} else if (seed.progressPercentage() >= 15) {
+					// Make 1 out of 5 items Blocked
+					if (createdCount % 5 == 3) {
+						assignedStatus = findStatusByName(allStatuses, "Blocked");
+					} else {
+						assignedStatus = findStatusByName(allStatuses, "In Progress");
+					}
+				} else {
+					assignedStatus = findStatusByName(allStatuses, "To Do");
+				}
+				if (assignedStatus == null && !allStatuses.isEmpty()) {
+					assignedStatus = allStatuses.get(0);
+				}
+				if (assignedStatus != null) {
+					activity.setStatus(assignedStatus);
 				}
 				CUserStory parentUserStory = !availableUserStories.isEmpty()
 						? availableUserStories.get(seed.parentUserStoryIndex() % availableUserStories.size())
@@ -289,7 +371,7 @@ public class CActivityInitializerService extends CProjectItemInitializerService 
 				activityService.save(activity);
 				createdActivities.add(activity);
 				createdCount++;
-				if (minimal) {
+				if (minimal && createdCount >= 6) {
 					break;
 				}
 			}

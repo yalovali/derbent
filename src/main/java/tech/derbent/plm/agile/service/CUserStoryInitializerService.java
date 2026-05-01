@@ -201,11 +201,25 @@ public class CUserStoryInitializerService extends CProjectItemInitializerService
 				userStory.setProgressPercentage(seed.progressPercentage());
 				userStory.setResults(seed.progressPercentage() >= 30
 						? "Story grooming is complete and implementation slices are prepared." : "");
-				if (type != null && type.getWorkflow() != null) {
-					final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(userStory);
-					if (!initialStatuses.isEmpty()) {
-						userStory.setStatus(initialStatuses.get(0));
+				final List<CProjectItemStatus> allStatuses = statusService.listByCompany(project.getCompany());
+				CProjectItemStatus assignedStatus;
+				if (seed.progressPercentage() >= 75) {
+					assignedStatus = findStatusByName(allStatuses, "In Review");
+					if (assignedStatus == null) assignedStatus = findStatusByName(allStatuses, "Done");
+				} else if (seed.progressPercentage() >= 20) {
+					if (createdCount % 5 == 4) {
+						assignedStatus = findStatusByName(allStatuses, "Blocked");
+					} else {
+						assignedStatus = findStatusByName(allStatuses, "In Progress");
 					}
+				} else {
+					assignedStatus = findStatusByName(allStatuses, "To Do");
+				}
+				if (assignedStatus == null && !allStatuses.isEmpty()) {
+					assignedStatus = allStatuses.get(0);
+				}
+				if (assignedStatus != null) {
+					userStory.setStatus(assignedStatus);
 				}
 				CFeature parentFeature = !availableFeatures.isEmpty()
 						? availableFeatures.get(seed.parentFeatureIndex() % availableFeatures.size())
@@ -228,7 +242,7 @@ public class CUserStoryInitializerService extends CProjectItemInitializerService
 				if (returnIndex < createdUserStories.length) {
 					createdUserStories[returnIndex++] = userStory;
 				}
-				if (minimal) {
+				if (minimal && createdCount >= 4) {
 					break;
 				}
 			}
@@ -239,5 +253,9 @@ public class CUserStoryInitializerService extends CProjectItemInitializerService
 					e.getMessage());
 			throw new RuntimeException("Failed to initialize sample user stories for project: " + project.getName(), e);
 		}
+	}
+
+	private static CProjectItemStatus findStatusByName(final List<CProjectItemStatus> statuses, final String name) {
+		return statuses.stream().filter(s -> s != null && name.equalsIgnoreCase(s.getName())).findFirst().orElse(null);
 	}
 }
