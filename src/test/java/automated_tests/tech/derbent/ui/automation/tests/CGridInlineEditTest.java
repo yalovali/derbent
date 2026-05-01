@@ -96,7 +96,8 @@ public class CGridInlineEditTest extends CBaseUITest {
 			clickNew();
 			wait_1000();
 			snap("03-new-dialog");
-			fillFirstTextField(ACTIVITY_ORIGINAL_NAME);
+			// Use #field-name (same pattern as CPageComprehensiveTest) to avoid filling the search bar
+			fillFieldByIdOrFallback("field-name", ACTIVITY_ORIGINAL_NAME);
 			wait_500();
 			clickSave();
 			wait_2000();
@@ -130,11 +131,14 @@ public class CGridInlineEditTest extends CBaseUITest {
 			snap("07-editor-input-visible");
 
 			// ── Step 8: replace the text with the edited name ─────────────────────
+			// Use chained locator so Playwright pierces Shadow DOM into the vaadin-text-field
 			LOGGER.info("Replacing name with '{}'", ACTIVITY_EDITED_NAME);
-			final Locator editorInput = page.locator("vaadin-grid vaadin-text-field input").first();
+			final Locator editorTf = page.locator("vaadin-grid vaadin-text-field").first();
+			final Locator editorInput = editorTf.locator("input").first();
 			editorInput.click();
 			wait_200();
-			editorInput.selectText();
+			// Triple-click selects all text inside the field (shadow-DOM safe alternative to selectText())
+			editorInput.click(new Locator.ClickOptions().setClickCount(3));
 			wait_200();
 			editorInput.fill(ACTIVITY_EDITED_NAME);
 			wait_500();
@@ -332,16 +336,26 @@ public class CGridInlineEditTest extends CBaseUITest {
 		}
 	}
 
-	/** Returns true if a text-field (or numeric-field) input is visible inside the grid editor. */
+	/** Returns true if a text-field (or numeric-field) input is visible inside the grid editor.
+	 *  Uses chained locators so Playwright pierces Shadow DOM into the web components. */
 	private boolean isEditorInputVisible() {
 		try {
-			final Locator inputs = page.locator("vaadin-grid vaadin-text-field input");
-			if (inputs.count() > 0 && inputs.first().isVisible()) {
-				return true;
+			final Locator gridTfs = page.locator("vaadin-grid vaadin-text-field");
+			for (int i = 0; i < gridTfs.count(); i++) {
+				final Locator inp = gridTfs.nth(i).locator("input");
+				if (inp.count() > 0 && inp.first().isVisible()) {
+					return true;
+				}
 			}
-			final Locator numInputs = page.locator(
-					"vaadin-grid vaadin-integer-field input, vaadin-grid vaadin-big-decimal-field input");
-			return numInputs.count() > 0 && numInputs.first().isVisible();
+			final Locator gridIntFields = page.locator(
+					"vaadin-grid vaadin-integer-field, vaadin-grid vaadin-big-decimal-field");
+			for (int i = 0; i < gridIntFields.count(); i++) {
+				final Locator inp = gridIntFields.nth(i).locator("input");
+				if (inp.count() > 0 && inp.first().isVisible()) {
+					return true;
+				}
+			}
+			return false;
 		} catch (final Exception e) {
 			LOGGER.warn("isEditorInputVisible error: {}", e.getMessage());
 			return false;
@@ -389,6 +403,37 @@ public class CGridInlineEditTest extends CBaseUITest {
 	// ---------------------------------------------------------------------------
 	// Convenience wrappers
 	// ---------------------------------------------------------------------------
+
+	/**
+	 * Fills a form field by its fieldId (looks for #fieldId input, then #fieldId,
+	 * then falls back to page.locator("vaadin-text-field").first()). Avoids
+	 * accidentally filling the search/filter bar at the top of the page.
+	 */
+	private void fillFieldByIdOrFallback(final String fieldId, final String value) {
+		try {
+			final Locator host = page.locator("#" + fieldId);
+			if (host.count() > 0) {
+				final Locator inp = host.locator("input");
+				if (inp.count() > 0) {
+					inp.first().fill(value);
+					LOGGER.info("Filled #{} input with '{}'", fieldId, value);
+					return;
+				}
+				host.first().fill(value);
+				LOGGER.info("Filled #{} (direct) with '{}'", fieldId, value);
+				return;
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("fillFieldByIdOrFallback #{} failed, using fallback: {}", fieldId, e.getMessage());
+		}
+		// Fallback: fill the first text-field via its inner input (shadow-DOM safe)
+		try {
+			page.locator("vaadin-text-field").first().locator("input").first().fill(value);
+			LOGGER.info("Filled first vaadin-text-field input with '{}'", value);
+		} catch (final Exception e) {
+			LOGGER.warn("Fallback fill also failed: {}", e.getMessage());
+		}
+	}
 
 	private void snap(final String label) {
 		takeScreenshot(String.format("%03d-%s", screenshotCounter++, label), false);

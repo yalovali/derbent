@@ -128,7 +128,7 @@ public class CComponentListAttachments extends CVerticalLayout
 					return attachment.getUploadedBy().getName();
 				}
 				return "";
-			}, "By", "120px", "uploadedBy", 0);
+			}, "By", "120px", "uploadedByName", 0);
 		} catch (final Exception e) {
 			LOGGER.error("Error configuring attachments grid reason={}", e.getMessage());
 			CNotificationService.showException("Error configuring attachments grid", e);
