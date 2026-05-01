@@ -29,7 +29,7 @@ public class CBabNodeInitializerService extends CEntityOfCompanyInitializerServi
 		Check.notNull(project, "project cannot be null");
 		try {
 			final CDetailSection detailSection =
-					CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
+					CEntityOfProjectInitializerService.createBasicView(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection("Node Information"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "device"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "nodeType"));

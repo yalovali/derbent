@@ -52,7 +52,7 @@ public class CActivityInitializerService extends CProjectItemInitializerService 
 	private static final boolean showInQuickToolbar = true;
 
 	/** Add relationships (comments, attachments, links) to sample activities. */
-	private static void addRelationshipsToActivities(final List<CActivity> activities, final CProject<?> project) {
+	private static void _addRelationshipsToActivities(final List<CActivity> activities, final CProject<?> project) {
 		try {
 			final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
 			// Add comments to first activity
@@ -113,7 +113,7 @@ public class CActivityInitializerService extends CProjectItemInitializerService 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
-			CEntityNamedInitializerService.createBasicView(scr, clazz, project, true);
+			CEntityNamedInitializerService.createScreenLines(scr, clazz, project, true);
 			scr.addScreenLine(CDetailLinesService.createSection("System Access"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
@@ -316,7 +316,7 @@ public class CActivityInitializerService extends CProjectItemInitializerService 
 			}
 			// Add relationships: comments, attachments, links (only if not minimal)
 			if (!minimal && !createdActivities.isEmpty()) {
-				addRelationshipsToActivities(createdActivities, project);
+				_addRelationshipsToActivities(createdActivities, project);
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample activities for project: {} reason={}", project.getName(),

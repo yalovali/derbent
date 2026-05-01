@@ -33,7 +33,7 @@ public class CActivityPriorityInitializerService extends CEntityTypeInitializerS
 	public static CDetailSection createBasicView(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
 		try {
-			final CDetailSection scr = CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
+			final CDetailSection scr = CEntityOfProjectInitializerService.createBasicView(project, clazz);
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
 			scr.addScreenLine(CDetailLinesService.createSection("Display Configuration"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));

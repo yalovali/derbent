@@ -40,7 +40,7 @@ public class CBabDeviceInitializerService extends CEntityOfCompanyInitializerSer
 		Check.notNull(project, "project cannot be null");
 		try {
 			final CDetailSection detailSection =
-					CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
+					CEntityOfProjectInitializerService.createBasicView(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection("Device Information"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "serialNumber"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "firmwareVersion"));

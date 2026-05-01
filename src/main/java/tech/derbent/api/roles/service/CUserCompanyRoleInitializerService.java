@@ -32,7 +32,7 @@ public class CUserCompanyRoleInitializerService extends CRoleInitializationServi
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			// Basic Company Role Information
-			CEntityNamedInitializerService.createBasicView(detailSection, clazz, project, true);
+			CEntityNamedInitializerService.createScreenLines(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
 			// Role Type Attributes

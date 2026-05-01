@@ -38,7 +38,7 @@ public class CProjectExpenseInitializerService extends CProjectItemInitializerSe
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection =
-					CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
+					CEntityOfProjectInitializerService.createBasicView(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "amount"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "currency"));

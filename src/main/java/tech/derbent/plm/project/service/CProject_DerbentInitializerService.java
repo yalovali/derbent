@@ -32,8 +32,7 @@ public class CProject_DerbentInitializerService extends CProjectInitializerServi
 
 	public static CDetailSection createBasicView(final CProject_Derbent project) throws Exception {
 		try {
-			final CDetailSection detailSection =
-					CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
+			final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			final CDetailLines companyLine = CDetailLinesService.createLineFromDefaults(clazz, "company");
 			companyLine.setIsReadonly(true);

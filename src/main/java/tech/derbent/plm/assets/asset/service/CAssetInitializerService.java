@@ -36,7 +36,7 @@ public class CAssetInitializerService extends CProjectItemInitializerService {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			// Basic Information Section
-			CEntityNamedInitializerService.createBasicView(detailSection, clazz, project, true);
+			CEntityNamedInitializerService.createScreenLines(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "brand"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "model"));

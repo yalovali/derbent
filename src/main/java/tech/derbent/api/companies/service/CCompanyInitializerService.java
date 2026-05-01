@@ -44,7 +44,7 @@ public class CCompanyInitializerService extends CEntityNamedInitializerService {
 			final CDetailSection detailSection =
 					createBaseScreenEntity(project, clazz);
 			// Basic Company Information
-			CEntityNamedInitializerService.createBasicView(detailSection, clazz,
+			CEntityNamedInitializerService.createScreenLines(detailSection, clazz,
 					project, true);
 			detailSection.addScreenLine(CDetailLinesService
 					.createLineFromDefaults(clazz, "address"));

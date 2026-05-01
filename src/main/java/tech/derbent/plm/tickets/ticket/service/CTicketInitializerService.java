@@ -41,7 +41,7 @@ public class CTicketInitializerService extends CProjectItemInitializerService {
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection =
-					CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
+					CEntityOfProjectInitializerService.createBasicView(project, clazz);
 			// Identity and Request Metadata
 			detailSection.addScreenLine(CDetailLinesService.createSection("Request Information"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "externalReference"));

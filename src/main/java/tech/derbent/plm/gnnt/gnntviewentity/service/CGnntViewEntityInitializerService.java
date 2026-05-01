@@ -28,7 +28,7 @@ public class CGnntViewEntityInitializerService extends CEntityOfProjectInitializ
 	private static final boolean SHOW_IN_QUICK_TOOLBAR = true;
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
-		final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
+		final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz);
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "gridType"));
 		detailSection.addScreenLine(CDetailLinesService.createSection("Gnnt Board"));

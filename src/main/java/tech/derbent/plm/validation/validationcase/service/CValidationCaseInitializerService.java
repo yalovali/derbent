@@ -36,7 +36,7 @@ public class CValidationCaseInitializerService extends CProjectItemInitializerSe
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection =
-					CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
+					CEntityOfProjectInitializerService.createBasicView(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priority"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "severity"));

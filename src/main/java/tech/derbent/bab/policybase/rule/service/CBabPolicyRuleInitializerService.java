@@ -57,7 +57,7 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
-			final CDetailSection scr = CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
+			final CDetailSection scr = CEntityOfProjectInitializerService.createBasicView(project, clazz);
 			// Policy rule specific fields
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active", true, ""));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "rulePriority", true, ""));
