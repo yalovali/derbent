@@ -27,7 +27,7 @@
   "prompt_log": "ai_prompts.log",
   "task_log": "ai_task.log",
   "path_prepend": ["/home/yasin/.nvm/versions/node/v22.22.2/bin", "/home/yasin/.local/bin"],
-  "default_agent": "claude",
+  "default_agent": "copilot",
   "agents": {
     "claude": {
       "display_name": "Claude",
@@ -60,6 +60,15 @@
       "working_dir": "/home/yasin/git/derbent",
       "auto_answer_permission": true,
       "permission_answer": "y"
+    },
+    "claudeapi": {
+      "display_name": "Claude API",
+      "aliases": ["claudeapi", "capi"],
+      "api_type": "claude",
+      "model": "claude-sonnet-4-6",
+      "max_tokens": 8096,
+      "api_key_env": "ANTHROPIC_API_KEY",
+      "system_prompt": "Sana verilen isteği uygula. İstek sisteme zarar verecekse veya gizli verileri ifşa edecekse çalıştırma; kullanıcıya kısa bir güvenlik açıklaması yap."
     }
   },
   "bot_names": ["bot", "agent", "lova", "codex", "copilot", "claude", "cc"],
@@ -67,10 +76,10 @@
   "custom_prompts": {
     "hi": {
       "description": "Kısa selamlama ve kullanım özeti",
-      "aliases": ["hi", "selam", "merhaba", "hello", "/hi"],
+      "aliases": ["hi", "/hi"],
       "agent": "claude",
       "mode": "prompt",
-      "prompt": "Kullanıcıya Türkçe kısa ve sıcak bir selam ver. Bu Telegram AI Agent botunda kullanılabilecek /help, /prompt, /task, /agents ve hazır komutları birkaç kısa maddeyle açıkla."
+      "prompt": "Kullanıcıya Türkçe kısa ve sıcak bir selam ver. Bu Telegram AI Agent botunda kullanılabilecek /help, /agent, /status, /task ve /top komutlarını birkaç kısa maddeyle açıkla."
     },
     "durum": {
       "description": "Bugünkü eposta kayıtlarını raporla",
@@ -91,5 +100,5 @@
   "timeout": 3600,
   "pty_idle_timeout": 15,
   "poll_interval": 5.0,
-  "task_reminder": "Uzun işler için /task [agent] <komut> kullan. Son durumu /taskstatus ile sorabilirsin."
+  "task_reminder": "Uzun işler için /task <komut> kullan. Varsayılan ajanı /agent <agent> ile değiştirip /task ile son durumu sorabilirsin."
 }

@@ -2,18 +2,27 @@
 """
 Telegram AI Agent Bot
 
-Yapı:
-- /prompt [agent] <mesaj> : Varsayılan veya seçilen AI ajanını çalıştırır.
-- /task [agent] <mesaj>   : Uzun AI işini arka planda çalıştırır, timeout yoktur.
-- /taskstatus             : Arka plan task çıktısının son halini gösterir.
-- /run <komut>     : Lokal Ubuntu shell komutu çalıştırır.
-- hazır komutlar   : telegram_config.json içindeki custom_prompts ile tanımlanır.
-- normal mesaj     : Bot adı veya ajan adı geçerse varsayılan AI ajanına gönderilir.
+Komutlar:
+- /task <mesaj>           : Aktif ajanla uzun AI işini arka planda çalıştırır.
+- /task                   : Çalışan task durumunu gösterir.
+- /agent <agent>          : Varsayılan AI ajanını değiştirir.
+- /agent                  : Mevcut ajan durumunu gösterir.
+- /top                    : Sistem istatistikleri ve en yoğun process'leri gösterir.
+- /run <komut>            : Lokal Ubuntu shell komutu çalıştırır.
+- hazır komutlar          : telegram_config.json içindeki custom_prompts ile tanımlanır.
+- normal mesaj            : Bot adı veya ajan adı geçerse varsayılan AI ajanına gönderilir.
 
-Not:
+Desteklenen ajan tipleri:
+1. CLI ajanı (varsayılan): executable + args ile subprocess/PTY üzerinden çalışır.
+   Örnekler: claude (Claude Code CLI), codex, copilot
+2. Claude Agent SDK (api_type: "claude"): Anthropic Python SDK üzerinden doğrudan
+   API çağrısı yapar — subprocess yok, PTY yok, daha hızlı ve güvenilir.
+   Gereksinimler: pip install anthropic  ve  ANTHROPIC_API_KEY ortam değişkeni.
+
+PTY notu:
 Bazı AI CLI araçları manuel terminalde izin isteyebildiği için pexpect ile PTY
 kullanıyoruz. Bu, normal subprocess pipe kullanımına göre interactive davranışa
-daha yakındır.
+daha yakındır. SDK tabanlı Claude ajanı bu sorunu tamamen ortadan kaldırır.
 """
 
 import asyncio
@@ -27,8 +36,18 @@ import shlex
 import shutil
 import sys
 import time
+import socket
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+
+# Optional: Anthropic SDK for direct Claude API calls (api_type: "claude" agents).
+# Install with: pip install anthropic
+try:
+    import anthropic as _anthropic_sdk
+    _ANTHROPIC_AVAILABLE = True
+except ImportError:
+    _anthropic_sdk = None  # type: ignore[assignment]
+    _ANTHROPIC_AVAILABLE = False
 
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import (
@@ -45,6 +64,9 @@ CONFIG_PATH = Path(os.getenv("TELEGRAM_BOT_CONFIG", str(ROOT / "telegram_config.
 BOT_LOG = "telegram_bot.log"
 PROMPT_LOG = "ai_prompts.log"
 TASK_LOG = "ai_task.log"
+
+# Agent types that use SDK/API calls instead of subprocess execution.
+_SUPPORTED_API_TYPES = frozenset({"claude"})
 
 
 class ConfigurationError(Exception):
@@ -129,6 +151,26 @@ def tail_file(path: Path, max_chars: int = 3500) -> str:
     return text[-max_chars:] if text else "Task log boş."
 
 
+def collapse_duplicate_lines(text: str) -> str:
+    lines = text.splitlines()
+    if not lines:
+        return text
+
+    collapsed: List[str] = []
+    last_line = None
+    for line in lines:
+        if line == last_line:
+            continue
+        collapsed.append(line)
+        last_line = line
+
+    trailing_newline = text.endswith("\n")
+    result = "\n".join(collapsed)
+    if trailing_newline and result:
+        result += "\n"
+    return result
+
+
 def is_allowed_by_whitelist(cmd: List[str], whitelist: List[str]) -> bool:
     return bool(cmd) and cmd[0] in whitelist
 
@@ -178,6 +220,8 @@ class TelegramAIAgentBot:
         self.task_agent: Optional[str] = None
         self.task_log_path = self.log_dir / self.task_log_name
         self._agent_busy: bool = False
+        # asyncio.Task handle for SDK-based Claude agent background tasks.
+        self._running_api_task: Optional[asyncio.Task] = None
 
     def load_agents(self) -> Dict[str, Dict[str, Any]]:
         agents = self.config.get("agents")
@@ -270,15 +314,30 @@ class TelegramAIAgentBot:
             if not isinstance(agent, dict):
                 errors.append(f"agents.{key} must be an object.")
                 continue
-            if not agent.get("executable"):
-                errors.append(f"agents.{key}.executable is required.")
-            elif not self.find_executable(key):
-                errors.append(
-                    f"agents.{key}.executable not found: {agent.get('executable')}. "
-                    "Set an absolute path or add its directory to path_prepend."
-                )
-            if not isinstance(agent.get("args", []), list):
-                errors.append(f"agents.{key}.args must be a JSON array.")
+            api_type = agent.get("api_type", "")
+            if api_type:
+                # SDK/API agent — no executable needed, but api_type must be known.
+                if api_type not in _SUPPORTED_API_TYPES:
+                    errors.append(
+                        f"agents.{key}.api_type '{api_type}' is not supported. "
+                        f"Supported: {', '.join(sorted(_SUPPORTED_API_TYPES))}"
+                    )
+                elif api_type == "claude" and not _ANTHROPIC_AVAILABLE:
+                    errors.append(
+                        f"agents.{key} uses api_type 'claude' but the anthropic package "
+                        "is not installed. Run: pip install anthropic"
+                    )
+            else:
+                # CLI agent — executable is required.
+                if not agent.get("executable"):
+                    errors.append(f"agents.{key}.executable is required.")
+                elif not self.find_executable(key):
+                    errors.append(
+                        f"agents.{key}.executable not found: {agent.get('executable')}. "
+                        "Set an absolute path or add its directory to path_prepend."
+                    )
+                if not isinstance(agent.get("args", []), list):
+                    errors.append(f"agents.{key}.args must be a JSON array.")
 
         for key, prompt in self.custom_prompts.items():
             if not prompt.get("prompt"):
@@ -338,6 +397,54 @@ class TelegramAIAgentBot:
             for key, value in self.agents[agent_key].get("env", {}).items():
                 env[str(key)] = str(value)
         return env
+
+    @staticmethod
+    def format_bytes(value: Optional[int]) -> str:
+        if value is None:
+            return "unknown"
+
+        units = ["B", "KiB", "MiB", "GiB", "TiB"]
+        amount = float(value)
+        for unit in units:
+            if amount < 1024.0 or unit == units[-1]:
+                return f"{amount:.1f}{unit}" if unit != "B" else f"{int(amount)}B"
+            amount /= 1024.0
+        return "unknown"
+
+    @staticmethod
+    def format_duration(seconds: float) -> str:
+        total = max(0, int(seconds))
+        days, remainder = divmod(total, 86400)
+        hours, remainder = divmod(remainder, 3600)
+        minutes, secs = divmod(remainder, 60)
+        parts = []
+        if days:
+            parts.append(f"{days}d")
+        if hours or parts:
+            parts.append(f"{hours}h")
+        if minutes or parts:
+            parts.append(f"{minutes}m")
+        parts.append(f"{secs}s")
+        return " ".join(parts)
+
+    def read_meminfo(self) -> Dict[str, int]:
+        meminfo: Dict[str, int] = {}
+        path = Path("/proc/meminfo")
+        if not path.exists():
+            return meminfo
+
+        for raw_line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+            if ":" not in raw_line:
+                continue
+            key, remainder = raw_line.split(":", 1)
+            parts = remainder.strip().split()
+            if not parts:
+                continue
+            try:
+                meminfo[key] = int(parts[0]) * 1024
+            except ValueError:
+                continue
+        return meminfo
 
     def user_allowed(self, user_id: int) -> bool:
         return user_id in self.allowed_users
@@ -543,6 +650,90 @@ class TelegramAIAgentBot:
 
         return await asyncio.to_thread(_run)
 
+    async def run_claude_api_agent(self, agent_key: str, text: str) -> dict:
+        """
+        Claude Agent SDK üzerinden doğrudan API çağrısı yapar.
+
+        Neden bu yöntem?
+        - subprocess veya PTY gerektirmez — daha hızlı ve kararlı.
+        - PTY/CLI ajanlarında yaşanan TTY ve izin sorunları yoktur.
+        - System prompt, model ve max_tokens agent config'inden okunur.
+        - ANTHROPIC_API_KEY ortam değişkeni veya api_key_env ile belirtilen
+          env değişkeni üzerinden kimlik doğrulaması yapılır.
+
+        Gereksinimler:
+          pip install anthropic
+          ANTHROPIC_API_KEY=<your-key>  (veya .env dosyasında)
+        """
+        if not _ANTHROPIC_AVAILABLE:
+            return {
+                "rc": -1,
+                "stdout": "",
+                "stderr": "anthropic SDK yüklü değil. Yükle: pip install anthropic",
+            }
+
+        agent = self.agents[agent_key]
+        api_key_env = agent.get("api_key_env", "ANTHROPIC_API_KEY")
+        api_key = os.getenv(api_key_env)
+        if not api_key:
+            return {
+                "rc": -1,
+                "stdout": "",
+                "stderr": f"API anahtarı eksik: {api_key_env} ortam değişkeni tanımlı değil.",
+            }
+
+        model = agent.get("model", "claude-sonnet-4-6")
+        max_tokens = int(agent.get("max_tokens", 8096))
+        # Agent-level system_prompt varsa kullan; yoksa global safety_prompt'a dön.
+        system = agent.get("system_prompt", self.config.get("safety_prompt", "")).strip()
+
+        self.logger.info("Claude API call agent=%s model=%s", agent_key, model)
+
+        try:
+            client = _anthropic_sdk.Anthropic(api_key=api_key)
+            kwargs: Dict[str, Any] = {
+                "model": model,
+                "max_tokens": max_tokens,
+                "messages": [{"role": "user", "content": text}],
+            }
+            if system:
+                kwargs["system"] = system
+
+            response = await asyncio.to_thread(lambda: client.messages.create(**kwargs))
+            result_text = response.content[0].text if response.content else ""
+            return {"rc": 0, "stdout": result_text, "stderr": ""}
+
+        except Exception as exc:
+            self.logger.exception("Claude API call failed agent=%s", agent_key)
+            return {"rc": -1, "stdout": "", "stderr": str(exc)}
+
+    async def watch_api_task(self, agent_key: str, text: str):
+        """
+        Claude API ajanını arka planda çalıştırır; sonucu task log dosyasına yazar.
+        PTY tabanlı watch_pty_task'ın SDK karşılığıdır.
+        """
+        agent = self.agents[agent_key]
+        display_name = agent.get("display_name", agent_key)
+
+        with self.task_log_path.open("a", encoding="utf-8", errors="replace") as log:
+            try:
+                result = await self.run_claude_api_agent(agent_key, text)
+                if result["rc"] == 0:
+                    log.write(result["stdout"])
+                else:
+                    log.write(f"[ERROR] {result['stderr']}\n")
+                log.write("\n[TASK FINISHED]\n")
+                log.flush()
+            except asyncio.CancelledError:
+                log.write(f"\n[TASK CANCELLED by user]\n")
+                log.flush()
+                raise
+            except Exception as exc:
+                log.write(f"\n[TASK WATCHER ERROR] {exc}\n")
+                log.flush()
+
+        self.logger.info("Background API task finished agent=%s", agent_key)
+
     async def post_init(self, application):
         """
         Bot baslatildiginda calisir.
@@ -550,19 +741,19 @@ class TelegramAIAgentBot:
         """
         from telegram import BotCommand
 
-        command_map = {
-            "help": "Yardım ve komut listesi",
-            "status": "Servis durumu",
-            "agents": "Tanımlı AI ajanlarını göster",
-            "prompt": "Varsayılan veya seçilen AI ajanına prompt",
-            "agent": "Belirli AI ajanına prompt gönder",
-            "task": "Arka plan AI task",
-            "taskstatus": "Çalışan task durumu",
-            "cancel": "Çalışan taskı iptal et",
-            "run": "Shell komutu çalıştır",
-            "logs": "Bot loglarını göster (admin)",
-            "config": "Kullanıcı erişimini yönet (admin)",
-        }
+        command_specs = [
+            ("help", "Yardım ve komut listesi"),
+            ("task", "Arka plan AI task"),
+            ("agent", "Varsayılan AI ajanını değiştir"),
+            ("status", "Servis durumu"),
+            ("top", "Sistem istatistikleri"),
+            ("cancel", "Çalışan taskı iptal et"),
+            ("run", "Shell komutu çalıştır"),
+            ("logs", "Bot loglarını göster (admin)"),
+            ("config", "Kullanıcı erişimini yönet (admin)"),
+            ("pull", "Git pull çalıştır"),
+        ]
+        command_map = dict(command_specs)
         if "durum" not in self.custom_command_names:
             command_map["durum"] = "Çalışan task durumu"
         for command_name in self.custom_command_names:
@@ -581,10 +772,10 @@ class TelegramAIAgentBot:
             return
 
         keyboard = [
-            ["/help", "/status"],
-            ["/prompt ", "/task "],
-            ["/taskstatus", "/cancel"],
-            ["/agents", "/logs"],
+            ["/help", "/task"],
+            ["/agent", "/status"],
+            ["/status", "/top"],
+            ["/cancel", "/logs"],
         ]
         custom_buttons = [f"/{name}" for name in self.custom_command_names[:6]]
         keyboard.extend(custom_buttons[i : i + 2] for i in range(0, len(custom_buttons), 2))
@@ -610,12 +801,12 @@ class TelegramAIAgentBot:
 
         msg = (
             "/help - yardım\n"
-            "/status - servis durumu\n"
-            "/agents - tanımlı AI ajanları\n"
-            "/prompt [agent] <text> - kısa AI prompt\n"
-            "/agent <agent> <text> - belirli AI ajanına prompt\n"
-            "/task [agent] <text> - uzun işi arka planda başlatır\n"
-            "/taskstatus - çalışan task durumunu ve son logları gösterir\n"
+            "/task <text> - aktif ajanla uzun işi arka planda başlatır\n"
+            "/task - çalışan task durumunu gösterir\n"
+            "/agent <agent> - varsayılan ajanı değiştirir\n"
+            "/agent - mevcut ajan durumunu gösterir\n"
+            "/status - servis ve ajan özeti\n"
+            "/top - sistem istatistikleri ve process özeti\n"
             "/cancel - çalışan task'ı durdurur\n"
             "/run <command> - lokal shell komutu çalıştırır\n"
             "/logs <lines> - bot loglarını okur, sadece admin\n\n"
@@ -630,38 +821,44 @@ class TelegramAIAgentBot:
         if not await self.require_allowed(update):
             return
 
-        task_state = "none"
-        if self.task_process:
-            task_state = "running" if self.task_process.isalive() else "finished"
-
+        agent_names = ", ".join(
+            sorted(
+                {
+                    str(agent.get("display_name", key)).strip()
+                    for key, agent in self.agents.items()
+                    if str(agent.get("display_name", key)).strip()
+                }
+            )
+        )
+        default_display = self.agents.get(self.default_agent, {}).get("display_name", self.default_agent)
         await update.message.reply_text(
-            f"Running\n"
-            f"working_dir={self.working_dir}\n"
-            f"exec_mode={self.exec_mode}\n"
-            f"default_agent={self.default_agent}\n"
-            f"agents={', '.join(sorted(self.agents))}\n"
-            f"timeout={self.timeout}\n"
-            f"token_env={self.token_env} ({'set' if os.getenv(self.token_env) else 'missing'})\n"
-            f"path_prepend={', '.join(self.path_prepend())}\n"
-            f"task={task_state}"
+            f"default_agent={default_display}\n"
+            f"available_agents={agent_names}"
         )
 
-    async def agents_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        if not await self.require_allowed(update):
-            return
+    def format_agent_status(self, agent_key: str) -> str:
+        agent = self.agents[agent_key]
+        display_name = agent.get("display_name", agent_key)
+        aliases = ", ".join(agent.get("aliases", [])) or "none"
+        mode = agent.get("api_type", "cli")
+        working_dir = agent.get("working_dir", self.working_dir)
+        executable = agent.get("executable", "api")
+        interactive = "yes" if agent.get("interactive", False) else "no"
+        busy = "yes" if self.task_agent == agent_key and (
+            (self.task_process and self.task_process.isalive())
+            or (self._running_api_task and not self._running_api_task.done())
+        ) else "no"
 
-        lines = []
-        for key, agent in sorted(self.agents.items()):
-            display = agent.get("display_name", key)
-            args = " ".join(str(item) for item in agent.get("args", []))
-            lines.append(f"{key}: {display}\n  executable={agent.get('executable')}\n  args={args}")
-        await update.message.reply_text("\n".join(lines))
-
-    def parse_agent_prefix(self, args: List[str]) -> Tuple[str, str]:
-        if args and normalize_alias(args[0].rstrip(":")) in self.agent_aliases:
-            agent_key = self.resolve_agent_key(args[0].rstrip(":"))
-            return agent_key, " ".join(args[1:]).strip()
-        return self.default_agent, " ".join(args).strip()
+        return (
+            f"agent={display_name}\n"
+            f"key={agent_key}\n"
+            f"aliases={aliases}\n"
+            f"mode={mode}\n"
+            f"interactive={interactive}\n"
+            f"executable={executable}\n"
+            f"working_dir={working_dir}\n"
+            f"active_task={busy}"
+        )
 
     def parse_agent_prefix_text(self, text: str) -> Tuple[str, str]:
         parts = text.strip().split(maxsplit=1)
@@ -670,23 +867,19 @@ class TelegramAIAgentBot:
             return agent_key, parts[1].strip() if len(parts) > 1 else ""
         return self.default_agent, text.strip()
 
-    async def prompt(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        if not await self.require_allowed(update):
-            return
-
-        agent_key, text = self.parse_agent_prefix(context.args)
-        if not text:
-            await update.message.reply_text("Usage: /prompt [agent] <text>")
-            return
-
-        await self.send_to_agent(update, text, agent_key)
+    def set_default_agent(self, agent_key: str) -> None:
+        self.default_agent = agent_key
+        self.config["default_agent"] = agent_key
+        CONFIG_PATH.write_text(
+            json.dumps(self.config, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
 
     async def agent_prompt(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not await self.require_allowed(update):
             return
 
-        if len(context.args) < 2:
-            await update.message.reply_text("Usage: /agent <agent> <text>")
+        if not context.args:
+            await update.message.reply_text(self.format_agent_status(self.default_agent))
             return
 
         try:
@@ -695,7 +888,22 @@ class TelegramAIAgentBot:
             await update.message.reply_text(str(exc))
             return
 
-        await self.send_to_agent(update, " ".join(context.args[1:]).strip(), agent_key)
+        if len(context.args) > 1:
+            await update.message.reply_text("Usage: /agent <agent>")
+            return
+
+        try:
+            self.set_default_agent(agent_key)
+        except OSError as exc:
+            await update.message.reply_text(
+                f"Default agent set to {self.agents[agent_key].get('display_name', agent_key)}, "
+                f"but config could not be saved: {exc}"
+            )
+            return
+
+        await update.message.reply_text(
+            f"Default agent set to {self.agents[agent_key].get('display_name', agent_key)}."
+        )
 
     async def normal_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not await self.require_allowed(update):
@@ -732,6 +940,68 @@ class TelegramAIAgentBot:
             return
         await self.send_to_agent(update, prompt_text, agent_key)
 
+    async def top(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not await self.require_allowed(update):
+            return
+
+        host = socket.gethostname()
+        uptime_seconds = None
+        uptime_path = Path("/proc/uptime")
+        if uptime_path.exists():
+            try:
+                uptime_seconds = float(uptime_path.read_text(encoding="utf-8").split()[0])
+            except (ValueError, IndexError):
+                uptime_seconds = None
+
+        load_avg = "n/a"
+        try:
+            load_avg = ", ".join(f"{value:.2f}" for value in os.getloadavg())
+        except (AttributeError, OSError):
+            pass
+
+        meminfo = self.read_meminfo()
+        mem_total = meminfo.get("MemTotal")
+        mem_available = meminfo.get("MemAvailable", meminfo.get("MemFree"))
+        mem_used = (mem_total - mem_available) if mem_total is not None and mem_available is not None else None
+
+        disk_usage = shutil.disk_usage(self.working_dir)
+        disk_line = (
+            f"{self.format_bytes(disk_usage.used)} used / "
+            f"{self.format_bytes(disk_usage.free)} free / "
+            f"{self.format_bytes(disk_usage.total)} total"
+        )
+
+        cpu_result = await self.run_process_with_timeout(
+            args=["ps", "aux", "--sort=-%cpu"],
+            cwd=self.working_dir,
+            timeout=10,
+            env=self.build_env(),
+        )
+        mem_result = await self.run_process_with_timeout(
+            args=["ps", "aux", "--sort=-%mem"],
+            cwd=self.working_dir,
+            timeout=10,
+            env=self.build_env(),
+        )
+
+        def summarize_ps(output: str, limit: int = 6) -> str:
+            lines = [line.rstrip() for line in output.splitlines() if line.strip()]
+            if not lines:
+                return "No process data."
+            return "\n".join(lines[:limit])
+
+        reply = (
+            f"host={host}\n"
+            f"uptime={self.format_duration(uptime_seconds) if uptime_seconds is not None else 'unknown'}\n"
+            f"loadavg={load_avg}\n"
+            f"memory={self.format_bytes(mem_used)} used / {self.format_bytes(mem_total)} total\n"
+            f"disk={disk_line}\n\n"
+            f"top_cpu:\n{summarize_ps(cpu_result['stdout'])}\n\n"
+            f"top_mem:\n{summarize_ps(mem_result['stdout'])}"
+        )
+        for part in split_telegram(reply):
+            await update.message.reply_text(part)
+
     async def custom_prompt_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not await self.require_allowed(update):
             return
@@ -756,9 +1026,10 @@ class TelegramAIAgentBot:
             await self.send_to_agent(update, prompt_text, agent_key)
 
     async def send_to_agent(self, update: Update, text: str, agent_key: str):
-        if self._agent_busy or (self.task_process and self.task_process.isalive()):
+        api_task_running = self._running_api_task and not self._running_api_task.done()
+        if self._agent_busy or (self.task_process and self.task_process.isalive()) or api_task_running:
             await update.message.reply_text(
-                "Zaten çalışan bir ajan var. /taskstatus ile kontrol et veya /cancel ile durdur."
+                "Zaten çalışan bir ajan var. /task ile kontrol et veya /cancel ile durdur."
             )
             return
 
@@ -784,7 +1055,11 @@ class TelegramAIAgentBot:
         await update.message.reply_text(f"{display_name} çalışıyor...")
 
         try:
-            if agent.get("interactive", False):
+            api_type = agent.get("api_type", "")
+            if api_type == "claude":
+                # Claude Agent SDK: doğrudan API çağrısı, subprocess/PTY yok.
+                result = await self.run_claude_api_agent(agent_key, text)
+            elif agent.get("interactive", False):
                 result = await self.run_agent_pty(agent_key, text, self.timeout)
             else:
                 args = self.build_agent_command(agent_key, text, include_prompt_as_arg=True)
@@ -820,23 +1095,24 @@ class TelegramAIAgentBot:
 
     async def task(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """
-        Uzun AI işini arka planda PTY ile başlatır.
-        Timeout uygulanmaz; /taskstatus ile log okunur.
+        Uzun AI işini aktif ajanla arka planda başlatır.
+        Parametresiz çağrıldığında task durumunu gösterir.
         """
         if not await self.require_allowed(update):
             return
 
-        agent_key, text = self.parse_agent_prefix(context.args)
+        text = " ".join(context.args).strip()
         if not text:
-            await update.message.reply_text("Usage: /task [agent] <text>")
+            await self.task_status(update, context)
             return
 
-        await self.start_background_task(update, text, agent_key)
+        await self.start_background_task(update, text, self.default_agent)
 
     async def start_background_task(self, update: Update, text: str, agent_key: str):
-        if self._agent_busy or (self.task_process and self.task_process.isalive()):
+        api_task_running = self._running_api_task and not self._running_api_task.done()
+        if self._agent_busy or (self.task_process and self.task_process.isalive()) or api_task_running:
             await update.message.reply_text(
-                "Zaten çalışan bir ajan var. /taskstatus ile kontrol et veya /cancel ile durdur."
+                "Zaten çalışan bir ajan var. /task ile kontrol et veya /cancel ile durdur."
             )
             return
 
@@ -862,6 +1138,20 @@ class TelegramAIAgentBot:
         self.task_agent = agent_key
         self.task_started_at = time.time()
 
+        api_type = agent.get("api_type", "")
+        if api_type == "claude":
+            # Claude Agent SDK: asyncio.Task olarak arka planda çalışır.
+            self.logger.info("Starting background Claude API task agent=%s", agent_key)
+            self._running_api_task = asyncio.create_task(
+                self.watch_api_task(agent_key, text)
+            )
+            await update.message.reply_text(
+                f"{display_name} API task başladı.\n"
+                "/task ile son durumu görebilirsin."
+            )
+            return
+
+        # PTY tabanlı CLI ajan: pexpect.spawn ile çalıştırılır.
         cmd = self.build_agent_command(agent_key, text, include_prompt_as_arg=True)
         command_line = " ".join(shlex.quote(x) for x in cmd)
 
@@ -880,7 +1170,7 @@ class TelegramAIAgentBot:
 
             await update.message.reply_text(
                 f"{display_name} task başladı.\nPTY PID={child.pid}\n"
-                "/taskstatus ile son çıktıyı görebilirsin."
+                "/task ile son durumu görebilirsin."
             )
 
             asyncio.create_task(self.watch_pty_task(child, agent_key))
@@ -896,6 +1186,7 @@ class TelegramAIAgentBot:
         """
         agent = self.agents[agent_key]
         display_name = agent.get("display_name", agent_key)
+        last_logged_fragment = ""
         patterns = [
             r"(?i)permission.*\?",
             r"(?i)allow.*\?",
@@ -916,12 +1207,19 @@ class TelegramAIAgentBot:
                     )
 
                     if child.before:
-                        log.write(child.before)
-                        log.flush()
+                        fragment = child.before
+                        if fragment != last_logged_fragment:
+                            log.write(fragment)
+                            log.flush()
+                            last_logged_fragment = fragment
 
                     if idx in [0, 1, 2, 3, 4, 5, 6]:
                         if child.after:
-                            log.write(child.after)
+                            fragment = child.after
+                            if fragment != last_logged_fragment:
+                                log.write(fragment)
+                                log.flush()
+                                last_logged_fragment = fragment
                         if agent.get("auto_answer_permission", False):
                             answer = agent.get("permission_answer", "y")
                             child.sendline(answer)
@@ -937,15 +1235,15 @@ class TelegramAIAgentBot:
 
                     if idx == 7:
                         if child.before:
-                            log.write(child.before)
+                            fragment = child.before
+                            if fragment != last_logged_fragment:
+                                log.write(fragment)
+                                last_logged_fragment = fragment
                         log.write("\n[TASK FINISHED]\n")
                         log.flush()
                         break
 
                     if idx == 8:
-                        if child.before:
-                            log.write(child.before)
-                            log.flush()
                         continue
 
                 except Exception as e:
@@ -959,21 +1257,27 @@ class TelegramAIAgentBot:
 
         self.logger.info("Background PTY task finished agent=%s", agent_key)
 
-    async def durum(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def task_status(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not await self.require_allowed(update):
             return
 
-        if not self.task_process:
+        has_pty = bool(self.task_process)
+        has_api = bool(self._running_api_task)
+
+        if not has_pty and not has_api:
             await update.message.reply_text("Henüz task yok.")
             return
 
-        state = "running" if self.task_process.isalive() else "finished"
+        if has_api:
+            state = "running" if not self._running_api_task.done() else "finished"
+        else:
+            state = "running" if self.task_process.isalive() else "finished"
 
         elapsed = ""
         if self.task_started_at:
             elapsed = f"{int(time.time() - self.task_started_at)}s"
 
-        last = tail_file(self.task_log_path, max_chars=3400)
+        last = collapse_duplicate_lines(tail_file(self.task_log_path, max_chars=3400))
         display_name = self.agents.get(self.task_agent or "", {}).get(
             "display_name", self.task_agent or "unknown"
         )
@@ -991,6 +1295,12 @@ class TelegramAIAgentBot:
 
     async def cancel(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not await self.require_allowed(update):
+            return
+
+        # Claude API task (asyncio.Task) iptal etme.
+        if self._running_api_task and not self._running_api_task.done():
+            self._running_api_task.cancel()
+            await update.message.reply_text("API task durduruldu.")
             return
 
         if not self.task_process or not self.task_process.isalive():
@@ -1192,6 +1502,27 @@ class TelegramAIAgentBot:
             "/config list userids        — listeyi göster"
         )
 
+    async def gitpull(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not await self.require_allowed(update):
+            return
+
+        await update.message.reply_text(f"git pull çalıştırılıyor: {self.working_dir}")
+
+        result = await self.run_process_with_timeout(
+            args=["git", "pull"],
+            cwd=self.working_dir,
+            timeout=60,
+            env=self.build_env(),
+        )
+
+        rc = result["rc"]
+        stdout = result["stdout"].strip()
+        stderr = result["stderr"].strip()
+        reply = f"RC={rc}\n{stdout}" + (f"\n{stderr}" if stderr else "")
+
+        for part in split_telegram(reply):
+            await update.message.reply_text(part)
+
     async def logs(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not await self.require_allowed(update):
             return
@@ -1237,17 +1568,14 @@ class TelegramAIAgentBot:
         app.add_handler(CommandHandler("start", self.start))
         app.add_handler(CommandHandler("help", self.help))
         app.add_handler(CommandHandler("status", self.status))
-        app.add_handler(CommandHandler("agents", self.agents_command))
-        app.add_handler(CommandHandler("prompt", self.prompt))
         app.add_handler(CommandHandler("agent", self.agent_prompt))
         app.add_handler(CommandHandler("task", self.task))
-        app.add_handler(CommandHandler("taskstatus", self.durum))
-        if "durum" not in self.custom_command_names:
-            app.add_handler(CommandHandler("durum", self.durum))
+        app.add_handler(CommandHandler("top", self.top))
         app.add_handler(CommandHandler("cancel", self.cancel))
         app.add_handler(CommandHandler("run", self.run))
         app.add_handler(CommandHandler("logs", self.logs))
         app.add_handler(CommandHandler("config", self.config_command))
+        app.add_handler(CommandHandler("pull", self.gitpull))
 
         # Kullanıcı sadece "/" yazdığında öneri butonlarını gösterir.
         app.add_handler(MessageHandler(filters.Regex("^/$"), self.show_suggestions))

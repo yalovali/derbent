@@ -2,9 +2,9 @@
 Sample runner for telegram_service handlers.
 
 This script imports TelegramService from telegram_bot, constructs fake Update and Context
-objects, calls the handler methods (handle_prompt, handle_run, handle_status, handle_logs,
+objects, calls the handler methods (handle_agent, handle_run, handle_status, handle_logs,
 unknown_handler), prints outputs to the console, and attempts to verify that a prompts
-log file exists after running handle_prompt.
+log file exists after running handle_agent.
 
 This script is intentionally defensive so it can be used as a smoke test without
 requiring a live Telegram bot or systemd service.
@@ -77,7 +77,7 @@ async def main():
     svc = TelegramService(cfg)
 
     print("Preparing fake update/context objects...")
-    upd_prompt = FakeUpdate(text="/prompt This is a test prompt")
+    upd_agent = FakeUpdate(text="/agent codex")
     upd_run = FakeUpdate(text="/run sample_job")
     upd_status = FakeUpdate(text="/status sample_job")
     upd_logs = FakeUpdate(text="/logs sample_job")
@@ -87,7 +87,7 @@ async def main():
 
     # Call handlers if they exist on the service. Print output or exceptions.
     handlers = [
-        ("handle_prompt", upd_prompt),
+        ("handle_agent", upd_agent),
         ("handle_run", upd_run),
         ("handle_status", upd_status),
         ("handle_logs", upd_logs),
