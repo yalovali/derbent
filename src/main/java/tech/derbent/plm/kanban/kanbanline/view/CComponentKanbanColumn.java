@@ -283,6 +283,10 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 			return;
 		}
 		binder.setBean(newValue);
+		if (newValue != null && newValue.getId() != null) {
+			getElement().setAttribute("data-kanban-column-id", String.valueOf(newValue.getId()));
+			getElement().setAttribute("data-kanban-column-name", newValue.getName() != null ? newValue.getName() : "");
+		}
 		// Invalidate cache since column changed
 		invalidateCache();
 		// ONE REFRESH ONLY: Only refresh if we have items - avoid refreshing during

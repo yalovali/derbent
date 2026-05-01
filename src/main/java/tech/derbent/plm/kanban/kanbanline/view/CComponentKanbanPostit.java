@@ -54,6 +54,9 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 		super(item);
 		Check.notNull(item, "Sprint item cannot be null for postit");
 		addClassName("kanban-postit");
+		if (item.getId() != null) {
+			getElement().setAttribute("data-sprint-item-id", String.valueOf(item.getId()));
+		}
 		final String height = "120px";
 		getStyle().set("width", "100%").set("height", height).set("min-height", height).set("max-height", height);
 		setPadding(true);

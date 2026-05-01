@@ -78,6 +78,7 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 		Check.notNull(project, "Project cannot be null for backlog column");
 		this.project = project;
 		LOGGER.debug("Creating backlog kanban column for project: {}", project.getName());
+		getElement().setAttribute("data-kanban-column-type", "backlog");
 		// Set the backlog column header title to make it visible
 		setBacklogColumnHeader();
 		// Create backlog component in compact mode (always true for narrow display in kanban board)

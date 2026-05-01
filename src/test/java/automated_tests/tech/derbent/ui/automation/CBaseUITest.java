@@ -1098,6 +1098,14 @@ public abstract class CBaseUITest {
 			logCurrentMenuStructure();
 			final Set<String> visitedCandidates = new HashSet<>();
 			for (final String searchTerm : searchTerms) {
+				// The hierarchical menu lazily renders leaf items; filtering via the menu search input makes entries discoverable.
+				try {
+					final Locator menuSearch = page.locator("vaadin-text-field[placeholder='Search menu...'] input");
+					if (menuSearch.count() > 0) {
+						menuSearch.first().fill(searchTerm);
+						wait_500();
+					}
+				} catch (final Exception ignored) { /****/ }
 				for (final String selector : selectorCandidates) {
 					for (int attempt = 0; attempt < 5; attempt++) {
 						final Locator candidates = page.locator(selector).filter(new Locator.FilterOptions().setHasText(searchTerm));

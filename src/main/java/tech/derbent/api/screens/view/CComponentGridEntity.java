@@ -309,6 +309,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	private final Map<Object, Component> entityToWidgetMap = new HashMap<>();
 	private CGrid<?> grid;
 	private CGridEntity gridEntity;
+	private boolean suppressInlineEditorSave = false;
 	// Master toolbar filter support
 	private final Map<String, Object> pageViewFilters = new HashMap<>();
 	private String pageViewSearchText = "";
@@ -983,7 +984,12 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	public void refreshGrid() {
 		LOGGER.debug("Refreshing grid data...");
 		final CEntityDB<?> selectedItem = getSelectedItem();
-		grid.refreshGrid();
+		suppressInlineEditorSave = true;
+		try {
+			grid.refreshGrid();
+		} finally {
+			suppressInlineEditorSave = false;
+		}
 		selectEntity(selectedItem);
 	}
 
@@ -1347,6 +1353,11 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	@SuppressWarnings ({"unchecked", "rawtypes"})
 	private void saveEditorItem(final Object item) {
 		if (item == null) {
+			return;
+		}
+		if (suppressInlineEditorSave) {
+			LOGGER.debug("Inline-edit save suppressed during grid refresh for {}",
+					item.getClass().getSimpleName());
 			return;
 		}
 		try {

@@ -180,6 +180,7 @@ public class CCrudToolbar extends HorizontalLayout {
 			}
 			final CProjectItem<?, ?> projectItem = (CProjectItem<?, ?>) currentEntity;
 			statusComboBox = new CColorAwareComboBox<>(CProjectItemStatus.class);
+			statusComboBox.setId("workflow-status-combobox");
 			statusComboBox.setWidth("220px");
 			statusComboBox.setClearButtonVisible(false);
 			statusComboBox.setItems(statuses);
