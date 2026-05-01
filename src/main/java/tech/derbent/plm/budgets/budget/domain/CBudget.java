@@ -33,7 +33,7 @@ import tech.derbent.plm.orders.currency.domain.CCurrency;
 @Entity
 @Table (name = "\"cbudget\"")
 @AttributeOverride (name = "id", column = @Column (name = "budget_id"))
-public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkflow<CBudget>, IHasAttachments, IHasComments {
+public class CBudget extends CProjectItem<CBudget, CBudgetType> implements IHasStatusAndWorkflow<CBudget, CBudgetType>, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#8B4513"; // X11 SaddleBrown - financial planning (darker)
 	public static final String DEFAULT_ICON = "vaadin:dollar";
@@ -179,7 +179,7 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 	public BigDecimal getEarnedValue() { return earnedValue; }
 
 	@Override
-	public CTypeEntity<?> getEntityType() { return entityType; }
+	public CBudgetType getEntityType() { return entityType; }
 
 	/** Get EVM performance status as human-readable string.
 	 * @return Performance status description */
@@ -271,7 +271,7 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 	}
 
 	@Override
-	public void setEntityType(CTypeEntity<?> typeEntity) {
+	public void setEntityType(final CBudgetType typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CBudgetType.class, "Type entity must be an instance of CBudgetType");
 		Check.notNull(getProject(), "Project must be set before assigning budget type");
@@ -279,7 +279,7 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning budget type");
 		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
 				+ typeEntity.getCompany().getId() + " does not match budget project company id " + getProject().getCompany().getId());
-		entityType = (CBudgetType) typeEntity;
+		entityType = typeEntity;
 		updateLastModified();
 	}
 

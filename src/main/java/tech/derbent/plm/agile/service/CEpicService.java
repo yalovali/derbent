@@ -14,6 +14,7 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.activities.service.CActivityPriorityService;
 import tech.derbent.plm.agile.domain.CEpic;
+import tech.derbent.plm.agile.domain.CEpicType;
 
 /**
  * Service for root-level agile epics.
@@ -24,7 +25,7 @@ import tech.derbent.plm.agile.domain.CEpic;
 @Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CEpicService extends CAgileEntityService<CEpic> implements IEntityRegistrable, IEntityWithView {
+public class CEpicService extends CAgileEntityService<CEpic, CEpicType> implements IEntityRegistrable, IEntityWithView {
 
 	private final CEpicTypeService typeService;
 
@@ -56,5 +57,5 @@ public class CEpicService extends CAgileEntityService<CEpic> implements IEntityR
 	protected IProjectItemRespository<CEpic> getTypedRepository() { return (IProjectItemRespository<CEpic>) repository; }
 
 	@Override
-	protected CTypeEntityService<?> getTypeService() { return typeService; }
+	protected CTypeEntityService<CEpicType> getTypeService() { return typeService; }
 }

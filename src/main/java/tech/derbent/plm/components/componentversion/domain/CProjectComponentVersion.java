@@ -29,8 +29,8 @@ import tech.derbent.plm.components.componentversiontype.domain.CProjectComponent
 @Entity
 @Table (name = "\"cprojectcomponentversion\"")
 @AttributeOverride (name = "id", column = @Column (name = "projectcomponentversion_id"))
-public class CProjectComponentVersion extends CProjectItem<CProjectComponentVersion>
-		implements IHasStatusAndWorkflow<CProjectComponentVersion>, IHasAttachments, IHasComments {
+public class CProjectComponentVersion extends CProjectItem<CProjectComponentVersion, CProjectComponentVersionType>
+		implements IHasStatusAndWorkflow<CProjectComponentVersion, CProjectComponentVersionType>, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#808000"; // X11 Olive - component versions (darker)
 	public static final String DEFAULT_ICON = "vaadin:tag";
@@ -88,7 +88,7 @@ public class CProjectComponentVersion extends CProjectItem<CProjectComponentVers
 	public Set<CComment> getComments() { return comments; }
 
 	@Override
-	public CTypeEntity<?> getEntityType() { return entityType; }
+	public CProjectComponentVersionType getEntityType() { return entityType; }
 
 	public CProjectComponent getProjectComponent() { return projectComponent; }
 
@@ -130,7 +130,7 @@ public class CProjectComponentVersion extends CProjectItem<CProjectComponentVers
 	}
 
 	@Override
-	public void setEntityType(CTypeEntity<?> typeEntity) {
+	public void setEntityType(final CProjectComponentVersionType typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CProjectComponentVersionType.class, "Type entity must be an instance of CComponentVersionType");
 		Check.notNull(getProject(), "Project must be set before assigning component version type");
@@ -138,7 +138,7 @@ public class CProjectComponentVersion extends CProjectItem<CProjectComponentVers
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning component version type");
 		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
 				+ typeEntity.getCompany().getId() + " does not match component version project company id " + getProject().getCompany().getId());
-		entityType = (CProjectComponentVersionType) typeEntity;
+		entityType = typeEntity;
 		updateLastModified();
 	}
 

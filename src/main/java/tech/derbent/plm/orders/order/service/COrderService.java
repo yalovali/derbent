@@ -27,6 +27,7 @@ import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.plm.orders.currency.domain.CCurrency;
 import tech.derbent.plm.orders.currency.service.CCurrencyService;
 import tech.derbent.plm.orders.order.domain.COrder;
+import tech.derbent.plm.orders.type.domain.COrderType;
 import tech.derbent.plm.orders.type.service.COrderTypeService;
 
 @Profile ({
@@ -36,7 +37,7 @@ import tech.derbent.plm.orders.type.service.COrderTypeService;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class COrderService extends CEntityOfProjectService<COrder>
-		implements IEntityRegistrable, IEntityWithView, IHasStatusAndWorkflowService<COrder> {
+		implements IEntityRegistrable, IEntityWithView, IHasStatusAndWorkflowService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(COrderService.class);
 	private final CCurrencyService currencyService;
@@ -126,8 +127,9 @@ public class COrderService extends CEntityOfProjectService<COrder>
 				sessionService.getActiveUser().orElseThrow(() -> new CInitializationException("No active user in session - cannot initialize order"));
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize order"));
-		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
-				entityStatusService);
+		@SuppressWarnings ("unchecked")
+		final IHasStatusAndWorkflow<?, ?> typedEntity = (IHasStatusAndWorkflow<?, ?>) entity;
+		initializeNewEntity_IHasStatusAndWorkflow(typedEntity, sessionService.getActiveCompany().orElseThrow(), typeService, entityStatusService);
 		// Initialize order-specific fields with sensible defaults (Context-aware)
 		entityCasted.setRequestor(currentUser);
 		entityCasted.setAssignedTo(currentUser);

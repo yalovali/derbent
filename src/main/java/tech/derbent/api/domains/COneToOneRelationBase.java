@@ -46,26 +46,26 @@ import tech.derbent.api.parentrelation.domain.CParentRelation;
  * @param <T> The concrete type of the relation entity
  * @author Derbent Framework
  * @see CParentRelation
- * @see tech.derbent.plm.sprints.domain.CSprintItem */
+ * @see CSprintItem */
 @MappedSuperclass
 public abstract class COneToOneRelationBase<T extends COneToOneRelationBase<T>> extends CEntityDB<T> implements IHasIcon {
 
 	/** Transient back-reference to owner entity. Set by parent after loading to enable display in widgets/forms. Must be set via setOwnerItem() after
 	 * entity load or construction. */
 	@Transient
-	private CProjectItem<?> ownerItem = null;
+	private CProjectItem<?, ?> ownerItem = null;
 
 	/** Default constructor for JPA. */
 	protected COneToOneRelationBase() {}
 
-	protected COneToOneRelationBase(final CProjectItem<?> ownerItem) {
+	protected COneToOneRelationBase(final CProjectItem<?, ?> ownerItem) {
 		this.ownerItem = ownerItem;
 	}
 
 	/** Get the owner item (CActivity/CMeeting/CMilestone/etc.).
 	 * @return the owner item
 	 * @throws IllegalStateException if ownerItem is null (must be set by owner entity) */
-	public CProjectItem<?> getOwnerItem() {
+	public CProjectItem<?, ?> getOwnerItem() {
 		if (ownerItem == null) {
 			throw new IllegalStateException("ownerItem must be set by parent entity after loading. "
 					+ "Ensure owner entity's @PostLoad or constructor calls setOwnerItem(this).");
@@ -76,7 +76,7 @@ public abstract class COneToOneRelationBase<T extends COneToOneRelationBase<T>> 
 	/** Set the owner item (CActivity/CMeeting/CMilestone/etc.). This method MUST be called by the owner entity in: - Constructor (after creating the
 	 * relation) - @PostLoad method (after JPA loads the entity)
 	 * @param ownerItem the owner item */
-	public void setOwnerItem(final CProjectItem<?> ownerItem) { this.ownerItem = ownerItem; }
+	public void setOwnerItem(final CProjectItem<?, ?> ownerItem) { this.ownerItem = ownerItem; }
 
 	@Override
 	public String toString() {

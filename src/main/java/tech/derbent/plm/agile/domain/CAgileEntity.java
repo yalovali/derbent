@@ -48,8 +48,8 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 
 @MappedSuperclass
 public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass, TypeClass>,
-		TypeClass extends CTypeEntity<?>> extends CProjectItem<EntityClass>
-		implements IHasStatusAndWorkflow<EntityClass>, IGnntEntityItem, ISprintableItem, IHasIcon, IHasAttachments,
+		TypeClass extends CTypeEntity<TypeClass>> extends CProjectItem<EntityClass, TypeClass>
+		implements IHasStatusAndWorkflow<EntityClass, TypeClass>, IGnntEntityItem, ISprintableItem, IHasIcon, IHasAttachments,
 		IHasComments, IHasLinks, IHasParentRelation {
 
 	@SuppressWarnings ("unused")
@@ -164,14 +164,14 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 			hidden = false, createComponentMethod = "createComponentParent", dataProviderBean = "pageservice",
 			captionVisible = false
 	)
-	private final CProjectItem<?> placeHolder_createComponentParent = null;
+	private final CProjectItem<?, ?> placeHolder_createComponentParent = null;
 	@Transient
 	@AMetaData (
 			displayName = "Children", required = false, readOnly = false, description = "Hierarchy children list",
 			hidden = false, createComponentMethod = "createComponentParentChildren", dataProviderBean = "pageservice",
 			captionVisible = false
 	)
-	private final CProjectItem<?> placeHolder_createComponentParentChildren = null;
+	private final CProjectItem<?, ?> placeHolder_createComponentParentChildren = null;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "cactivitypriority_id", nullable = true)
 	@AMetaData (
@@ -270,7 +270,7 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 	public LocalDate getDueDate() { return dueDate; }
 
 	@Override
-	public CTypeEntity<?> getEntityType() { return getTypedEntityType(); }
+	public TypeClass getEntityType() { return getTypedEntityType(); }
 
 	public BigDecimal getEstimatedCost() { return estimatedCost; }
 
@@ -288,9 +288,9 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 	@Override
 	public CParentRelation getParentRelation() { return parentRelation; }
 
-	public CProjectItem<?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
+	public CProjectItem<?, ?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
 
-	public CProjectItem<?> getPlaceHolder_createComponentParentChildren() {
+	public CProjectItem<?, ?> getPlaceHolder_createComponentParentChildren() {
 		return placeHolder_createComponentParentChildren;
 	}
 
@@ -409,9 +409,8 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 	}
 
 	@Override
-	@SuppressWarnings ("unchecked")
-	public void setEntityType(final CTypeEntity<?> entityType) {
-		setTypedEntityType((TypeClass) entityType);
+	public void setEntityType(final TypeClass entityType) {
+		setTypedEntityType(entityType);
 	}
 
 	public void setEstimatedCost(final BigDecimal estimatedCost) {

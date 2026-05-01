@@ -28,7 +28,7 @@ import tech.derbent.plm.providers.providertype.domain.CProviderType;
 @Entity
 @Table (name = "cprovider")
 @AttributeOverride (name = "id", column = @Column (name = "provider_id"))
-public class CProvider extends CProjectItem<CProvider> implements IHasStatusAndWorkflow<CProvider>, IHasAttachments, IHasComments {
+public class CProvider extends CProjectItem<CProvider, CProviderType> implements IHasStatusAndWorkflow<CProvider, CProviderType>, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#696969"; // X11 DimGray - external providers (darker)
 	public static final String DEFAULT_ICON = "vaadin:handshake";
@@ -73,7 +73,7 @@ public class CProvider extends CProjectItem<CProvider> implements IHasStatusAndW
 	public Set<CComment> getComments() { return comments; }
 
 	@Override
-	public CTypeEntity<?> getEntityType() { return entityType; }
+	public CProviderType getEntityType() { return entityType; }
 
 	@Override
 	public CWorkflowEntity getWorkflow() {
@@ -92,7 +92,7 @@ public class CProvider extends CProjectItem<CProvider> implements IHasStatusAndW
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	@Override
-	public void setEntityType(CTypeEntity<?> typeEntity) {
+	public void setEntityType(final CProviderType typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CProviderType.class, "Type entity must be an instance of CProviderType");
 		Check.notNull(getProject(), "Project must be set before assigning provider type");
@@ -100,7 +100,7 @@ public class CProvider extends CProjectItem<CProvider> implements IHasStatusAndW
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning provider type");
 		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
 				+ typeEntity.getCompany().getId() + " does not match provider project company id " + getProject().getCompany().getId());
-		entityType = (CProviderType) typeEntity;
+		entityType = typeEntity;
 		updateLastModified();
 	}
 }

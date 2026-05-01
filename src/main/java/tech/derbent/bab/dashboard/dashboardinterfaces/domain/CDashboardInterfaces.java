@@ -18,7 +18,6 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.dashboard.domain.CDashboardProject;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.bab.dashboard.dashboardinterfaces.service.CDashboardInterfacesService;
 import tech.derbent.bab.dashboard.dashboardinterfaces.service.CPageServiceDashboardInterfaces;
 import tech.derbent.plm.attachments.domain.CAttachment;
@@ -52,7 +51,7 @@ import tech.derbent.plm.links.domain.IHasLinks;
 })
 @AttributeOverride (name = "id", column = @Column (name = "dashboard_interfaces_id"))
 public class CDashboardInterfaces extends CDashboardProject<CDashboardInterfaces>
-		implements IHasAttachments, IHasComments, IHasLinks, IEntityRegistrable {
+		implements IHasAttachments, IHasComments, IHasLinks {
 
 	// Entity constants (MANDATORY)
 	public static final String DEFAULT_COLOR = "#FF5722"; // Deep Orange - Interface/Hardware
@@ -170,7 +169,6 @@ public class CDashboardInterfaces extends CDashboardProject<CDashboardInterfaces
 	@Override
 	public Set<CLink> getLinks() { return links; }
 
-	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceDashboardInterfaces.class; }
 
 	/** Getter for transient placeholder field - returns entity itself for component binding.
@@ -222,7 +220,6 @@ public class CDashboardInterfaces extends CDashboardProject<CDashboardInterfaces
 		return this;
 	}
 
-	@Override
 	public Class<?> getServiceClass() { return CDashboardInterfacesService.class; }
 	// BAB Component Placeholder Getters (MANDATORY pattern: return this entity)
 

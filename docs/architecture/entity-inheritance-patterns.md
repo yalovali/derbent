@@ -15,7 +15,7 @@ CEntityNamed<T>
     ↓
 CEntityOfProject<T>
     ↓
-CProjectItem<T>
+CProjectItem<T, TType>
     ↓
 [Domain Classes: CActivity, CRisk, CMeeting, etc.]
 ```
@@ -295,13 +295,13 @@ public class CActivity extends CProjectItem<CActivity> {
 | System configuration, simple lookup | `CEntityDB<T>` | System settings |
 | Named entities without project scope | `CEntityNamed<T>` | Companies, global roles |
 | Project-scoped types/statuses | `CEntityOfProject<T>` | Activity types, statuses |
-| Main business entities | `CProjectItem<T>` | Activities, risks, meetings |
+| Main business entities | `CProjectItem<T, TType>` | Activities, risks, meetings |
 
 ### 2. Always Use Generic Type Parameter
 
 ```java
 // ✅ CORRECT
-public class CActivity extends CProjectItem<CActivity> {
+public class CActivity extends CProjectItem<CActivity, CActivityType> {
     // ...
 }
 

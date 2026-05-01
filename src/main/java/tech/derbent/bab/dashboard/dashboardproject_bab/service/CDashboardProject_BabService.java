@@ -12,6 +12,8 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.dashboard.dashboardprojecttype.domain.CDashboardProjectType;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -27,12 +29,13 @@ import tech.derbent.bab.ui.component.CComponentDashboardWidget_Bab;
 @Service
 @Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
-public class CDashboardProject_BabService extends CProjectItemService<CDashboardProject_Bab> implements IEntityRegistrable, IEntityWithView {
+public class CDashboardProject_BabService extends CProjectItemService<CDashboardProject_Bab, CDashboardProjectType>
+		implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDashboardProject_BabService.class);
 
 	public CDashboardProject_BabService(final IDashboardProject_BabRepository repository, final Clock clock, final ISessionService sessionService,
-			final tech.derbent.api.entityOfCompany.service.CProjectItemStatusService statusService) {
+			final CProjectItemStatusService statusService) {
 		super(repository, clock, sessionService, statusService);
 	}
 

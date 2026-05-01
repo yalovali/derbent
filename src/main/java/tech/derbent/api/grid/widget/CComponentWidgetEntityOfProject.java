@@ -20,7 +20,7 @@ import tech.derbent.api.utils.CAuxillaries;
  * @author Derbent Framework
  * @since 1.0
  * @param <EntityClass> the entity type extending CProjectItem */
-public abstract class CComponentWidgetEntityOfProject<EntityClass extends CProjectItem<?>> extends CComponentWidgetEntity<EntityClass> {
+public abstract class CComponentWidgetEntityOfProject<EntityClass extends CProjectItem<?, ?>> extends CComponentWidgetEntity<EntityClass> {
 
 	protected static final int MAX_DESCRIPTION_LENGTH = 100;
 	private static final long serialVersionUID = 1L;

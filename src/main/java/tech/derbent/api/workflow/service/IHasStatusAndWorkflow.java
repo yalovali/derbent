@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.domain.CWorkflowStatusRelation;
@@ -35,13 +36,13 @@ import tech.derbent.api.workflow.domain.CWorkflowStatusRelation;
  * <li>Status initialization MUST use {@link IHasStatusAndWorkflowService#initializeNewEntity}</li>
  * <li>Status MUST NEVER be set to null after initialization</li>
  * <li>Status changes MUST follow workflow transitions (use
- * {@link tech.derbent.api.entityOfCompany.service.CProjectItemStatusService#getValidNextStatuses})</li>
+ * {@link CProjectItemStatusService#getValidNextStatuses})</li>
  * </ol>
  * @param <EntityClass> The entity class implementing this interface
  * @see CWorkflowEntity
  * @see CProjectItemStatus
  * @see CWorkflowStatusRelation */
-public interface IHasStatusAndWorkflow<EntityClass extends IHasStatusAndWorkflow<EntityClass>> {
+public interface IHasStatusAndWorkflow<EntityClass, TypeClass extends CTypeEntity<TypeClass>> {
 
 	Logger LOGGER = LoggerFactory.getLogger(IHasStatusAndWorkflow.class);
 
@@ -53,12 +54,12 @@ public interface IHasStatusAndWorkflow<EntityClass extends IHasStatusAndWorkflow
 	 * @return true if status/workflow were copied, false if skipped */
 	static boolean copyStatusAndWorkflowTo(final CEntityDB<?> source, final CEntityDB<?> target, final CCloneOptions options) {
 		// Check if both source and target implement IHasStatusAndWorkflow
-		if (!(source instanceof IHasStatusAndWorkflow) || !(target instanceof IHasStatusAndWorkflow)) {
+		if (!(source instanceof IHasStatusAndWorkflow<?, ?>) || !(target instanceof IHasStatusAndWorkflow<?, ?>)) {
 			return false; // Skip silently if target doesn't support status/workflow
 		}
 		try {
-			final IHasStatusAndWorkflow<?> sourceWithStatus = (IHasStatusAndWorkflow<?>) source;
-			final IHasStatusAndWorkflow<?> targetWithStatus = (IHasStatusAndWorkflow<?>) target;
+			final IHasStatusAndWorkflow<?, ?> sourceWithStatus = (IHasStatusAndWorkflow<?, ?>) source;
+			final IHasStatusAndWorkflow<?, ?> targetWithStatus = (IHasStatusAndWorkflow<?, ?>) target;
 			// Copy status if options allow
 			if (options.isCloneStatus() && sourceWithStatus.getStatus() != null) {
 				CEntityDB.copyField(sourceWithStatus::getStatus, targetWithStatus::setStatus);
@@ -76,10 +77,16 @@ public interface IHasStatusAndWorkflow<EntityClass extends IHasStatusAndWorkflow
 		}
 	}
 
-	CTypeEntity<?> getEntityType();
+	TypeClass getEntityType();
 	CProjectItemStatus getStatus();
 	CWorkflowEntity getWorkflow();
-	void setEntityType(CTypeEntity<?> typeEntity);
+	void setEntityType(TypeClass typeEntity);
+
+	default void setEntityTypeUnchecked(final CTypeEntity<?> typeEntity) {
+		@SuppressWarnings ("unchecked")
+		final TypeClass typedEntityType = (TypeClass) typeEntity;
+		setEntityType(typedEntityType);
+	}
 
 	/** Sets the status for this entity.
 	 * <p>

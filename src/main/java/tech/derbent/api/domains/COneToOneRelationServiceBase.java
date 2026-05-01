@@ -85,7 +85,7 @@ public abstract class COneToOneRelationServiceBase<T extends COneToOneRelationBa
 	 * @param entity         The entity to validate
 	 * @param interfaceClass The required interface class
 	 * @throws IllegalArgumentException if entity doesn't implement the interface */
-	protected void validateOwnership(final CProjectItem<?> entity, final Class<?> interfaceClass) {
+	protected void validateOwnership(final CProjectItem<?, ?> entity, final Class<?> interfaceClass) {
 		Check.notNull(entity, "Entity cannot be null");
 		Check.notNull(entity.getId(), "Entity must be persisted");
 		if (!interfaceClass.isInstance(entity)) {
@@ -98,7 +98,7 @@ public abstract class COneToOneRelationServiceBase<T extends COneToOneRelationBa
 	 * @param entity1 First entity
 	 * @param entity2 Second entity
 	 * @throws IllegalArgumentException if entities are in different projects */
-	protected void validateSameProject(final CProjectItem<?> entity1, final CProjectItem<?> entity2) {
+	protected void validateSameProject(final CProjectItem<?, ?> entity1, final CProjectItem<?, ?> entity2) {
 		Check.notNull(entity1, "First entity cannot be null");
 		Check.notNull(entity2, "Second entity cannot be null");
 		Check.notNull(entity1.getProject(), "First entity must have a project");

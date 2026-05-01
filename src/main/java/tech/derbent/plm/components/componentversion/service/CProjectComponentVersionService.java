@@ -10,6 +10,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.plm.components.componentversiontype.domain.CProjectComponentVersionType;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -28,7 +29,7 @@ import tech.derbent.plm.components.componentversiontype.service.CProjectComponen
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll
-public class CProjectComponentVersionService extends CProjectItemService<CProjectComponentVersion> implements IEntityRegistrable, IEntityWithView {
+public class CProjectComponentVersionService extends CProjectItemService<CProjectComponentVersion, CProjectComponentVersionType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectComponentVersionService.class);
 	private final CProjectComponentService componentService;
@@ -82,7 +83,9 @@ public class CProjectComponentVersionService extends CProjectItemService<CProjec
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
 		final CProjectComponentVersion componentVersion = (CProjectComponentVersion) entity;
-		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+		@SuppressWarnings ("unchecked")
+		final IHasStatusAndWorkflow<?, ?> typedEntity = (IHasStatusAndWorkflow<?, ?>) entity;
+		initializeNewEntity_IHasStatusAndWorkflow(typedEntity, sessionService.getActiveCompany().orElseThrow(), typeService,
 				statusService);
 		if (componentVersion.getProjectComponent() != null) {
 			return;

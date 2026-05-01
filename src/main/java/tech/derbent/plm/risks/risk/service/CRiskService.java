@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.plm.risks.risktype.domain.CRiskType;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -25,7 +26,7 @@ import tech.derbent.plm.risks.risktype.service.CRiskTypeService;
 })
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CRiskService extends CProjectItemService<CRisk> implements IEntityRegistrable, IEntityWithView {
+public class CRiskService extends CProjectItemService<CRisk, CRiskType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskService.class);
 	private final CRiskTypeService typeService;
@@ -82,7 +83,9 @@ public class CRiskService extends CProjectItemService<CRisk> implements IEntityR
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+		@SuppressWarnings ("unchecked")
+		final IHasStatusAndWorkflow<?, ?> typedEntity = (IHasStatusAndWorkflow<?, ?>) entity;
+		initializeNewEntity_IHasStatusAndWorkflow(typedEntity, sessionService.getActiveCompany().orElseThrow(), typeService,
 				statusService);
 	}
 

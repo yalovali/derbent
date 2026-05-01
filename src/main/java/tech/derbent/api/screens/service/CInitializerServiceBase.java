@@ -124,7 +124,7 @@ public abstract class CInitializerServiceBase {
 	 * @return the field or null if not found */
 	@SuppressWarnings ("unused")
 	private static <EntityClass extends CTypeEntity<EntityClass>> CTypeEntityService<?>
-			getEntityTypeService(final IHasStatusAndWorkflow<?> statusItem) {
+			getEntityTypeService(final IHasStatusAndWorkflow<?, ?> statusItem) {
 		final Field field = CAuxillaries.findField(statusItem.getClass(), "entityType");
 		Check.notNull(field, "Field 'entityType' not found in class hierarchy of " + statusItem.getClass().getName());
 		final Class<?> returnType = field.getType();

@@ -53,11 +53,11 @@ public class CGnntTimelineService {
 
 	private static final class CHierarchyContext {
 
-		private final Map<String, List<CProjectItem<?>>> childrenByParentKey;
+		private final Map<String, List<CProjectItem<?, ?>>> childrenByParentKey;
 		private final Map<String, String> parentKeyByEntityKey;
-		private final List<CProjectItem<?>> rootItems;
+		private final List<CProjectItem<?, ?>> rootItems;
 
-		private CHierarchyContext(final List<CProjectItem<?>> rootItems, final Map<String, List<CProjectItem<?>>> childrenByParentKey,
+		private CHierarchyContext(final List<CProjectItem<?, ?>> rootItems, final Map<String, List<CProjectItem<?, ?>>> childrenByParentKey,
 				final Map<String, String> parentKeyByEntityKey) {
 			this.rootItems = rootItems;
 			this.childrenByParentKey = childrenByParentKey;
@@ -65,20 +65,20 @@ public class CGnntTimelineService {
 		}
 	}
 
-	private static final Comparator<CProjectItem<?>> HIERARCHY_ITEM_COMPARATOR =
+	private static final Comparator<CProjectItem<?, ?>> HIERARCHY_ITEM_COMPARATOR =
 			Comparator.comparingInt(CGnntTimelineService::getHierarchyTypeOrder)
 					.thenComparing(CProjectItem::getStartDate, Comparator.nullsLast(LocalDate::compareTo))
 					.thenComparing(CProjectItem::getName, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
 					.thenComparing(CProjectItem::getId, Comparator.nullsLast(Long::compareTo));
 
-	private static String buildEntityKey(final CProjectItem<?> entity) {
+	private static String buildEntityKey(final CProjectItem<?, ?> entity) {
 		if (entity == null || entity.getId() == null) {
 			return null;
 		}
 		return ProxyUtils.getUserClass(entity.getClass()).getSimpleName() + ":" + entity.getId();
 	}
 
-	private static String buildParentKey(final CProjectItem<?> entity) {
+	private static String buildParentKey(final CProjectItem<?, ?> entity) {
 		if (!(entity instanceof IHasParentRelation)) {
 			return null;
 		}
@@ -90,7 +90,7 @@ public class CGnntTimelineService {
 		return parentRelation.getParentItemType() + ":" + parentRelation.getParentItemId();
 	}
 
-	private CGnntHierarchyResult buildHierarchyResult(final Map<String, CProjectItem<?>> entitiesByKey,
+	private CGnntHierarchyResult buildHierarchyResult(final Map<String, CProjectItem<?, ?>> entitiesByKey,
 			final CGnntBoardFilterCriteria filterCriteria) {
 		final CHierarchyContext hierarchyContext = buildHierarchyContext(entitiesByKey);
 		if (filterCriteria != null && filterCriteria.getEntityType() != null) {
@@ -99,16 +99,16 @@ public class CGnntTimelineService {
 		final List<CVisibleHierarchyNode> rootNodes = new ArrayList<>();
 		final Set<String> visited = new HashSet<>();
 		final AtomicLong uniqueIdSequence = new AtomicLong(1);
-		for (final CProjectItem<?> rootItem : hierarchyContext.rootItems) {
+		for (final CProjectItem<?, ?> rootItem : hierarchyContext.rootItems) {
 			final CVisibleHierarchyNode visibleRootNode =
 					buildVisibleNode(rootItem, 0, hierarchyContext.childrenByParentKey, visited, uniqueIdSequence, filterCriteria);
 			if (visibleRootNode != null) {
 				rootNodes.add(visibleRootNode);
 			}
 		}
-		final List<CProjectItem<?>> remainingItems = new ArrayList<>(entitiesByKey.values());
+		final List<CProjectItem<?, ?>> remainingItems = new ArrayList<>(entitiesByKey.values());
 		remainingItems.sort(HIERARCHY_ITEM_COMPARATOR);
-		for (final CProjectItem<?> remainingItem : remainingItems) {
+		for (final CProjectItem<?, ?> remainingItem : remainingItems) {
 			if (!visited.contains(buildEntityKey(remainingItem))) {
 				LOGGER.warn("Gnnt hierarchy item {} was not attached to a root. Rendering it as a top-level item.",
 						buildEntityKey(remainingItem));
@@ -122,11 +122,11 @@ public class CGnntTimelineService {
 		return flattenHierarchy(rootNodes);
 	}
 
-	private CHierarchyContext buildHierarchyContext(final Map<String, CProjectItem<?>> entitiesByKey) {
-		final Map<String, List<CProjectItem<?>>> childrenByParentKey = new HashMap<>();
+	private CHierarchyContext buildHierarchyContext(final Map<String, CProjectItem<?, ?>> entitiesByKey) {
+		final Map<String, List<CProjectItem<?, ?>>> childrenByParentKey = new HashMap<>();
 		final Map<String, String> parentKeyByEntityKey = new HashMap<>();
-		final List<CProjectItem<?>> rootItems = new ArrayList<>();
-		for (final CProjectItem<?> entity : entitiesByKey.values()) {
+		final List<CProjectItem<?, ?>> rootItems = new ArrayList<>();
+		for (final CProjectItem<?, ?> entity : entitiesByKey.values()) {
 			final String entityKey = buildEntityKey(entity);
 			final String parentKey = buildParentKey(entity);
 			if (entityKey != null) {
@@ -139,7 +139,7 @@ public class CGnntTimelineService {
 			}
 		}
 		rootItems.sort(HIERARCHY_ITEM_COMPARATOR);
-		for (final List<CProjectItem<?>> children : childrenByParentKey.values()) {
+		for (final List<CProjectItem<?, ?>> children : childrenByParentKey.values()) {
 			children.sort(HIERARCHY_ITEM_COMPARATOR);
 		}
 		return new CHierarchyContext(rootItems, childrenByParentKey, parentKeyByEntityKey);
@@ -148,10 +148,10 @@ public class CGnntTimelineService {
 	private CGnntHierarchyResult buildAnchoredHierarchyResult(final CHierarchyContext hierarchyContext,
 			final CGnntBoardFilterCriteria filterCriteria) {
 		// Type-filter mode is anchor-down: matched items stay as roots and carry their full subtree, without ancestor context above them.
-		final List<CProjectItem<?>> directMatches = hierarchyContext.rootItems.stream().flatMap(root -> flattenEntities(root, hierarchyContext).stream())
+		final List<CProjectItem<?, ?>> directMatches = hierarchyContext.rootItems.stream().flatMap(root -> flattenEntities(root, hierarchyContext).stream())
 				.filter(entity -> matchesFilters(entity, filterCriteria)).sorted(HIERARCHY_ITEM_COMPARATOR).toList();
 		final Set<String> directMatchKeys = new HashSet<>();
-		for (final CProjectItem<?> directMatch : directMatches) {
+		for (final CProjectItem<?, ?> directMatch : directMatches) {
 			final String entityKey = buildEntityKey(directMatch);
 			if (entityKey != null) {
 				directMatchKeys.add(entityKey);
@@ -160,14 +160,14 @@ public class CGnntTimelineService {
 		final List<CVisibleHierarchyNode> rootNodes = new ArrayList<>();
 		final Set<String> visited = new HashSet<>();
 		final AtomicLong uniqueIdSequence = new AtomicLong(1);
-		for (final CProjectItem<?> directMatch : directMatches) {
+		for (final CProjectItem<?, ?> directMatch : directMatches) {
 			final String entityKey = buildEntityKey(directMatch);
 			if (entityKey == null || hasMatchedAncestor(entityKey, hierarchyContext.parentKeyByEntityKey, directMatchKeys)) {
 				continue;
 			}
 			rootNodes.add(buildSubtreeNode(directMatch, 0, hierarchyContext.childrenByParentKey, visited, uniqueIdSequence));
 		}
-		for (final CProjectItem<?> directMatch : directMatches) {
+		for (final CProjectItem<?, ?> directMatch : directMatches) {
 			final String entityKey = buildEntityKey(directMatch);
 			if (entityKey != null && !visited.contains(entityKey)) {
 				rootNodes.add(buildSubtreeNode(directMatch, 0, hierarchyContext.childrenByParentKey, visited, uniqueIdSequence));
@@ -176,20 +176,20 @@ public class CGnntTimelineService {
 		return flattenHierarchy(rootNodes);
 	}
 
-	private List<CProjectItem<?>> flattenEntities(final CProjectItem<?> rootItem, final CHierarchyContext hierarchyContext) {
-		final List<CProjectItem<?>> entities = new ArrayList<>();
+	private List<CProjectItem<?, ?>> flattenEntities(final CProjectItem<?, ?> rootItem, final CHierarchyContext hierarchyContext) {
+		final List<CProjectItem<?, ?>> entities = new ArrayList<>();
 		appendEntityAndDescendants(rootItem, hierarchyContext.childrenByParentKey, entities);
 		return entities;
 	}
 
-	private void appendEntityAndDescendants(final CProjectItem<?> entity, final Map<String, List<CProjectItem<?>>> childrenByParentKey,
-			final List<CProjectItem<?>> entities) {
+	private void appendEntityAndDescendants(final CProjectItem<?, ?> entity, final Map<String, List<CProjectItem<?, ?>>> childrenByParentKey,
+			final List<CProjectItem<?, ?>> entities) {
 		entities.add(entity);
 		final String entityKey = buildEntityKey(entity);
 		if (entityKey == null) {
 			return;
 		}
-		for (final CProjectItem<?> child : childrenByParentKey.getOrDefault(entityKey, List.of())) {
+		for (final CProjectItem<?, ?> child : childrenByParentKey.getOrDefault(entityKey, List.of())) {
 			appendEntityAndDescendants(child, childrenByParentKey, entities);
 		}
 	}
@@ -205,8 +205,8 @@ public class CGnntTimelineService {
 		return false;
 	}
 
-	private CVisibleHierarchyNode buildVisibleNode(final CProjectItem<?> entity, final int hierarchyLevel,
-			final Map<String, List<CProjectItem<?>>> childrenByParentKey, final Set<String> visited, final AtomicLong uniqueIdSequence,
+	private CVisibleHierarchyNode buildVisibleNode(final CProjectItem<?, ?> entity, final int hierarchyLevel,
+			final Map<String, List<CProjectItem<?, ?>>> childrenByParentKey, final Set<String> visited, final AtomicLong uniqueIdSequence,
 			final CGnntBoardFilterCriteria filterCriteria) {
 		final String entityKey = buildEntityKey(entity);
 		if (entityKey == null) {
@@ -216,10 +216,10 @@ public class CGnntTimelineService {
 			LOGGER.warn("Skipping already visited Gnnt hierarchy item {}", entityKey);
 			return null;
 		}
-		final List<CProjectItem<?>> children = new ArrayList<>(childrenByParentKey.getOrDefault(entityKey, List.of()));
+		final List<CProjectItem<?, ?>> children = new ArrayList<>(childrenByParentKey.getOrDefault(entityKey, List.of()));
 		children.sort(HIERARCHY_ITEM_COMPARATOR);
 		final List<CVisibleHierarchyNode> visibleChildren = new ArrayList<>();
-		for (final CProjectItem<?> child : children) {
+		for (final CProjectItem<?, ?> child : children) {
 			final CVisibleHierarchyNode visibleChild =
 					buildVisibleNode(child, hierarchyLevel + 1, childrenByParentKey, visited, uniqueIdSequence, filterCriteria);
 			if (visibleChild != null) {
@@ -232,14 +232,14 @@ public class CGnntTimelineService {
 		return new CVisibleHierarchyNode(new CGnntItem(entity, uniqueIdSequence.getAndIncrement(), hierarchyLevel), visibleChildren);
 	}
 
-	private CVisibleHierarchyNode buildSubtreeNode(final CProjectItem<?> entity, final int hierarchyLevel,
-			final Map<String, List<CProjectItem<?>>> childrenByParentKey, final Set<String> visited, final AtomicLong uniqueIdSequence) {
+	private CVisibleHierarchyNode buildSubtreeNode(final CProjectItem<?, ?> entity, final int hierarchyLevel,
+			final Map<String, List<CProjectItem<?, ?>>> childrenByParentKey, final Set<String> visited, final AtomicLong uniqueIdSequence) {
 		final String entityKey = buildEntityKey(entity);
 		if (entityKey == null || !visited.add(entityKey)) {
 			return null;
 		}
 		final List<CVisibleHierarchyNode> visibleChildren = new ArrayList<>();
-		for (final CProjectItem<?> child : childrenByParentKey.getOrDefault(entityKey, List.of())) {
+		for (final CProjectItem<?, ?> child : childrenByParentKey.getOrDefault(entityKey, List.of())) {
 			final CVisibleHierarchyNode visibleChild = buildSubtreeNode(child, hierarchyLevel + 1, childrenByParentKey, visited, uniqueIdSequence);
 			if (visibleChild != null) {
 				visibleChildren.add(visibleChild);
@@ -272,7 +272,7 @@ public class CGnntTimelineService {
 		}
 	}
 
-	private static int getHierarchyTypeOrder(final CProjectItem<?> entity) {
+	private static int getHierarchyTypeOrder(final CProjectItem<?, ?> entity) {
 		final int level = CHierarchyNavigationService.getEntityLevel(entity);
 		return level >= 0 ? level : Integer.MAX_VALUE - 1;
 	}
@@ -286,7 +286,7 @@ public class CGnntTimelineService {
 		Check.notNull(gnntViewEntity, "Gnnt view entity cannot be null");
 		Check.notNull(gnntViewEntity.getProject(), "Gnnt view entity must belong to a project");
 		final CProject<?> project = gnntViewEntity.getProject();
-		final Map<String, CProjectItem<?>> entitiesByKey = new LinkedHashMap<>();
+		final Map<String, CProjectItem<?, ?>> entitiesByKey = new LinkedHashMap<>();
 		for (final String entityKey : CEntityRegistry.getAllRegisteredEntityKeys()) {
 			final Class<?> entityClass = CEntityRegistry.getEntityClass(entityKey);
 			if (!isSupportedGnntSourceEntity(entityClass)) {
@@ -303,10 +303,10 @@ public class CGnntTimelineService {
 				}
 				final CEntityOfProjectService<?> projectService = (CEntityOfProjectService<?>) serviceBean;
 				for (final Object rawEntity : projectService.listByProject(project)) {
-					if (!(rawEntity instanceof CProjectItem<?>)) {
+					if (!(rawEntity instanceof CProjectItem<?, ?>)) {
 						continue;
 					}
-					final CProjectItem<?> projectItem = (CProjectItem<?>) rawEntity;
+					final CProjectItem<?, ?> projectItem = (CProjectItem<?, ?>) rawEntity;
 					final String projectItemKey = buildEntityKey(projectItem);
 					if (projectItemKey == null) {
 						LOGGER.debug("Skipping Gnnt timeline source {} because entity ID is null", entityClass.getSimpleName());
@@ -325,7 +325,7 @@ public class CGnntTimelineService {
 		return buildHierarchy(gnntViewEntity, null).getFlatItems();
 	}
 
-	private boolean matchesFilters(final CProjectItem<?> entity, final CGnntBoardFilterCriteria filterCriteria) {
+	private boolean matchesFilters(final CProjectItem<?, ?> entity, final CGnntBoardFilterCriteria filterCriteria) {
 		if (entity == null || filterCriteria == null || !filterCriteria.hasAnyFilter()) {
 			return true;
 		}
@@ -364,9 +364,9 @@ public class CGnntTimelineService {
 		if (actual == null) {
 			return false;
 		}
-		if (expected instanceof CProjectItem<?> && actual instanceof CProjectItem<?>) {
-			final CProjectItem<?> expectedEntity = (CProjectItem<?>) expected;
-			final CProjectItem<?> actualEntity = (CProjectItem<?>) actual;
+		if (expected instanceof CProjectItem<?, ?> && actual instanceof CProjectItem<?, ?>) {
+			final CProjectItem<?, ?> expectedEntity = (CProjectItem<?, ?>) expected;
+			final CProjectItem<?, ?> actualEntity = (CProjectItem<?, ?>) actual;
 			return expectedEntity.getId() != null && expectedEntity.getId().equals(actualEntity.getId());
 		}
 		return expected.equals(actual);

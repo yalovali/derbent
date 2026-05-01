@@ -17,22 +17,22 @@ public final class CGnntAgileFilterSupport {
 
 	private CGnntAgileFilterSupport() {}
 
-	public static CProjectItem<?> resolveEpic(final CProjectItem<?> entity) {
+	public static CProjectItem<?, ?> resolveEpic(final CProjectItem<?, ?> entity) {
 		return CHierarchyNavigationService.resolveAncestorAtLevel(entity, 0);
 	}
 
-	public static CProjectItem<?> resolveFeature(final CProjectItem<?> entity) {
+	public static CProjectItem<?, ?> resolveFeature(final CProjectItem<?, ?> entity) {
 		return CHierarchyNavigationService.resolveAncestorAtLevel(entity, 1);
 	}
 
-	public static CUser resolveResponsible(final CProjectItem<?> entity) {
+	public static CUser resolveResponsible(final CProjectItem<?, ?> entity) {
 		if (entity instanceof ISprintableItem sprintableItem) {
 			return sprintableItem.getAssignedTo();
 		}
 		return entity != null ? entity.getAssignedTo() : null;
 	}
 
-	public static CSprint resolveSprint(final CProjectItem<?> entity) {
+	public static CSprint resolveSprint(final CProjectItem<?, ?> entity) {
 		if (!(entity instanceof ISprintableItem sprintableItem)) {
 			return null;
 		}
@@ -40,7 +40,7 @@ public final class CGnntAgileFilterSupport {
 		return sprintItem != null ? sprintItem.getSprint() : null;
 	}
 
-	public static CProjectItem<?> resolveUserStory(final CProjectItem<?> entity) {
+	public static CProjectItem<?, ?> resolveUserStory(final CProjectItem<?, ?> entity) {
 		return CHierarchyNavigationService.resolveAncestorAtLevel(entity, 2);
 	}
 }

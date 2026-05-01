@@ -40,7 +40,7 @@ import tech.derbent.plm.orders.type.domain.COrderType;
 @Entity
 @Table (name = "corder")
 @AttributeOverride (name = "id", column = @Column (name = "order_id"))
-public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflow<COrder>, IHasAttachments, IHasComments, IHasLinks {
+public class COrder extends CProjectItem<COrder, COrderType> implements IHasStatusAndWorkflow<COrder, COrderType>, IHasAttachments, IHasComments, IHasLinks {
 
 	public static final String DEFAULT_COLOR = "#D2B48C"; // X11 Tan - purchase orders
 	public static final String DEFAULT_ICON = "vaadin:invoice";
@@ -294,7 +294,7 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 	}
 
 	@Override
-	public void setEntityType(CTypeEntity<?> typeEntity) {
+	public void setEntityType(final COrderType typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, COrderType.class, "Type entity must be an instance of COrderType");
 		Check.notNull(getProject(), "Project must be set before assigning order type");
@@ -302,7 +302,7 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning order type");
 		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
 				+ typeEntity.getCompany().getId() + " does not match order project company id " + getProject().getCompany().getId());
-		entityType = (COrderType) typeEntity;
+		entityType = typeEntity;
 		updateLastModified();
 	}
 

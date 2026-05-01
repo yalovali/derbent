@@ -18,7 +18,6 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.dashboard.domain.CDashboardProject;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.bab.dashboard.dashboardproject_bab.service.CDashboardProject_BabService;
 import tech.derbent.bab.dashboard.dashboardproject_bab.service.CPageServiceDashboardProject_Bab;
 import tech.derbent.plm.attachments.domain.CAttachment;
@@ -39,7 +38,7 @@ import tech.derbent.plm.links.domain.IHasLinks;
 })
 @AttributeOverride (name = "id", column = @Column (name = "dashboard_project_id"))
 public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_Bab>
-		implements IHasAttachments, IHasComments, IHasLinks, IEntityRegistrable {
+		implements IHasAttachments, IHasComments, IHasLinks {
 
 	// Entity constants (MANDATORY)
 	public static final String DEFAULT_COLOR = "#009688"; // Teal - Dashboard/Monitoring
@@ -150,7 +149,6 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 	@Override
 	public Set<CLink> getLinks() { return links; }
 
-	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceDashboardProject_Bab.class; }
 
 	/** Getter for transient placeholder field - returns entity itself for component binding.
@@ -202,7 +200,6 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 		return this;
 	}
 
-	@Override
 	public Class<?> getServiceClass() { return CDashboardProject_BabService.class; }
 
 	/** Initialize intrinsic defaults (RULE 3). */

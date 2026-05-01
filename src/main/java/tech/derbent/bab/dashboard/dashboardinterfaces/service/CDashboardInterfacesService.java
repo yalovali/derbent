@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import tech.derbent.api.dashboard.dashboardprojecttype.domain.CDashboardProjectType;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -35,12 +37,13 @@ import tech.derbent.bab.dashboard.dashboardinterfaces.domain.CDashboardInterface
 		"bab", "default", "test"
 })
 @PreAuthorize ("isAuthenticated()")
-public class CDashboardInterfacesService extends CProjectItemService<CDashboardInterfaces> implements IEntityRegistrable, IEntityWithView {
+public class CDashboardInterfacesService extends CProjectItemService<CDashboardInterfaces, CDashboardProjectType>
+		implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDashboardInterfacesService.class);
 
 	public CDashboardInterfacesService(final IDashboardInterfacesRepository repository, final Clock clock, final ISessionService sessionService,
-			final tech.derbent.api.entityOfCompany.service.CProjectItemStatusService statusService) {
+			final CProjectItemStatusService statusService) {
 		super(repository, clock, sessionService, statusService);
 	}
 

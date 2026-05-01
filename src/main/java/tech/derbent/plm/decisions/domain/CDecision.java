@@ -44,8 +44,8 @@ import tech.derbent.plm.links.domain.IHasLinks;
 @Entity
 @Table (name = "cdecision")
 @AttributeOverride (name = "id", column = @Column (name = "decision_id"))
-public class CDecision extends CProjectItem<CDecision>
-		implements IHasStatusAndWorkflow<CDecision>, IHasAttachments, IHasComments, IHasLinks, IHasParentRelation {
+public class CDecision extends CProjectItem<CDecision, CDecisionType>
+		implements IHasStatusAndWorkflow<CDecision, CDecisionType>, IHasAttachments, IHasComments, IHasLinks, IHasParentRelation {
 
 	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - authoritative decisions
 	public static final String DEFAULT_ICON = "vaadin:gavel";
@@ -67,7 +67,7 @@ public class CDecision extends CProjectItem<CDecision>
 			displayName = "Agile Parent", required = false, readOnly = false, description = "Agile hierarchy parent selector", hidden = false,
 			createComponentMethod = "createComponentParent", dataProviderBean = "pageservice", captionVisible = false
 	)
-	private final CProjectItem<?> placeHolder_createComponentParent = null;
+	private final CProjectItem<?, ?> placeHolder_createComponentParent = null;
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "decision_id")
@@ -150,7 +150,7 @@ public class CDecision extends CProjectItem<CDecision>
 	// IHasComments interface methods
 	@Override
 	public Set<CComment> getComments() { return comments; }
-	public CProjectItem<?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
+	public CProjectItem<?, ?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
 
 	/** Gets the end date for Gantt chart display. For decisions, this is the review date.
 	 * @return the review date as LocalDate, or null if not set */
@@ -208,7 +208,7 @@ public class CDecision extends CProjectItem<CDecision>
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	@Override
-	public void setEntityType(final CTypeEntity<?> typeEntity) {
+	public void setEntityType(final CDecisionType typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CDecisionType.class, "Type entity must be an instance of CDecisionType");
 		Check.notNull(getProject(), "Project must be set before assigning decision type");
@@ -216,7 +216,7 @@ public class CDecision extends CProjectItem<CDecision>
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning decision type");
 		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
 				+ typeEntity.getCompany().getId() + " does not match decision project company id " + getProject().getCompany().getId());
-		entityType = (CDecisionType) typeEntity;
+		entityType = typeEntity;
 		updateLastModified();
 	}
 

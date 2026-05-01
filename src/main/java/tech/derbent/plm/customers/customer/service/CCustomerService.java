@@ -11,6 +11,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.plm.customers.customertype.domain.CCustomerType;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -27,7 +28,7 @@ import tech.derbent.plm.customers.customertype.service.CCustomerTypeService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll
-public class CCustomerService extends CProjectItemService<CCustomer> implements IEntityRegistrable, IEntityWithView {
+public class CCustomerService extends CProjectItemService<CCustomer, CCustomerType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCustomerService.class);
 	private final CCustomerTypeService typeService;
@@ -89,7 +90,9 @@ public class CCustomerService extends CProjectItemService<CCustomer> implements 
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+		@SuppressWarnings ("unchecked")
+		final IHasStatusAndWorkflow<?, ?> typedEntity = (IHasStatusAndWorkflow<?, ?>) entity;
+		initializeNewEntity_IHasStatusAndWorkflow(typedEntity, sessionService.getActiveCompany().orElseThrow(), typeService,
 				statusService);
 	}
 

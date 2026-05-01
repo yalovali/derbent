@@ -30,8 +30,8 @@ import tech.derbent.plm.components.componenttype.domain.CProjectComponentType;
 @Entity
 @Table (name = "\"cprojectcomponent\"")
 @AttributeOverride (name = "id", column = @Column (name = "projectcomponent_id"))
-public class CProjectComponent extends CProjectItem<CProjectComponent>
-		implements IHasStatusAndWorkflow<CProjectComponent>, IHasAttachments, IHasComments {
+public class CProjectComponent extends CProjectItem<CProjectComponent, CProjectComponentType>
+		implements IHasStatusAndWorkflow<CProjectComponent, CProjectComponentType>, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#808000"; // X11 Olive - component parts (darker)
 	public static final String DEFAULT_ICON = "vaadin:cogs";
@@ -89,7 +89,7 @@ public class CProjectComponent extends CProjectItem<CProjectComponent>
 	public String getComponentCode() { return componentCode; }
 
 	@Override
-	public CTypeEntity<?> getEntityType() { return entityType; }
+	public CProjectComponentType getEntityType() { return entityType; }
 
 	@Override
 	public CWorkflowEntity getWorkflow() {
@@ -129,7 +129,7 @@ public class CProjectComponent extends CProjectItem<CProjectComponent>
 	}
 
 	@Override
-	public void setEntityType(CTypeEntity<?> typeEntity) {
+	public void setEntityType(final CProjectComponentType typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CProjectComponentType.class, "Type entity must be an instance of CComponentType");
 		Check.notNull(getProject(), "Project must be set before assigning component type");
@@ -137,7 +137,7 @@ public class CProjectComponent extends CProjectItem<CProjectComponent>
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning component type");
 		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
 				+ typeEntity.getCompany().getId() + " does not match component project company id " + getProject().getCompany().getId());
-		entityType = (CProjectComponentType) typeEntity;
+		entityType = typeEntity;
 		updateLastModified();
 	}
 }

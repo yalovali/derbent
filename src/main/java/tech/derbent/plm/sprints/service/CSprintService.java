@@ -12,6 +12,7 @@ import jakarta.persistence.EntityNotFoundException;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.plm.sprints.domain.CSprintType;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.ISprintableItem;
@@ -30,7 +31,7 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 })
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CSprintService extends CProjectItemService<CSprint> implements IEntityRegistrable, IEntityWithView {
+public class CSprintService extends CProjectItemService<CSprint, CSprintType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintService.class);
 
@@ -174,7 +175,9 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+		@SuppressWarnings ("unchecked")
+		final IHasStatusAndWorkflow<?, ?> typedEntity = (IHasStatusAndWorkflow<?, ?>) entity;
+		initializeNewEntity_IHasStatusAndWorkflow(typedEntity, sessionService.getActiveCompany().orElseThrow(), typeService,
 				statusService);
 	}
 

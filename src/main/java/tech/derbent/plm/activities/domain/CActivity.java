@@ -51,8 +51,9 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 @Entity
 @Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
-public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndWorkflow<CActivity>, IGnntEntityItem,
-		ISprintableItem, IHasIcon, IHasAttachments, IHasComments, IHasLinks, IHasParentRelation {
+public class CActivity extends CProjectItem<CActivity, CActivityType>
+		implements IHasStatusAndWorkflow<CActivity, CActivityType>, IGnntEntityItem, ISprintableItem, IHasIcon,
+		IHasAttachments, IHasComments, IHasLinks, IHasParentRelation {
 
 	public static final String DEFAULT_COLOR = "#4966B0"; // OpenWindows Selection Blue - actionable items
 	public static final String DEFAULT_ICON = "vaadin:tasks";
@@ -113,9 +114,10 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	// Type Management - concrete implementation of parent's typeEntity
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
+	// CActivityTypeService
 	@AMetaData (
 			displayName = "Activity Type", required = false, readOnly = false,
-			description = "Type category of the activity", hidden = false, dataProviderBean = "CActivityTypeService",
+			description = "Type category of the activity", hidden = false, dataProviderBean = "service",
 			setBackgroundFromColor = true, useIcon = true
 	)
 	private CActivityType entityType;
@@ -158,7 +160,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			description = "Agile hierarchy parent selector", hidden = false,
 			createComponentMethod = "createComponentParent", dataProviderBean = "pageservice", captionVisible = false
 	)
-	private final CProjectItem<?> placeHolder_createComponentParent = null;
+	private final CProjectItem<?, ?> placeHolder_createComponentParent = null;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "cactivitypriority_id", nullable = true)
 	@AMetaData (
@@ -268,7 +270,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	/** Gets the activity type.
 	 * @return the activity type */
 	@Override
-	public CTypeEntity<?> getEntityType() { return entityType; }
+	public CActivityType getEntityType() { return entityType; }
 
 	public BigDecimal getEstimatedHours() { return estimatedHours; }
 
@@ -285,7 +287,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	@Override
 	public CParentRelation getParentRelation() { return parentRelation; }
 
-	public CProjectItem<?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
+	public CProjectItem<?, ?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
 
 	public CActivityPriority getPriority() { return priority; }
 
@@ -418,7 +420,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	/** Override to set concrete type entity.
 	 * @param typeEntity the type entity to set */
 	@Override
-	public void setEntityType(final CTypeEntity<?> typeEntity) {
+	public void setEntityType(final CActivityType typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CActivityType.class, "Type entity must be an instance of CActivityType");
 		Check.notNull(getProject(), "Project must be set before assigning activity type");
@@ -427,7 +429,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
 				"Type entity company id " + typeEntity.getCompany().getId()
 						+ " does not match activity project company id " + getProject().getCompany().getId());
-		entityType = (CActivityType) typeEntity;
+		entityType = typeEntity;
 		updateLastModified();
 	}
 

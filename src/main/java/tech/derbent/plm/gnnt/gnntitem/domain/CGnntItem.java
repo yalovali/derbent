@@ -29,7 +29,7 @@ public class CGnntItem {
 	public static final String VIEW_NAME = "Gnnt Items View";
 
 	private final LocalDate endDate;
-	private final CProjectItem<?> entity;
+	private final CProjectItem<?, ?> entity;
 	private final String entityKey;
 	private final String entityType;
 	private final boolean editable;
@@ -39,7 +39,7 @@ public class CGnntItem {
 	private final String parentType;
 	private final LocalDate startDate;
 
-	public CGnntItem(final CProjectItem<?> entity, final long uniqueId, final int hierarchyLevel) {
+	public CGnntItem(final CProjectItem<?, ?> entity, final long uniqueId, final int hierarchyLevel) {
 		this.entity = entity;
 		id = uniqueId;
 		entityType = ProxyUtils.getUserClass(entity.getClass()).getSimpleName();
@@ -99,7 +99,7 @@ public class CGnntItem {
 		return endDate;
 	}
 
-	public CProjectItem<?> getEntity() {
+	public CProjectItem<?, ?> getEntity() {
 		return entity;
 	}
 
@@ -211,7 +211,7 @@ public class CGnntItem {
 		this.hasChildren = hasChildren;
 	}
 
-	private static boolean resolveEditable(final CProjectItem<?> entity) {
+	private static boolean resolveEditable(final CProjectItem<?, ?> entity) {
 		if (entity == null) {
 			return false;
 		}

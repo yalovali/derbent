@@ -40,7 +40,7 @@ import tech.derbent.api.utils.Check;
  * CComponentItemDetails itemDetails = new CComponentItemDetails(sessionService, pageEntityService, detailSectionService);
  * itemDetails.setValue(activity); // Displays activity details
  * itemDetails.addValueChangeListener(event -> {
- * 	CProjectItem<?> item = event.getValue();
+ * 	CProjectItem<?, ?> item = event.getValue();
  * 	// Handle value change
  * });
  * </pre>

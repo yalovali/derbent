@@ -105,7 +105,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 					entity != null ? entity.getId() : "null", entity != null ? entity.getClass().getSimpleName() : "null");
 			Objects.requireNonNull(entity, "Entity must be selected before changing status");
 			Check.instanceOf(entity, IHasStatusAndWorkflow.class, "Entity must have status implementation");
-			final IHasStatusAndWorkflow<?> workflowEntity = (IHasStatusAndWorkflow<?>) entity;
+			final IHasStatusAndWorkflow<?, ?> workflowEntity = (IHasStatusAndWorkflow<?, ?>) entity;
 			workflowEntity.setStatus(newStatus);
 			getEntityService().save(entity);
 			getView().onEntitySaved(entity);

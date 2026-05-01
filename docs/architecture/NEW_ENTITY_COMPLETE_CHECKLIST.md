@@ -52,7 +52,7 @@ Is this entity stored in database?
     │          └─ YES → Extend CEntityOfProject<T>
     │              │
     │              ├─ Is it a work item with status workflow?
-    │              │  └─ YES → Extend CProjectItem<T>
+    │              │  └─ YES → Extend CProjectItem<T, TType>
     │              │      │
     │              │      └─ Examples: CActivity, CMeeting, CDecision
     │              │
@@ -1174,8 +1174,8 @@ detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "l
 
 ### CProjectItem (Work Item)
 
-**Extends**: `CProjectItem<T>`  
-**Implements**: `IHasStatusAndWorkflow<T>`, `IHasAttachments`, `IHasComments`  
+**Extends**: `CProjectItem<T, TType>`  
+**Implements**: `IHasStatusAndWorkflow<T, TType>`, `IHasAttachments`, `IHasComments`  
 **Examples**: CActivity, CValidationCase, CMeeting  
 **Has**: entityType, status, workflow, assignedTo, attachments, comments
 

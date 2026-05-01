@@ -55,8 +55,8 @@ import tech.derbent.plm.tickets.tickettype.domain.CTicketType;
 @Entity
 @Table (name = "\"cticket\"")
 @AttributeOverride (name = "id", column = @Column (name = "ticket_id"))
-public class CTicket extends CProjectItem<CTicket>
-		implements IHasStatusAndWorkflow<CTicket>, IHasAttachments, IHasComments, IHasLinks, IHasParentRelation {
+public class CTicket extends CProjectItem<CTicket, CTicketType>
+		implements IHasStatusAndWorkflow<CTicket, CTicketType>, IHasAttachments, IHasComments, IHasLinks, IHasParentRelation {
 
 	public static final String DEFAULT_COLOR = "#3A5791"; // Darker blue - support items
 	public static final String DEFAULT_ICON = "vaadin:ticket";
@@ -78,7 +78,7 @@ public class CTicket extends CProjectItem<CTicket>
 			displayName = "Agile Parent", required = false, readOnly = false, description = "Agile hierarchy parent selector", hidden = false,
 			createComponentMethod = "createComponentParent", dataProviderBean = "pageservice", captionVisible = false
 	)
-	private final CProjectItem<?> placeHolder_createComponentParent = null;
+	private final CProjectItem<?, ?> placeHolder_createComponentParent = null;
 	// ============================================================
 	// TICKET IDENTITY FIELDS
 	// ============================================================
@@ -353,7 +353,7 @@ public class CTicket extends CProjectItem<CTicket>
 	@Override
 	public Set<CComment> getComments() { return comments; }
 
-	public CProjectItem<?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
+	public CProjectItem<?, ?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
 	// ============================================================
 	// GETTERS AND SETTERS
 	// ============================================================
@@ -369,7 +369,7 @@ public class CTicket extends CProjectItem<CTicket>
 	public CTicket getDuplicateOf() { return duplicateOf; }
 
 	@Override
-	public CTypeEntity<?> getEntityType() { return entityType; }
+	public CTicketType getEntityType() { return entityType; }
 
 	public String getExternalReference() { return externalReference; }
 
@@ -496,7 +496,7 @@ public class CTicket extends CProjectItem<CTicket>
 	}
 
 	@Override
-	public void setEntityType(CTypeEntity<?> typeEntity) {
+	public void setEntityType(final CTicketType typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CTicketType.class, "Type entity must be an instance of CTicketType");
 		Check.notNull(getProject(), "Project must be set before assigning ticket type");
@@ -504,7 +504,7 @@ public class CTicket extends CProjectItem<CTicket>
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning ticket type");
 		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
 				+ typeEntity.getCompany().getId() + " does not match ticket project company id " + getProject().getCompany().getId());
-		entityType = (CTicketType) typeEntity;
+		entityType = typeEntity;
 		updateLastModified();
 	}
 

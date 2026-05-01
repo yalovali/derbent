@@ -38,8 +38,8 @@ import tech.derbent.plm.milestones.milestonetype.domain.CMilestoneType;
 @Entity
 @Table (name = "\"cmilestone\"")
 @AttributeOverride (name = "id", column = @Column (name = "milestone_id"))
-public class CMilestone extends CProjectItem<CMilestone>
-		implements IHasStatusAndWorkflow<CMilestone>, IHasAttachments, IHasComments, IHasLinks, IHasParentRelation {
+public class CMilestone extends CProjectItem<CMilestone, CMilestoneType>
+		implements IHasStatusAndWorkflow<CMilestone, CMilestoneType>, IHasAttachments, IHasComments, IHasLinks, IHasParentRelation {
 
 	public static final String DEFAULT_COLOR = "#4B4382"; // CDE Titlebar Purple - key achievements
 	public static final String DEFAULT_ICON = "vaadin:flag";
@@ -62,7 +62,7 @@ public class CMilestone extends CProjectItem<CMilestone>
 			displayName = "Agile Parent", required = false, readOnly = false, description = "Agile hierarchy parent selector", hidden = false,
 			createComponentMethod = "createComponentParent", dataProviderBean = "pageservice", captionVisible = false
 	)
-	private final CProjectItem<?> placeHolder_createComponentParent = null;
+	private final CProjectItem<?, ?> placeHolder_createComponentParent = null;
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "milestone_id")
@@ -109,7 +109,7 @@ public class CMilestone extends CProjectItem<CMilestone>
 			parentRelation.setOwnerItem(this);
 		}
 	}
-	public CProjectItem<?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
+	public CProjectItem<?, ?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
 
 	@Override
 	public Set<CAttachment> getAttachments() { return attachments; }
@@ -118,7 +118,7 @@ public class CMilestone extends CProjectItem<CMilestone>
 	public Set<CComment> getComments() { return comments; }
 
 	@Override
-	public CTypeEntity<?> getEntityType() { return entityType; }
+	public CMilestoneType getEntityType() { return entityType; }
 
 	@Override
 	public Set<CLink> getLinks() { return links; }
@@ -143,7 +143,7 @@ public class CMilestone extends CProjectItem<CMilestone>
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	@Override
-	public void setEntityType(CTypeEntity<?> typeEntity) {
+	public void setEntityType(final CMilestoneType typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CMilestoneType.class, "Type entity must be an instance of CMilestoneType");
 		Check.notNull(getProject(), "Project must be set before assigning milestone type");
@@ -151,7 +151,7 @@ public class CMilestone extends CProjectItem<CMilestone>
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning milestone type");
 		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
 				+ typeEntity.getCompany().getId() + " does not match milestone project company id " + getProject().getCompany().getId());
-		entityType = (CMilestoneType) typeEntity;
+		entityType = typeEntity;
 		updateLastModified();
 	}
 

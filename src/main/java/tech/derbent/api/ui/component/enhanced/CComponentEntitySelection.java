@@ -422,7 +422,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		CGrid.styleColumnHeader(grid1.addComponentColumn(item -> {
 			try {
 				if (item instanceof CProjectItem) {
-					return new CLabelEntity(((CProjectItem<?>) item).getAssignedTo());
+					return new CLabelEntity(((CProjectItem<?, ?>) item).getAssignedTo());
 				}
 			} catch (final Exception e) {
 				LOGGER.warn("Error rendering assignedTo for item {}: {}", item.getId(), e.getMessage());
@@ -1173,7 +1173,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		final Set<String> statuses = new HashSet<>();
 		for (final EntityClass item : allItems) {
 			if (item instanceof CProjectItem) {
-				final CProjectItem<?> projectItem = (CProjectItem<?>) item;
+				final CProjectItem<?, ?> projectItem = (CProjectItem<?, ?>) item;
 				if (projectItem.getStatus() != null) {
 					statuses.add(projectItem.getStatus().getName());
 				}

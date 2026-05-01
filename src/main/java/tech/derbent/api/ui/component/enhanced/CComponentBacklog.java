@@ -31,7 +31,7 @@ import tech.derbent.plm.issues.issue.service.CIssueService;
 import tech.derbent.plm.meetings.domain.CMeeting;
 import tech.derbent.plm.meetings.service.CMeetingService;
 
-public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>>
+public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?, ?>>
 		implements IPageServiceAutoRegistrable, IHasSelectionNotification {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentBacklog.class);
@@ -60,7 +60,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	 * @param project the project to load backlog items for
 	 * @return provider for loading items */
 	@SuppressWarnings ("unchecked")
-	private static ItemsProvider<CProjectItem<?>> createItemsProvider(final CProject<?> project) {
+	private static ItemsProvider<CProjectItem<?, ?>> createItemsProvider(final CProject<?> project) {
 		return config -> {
 			try {
 				if (project == null) {
@@ -73,11 +73,11 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 				final CIssueService issueService = CSpringContext.getBean(CIssueService.class);
 				// Load items ordered by sprintOrder for proper backlog display
 				if (config.getEntityClass() == CActivity.class) {
-					return (List<CProjectItem<?>>) (List<?>) activityService.listForProjectBacklog(project);
+					return (List<CProjectItem<?, ?>>) (List<?>) activityService.listForProjectBacklog(project);
 				} else if (config.getEntityClass() == CMeeting.class) {
-					return (List<CProjectItem<?>>) (List<?>) meetingService.listForProjectBacklog(project);
+					return (List<CProjectItem<?, ?>>) (List<?>) meetingService.listForProjectBacklog(project);
 				} else if (config.getEntityClass() == CIssue.class) {
-					return (List<CProjectItem<?>>) (List<?>) issueService.listForProjectBacklog(project);
+					return (List<CProjectItem<?, ?>>) (List<?>) issueService.listForProjectBacklog(project);
 				}
 				return new ArrayList<>();
 			} catch (final Exception e) {
@@ -90,13 +90,13 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 
 	/** Creates a selection handler for the backlog.
 	 * @return selection handler that logs selection changes */
-	private static Consumer<Set<CProjectItem<?>>> createSelectionHandler() {
+	private static Consumer<Set<CProjectItem<?, ?>>> createSelectionHandler() {
 		return selectedItems -> LOGGER.debug("Backlog selection changed: {} items selected", selectedItems.size());
 	}
 
 	private final boolean compactMode;
 	/** Currently selected backlog item for detail display */
-	private CProjectItem<?> selectedBacklogItem;
+	private CProjectItem<?, ?> selectedBacklogItem;
 	/** Selection listeners for notification pattern */
 	private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new HashSet<>();
 
@@ -141,7 +141,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	}
 
 	@Override
-	public void configureGrid(final CGrid<CProjectItem<?>> grid) {
+	public void configureGrid(final CGrid<CProjectItem<?, ?>> grid) {
 		// Clear existing columns first
 		grid.getColumns().forEach(grid::removeColumn);
 		// In compact mode, show a Gnnt-inspired planning grid (status/responsible/dates + story points).
@@ -229,7 +229,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 
 	/** Gets all items currently displayed in the grid.
 	 * @return list of all items in grid */
-	public List<CProjectItem<?>> getAllItems() {
+	public List<CProjectItem<?, ?>> getAllItems() {
 		final var grid = getGrid();
 		if (grid == null) {
 			return List.of();
@@ -242,7 +242,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 
 	/** Gets the currently selected backlog item.
 	 * @return The selected project item or null if no selection */
-	public CProjectItem<?> getSelectedBacklogItem() {
+	public CProjectItem<?, ?> getSelectedBacklogItem() {
 		return selectedBacklogItem;
 	}
 
@@ -254,7 +254,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	/** Overridden to propagate selection events to listeners (e.g., kanban board). When an item is selected in the backlog grid, this notifies the parent
 	 * container to display the item details in the entity detail view. */
 	@Override
-	protected void on_gridItems_singleSelectionChanged(final CProjectItem<?> value) {
+	protected void on_gridItems_singleSelectionChanged(final CProjectItem<?, ?> value) {
 		super.on_gridItems_singleSelectionChanged(value);
 		// Store selected item for retrieval by parent
 		selectedBacklogItem = value;

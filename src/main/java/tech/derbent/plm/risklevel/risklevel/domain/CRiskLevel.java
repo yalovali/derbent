@@ -8,6 +8,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
@@ -18,11 +19,12 @@ import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.domain.IHasComments;
+import tech.derbent.plm.risklevel.riskleveltype.domain.CRiskLevelType;
 
 @Entity
 @Table (name = "\"crisklevel\"") // Using quoted identifiers for PostgreSQL
 @AttributeOverride (name = "id", column = @Column (name = "risklevel_id"))
-public class CRiskLevel extends CProjectItem<CRiskLevel> implements IHasAttachments, IHasComments {
+public class CRiskLevel extends CProjectItem<CRiskLevel, CRiskLevelType> implements IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#7A6E58"; // Darker border - risk levels
 	public static final String DEFAULT_ICON = "vaadin:chart-3d";
@@ -45,6 +47,16 @@ public class CRiskLevel extends CProjectItem<CRiskLevel> implements IHasAttachme
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
+
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "entitytype_id", nullable = true)
+	@AMetaData (
+			displayName = "Risk Level Type", required = false, readOnly = false,
+			description = "Type/category of the risk level", hidden = false, dataProviderBean = "CRiskLevelTypeService",
+			setBackgroundFromColor = true, useIcon = true
+	)
+	private CRiskLevelType entityType;
+
 	@Column (nullable = true)
 	@AMetaData (
 			displayName = "Risk Level", required = false, readOnly = false, defaultValue = "1", description = "Numeric risk level indicator (1-10)",
@@ -67,6 +79,9 @@ public class CRiskLevel extends CProjectItem<CRiskLevel> implements IHasAttachme
 	@Override
 	public Set<CComment> getComments() { return comments; }
 
+	@Override
+	public CRiskLevelType getEntityType() { return entityType; }
+
 	public Integer getRiskLevel() { return riskLevel; }
 
 	private final void initializeDefaults() {
@@ -80,6 +95,12 @@ public class CRiskLevel extends CProjectItem<CRiskLevel> implements IHasAttachme
 	@Override
 	public void setComments(final Set<CComment> comments) {
 		this.comments = comments;
+		updateLastModified();
+	}
+
+	@Override
+	public void setEntityType(final CRiskLevelType entityType) {
+		this.entityType = entityType;
 		updateLastModified();
 	}
 

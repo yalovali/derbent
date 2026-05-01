@@ -13,6 +13,7 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.plm.issues.issuetype.domain.CIssueType;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -29,7 +30,7 @@ import tech.derbent.plm.sprints.domain.CSprint;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll
-public class CIssueService extends CProjectItemService<CIssue> implements IEntityRegistrable, IEntityWithView {
+public class CIssueService extends CProjectItemService<CIssue, CIssueType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CIssueService.class);
 	private final CIssueTypeService typeService;
@@ -99,7 +100,9 @@ public class CIssueService extends CProjectItemService<CIssue> implements IEntit
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+		@SuppressWarnings ("unchecked")
+		final IHasStatusAndWorkflow<?, ?> typedEntity = (IHasStatusAndWorkflow<?, ?>) entity;
+		initializeNewEntity_IHasStatusAndWorkflow(typedEntity, sessionService.getActiveCompany().orElseThrow(), typeService,
 				statusService);
 	}
 

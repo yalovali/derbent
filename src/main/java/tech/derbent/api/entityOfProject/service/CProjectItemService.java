@@ -4,6 +4,7 @@ import java.time.Clock;
 import tech.derbent.api.parentrelation.service.IHasParentRelationService;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
+import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
@@ -14,8 +15,9 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 
-public abstract class CProjectItemService<EntityClass extends CProjectItem<EntityClass>> extends CEntityOfProjectService<EntityClass>
-		implements IHasStatusAndWorkflowService<EntityClass>, IHasParentRelationService {
+public abstract class CProjectItemService<EntityClass extends CProjectItem<EntityClass, TypeClass>,
+		TypeClass extends CTypeEntity<TypeClass>> extends CEntityOfProjectService<EntityClass>
+		implements IHasStatusAndWorkflowService, IHasParentRelationService {
 
 	protected CProjectItemStatusService statusService;
 
@@ -45,11 +47,10 @@ public abstract class CProjectItemService<EntityClass extends CProjectItem<Entit
 		// Call parent to copy entity-of-project fields
 		super.copyEntityFieldsTo(source, target, options);
 		// Copy project item fields if target supports them
-		if (!(target instanceof tech.derbent.api.entityOfProject.domain.CProjectItem)) {
+		if (!(target instanceof CProjectItem<?, ?>)) {
 			return;
 		}
-		final tech.derbent.api.entityOfProject.domain.CProjectItem<?> targetProjectItem =
-				(tech.derbent.api.entityOfProject.domain.CProjectItem<?>) target;
+		final CProjectItem<?, ?> targetProjectItem = (CProjectItem<?, ?>) target;
 		// Copy project and creator - direct setter/getter
 		targetProjectItem.setProject(source.getProject());
 		targetProjectItem.setCreatedBy(source.getCreatedBy());
@@ -94,7 +95,7 @@ public abstract class CProjectItemService<EntityClass extends CProjectItem<Entit
 	}
 
 	@SuppressWarnings ("unchecked")
-	public final void revokeSave(final CProjectItem<?> rawEntity) {
+	public final void revokeSave(final CProjectItem<?, ?> rawEntity) {
 		save((EntityClass) rawEntity);
 	}
 

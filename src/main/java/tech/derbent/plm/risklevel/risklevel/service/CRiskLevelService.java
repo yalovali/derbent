@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.plm.risklevel.riskleveltype.domain.CRiskLevelType;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -21,7 +22,7 @@ import tech.derbent.plm.risklevel.risklevel.domain.CRiskLevel;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CRiskLevelService extends CProjectItemService<CRiskLevel> implements IEntityRegistrable, IEntityWithView {
+public class CRiskLevelService extends CProjectItemService<CRiskLevel, CRiskLevelType> implements IEntityRegistrable, IEntityWithView {
 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskLevelService.class);

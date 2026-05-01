@@ -110,7 +110,7 @@ public class CComponentAgileParentSelector extends ComboBox<CActivity> {
 				// Get current entity and its descendants
 				final Optional<CActivity> currentEntity = activityService.getById(currentEntityId);
 				currentEntity.ifPresent(value -> {
-					final java.util.List<CProjectItem<?>> descendants =
+					final java.util.List<CProjectItem<?, ?>> descendants =
 							agileParentRelationService.getAllDescendants(value);
 					descendants.stream().map(CEntityDB::getId).forEach(excludedIds::add);
 				});

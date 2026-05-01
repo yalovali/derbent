@@ -47,7 +47,7 @@ import tech.derbent.plm.sprints.service.CSprintItemService;
  * <p>
  * Implements IDropTarget to receive dropped items from backlog component. */
 public class CComponentListSprintItems extends CComponentListEntityBase<CSprint, CSprintItem>
-		implements IEntitySelectionDialogSupport<CProjectItem<?>> {
+		implements IEntitySelectionDialogSupport<CProjectItem<?, ?>> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListSprintItems.class);
 	private static final long serialVersionUID = 1L;
@@ -74,7 +74,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	@Override
 	public void configureGrid(final CGrid<CSprintItem> grid1) {
 		Check.notNull(grid1, "Grid cannot be null");
-		grid1.addIdColumn(item -> item.getParentItem() instanceof CProjectItem<?> ? (CProjectItem<?>) item.getParentItem() : null,
+		grid1.addIdColumn(item -> item.getParentItem() instanceof CProjectItem<?, ?> ? (CProjectItem<?, ?>) item.getParentItem() : null,
 				CSprintItem::getItemId, "ID", "id");
 		// Use expanding column for Name to fill remaining width
 		grid1.addShortTextColumn(item -> {
@@ -147,7 +147,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	 * enable the dialog to hide or pre-select them.
 	 * @return ItemsProvider that returns the current sprint's items filtered by entity type */
 	@Override
-	public CComponentEntitySelection.ItemsProvider<CProjectItem<?>> getAlreadySelectedProvider() {
+	public CComponentEntitySelection.ItemsProvider<CProjectItem<?, ?>> getAlreadySelectedProvider() {
 		return config -> {
 			try {
 				final CSprint sprint = getMasterEntity();
@@ -159,9 +159,9 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 				final CSprintItemService service = (CSprintItemService) childService;
 				final List<CSprintItem> sprintItems = service.findByMasterId(sprint.getId());
 				// Filter by entity type and extract the underlying items
-				final List<CProjectItem<?>> result = new ArrayList<>();
+				final List<CProjectItem<?, ?>> result = new ArrayList<>();
 				final String targetType = config.getEntityClass().getSimpleName();
-				sprintItems.stream().filter((final CSprintItem sprintItem) -> sprintItem.getParentItem() != null && targetType.equals(sprintItem.getParentItem().getClass().getSimpleName())).forEach((final CSprintItem sprintItem) -> result.add((CProjectItem<?>) sprintItem.getParentItem()));
+				sprintItems.stream().filter((final CSprintItem sprintItem) -> sprintItem.getParentItem() != null && targetType.equals(sprintItem.getParentItem().getClass().getSimpleName())).forEach((final CSprintItem sprintItem) -> result.add((CProjectItem<?, ?>) sprintItem.getParentItem()));
 				LOGGER.debug("Found {} already selected items of type {}", result.size(), targetType);
 				return result;
 			} catch (final Exception e) {
@@ -193,7 +193,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 
 	@Override
 	@SuppressWarnings ("unchecked")
-	public CComponentEntitySelection.ItemsProvider<CProjectItem<?>> getItemsProvider() {
+	public CComponentEntitySelection.ItemsProvider<CProjectItem<?, ?>> getItemsProvider() {
 		return config -> {
 			try {
 				final CProject<?> project = getMasterEntity() != null ? getMasterEntity().getProject() : null;
@@ -202,9 +202,9 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 					return new ArrayList<>();
 				}
 				if (config.getEntityClass() == CActivity.class) {
-					return (List<CProjectItem<?>>) (List<?>) activityService.listByProject(project);
+					return (List<CProjectItem<?, ?>>) (List<?>) activityService.listByProject(project);
 				} else if (config.getEntityClass() == CMeeting.class) {
-					return (List<CProjectItem<?>>) (List<?>) meetingService.listByProject(project);
+					return (List<CProjectItem<?, ?>>) (List<?>) meetingService.listByProject(project);
 				}
 				return new ArrayList<>();
 			} catch (final Exception e) {
@@ -292,7 +292,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 			LOGGER.debug("Opening entity selection dialog: {}", getDialogTitle());
 			// Use interface methods for dialog configuration
 			// Raw types are required due to complex generic constraints between CDialogEntitySelection and Consumer
-			final CDialogEntitySelection<CProjectItem<?>> dialog = new CDialogEntitySelection(getDialogTitle(), getDialogEntityTypes(),
+			final CDialogEntitySelection<CProjectItem<?, ?>> dialog = new CDialogEntitySelection(getDialogTitle(), getDialogEntityTypes(),
 					getItemsProvider(), getSelectionHandler(), isMultiSelect(), getAlreadySelectedProvider(), getAlreadySelectedMode());
 			dialog.open();
 		} catch (final Exception ex) {

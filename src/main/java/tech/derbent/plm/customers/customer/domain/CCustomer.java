@@ -34,8 +34,8 @@ import tech.derbent.plm.customers.customertype.domain.CCustomerType;
 @Entity
 @Table (name = "ccustomer")
 @AttributeOverride (name = "id", column = @Column (name = "customer_id"))
-public class CCustomer extends CProjectItem<CCustomer>
-		implements IHasStatusAndWorkflow<CCustomer>, IHasAttachments, IHasComments {
+public class CCustomer extends CProjectItem<CCustomer, CCustomerType>
+		implements IHasStatusAndWorkflow<CCustomer, CCustomerType>, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#4169E1"; // RoyalBlue - customers
 	public static final String DEFAULT_ICON = "vaadin:briefcase";
@@ -202,7 +202,7 @@ public class CCustomer extends CProjectItem<CCustomer>
 	public LocalDate getEndDate() { return lastInteractionDate != null ? lastInteractionDate : relationshipStartDate; }
 
 	@Override
-	public CTypeEntity<?> getEntityType() { return entityType; }
+	public CCustomerType getEntityType() { return entityType; }
 
 	/** Gets the icon for Gantt chart display.
 	 * @return the customer icon identifier */
@@ -287,7 +287,7 @@ public class CCustomer extends CProjectItem<CCustomer>
 	}
 
 	@Override
-	public void setEntityType(CTypeEntity<?> typeEntity) {
+	public void setEntityType(final CCustomerType typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CCustomerType.class, "Type entity must be an instance of CCustomerType");
 		Check.notNull(getProject(), "Project must be set before assigning customer type");
@@ -296,7 +296,7 @@ public class CCustomer extends CProjectItem<CCustomer>
 		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
 				"Type entity company id " + typeEntity.getCompany().getId()
 						+ " does not match customer project company id " + getProject().getCompany().getId());
-		entityType = (CCustomerType) typeEntity;
+		entityType = typeEntity;
 		updateLastModified();
 	}
 

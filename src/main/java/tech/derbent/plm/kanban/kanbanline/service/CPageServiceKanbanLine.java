@@ -71,7 +71,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	 * @param item       The project item to update
 	 * @param sprintItem The sprint item wrapping the project item
 	 * @param newStatus  The status to apply */
-	private void applyStatusAndSave(final CProjectItem<?> item, final CSprintItem sprintItem, final CProjectItemStatus newStatus) {
+	private void applyStatusAndSave(final CProjectItem<?, ?> item, final CSprintItem sprintItem, final CProjectItemStatus newStatus) {
 		try {
 			Check.notNull(item, "Project item cannot be null");
 			Check.notNull(sprintItem, "Sprint item cannot be null");
@@ -81,7 +81,8 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			// Save project item using its specific service (dynamic service lookup by
 			// entity class)
 			final Class<?> projectItemServiceClass = CEntityRegistry.getServiceClassForEntity(item.getClass());
-			final CProjectItemService<?> projectItemService = (CProjectItemService<?>) CSpringContext.getBean(projectItemServiceClass);
+			final CProjectItemService<?, ?> projectItemService =
+					(CProjectItemService<?, ?>) CSpringContext.getBean(projectItemServiceClass);
 			projectItemService.revokeSave(item); // revokeSave = save bypassing some validations for system updates
 			// CRITICAL: Defer UI refresh until after Vaadin drop event completes
 			componentKanbanBoard.getUI().ifPresent(ui -> ui.access(() -> {
@@ -159,7 +160,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	 * @param event      The drop event */
 	private void handleDragBetweenColumns(final CSprintItem sprintItem, final CDragDropEvent event) {
 		LOGGER.info("Handling drag between kanban columns");
-		final CProjectItem<?> item = (CProjectItem<?>) sprintItem.getParentItem();
+		final CProjectItem<?, ?> item = (CProjectItem<?, ?>) sprintItem.getParentItem();
 		// Step 2: Resolve target kanban column from drop event (column, post-it, or
 		// component)
 		final CKanbanColumn targetColumn = resolveTargetColumn(event);
@@ -170,7 +171,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		// Step 4: Resolve valid status(es) for target column
 		// This intersects column's included statuses with workflow-valid transitions
 		final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
-		final List<CProjectItemStatus> targetStatuses = statusService.resolveStatusesForColumn(targetColumn, (IHasStatusAndWorkflow<?>) item);
+		final List<CProjectItemStatus> targetStatuses = statusService.resolveStatusesForColumn(targetColumn, (IHasStatusAndWorkflow<?, ?>) item);
 		// Step 5: Handle status transition based on number of valid statuses
 		if (targetStatuses.isEmpty()) {
 			// Case 1: No valid status for this column - update column assignment but not
@@ -208,7 +209,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	 * item, adds it to the current sprint, assigns it to the target column, and resolves the appropriate status based on workflow rules.
 	 * @param projectItem The backlog item being dragged
 	 * @param event       The drop event */
-	private void handleDragFromBacklog(final CProjectItem<?> projectItem, final CDragDropEvent event) {
+	private void handleDragFromBacklog(final CProjectItem<?, ?> projectItem, final CDragDropEvent event) {
 		LOGGER.info("[DragDrop] Handling drag from backlog to kanban column - adding item {} to sprint", projectItem.getId());
 		try {
 			// Get target column
@@ -239,7 +240,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			// Resolve valid statuses for target column
 			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 			final List<CProjectItemStatus> targetStatuses =
-					statusService.resolveStatusesForColumn(targetColumn, (IHasStatusAndWorkflow<?>) projectItem);
+					statusService.resolveStatusesForColumn(targetColumn, (IHasStatusAndWorkflow<?, ?>) projectItem);
 			LOGGER.info("[DragDrop] Resolved {} target statuses for column {}", targetStatuses.size(), targetColumn.getName());
 			// Handle status assignment based on number of valid statuses
 			if (targetStatuses.isEmpty()) {
@@ -274,7 +275,8 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 				((ISprintableItem) projectItem).setStatus(newStatus);
 				// Save project item first (to persist status change)
 				final Class<?> projectItemServiceClass = CEntityRegistry.getServiceClassForEntity(projectItem.getClass());
-				final CProjectItemService<?> projectItemService = (CProjectItemService<?>) CSpringContext.getBean(projectItemServiceClass);
+				final CProjectItemService<?, ?> projectItemService =
+						(CProjectItemService<?, ?>) CSpringContext.getBean(projectItemServiceClass);
 				projectItemService.revokeSave(projectItem);
 				LOGGER.info("[DragDrop] Project item {} status updated to {}", projectItem.getId(), newStatus.getName());
 				// Save the sprint item (cascades from parent save)
@@ -386,7 +388,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 				// Drop on kanban column: Handle based on source type
 				if (draggedItem instanceof CProjectItem) {
 					// Drag from backlog: Add to sprint
-					handleDragFromBacklog((CProjectItem<?>) draggedItem, event);
+					handleDragFromBacklog((CProjectItem<?, ?>) draggedItem, event);
 				} else if (draggedItem instanceof CSprintItem) {
 					// Drag between kanban columns: Update status/column
 					handleDragBetweenColumns((CSprintItem) draggedItem, event);
@@ -502,7 +504,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	 * @param sprintItem     The sprint item wrapping the project item
 	 * @param targetColumn   The column being dropped onto
 	 * @param targetStatuses List of valid statuses the user can choose from (must have at least 2 items) */
-	private void showStatusSelectionDialog(final CProjectItem<?> item, final CSprintItem sprintItem, final CKanbanColumn targetColumn,
+	private void showStatusSelectionDialog(final CProjectItem<?, ?> item, final CSprintItem sprintItem, final CKanbanColumn targetColumn,
 			final List<CProjectItemStatus> targetStatuses) {
 		Check.notNull(item, "Project item cannot be null");
 		Check.notNull(sprintItem, "Sprint item cannot be null");
@@ -542,7 +544,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	 * @param sprintItem     The newly created sprint item
 	 * @param targetColumn   The column being dropped onto
 	 * @param targetStatuses List of valid statuses the user can choose from */
-	private void showStatusSelectionDialogForBacklog(final CProjectItem<?> projectItem, final CSprintItem sprintItem,
+	private void showStatusSelectionDialogForBacklog(final CProjectItem<?, ?> projectItem, final CSprintItem sprintItem,
 			final CKanbanColumn targetColumn, final List<CProjectItemStatus> targetStatuses) {
 		Check.notNull(projectItem, "Project item cannot be null");
 		Check.notNull(sprintItem, "Sprint item cannot be null");
@@ -560,7 +562,8 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 					((ISprintableItem) projectItem).setStatus(selectedStatus);
 					// Save project item (to persist status change)
 					final Class<?> projectItemServiceClass = CEntityRegistry.getServiceClassForEntity(projectItem.getClass());
-					final CProjectItemService<?> projectItemService = (CProjectItemService<?>) CSpringContext.getBean(projectItemServiceClass);
+					final CProjectItemService<?, ?> projectItemService =
+							(CProjectItemService<?, ?>) CSpringContext.getBean(projectItemServiceClass);
 					projectItemService.revokeSave(projectItem);
 					// CRITICAL: Defer UI refresh to avoid dialog detachment issues
 					componentKanbanBoard.getUI().ifPresent(ui -> ui.access(() -> {

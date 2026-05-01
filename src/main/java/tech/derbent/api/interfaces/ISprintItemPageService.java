@@ -34,7 +34,7 @@ import tech.derbent.api.entityOfProject.domain.CProjectItem;
  * @since 1.0
  * @see ISprintableItem */
 @FunctionalInterface
-public interface ISprintItemPageService<T extends CProjectItem<?> & ISprintableItem> {
+public interface ISprintItemPageService<T extends CProjectItem<?, ?> & ISprintableItem> {
 
 	/** Creates a widget component for displaying the entity when shown as a sprint item.
 	 * <p>

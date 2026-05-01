@@ -14,6 +14,7 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.plm.validation.validationcasetype.domain.CValidationCaseType;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -33,7 +34,7 @@ import tech.derbent.plm.validation.validationsuite.domain.CValidationSuite;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll
-public class CValidationCaseService extends CProjectItemService<CValidationCase> implements IEntityRegistrable, IEntityWithView {
+public class CValidationCaseService extends CProjectItemService<CValidationCase, CValidationCaseType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CValidationCaseService.class);
 	private final CValidationCaseTypeService typeService;
@@ -151,7 +152,9 @@ public class CValidationCaseService extends CProjectItemService<CValidationCase>
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+		@SuppressWarnings ("unchecked")
+		final IHasStatusAndWorkflow<?, ?> typedEntity = (IHasStatusAndWorkflow<?, ?>) entity;
+		initializeNewEntity_IHasStatusAndWorkflow(typedEntity, sessionService.getActiveCompany().orElseThrow(), typeService,
 				statusService);
 	}
 

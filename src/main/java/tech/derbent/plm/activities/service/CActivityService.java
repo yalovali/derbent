@@ -13,6 +13,7 @@ import jakarta.persistence.EntityNotFoundException;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.plm.activities.domain.CActivityType;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
@@ -35,7 +36,7 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 		"derbent", "default"
 })
 @PreAuthorize ("isAuthenticated()")
-public class CActivityService extends CProjectItemService<CActivity> implements IEntityRegistrable, IEntityWithView {
+public class CActivityService extends CProjectItemService<CActivity, CActivityType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityService.class);
 	private final CActivityPriorityService activityPriorityService;
@@ -135,7 +136,9 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		final CActivity entityCasted = (CActivity) entity;
 		final CProject<?> currentProject = sessionService.getActiveProject().orElseThrow(
 				() -> new CInitializationException("No active project in session - cannot initialize activity"));
-		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity,
+		@SuppressWarnings ("unchecked")
+		final IHasStatusAndWorkflow<?, ?> typedEntity = (IHasStatusAndWorkflow<?, ?>) entity;
+		initializeNewEntity_IHasStatusAndWorkflow(typedEntity,
 				sessionService.getActiveCompany().orElseThrow(), typeService, statusService);
 		if (entityCasted.getSprintItem() == null) {
 			final CSprintItem sprintItem = new CSprintItem(true);

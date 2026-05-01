@@ -41,7 +41,7 @@ Is this entity stored in database?
     │          └─ YES → Extend CEntityOfProject<T>
     │              │
     │              ├─ Is it a work item with status workflow?
-    │              │  └─ YES → Extend CProjectItem<T>
+    │              │  └─ YES → Extend CProjectItem<T, TType>
     │              │      │
     │              │      └─ Examples: CActivity, CMeeting, CDecision
     │              │
@@ -71,7 +71,7 @@ CEntityNamed<T>                     # Adds: name, description, color, icon
     │
     └─→ CEntityOfProject<T>        # Adds: project association
             ↓
-        CProjectItem<T>             # Adds: status, workflow, dates, assignedTo
+        CProjectItem<T, TType>      # Adds: status, workflow, dates, assignedTo
             ↓
         [Work Items: CActivity, CMeeting, CDecision, etc.]
 ```

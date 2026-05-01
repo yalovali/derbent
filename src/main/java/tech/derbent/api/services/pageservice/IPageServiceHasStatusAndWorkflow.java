@@ -37,12 +37,12 @@ public interface IPageServiceHasStatusAndWorkflow<EntityClass extends CEntityDB<
 				return;
 			}
 			// Get valid next statuses from workflow
-			final List<CProjectItemStatus> validStatuses = getProjectItemStatusService().getValidNextStatuses((IHasStatusAndWorkflow<?>) entity);
+			final List<CProjectItemStatus> validStatuses = getProjectItemStatusService().getValidNextStatuses((IHasStatusAndWorkflow<?, ?>) entity);
 			// Check if the new status is in the list of valid statuses
 			final boolean isValidTransition = validStatuses.stream().anyMatch(s -> s.getId().equals(newStatus.getId()));
 			if (!isValidTransition) {
 				final String currentStatusName =
-						((IHasStatusAndWorkflow<?>) entity).getStatus() != null ? ((IHasStatusAndWorkflow<?>) entity).getStatus().getName() : "none";
+						((IHasStatusAndWorkflow<?, ?>) entity).getStatus() != null ? ((IHasStatusAndWorkflow<?, ?>) entity).getStatus().getName() : "none";
 				LOGGER.warn("Invalid status transition from '{}' to '{}' for entity ID: {}", currentStatusName, newStatus.getName(), entity.getId());
 				CNotificationService.showWarning(String.format("Cannot change status from '%s' to '%s' - transition not allowed by workflow",
 						currentStatusName, newStatus.getName()));
@@ -50,8 +50,8 @@ public interface IPageServiceHasStatusAndWorkflow<EntityClass extends CEntityDB<
 			}
 			// Status change is valid - apply it to entity and save
 			final String oldStatusName =
-					((IHasStatusAndWorkflow<?>) entity).getStatus() != null ? ((IHasStatusAndWorkflow<?>) entity).getStatus().getName() : "none";
-			((IHasStatusAndWorkflow<?>) entity).setStatus(newStatus);
+					((IHasStatusAndWorkflow<?, ?>) entity).getStatus() != null ? ((IHasStatusAndWorkflow<?, ?>) entity).getStatus().getName() : "none";
+			((IHasStatusAndWorkflow<?, ?>) entity).setStatus(newStatus);
 			LOGGER.info("Status changed from '{}' to '{}' for entity ID: {}", oldStatusName, newStatus.getName(), entity.getId());
 			// Save the entity to persist the status change
 			final EntityClass savedEntity = getEntityService().save(entity);
@@ -82,7 +82,7 @@ public interface IPageServiceHasStatusAndWorkflow<EntityClass extends CEntityDB<
 			return List.of();
 		}
 		Check.notNull(getProjectItemStatusService(), "CProjectItemStatusService cannot be null");
-		return getProjectItemStatusService().getValidNextStatuses((IHasStatusAndWorkflow<?>) entity);
+		return getProjectItemStatusService().getValidNextStatuses((IHasStatusAndWorkflow<?, ?>) entity);
 	}
 
 	CAbstractService<EntityClass> getEntityService();

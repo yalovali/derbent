@@ -49,7 +49,7 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 
 	private String selectedParentKey;
 	private List<CGnntItem> allLeafItems = List.of();
-	private Map<String, CProjectItem<?>> entitiesByKey = Map.of();
+	private Map<String, CProjectItem<?, ?>> entitiesByKey = Map.of();
 	private CGanttTimelineRange lastRange;
 
 	public CSprintPlanningBacklogBrowser(final CSprintPlanningDragContext dragContext, final Consumer<CGnntItem> leafSelectionListener,
@@ -192,7 +192,7 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 	}
 
 	public void setBacklogData(final CGnntHierarchyResult parentHierarchy, final CGnntHierarchyResult leafHierarchy,
-			final Map<String, CProjectItem<?>> entitiesByKey, final CGanttTimelineRange range) {
+			final Map<String, CProjectItem<?, ?>> entitiesByKey, final CGanttTimelineRange range) {
 
 		// Keep these cached so parent selection can filter leaf items without reloading from the database.
 		this.entitiesByKey = entitiesByKey != null ? entitiesByKey : Map.of();
@@ -241,7 +241,7 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 
 		final List<CGnntItem> filtered = new ArrayList<>();
 		items.forEach((final CGnntItem item) -> {
-			final CProjectItem<?> entity = item != null ? item.getEntity() : null;
+			final CProjectItem<?, ?> entity = item != null ? item.getEntity() : null;
 			if (entity != null && isDescendantOfSelectedParent(entity)) {
 				filtered.add(item);
 			}
@@ -249,13 +249,13 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 		return filtered;
 	}
 
-	private boolean isDescendantOfSelectedParent(final CProjectItem<?> leaf) {
+	private boolean isDescendantOfSelectedParent(final CProjectItem<?, ?> leaf) {
 		String parentKey = CHierarchyNavigationService.buildParentKey(leaf);
 		while (parentKey != null) {
 			if (parentKey.equals(selectedParentKey)) {
 				return true;
 			}
-			final CProjectItem<?> parent = entitiesByKey.get(parentKey);
+			final CProjectItem<?, ?> parent = entitiesByKey.get(parentKey);
 			if (parent == null) {
 				break;
 			}

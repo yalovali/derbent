@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.session.service.ISessionService;
@@ -18,6 +19,7 @@ import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.plm.decisions.domain.CDecision;
+import tech.derbent.plm.decisions.domain.CDecisionType;
 
 /** CDecisionService - Service class for CDecision entities. Layer: Service (MVC) Provides business logic operations for decision management including
  * validation, creation, approval workflow management, and project-based queries. */
@@ -27,7 +29,7 @@ import tech.derbent.plm.decisions.domain.CDecision;
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CDecisionService extends CEntityOfProjectService<CDecision>
-		implements IEntityRegistrable, IEntityWithView, IHasStatusAndWorkflowService<CDecision> {
+		implements IEntityRegistrable, IEntityWithView, IHasStatusAndWorkflowService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecisionService.class);
 	private final CProjectItemStatusService statusService;
@@ -51,7 +53,7 @@ public class CDecisionService extends CEntityOfProjectService<CDecision>
 	 * @param target  the target entity to copy to
 	 * @param options clone options controlling what fields to copy */
 	@Override
-	public void copyEntityFieldsTo(final CDecision source, final CEntityDB<?> target, final tech.derbent.api.interfaces.CCloneOptions options) {
+	public void copyEntityFieldsTo(final CDecision source, final CEntityDB<?> target, final CCloneOptions options) {
 		// Call parent to copy project item fields
 		super.copyEntityFieldsTo(source, target, options);
 		// Only copy if target is a Decision
@@ -84,8 +86,9 @@ public class CDecisionService extends CEntityOfProjectService<CDecision>
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
-				statusService);
+		@SuppressWarnings ("unchecked")
+		final IHasStatusAndWorkflow<?, ?> typedEntity = (IHasStatusAndWorkflow<?, ?>) entity;
+		initializeNewEntity_IHasStatusAndWorkflow(typedEntity, sessionService.getActiveCompany().orElseThrow(), typeService, statusService);
 	}
 
 	@Override

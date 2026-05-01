@@ -36,7 +36,7 @@ import tech.derbent.plm.storage.storagetype.domain.CStorageType;
 @Entity
 @Table (name = "cstorage")
 @AttributeOverride (name = "id", column = @Column (name = "storage_id"))
-public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWorkflow<CStorage>, IHasAttachments, IHasComments, IHasLinks {
+public class CStorage extends CProjectItem<CStorage, CStorageType> implements IHasStatusAndWorkflow<CStorage, CStorageType>, IHasAttachments, IHasComments, IHasLinks {
 
 	public static final String DEFAULT_COLOR = "#006699";
 	public static final String DEFAULT_ICON = "vaadin:warehouse";
@@ -220,7 +220,7 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
 	public void setCurrentUtilization(final BigDecimal currentUtilization) { this.currentUtilization = currentUtilization; }
 
 	@Override
-	public void setEntityType(final CTypeEntity<?> typeEntity) {
+	public void setEntityType(final CStorageType typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CStorageType.class, "Type entity must be an instance of CStorageType");
 		Check.notNull(getProject(), "Project must be set before assigning storage type");
@@ -228,7 +228,7 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning storage type");
 		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
 				+ typeEntity.getCompany().getId() + " does not match storage project company id " + getProject().getCompany().getId());
-		entityType = (CStorageType) typeEntity;
+		entityType = typeEntity;
 		updateLastModified();
 	}
 

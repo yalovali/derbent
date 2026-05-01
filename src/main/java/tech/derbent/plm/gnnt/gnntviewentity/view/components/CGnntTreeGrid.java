@@ -291,7 +291,7 @@ public class CGnntTreeGrid extends CAbstractGnntGridBase {
 	}
 
 	private boolean isDone(final Object entity) {
-		if (!(entity instanceof IHasStatusAndWorkflow<?> itemWithStatus)) {
+		if (!(entity instanceof IHasStatusAndWorkflow<?, ?> itemWithStatus)) {
 			return false;
 		}
 		final CProjectItemStatus status = itemWithStatus.getStatus();

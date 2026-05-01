@@ -34,8 +34,8 @@ import tech.derbent.plm.projectincomes.projectincometype.domain.CProjectIncomeTy
 @Entity
 @Table (name = "\"cprojectincome\"")
 @AttributeOverride (name = "id", column = @Column (name = "projectincome_id"))
-public class CProjectIncome extends CProjectItem<CProjectIncome>
-		implements IHasStatusAndWorkflow<CProjectIncome>, IFinancialEntity, IHasAttachments, IHasComments {
+public class CProjectIncome extends CProjectItem<CProjectIncome, CProjectIncomeType>
+		implements IHasStatusAndWorkflow<CProjectIncome, CProjectIncomeType>, IFinancialEntity, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#B8860B"; // X11 DarkGoldenrod - incoming money (darker)
 	public static final String DEFAULT_ICON = "vaadin:money-deposit";
@@ -104,7 +104,7 @@ public class CProjectIncome extends CProjectItem<CProjectIncome>
 	public CCurrency getCurrency() { return currency; }
 
 	@Override
-	public CTypeEntity<?> getEntityType() { return entityType; }
+	public CProjectIncomeType getEntityType() { return entityType; }
 
 	public LocalDate getIncomeDate() { return incomeDate; }
 
@@ -142,7 +142,7 @@ public class CProjectIncome extends CProjectItem<CProjectIncome>
 	}
 
 	@Override
-	public void setEntityType(CTypeEntity<?> typeEntity) {
+	public void setEntityType(final CProjectIncomeType typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CProjectIncomeType.class, "Type entity must be an instance of CProjectIncomeType");
 		Check.notNull(getProject(), "Project must be set before assigning project income type");
@@ -150,7 +150,7 @@ public class CProjectIncome extends CProjectItem<CProjectIncome>
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning project income type");
 		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
 				+ typeEntity.getCompany().getId() + " does not match project income project company id " + getProject().getCompany().getId());
-		entityType = (CProjectIncomeType) typeEntity;
+		entityType = typeEntity;
 		updateLastModified();
 	}
 

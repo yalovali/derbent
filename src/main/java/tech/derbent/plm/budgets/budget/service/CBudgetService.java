@@ -11,6 +11,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.plm.budgets.budgettype.domain.CBudgetType;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -25,7 +26,7 @@ import tech.derbent.plm.budgets.budgettype.service.CBudgetTypeService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll
-public class CBudgetService extends CProjectItemService<CBudget> implements IEntityRegistrable, IEntityWithView {
+public class CBudgetService extends CProjectItemService<CBudget, CBudgetType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBudgetService.class);
 	private final CBudgetTypeService typeService;
@@ -79,7 +80,9 @@ public class CBudgetService extends CProjectItemService<CBudget> implements IEnt
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+		@SuppressWarnings ("unchecked")
+		final IHasStatusAndWorkflow<?, ?> typedEntity = (IHasStatusAndWorkflow<?, ?>) entity;
+		initializeNewEntity_IHasStatusAndWorkflow(typedEntity, sessionService.getActiveCompany().orElseThrow(), typeService,
 				statusService);
 	}
 

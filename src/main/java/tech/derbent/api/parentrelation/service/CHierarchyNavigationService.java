@@ -38,7 +38,7 @@ import tech.derbent.api.utils.Check;
 })
 public class CHierarchyNavigationService {
 
-	private static final Comparator<CProjectItem<?>> ITEM_COMPARATOR =
+	private static final Comparator<CProjectItem<?, ?>> ITEM_COMPARATOR =
 			Comparator.comparingInt(CHierarchyNavigationService::getSortLevel)
 					.thenComparing(item -> {
 						final String title = CEntityRegistry.getEntityTitleSingular(ProxyUtils.getUserClass(item.getClass()));
@@ -49,19 +49,19 @@ public class CHierarchyNavigationService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CHierarchyNavigationService.class);
 
-	private static int getSortLevel(final CProjectItem<?> item) {
+	private static int getSortLevel(final CProjectItem<?, ?> item) {
 		final int level = getEntityLevel(item);
 		return level >= 0 ? level : Integer.MAX_VALUE - 1;
 	}
 
-	public static String buildEntityKey(final CProjectItem<?> entity) {
+	public static String buildEntityKey(final CProjectItem<?, ?> entity) {
 		if (entity == null || entity.getId() == null) {
 			return null;
 		}
 		return ProxyUtils.getUserClass(entity.getClass()).getSimpleName() + ":" + entity.getId();
 	}
 
-	public static String buildParentKey(final CProjectItem<?> entity) {
+	public static String buildParentKey(final CProjectItem<?, ?> entity) {
 		if (!(entity instanceof IHasParentRelation hasParentRelation)) {
 			return null;
 		}
@@ -73,20 +73,20 @@ public class CHierarchyNavigationService {
 		return hasParentRelation.getParentRelation().getParentItemType() + ":" + hasParentRelation.getParentRelation().getParentItemId();
 	}
 
-	public static boolean canEntityHaveParent(final CProjectItem<?> entity) {
+	public static boolean canEntityHaveParent(final CProjectItem<?, ?> entity) {
 		return entity instanceof IHasParentRelation && getEntityLevel(entity) != 0;
 	}
 
-	public static boolean canHaveChildren(final CProjectItem<?> entity) {
+	public static boolean canHaveChildren(final CProjectItem<?, ?> entity) {
 		return resolveEntityType(entity).map(type -> type.getLevel() != null && type.getLevel() >= 0 && type.getCanHaveChildren()).orElse(false);
 	}
 
-	public static int getEntityLevel(final CProjectItem<?> entity) {
+	public static int getEntityLevel(final CProjectItem<?, ?> entity) {
 		return resolveEntityType(entity).map(CTypeEntity::getLevel).orElse(-1);
 	}
 
 	public static boolean isSameEntity(final Object left, final Object right) {
-		if (!(left instanceof CProjectItem<?> leftItem) || !(right instanceof CProjectItem<?> rightItem)) {
+		if (!(left instanceof CProjectItem<?, ?> leftItem) || !(right instanceof CProjectItem<?, ?> rightItem)) {
 			return false;
 		}
 		final String leftKey = buildEntityKey(leftItem);
@@ -94,7 +94,7 @@ public class CHierarchyNavigationService {
 		return leftKey != null && leftKey.equals(rightKey);
 	}
 
-	public static Optional<CTypeEntity<?>> resolveEntityType(final CProjectItem<?> entity) {
+	public static Optional<CTypeEntity<?>> resolveEntityType(final CProjectItem<?, ?> entity) {
 		if (entity == null) {
 			return Optional.empty();
 		}
@@ -109,11 +109,11 @@ public class CHierarchyNavigationService {
 		return Optional.empty();
 	}
 
-	public static CProjectItem<?> resolveAncestorAtLevel(final Object entity, final int targetLevel) {
-		if (!(entity instanceof CProjectItem<?> projectItem)) {
+	public static CProjectItem<?, ?> resolveAncestorAtLevel(final Object entity, final int targetLevel) {
+		if (!(entity instanceof CProjectItem<?, ?> projectItem)) {
 			return null;
 		}
-		CProjectItem<?> current = projectItem;
+		CProjectItem<?, ?> current = projectItem;
 		final Set<String> visitedKeys = new HashSet<>();
 		while (current != null) {
 			final String currentKey = buildEntityKey(current);
@@ -133,18 +133,18 @@ public class CHierarchyNavigationService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<CProjectItem<?>> getAllDescendants(final CProjectItem<?> rootItem) {
+	public List<CProjectItem<?, ?>> getAllDescendants(final CProjectItem<?, ?> rootItem) {
 		Check.notNull(rootItem, "Root item cannot be null");
 		Check.notNull(rootItem.getProject(), "Root item project cannot be null");
-		final List<CProjectItem<?>> descendants = new ArrayList<>();
-		final Deque<CProjectItem<?>> stack = new ArrayDeque<>(listChildren(rootItem));
+		final List<CProjectItem<?, ?>> descendants = new ArrayList<>();
+		final Deque<CProjectItem<?, ?>> stack = new ArrayDeque<>(listChildren(rootItem));
 		final Set<String> visitedKeys = new HashSet<>();
 		final String rootKey = buildEntityKey(rootItem);
 		if (rootKey != null) {
 			visitedKeys.add(rootKey);
 		}
 		while (!stack.isEmpty()) {
-			final CProjectItem<?> current = stack.pop();
+			final CProjectItem<?, ?> current = stack.pop();
 			final String currentKey = buildEntityKey(current);
 			if (currentKey == null || !visitedKeys.add(currentKey)) {
 				continue;
@@ -157,11 +157,11 @@ public class CHierarchyNavigationService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<Class<? extends CProjectItem<?>>> listCreatableChildEntityClasses(final CProjectItem<?> parent) {
+	public List<Class<? extends CProjectItem<?, ?>>> listCreatableChildEntityClasses(final CProjectItem<?, ?> parent) {
 		Check.notNull(parent, "Parent item cannot be null");
-		final List<Class<? extends CProjectItem<?>>> classes = new ArrayList<>();
-		for (final Class<? extends CProjectItem<?>> entityClass : listHierarchyEntityClasses()) {
-			final Optional<CProjectItem<?>> previewChild = createPreviewItem(entityClass);
+		final List<Class<? extends CProjectItem<?, ?>>> classes = new ArrayList<>();
+		for (final Class<? extends CProjectItem<?, ?>> entityClass : listHierarchyEntityClasses()) {
+			final Optional<CProjectItem<?, ?>> previewChild = createPreviewItem(entityClass);
 			if (previewChild.isPresent() && isValidParentCandidate(previewChild.get(), parent)) {
 				classes.add(entityClass);
 			}
@@ -174,7 +174,7 @@ public class CHierarchyNavigationService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<CProjectItem<?>> listChildren(final CProjectItem<?> parent) {
+	public List<CProjectItem<?, ?>> listChildren(final CProjectItem<?, ?> parent) {
 		Check.notNull(parent, "Parent item cannot be null");
 		Check.notNull(parent.getProject(), "Parent project cannot be null");
 		final String parentKey = buildEntityKey(parent);
@@ -185,8 +185,8 @@ public class CHierarchyNavigationService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<Class<? extends CProjectItem<?>>> listHierarchyEntityClasses() {
-		final List<Class<? extends CProjectItem<?>>> entityClasses = new ArrayList<>();
+	public List<Class<? extends CProjectItem<?, ?>>> listHierarchyEntityClasses() {
+		final List<Class<? extends CProjectItem<?, ?>>> entityClasses = new ArrayList<>();
 		for (final String entityKey : CEntityRegistry.getAllRegisteredEntityKeys()) {
 			try {
 				final Class<?> entityClass = CEntityRegistry.getEntityClass(entityKey);
@@ -196,7 +196,7 @@ public class CHierarchyNavigationService {
 					continue;
 				}
 				@SuppressWarnings("unchecked")
-				final Class<? extends CProjectItem<?>> typedClass = (Class<? extends CProjectItem<?>>) entityClass;
+				final Class<? extends CProjectItem<?, ?>> typedClass = (Class<? extends CProjectItem<?, ?>>) entityClass;
 				entityClasses.add(typedClass);
 			} catch (final Exception e) {
 				LOGGER.debug("Skipping hierarchy class lookup for {}: {}", entityKey, e.getMessage());
@@ -206,10 +206,10 @@ public class CHierarchyNavigationService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<CProjectItem<?>> listHierarchyItems(final CProject<?> project) {
+	public List<CProjectItem<?, ?>> listHierarchyItems(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
-		final List<CProjectItem<?>> items = new ArrayList<>();
-		for (final Class<? extends CProjectItem<?>> entityClass : listHierarchyEntityClasses()) {
+		final List<CProjectItem<?, ?>> items = new ArrayList<>();
+		for (final Class<? extends CProjectItem<?, ?>> entityClass : listHierarchyEntityClasses()) {
 			try {
 				final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
 				if (serviceClass == null) {
@@ -220,7 +220,7 @@ public class CHierarchyNavigationService {
 					continue;
 				}
 				for (final Object rawItem : projectService.listByProject(project)) {
-					if (rawItem instanceof CProjectItem<?> projectItem) {
+					if (rawItem instanceof CProjectItem<?, ?> projectItem) {
 						items.add(projectItem);
 						if (projectItem instanceof final ISprintableItem sprintableItem) {
 							// Sprint planning drag/drop happens outside of this @Transactional method.
@@ -247,12 +247,12 @@ public class CHierarchyNavigationService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<CProjectItem<?>> listItemsAtLevel(final CProject<?> project, final int level) {
+	public List<CProjectItem<?, ?>> listItemsAtLevel(final CProject<?> project, final int level) {
 		return listHierarchyItems(project).stream().filter(item -> getEntityLevel(item) == level).toList();
 	}
 
 	@Transactional(readOnly = true)
-	public List<CProjectItem<?>> listParentCandidates(final CProjectItem<?> child) {
+	public List<CProjectItem<?, ?>> listParentCandidates(final CProjectItem<?, ?> child) {
 		Check.notNull(child, "Child item cannot be null");
 		Check.notNull(child.getProject(), "Child project cannot be null");
 		return listHierarchyItems(child.getProject()).stream().filter(candidateParent -> isValidParentCandidate(child, candidateParent))
@@ -260,7 +260,7 @@ public class CHierarchyNavigationService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<CProjectItem<?>> listSelectableChildCandidates(final CProjectItem<?> parent) {
+	public List<CProjectItem<?, ?>> listSelectableChildCandidates(final CProjectItem<?, ?> parent) {
 		Check.notNull(parent, "Parent item cannot be null");
 		Check.notNull(parent.getProject(), "Parent project cannot be null");
 		final Set<String> existingChildKeys = listChildren(parent).stream().map(CHierarchyNavigationService::buildEntityKey).filter(key -> key != null)
@@ -271,7 +271,7 @@ public class CHierarchyNavigationService {
 				.sorted(ITEM_COMPARATOR).toList();
 	}
 
-	public boolean isValidParentCandidate(final CProjectItem<?> child, final CProjectItem<?> candidateParent) {
+	public boolean isValidParentCandidate(final CProjectItem<?, ?> child, final CProjectItem<?, ?> candidateParent) {
 		if (child == null || candidateParent == null || child.getProject() == null || candidateParent.getProject() == null) {
 			return false;
 		}
@@ -306,7 +306,7 @@ public class CHierarchyNavigationService {
 		return true;
 	}
 
-	private Optional<CProjectItem<?>> createPreviewItem(final Class<? extends CProjectItem<?>> entityClass) {
+	private Optional<CProjectItem<?, ?>> createPreviewItem(final Class<? extends CProjectItem<?, ?>> entityClass) {
 		try {
 			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
 			if (serviceClass == null) {
@@ -317,7 +317,7 @@ public class CHierarchyNavigationService {
 				return Optional.empty();
 			}
 			final Object previewItem = projectService.newEntity("Preview " + entityClass.getSimpleName());
-			if (previewItem instanceof CProjectItem<?> projectItem) {
+			if (previewItem instanceof CProjectItem<?, ?> projectItem) {
 				return Optional.of(projectItem);
 			}
 		} catch (final Exception e) {

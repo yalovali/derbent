@@ -33,6 +33,7 @@ import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.domain.IHasComments;
 import tech.derbent.plm.invoices.invoiceitem.domain.CInvoiceItem;
+import tech.derbent.plm.invoices.invoicetype.domain.CInvoiceType;
 import tech.derbent.plm.invoices.payment.domain.CPayment;
 import tech.derbent.plm.invoices.payment.domain.CPaymentStatus;
 import tech.derbent.plm.milestones.milestone.domain.CMilestone;
@@ -42,7 +43,7 @@ import tech.derbent.plm.orders.currency.domain.CCurrency;
 @Entity
 @Table (name = "cinvoice")
 @AttributeOverride (name = "id", column = @Column (name = "invoice_id"))
-public class CInvoice extends CProjectItem<CInvoice> implements IHasAttachments, IHasComments, IFinancialEntity {
+public class CInvoice extends CProjectItem<CInvoice, CInvoiceType> implements IHasAttachments, IHasComments, IFinancialEntity {
 
 	public static final String DEFAULT_COLOR = "#FFD700"; // Gold - incoming revenue
 	public static final String DEFAULT_ICON = "vaadin:invoice";
@@ -116,6 +117,15 @@ public class CInvoice extends CProjectItem<CInvoice> implements IHasAttachments,
 	@Column (name = "due_date", nullable = false)
 	@AMetaData (displayName = "Due Date", required = true, readOnly = false, description = "Payment due date", hidden = false)
 	private LocalDate dueDate;
+
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "entitytype_id", nullable = true)
+	@AMetaData (
+			displayName = "Invoice Type", required = false, readOnly = false,
+			description = "Type category of the invoice", hidden = false, dataProviderBean = "CInvoiceTypeService",
+			setBackgroundFromColor = true, useIcon = true
+	)
+	private CInvoiceType entityType;
 	@Column (name = "installment_number", nullable = true)
 	@AMetaData (
 			displayName = "Installment Number", required = false, readOnly = false, description = "Current installment number (e.g., 1 of 4)",
@@ -274,6 +284,9 @@ public class CInvoice extends CProjectItem<CInvoice> implements IHasAttachments,
 
 	public LocalDate getDueDate() { return dueDate; }
 
+	@Override
+	public CInvoiceType getEntityType() { return entityType; }
+
 	public Integer getInstallmentNumber() { return installmentNumber; }
 
 	public LocalDate getInvoiceDate() { return invoiceDate; }
@@ -424,6 +437,12 @@ public class CInvoice extends CProjectItem<CInvoice> implements IHasAttachments,
 
 	public void setDueDate(final LocalDate dueDate) {
 		this.dueDate = dueDate;
+		updateLastModified();
+	}
+
+	@Override
+	public void setEntityType(final CInvoiceType entityType) {
+		this.entityType = entityType;
 		updateLastModified();
 	}
 

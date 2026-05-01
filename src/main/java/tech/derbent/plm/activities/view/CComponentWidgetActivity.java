@@ -40,7 +40,7 @@ public class CComponentWidgetActivity extends CComponentWidgetEntityOfProject<CA
 		final CActivity activity = getEntity();
 		if (activity.hasParentActivity()) {
 			try {
-				final CProjectItem<?> parentItem = activity.getParentItem();
+				final CProjectItem<?, ?> parentItem = activity.getParentItem();
 				if (parentItem != null) {
 					final CLabelEntity parentLabel = new CLabelEntity(parentItem);
 					parentLabel.getStyle().set("font-style", "italic");

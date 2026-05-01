@@ -51,7 +51,7 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 // in lowercase
 @AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
 @AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "meeting_status_id"))
-public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWorkflow<CMeeting>, IGnntEntityItem,
+public class CMeeting extends CProjectItem<CMeeting, CMeetingType> implements IHasStatusAndWorkflow<CMeeting, CMeetingType>, IGnntEntityItem,
 		ISprintableItem, IHasIcon, IHasAttachments, IHasComments, IHasParentRelation {
 
 	public static final String DEFAULT_COLOR = "#DAA520"; // X11 Goldenrod - calendar events (darker)
@@ -169,7 +169,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 			description = "Agile hierarchy parent selector", hidden = false,
 			createComponentMethod = "createComponentParent", dataProviderBean = "pageservice", captionVisible = false
 	)
-	private final CProjectItem<?> placeHolder_createComponentParent = null;
+	private final CProjectItem<?, ?> placeHolder_createComponentParent = null;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "related_activity_id", nullable = true)
 	@AMetaData (
@@ -274,7 +274,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	@Override
 	@SuppressWarnings ({})
-	public CTypeEntity<?> getEntityType() { return entityType; }
+	public CMeetingType getEntityType() { return entityType; }
 
 	@Override
 	public String getIconString() { return DEFAULT_ICON; }
@@ -292,7 +292,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	public Set<CUser> getParticipants() { return participants == null ? new HashSet<>() : new HashSet<>(participants); }
 
-	public CProjectItem<?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
+	public CProjectItem<?, ?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
 
 	@Override
 	public Integer getProgressPercentage() {
@@ -416,10 +416,8 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	public void setEndTime(final LocalTime endTime) { this.endTime = endTime; }
 
-	public void setEntityType(final CMeetingType entityType) { this.entityType = entityType; }
-
 	@Override
-	public void setEntityType(final CTypeEntity<?> typeEntity) {
+	public void setEntityType(final CMeetingType typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CMeetingType.class, "Type entity must be an instance of CMeetingType");
 		Check.notNull(getProject(), "Project must be set before assigning meeting type");
@@ -428,7 +426,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
 				"Type entity company id " + typeEntity.getCompany().getId()
 						+ " does not match meeting project company id " + getProject().getCompany().getId());
-		entityType = (CMeetingType) typeEntity;
+		entityType = typeEntity;
 		updateLastModified();
 	}
 

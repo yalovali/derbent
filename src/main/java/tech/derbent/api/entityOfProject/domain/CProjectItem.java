@@ -8,7 +8,9 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Transient;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
@@ -16,7 +18,12 @@ import tech.derbent.api.utils.Check;
 /** CProjectItem - Base class for project items. Provides hierarchical structure support (via IHasParentRelation) and Gantt-specific abstract methods
  * for date handling, visual representation, and user assignments. All subclasses must implement the abstract Gantt methods. */
 @MappedSuperclass
-public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityClass> {
+public abstract class CProjectItem<EntityClass, TypeClass extends CTypeEntity<TypeClass>>
+		extends CEntityOfProject<EntityClass> {
+
+	// Type Management
+	@Transient
+	protected TypeClass entityType;
 
 	// Status and Priority Management
 	@ManyToOne (fetch = FetchType.EAGER)
@@ -33,6 +40,13 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 
 	public CProjectItem(final Class<EntityClass> clazz, final String name, final CProject<?> project) {
 		super(clazz, name, project);
+	}
+
+	public TypeClass getEntityType() { return entityType; }
+
+	public void setEntityType(final TypeClass entityType) {
+		this.entityType = entityType;
+		updateLastModified();
 	}
 
 	/** Get the end date for Gantt chart display.

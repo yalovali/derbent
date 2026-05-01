@@ -37,7 +37,7 @@ import tech.derbent.plm.providers.provider.domain.CProvider;
 @Entity
 @Table (name = "\"casset\"")
 @AttributeOverride (name = "id", column = @Column (name = "asset_id"))
-public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflow<CAsset>, IHasAttachments, IHasComments, IHasLinks {
+public class CAsset extends CProjectItem<CAsset, CAssetType> implements IHasStatusAndWorkflow<CAsset, CAssetType>, IHasAttachments, IHasComments, IHasLinks {
 
 	public static final String DEFAULT_COLOR = "#708090"; // X11 SlateGray - owned items (darker)
 	public static final String DEFAULT_ICON = "vaadin:briefcase";
@@ -283,7 +283,7 @@ public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflo
 	}
 
 	@Override
-	public void setEntityType(final CTypeEntity<?> typeEntity) {
+	public void setEntityType(final CAssetType typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CAssetType.class, "Type entity must be an instance of CAssetType");
 		Check.notNull(getProject(), "Project must be set before assigning asset type");
@@ -291,7 +291,7 @@ public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflo
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning asset type");
 		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
 				+ typeEntity.getCompany().getId() + " does not match asset project company id " + getProject().getCompany().getId());
-		entityType = (CAssetType) typeEntity;
+		entityType = typeEntity;
 		updateLastModified();
 	}
 

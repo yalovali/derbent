@@ -12,11 +12,12 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IHasContentOwner;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
+import tech.derbent.api.session.service.CSessionService;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.session.service.CSessionService;
 
 @Service
 public final class CDataProviderResolver {
@@ -24,12 +25,20 @@ public final class CDataProviderResolver {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDataProviderResolver.class);
 
 	@SuppressWarnings ("rawtypes")
-	public static Object resolveBean(final String beanName, final IContentOwner contentOwner) throws Exception {
+	public static Object resolveBean(final String fieldType, String beanName, final IContentOwner contentOwner)
+			throws Exception {
 		final Object bean = switch (beanName) {
 		case "context" -> {
 			// just the content owner
 			Check.notNull(contentOwner, "Content owner cannot be null when resolving 'context' bean");
 			yield contentOwner;
+		}
+		case "service" -> {
+			// return bean of fieldType service from spring context
+			Check.notBlank(fieldType, "Field type cannot be blank when resolving 'service' bean"
+					+ " - field type is required to determine which service bean to return");
+			final Class<?> serviceClass = CEntityRegistry.getEntityServiceClass(fieldType);
+			yield CSpringContext.getBean(serviceClass);
 		}
 		case "session" -> CSpringContext.getBean(CSessionService.class);
 		case "pageservice" -> {
@@ -51,11 +60,12 @@ public final class CDataProviderResolver {
 	}
 
 	public List<String> getAvailableServiceBeans() {
-		return Arrays.stream(applicationContext.getBeanDefinitionNames()).filter(name -> name.toLowerCase().contains("service")).sorted()
-				.collect(Collectors.toList());
+		return Arrays.stream(applicationContext.getBeanDefinitionNames())
+				.filter(name -> name.toLowerCase().contains("service")).sorted().collect(Collectors.toList());
 	}
 
-	public Component resolveDataComponent(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
+	public Component resolveDataComponent(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo)
+			throws Exception {
 		try {
 			final Object result = resolveMethodAnnotations(null, contentOwner, fieldInfo);
 			final Component component = (Component) result;
@@ -70,7 +80,8 @@ public final class CDataProviderResolver {
 	}
 
 	@SuppressWarnings ("unchecked")
-	public <T> List<T> resolveDataList(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
+	public <T> List<T> resolveDataList(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo)
+			throws Exception {
 		try {
 			if ("none".equalsIgnoreCase(fieldInfo.getDataProviderBean())) {
 				return List.of();
@@ -83,7 +94,8 @@ public final class CDataProviderResolver {
 		}
 	}
 
-	public Object resolveMethodAnnotations(CEntityDB<?> entity, final IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
+	public Object resolveMethodAnnotations(CEntityDB<?> entity, final IContentOwner contentOwner,
+			final EntityFieldInfo fieldInfo) throws Exception {
 		try {
 			boolean there_is_param = false;
 			Check.notNull(fieldInfo, "Field info cannot be null");
@@ -91,8 +103,8 @@ public final class CDataProviderResolver {
 			// Check for "none" sentinel value first - indicates field should not have a data provider
 			if (beanName != null && "none".equalsIgnoreCase(beanName.trim())) {
 				// dont come here !!! fix it before
-				throw new IllegalArgumentException("Data provider bean is set to 'none' for field '" + fieldInfo.getFieldName()
-						+ "' - this field should not use a data provider");
+				throw new IllegalArgumentException("Data provider bean is set to 'none' for field '"
+						+ fieldInfo.getFieldName() + "' - this field should not use a data provider");
 			}
 			Check.notBlank(beanName, "Data provider owner or bean name cannot be empty");
 			Object paramValue = null;
@@ -100,8 +112,9 @@ public final class CDataProviderResolver {
 				there_is_param = true;
 				paramValue = resolveParamValue(entity, contentOwner, fieldInfo);
 			}
-			final Object bean = resolveBean(beanName, contentOwner);
-			Check.notNull(bean, "Data Provider Service bean cannot be null for bean name: " + beanName + " field: " + fieldInfo.getFieldName());
+			final Object bean = resolveBean(fieldInfo.getJavaType(), beanName, contentOwner);
+			Check.notNull(bean, "Data Provider Service bean cannot be null for bean name: " + beanName + " field: "
+					+ fieldInfo.getFieldName());
 			final Object result;
 			if (there_is_param) {
 				result = CAuxillaries.invokeMethod(bean, fieldInfo.getDataProviderMethod(), paramValue);
@@ -111,12 +124,14 @@ public final class CDataProviderResolver {
 			Check.notNull(result, "Result from data provider method cannot be null");
 			return result;
 		} catch (final Exception e) {
-			LOGGER.error("Error resolving method annotations for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
+			LOGGER.error("Error resolving method annotations for field '{}': {}", fieldInfo.getFieldName(),
+					e.getMessage());
 			throw e;
 		}
 	}
 
-	Object resolveParamValue(CEntityDB<?> entity, final IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
+	Object resolveParamValue(CEntityDB<?> entity, final IContentOwner contentOwner, final EntityFieldInfo fieldInfo)
+			throws Exception {
 		Check.notNull(fieldInfo, "Field info cannot be null");
 		Object paramValue = null;
 		Object paramBean = null;
@@ -141,13 +156,14 @@ public final class CDataProviderResolver {
 			// session service must be ISessionService of CSessionService or CWebSessionService
 			// Get the actual session service bean from Spring context
 			Check.isTrue(applicationContext.containsBean("CSessionService"),
-					"Session service bean 'CSessionService' not found in application context of beans:" + getAvailableServiceBeans());
+					"Session service bean 'CSessionService' not found in application context of beans:"
+							+ getAvailableServiceBeans());
 			yield applicationContext.getBean("CSessionService");
 		}
 		default -> {
 			// Get bean from Spring context
-			Check.isTrue(applicationContext.containsBean(paramBeanName),
-					"Parameter Bean '" + paramBeanName + "' not found in application context of beans:" + getAvailableServiceBeans());
+			Check.isTrue(applicationContext.containsBean(paramBeanName), "Parameter Bean '" + paramBeanName
+					+ "' not found in application context of beans:" + getAvailableServiceBeans());
 			yield applicationContext.getBean(paramBeanName);
 		}
 		};

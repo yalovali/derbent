@@ -37,8 +37,8 @@ import tech.derbent.api.utils.Check;
  * classes.
  * </p>
  */
-public class CComponentAgileParentSelector extends CComponentBase<CProjectItem<?>>
-		implements IComponentTransientPlaceHolder<CProjectItem<?>>, IPageServiceAutoRegistrable {
+public class CComponentAgileParentSelector extends CComponentBase<CProjectItem<?, ?>>
+		implements IComponentTransientPlaceHolder<CProjectItem<?, ?>>, IPageServiceAutoRegistrable {
 
 	public static final String ID_BUTTON_CLEAR = "custom-agile-parent-clear-button";
 	public static final String ID_BUTTON_EDIT = "custom-agile-parent-edit-button";
@@ -50,7 +50,7 @@ public class CComponentAgileParentSelector extends CComponentBase<CProjectItem<?
 	private CButton buttonEdit;
 	private CButton buttonSelect;
 	private CComponentItemDetails componentParentDetails;
-	private CProjectItem<?> currentEntity;
+	private CProjectItem<?, ?> currentEntity;
 	private Div detailsPlaceholder;
 	private final CHierarchyNavigationService hierarchyNavigationService;
 	private Div infoDiv;
@@ -64,15 +64,15 @@ public class CComponentAgileParentSelector extends CComponentBase<CProjectItem<?
 	}
 
 	private List<EntityTypeConfig<?>> createAllowedParentTypes() {
-		final List<CProjectItem<?>> candidates = hierarchyNavigationService.listParentCandidates(currentEntity);
+		final List<CProjectItem<?, ?>> candidates = hierarchyNavigationService.listParentCandidates(currentEntity);
 		// Explicit map type witness avoids wildcard-capture inference differences across compiler versions.
-		final List<Class<? extends CProjectItem<?>>> entityClasses =
-				candidates.stream().<Class<? extends CProjectItem<?>>>map(this::resolveProjectItemClass).distinct().sorted(Comparator.comparing(entityClass -> {
+		final List<Class<? extends CProjectItem<?, ?>>> entityClasses =
+				candidates.stream().<Class<? extends CProjectItem<?, ?>>>map(this::resolveProjectItemClass).distinct().sorted(Comparator.comparing(entityClass -> {
 					final String title = CEntityRegistry.getEntityTitleSingular(entityClass);
 					return title != null ? title : entityClass.getSimpleName();
 				}, String.CASE_INSENSITIVE_ORDER)).toList();
 		final List<EntityTypeConfig<?>> entityTypes = new ArrayList<>();
-		for (final Class<? extends CProjectItem<?>> entityClass : entityClasses) {
+		for (final Class<? extends CProjectItem<?, ?>> entityClass : entityClasses) {
 			entityTypes.add(createEntityTypeConfig(entityClass));
 		}
 		return entityTypes;
@@ -94,7 +94,7 @@ public class CComponentAgileParentSelector extends CComponentBase<CProjectItem<?
 	@Override
 	public String getComponentName() { return "agileParent"; }
 
-	private CProjectItem<?> getCurrentParent() {
+	private CProjectItem<?, ?> getCurrentParent() {
 		if (!(currentEntity instanceof IHasParentRelation hasParentRelation)) {
 			return null;
 		}
@@ -153,11 +153,11 @@ public class CComponentAgileParentSelector extends CComponentBase<CProjectItem<?
 		}
 	}
 
-	private List<CProjectItem<?>> listParentsForType(final EntityTypeConfig<?> config) {
+	private List<CProjectItem<?, ?>> listParentsForType(final EntityTypeConfig<?> config) {
 		if (config == null || currentEntity == null) {
 			return List.of();
 		}
-		final List<CProjectItem<?>> candidates = new ArrayList<>(hierarchyNavigationService.listParentCandidates(currentEntity));
+		final List<CProjectItem<?, ?>> candidates = new ArrayList<>(hierarchyNavigationService.listParentCandidates(currentEntity));
 		return candidates.stream().filter(candidate -> config.getEntityClass().isAssignableFrom(candidate.getClass())).toList();
 	}
 
@@ -177,7 +177,7 @@ public class CComponentAgileParentSelector extends CComponentBase<CProjectItem<?
 
 	private void on_buttonEdit_clicked() {
 		try {
-			final CProjectItem<?> parent = getCurrentParent();
+			final CProjectItem<?, ?> parent = getCurrentParent();
 			if (parent == null) {
 				CNotificationService.showWarning("No parent selected");
 				return;
@@ -200,9 +200,9 @@ public class CComponentAgileParentSelector extends CComponentBase<CProjectItem<?
 				CNotificationService.showWarning("This item cannot have a parent with the current type configuration");
 				return;
 			}
-			final CDialogEntitySelection<CProjectItem<?>> dialog =
+			final CDialogEntitySelection<CProjectItem<?, ?>> dialog =
 					new CDialogEntitySelection<>("Select Parent", parentTypes, this::listParentsForType, selected -> {
-						final CProjectItem<?> parent = selected != null && !selected.isEmpty() ? selected.get(0) : null;
+						final CProjectItem<?, ?> parent = selected != null && !selected.isEmpty() ? selected.get(0) : null;
 						setParent(parent);
 					}, false);
 			dialog.open();
@@ -242,13 +242,13 @@ public class CComponentAgileParentSelector extends CComponentBase<CProjectItem<?
 			refreshButtonStates();
 			return;
 		}
-		final CProjectItem<?> parent = getCurrentParent();
+		final CProjectItem<?, ?> parent = getCurrentParent();
 		renderParentSummary(parent);
 		setParentDetailsValue(parent);
 		refreshButtonStates();
 	}
 
-	private void renderParentSummary(final CProjectItem<?> parent) {
+	private void renderParentSummary(final CProjectItem<?, ?> parent) {
 		infoDiv.removeAll();
 		if (parent == null) {
 			final Span placeholderText = new Span("Parent: (none)");
@@ -273,20 +273,20 @@ public class CComponentAgileParentSelector extends CComponentBase<CProjectItem<?
 	}
 
 	@SuppressWarnings ("unchecked")
-	private Class<? extends CProjectItem<?>> resolveProjectItemClass(final CProjectItem<?> item) {
-		return (Class<? extends CProjectItem<?>>) item.getClass();
+	private Class<? extends CProjectItem<?, ?>> resolveProjectItemClass(final CProjectItem<?, ?> item) {
+		return (Class<? extends CProjectItem<?, ?>>) item.getClass();
 	}
 
 	@SuppressWarnings ({
 			"rawtypes", "unchecked"
 	})
-	private void saveEntity(final CProjectItem<?> entity) {
+	private void saveEntity(final CProjectItem<?, ?> entity) {
 		final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entity.getClass());
 		final CAbstractService service = (CAbstractService) CSpringContext.getBean(serviceClass);
 		service.save(entity);
 	}
 
-	private void setParent(final CProjectItem<?> parent) {
+	private void setParent(final CProjectItem<?, ?> parent) {
 		try {
 			Check.notNull(currentEntity, "currentEntity cannot be null");
 			parentRelationService.setParent(currentEntity, parent);
@@ -310,7 +310,7 @@ public class CComponentAgileParentSelector extends CComponentBase<CProjectItem<?
 	}
 
 	@Override
-	public void setThis(final CProjectItem<?> value) {
+	public void setThis(final CProjectItem<?, ?> value) {
 		currentEntity = value;
 		setValue(getCurrentParent());
 		refreshComponent();

@@ -29,7 +29,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 	 * @param item the project item to check
 	 * @return true if the item's type allows children, or true by default if type cannot be determined */
 	@Transactional (readOnly = true)
-	public static boolean canHaveChildren(final CProjectItem<?> item) {
+	public static boolean canHaveChildren(final CProjectItem<?, ?> item) {
 		if (item == null) {
 			return false;
 		}
@@ -51,7 +51,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 	 * @param relations list of parent-child relation records
 	 * @return list of loaded child items */
 	@SuppressWarnings ("unchecked")
-	private static <T extends CProjectItem<?>> List<T> loadChildrenFromRelations(final List<CParentChildRelation> relations) {
+	private static <T extends CProjectItem<?, ?>> List<T> loadChildrenFromRelations(final List<CParentChildRelation> relations) {
 		final List<T> children = new ArrayList<>();
 		for (final CParentChildRelation rel : relations) {
 			try {
@@ -65,7 +65,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 					LOGGER.warn("Could not find service class for entity: {}", childClass.getSimpleName());
 					continue;
 				}
-				final CProjectItemService<?> service = (CProjectItemService<?>) CSpringContext.getBean(serviceClass);
+				final CProjectItemService<?, ?> service = (CProjectItemService<?, ?>) CSpringContext.getBean(serviceClass);
 				final Optional<?> child = service.getById(rel.getChildId());
 				child.ifPresent(c -> children.add((T) c));
 			} catch (final Exception e) {
@@ -83,7 +83,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 	 * @param child the child project item */
 	@SuppressWarnings ("deprecation")
 	@Transactional
-	public void clearParent(final CProjectItem<?> child) {
+	public void clearParent(final CProjectItem<?, ?> child) {
 		Objects.requireNonNull(child, "Child item cannot be null");
 		Objects.requireNonNull(child.getId(), "Child item must be persisted");
 		final String childType = child.getClass().getSimpleName();
@@ -96,7 +96,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 	 * @param parent the parent project item
 	 * @return list of child project items */
 	@Transactional (readOnly = true)
-	public <T extends CProjectItem<?>> List<T> getChildren(final CProjectItem<?> parent) {
+	public <T extends CProjectItem<?, ?>> List<T> getChildren(final CProjectItem<?, ?> parent) {
 		Objects.requireNonNull(parent, "Parent item cannot be null");
 		Objects.requireNonNull(parent.getId(), "Parent item must be persisted");
 		final String parentType = parent.getClass().getSimpleName();
@@ -110,7 +110,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 	 * @param childEntityClassName the class name of children to retrieve (e.g., "CActivity")
 	 * @return list of child project items matching the specified type */
 	@Transactional (readOnly = true)
-	public <T extends CProjectItem<?>> List<T> getChildrenByType(final CProjectItem<?> parent, final String childEntityClassName) {
+	public <T extends CProjectItem<?, ?>> List<T> getChildrenByType(final CProjectItem<?, ?> parent, final String childEntityClassName) {
 		Objects.requireNonNull(parent, "Parent item cannot be null");
 		Objects.requireNonNull(parent.getId(), "Parent item must be persisted");
 		Check.notBlank(childEntityClassName, "Child entity class name cannot be blank");
@@ -128,7 +128,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 	 * @return optional parent project item */
 	@SuppressWarnings ("unchecked")
 	@Transactional (readOnly = true)
-	public <T extends CProjectItem<?>> Optional<T> getParent(final CProjectItem<?> child) {
+	public <T extends CProjectItem<?, ?>> Optional<T> getParent(final CProjectItem<?, ?> child) {
 		Objects.requireNonNull(child, "Child item cannot be null");
 		Objects.requireNonNull(child.getId(), "Child item must be persisted");
 		final String childType = child.getClass().getSimpleName();
@@ -149,7 +149,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 				LOGGER.warn("Could not find service class for entity: {}", parentClass.getSimpleName());
 				return Optional.empty();
 			}
-			final CProjectItemService<?> service = (CProjectItemService<?>) CSpringContext.getBean(serviceClass);
+			final CProjectItemService<?, ?> service = (CProjectItemService<?, ?>) CSpringContext.getBean(serviceClass);
 			return (Optional<T>) service.getById(rel.getParentId());
 		} catch (final Exception e) {
 			LOGGER.error("Error retrieving parent for {}#{}: {} reason={}", childType, child.getId(), e.getMessage(), e.getMessage());
@@ -172,7 +172,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 	 * @param parent the parent project item
 	 * @throws IllegalArgumentException if validation fails */
 	@Transactional
-	public void setParent(final CProjectItem<?> child, final CProjectItem<?> parent) {
+	public void setParent(final CProjectItem<?, ?> child, final CProjectItem<?, ?> parent) {
 		Objects.requireNonNull(child, "Child item cannot be null");
 		Objects.requireNonNull(parent, "Parent item cannot be null");
 		Objects.requireNonNull(child.getId(), "Child item must be persisted");

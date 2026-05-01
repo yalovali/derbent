@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.plm.assets.assettype.domain.CAssetType;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -26,7 +27,7 @@ import tech.derbent.plm.assets.assettype.service.CAssetTypeService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll
-public class CAssetService extends CProjectItemService<CAsset> implements IEntityRegistrable, IEntityWithView {
+public class CAssetService extends CProjectItemService<CAsset, CAssetType> implements IEntityRegistrable, IEntityWithView {
 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAssetService.class);
@@ -58,7 +59,9 @@ public class CAssetService extends CProjectItemService<CAsset> implements IEntit
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+		@SuppressWarnings ("unchecked")
+		final IHasStatusAndWorkflow<?, ?> typedEntity = (IHasStatusAndWorkflow<?, ?>) entity;
+		initializeNewEntity_IHasStatusAndWorkflow(typedEntity, sessionService.getActiveCompany().orElseThrow(), typeService,
 				statusService);
 	}
 

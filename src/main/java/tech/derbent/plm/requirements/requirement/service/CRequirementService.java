@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.plm.requirements.requirementtype.domain.CRequirementType;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.parentrelation.domain.CParentRelation;
@@ -27,7 +28,7 @@ import tech.derbent.plm.requirements.requirementtype.service.CRequirementTypeSer
 		"derbent", "default"
 })
 @PreAuthorize ("isAuthenticated()")
-public class CRequirementService extends CProjectItemService<CRequirement> implements IEntityRegistrable, IEntityWithView {
+public class CRequirementService extends CProjectItemService<CRequirement, CRequirementType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRequirementService.class);
 	private final CRequirementTypeService typeService;
@@ -68,7 +69,9 @@ public class CRequirementService extends CProjectItemService<CRequirement> imple
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
 		final CRequirement requirement = (CRequirement) entity;
-		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+		@SuppressWarnings ("unchecked")
+		final IHasStatusAndWorkflow<?, ?> typedEntity = (IHasStatusAndWorkflow<?, ?>) entity;
+		initializeNewEntity_IHasStatusAndWorkflow(typedEntity, sessionService.getActiveCompany().orElseThrow(), typeService,
 				statusService);
 		if (requirement.getParentRelation() == null) {
 			requirement.setParentRelation(new CParentRelation(requirement));

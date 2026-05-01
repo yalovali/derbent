@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.plm.tickets.tickettype.domain.CTicketType;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
@@ -25,7 +26,7 @@ import tech.derbent.plm.tickets.tickettype.service.CTicketTypeService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll
-public class CTicketService extends CProjectItemService<CTicket> implements IEntityRegistrable, IEntityWithView {
+public class CTicketService extends CProjectItemService<CTicket, CTicketType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CTicketService.class);
 	private final CTicketPriorityService ticketPriorityService;
@@ -59,7 +60,9 @@ public class CTicketService extends CProjectItemService<CTicket> implements IEnt
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+		@SuppressWarnings ("unchecked")
+		final IHasStatusAndWorkflow<?, ?> typedEntity = (IHasStatusAndWorkflow<?, ?>) entity;
+		initializeNewEntity_IHasStatusAndWorkflow(typedEntity, sessionService.getActiveCompany().orElseThrow(), typeService,
 				statusService);
 		// Initialize priority (Contextual DB Lookup)
 		final java.util.List<CTicketPriority> priorities = ticketPriorityService.listByCompany(sessionService.getActiveCompany().orElseThrow());

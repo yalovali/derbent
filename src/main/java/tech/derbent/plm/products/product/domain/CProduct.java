@@ -28,7 +28,7 @@ import tech.derbent.plm.products.producttype.domain.CProductType;
 @Entity
 @Table (name = "\"cproduct\"")
 @AttributeOverride (name = "id", column = @Column (name = "product_id"))
-public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWorkflow<CProduct>, IHasAttachments, IHasComments {
+public class CProduct extends CProjectItem<CProduct, CProductType> implements IHasStatusAndWorkflow<CProduct, CProductType>, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#6B8E23"; // X11 OliveDrab - product entities (darker)
 	public static final String DEFAULT_ICON = "vaadin:package";
@@ -78,7 +78,7 @@ public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWor
 	public Set<CComment> getComments() { return comments; }
 
 	@Override
-	public CTypeEntity<?> getEntityType() { return entityType; }
+	public CProductType getEntityType() { return entityType; }
 
 	public String getProductCode() { return productCode; }
 
@@ -99,7 +99,7 @@ public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWor
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	@Override
-	public void setEntityType(CTypeEntity<?> typeEntity) {
+	public void setEntityType(final CProductType typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CProductType.class, "Type entity must be an instance of CProductType");
 		Check.notNull(getProject(), "Project must be set before assigning product type");
@@ -107,7 +107,7 @@ public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWor
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning product type");
 		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
 				+ typeEntity.getCompany().getId() + " does not match product project company id " + getProject().getCompany().getId());
-		entityType = (CProductType) typeEntity;
+		entityType = typeEntity;
 		updateLastModified();
 	}
 

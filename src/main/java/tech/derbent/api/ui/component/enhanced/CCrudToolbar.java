@@ -157,7 +157,7 @@ public class CCrudToolbar extends HorizontalLayout {
 						// This ensures only allowed transitions are shown in the combobox
 						if (currentEntity instanceof IHasStatusAndWorkflow) {
 							try {
-								return statusService.getValidNextStatuses((IHasStatusAndWorkflow<?>) currentEntity);
+								return statusService.getValidNextStatuses((IHasStatusAndWorkflow<?, ?>) currentEntity);
 							} catch (final Exception ex) {
 								// Handle lazy loading exceptions for detached entities
 								LOGGER.debug("Could not get valid next statuses (entity may be detached): {}", ex.getMessage());
@@ -178,7 +178,7 @@ public class CCrudToolbar extends HorizontalLayout {
 				LOGGER.debug("No statuses available from provider, cannot create workflow combobox");
 				return;
 			}
-			final CProjectItem<?> projectItem = (CProjectItem<?>) currentEntity;
+			final CProjectItem<?, ?> projectItem = (CProjectItem<?, ?>) currentEntity;
 			statusComboBox = new CColorAwareComboBox<>(CProjectItemStatus.class);
 			statusComboBox.setWidth("220px");
 			statusComboBox.setClearButtonVisible(false);

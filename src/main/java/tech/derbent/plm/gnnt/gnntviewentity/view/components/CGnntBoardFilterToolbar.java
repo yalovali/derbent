@@ -40,12 +40,12 @@ public class CGnntBoardFilterToolbar extends CHorizontalLayout {
 	private static final long serialVersionUID = 1L;
 
 	private final CButton buttonClear;
-	private final CComboBox<CProjectItem<?>> comboBoxEpic;
+	private final CComboBox<CProjectItem<?, ?>> comboBoxEpic;
 	private final CComboBox<Class<?>> comboBoxEntityType;
-	private final CComboBox<CProjectItem<?>> comboBoxFeature;
+	private final CComboBox<CProjectItem<?, ?>> comboBoxFeature;
 	private final CComboBox<CUser> comboBoxResponsible;
 	private final CComboBox<CSprint> comboBoxSprint;
-	private final CComboBox<CProjectItem<?>> comboBoxUserStory;
+	private final CComboBox<CProjectItem<?, ?>> comboBoxUserStory;
 	private CProject<?> currentProject;
 	private final List<Consumer<CGnntBoardFilterCriteria>> filterChangeListeners = new ArrayList<>();
 	private final CHierarchyNavigationService hierarchyNavigationService;
@@ -197,8 +197,8 @@ public class CGnntBoardFilterToolbar extends CHorizontalLayout {
 		return comboBox;
 	}
 
-	private CComboBox<CProjectItem<?>> createHierarchyComboBox(final String label) {
-		final CComboBox<CProjectItem<?>> comboBox = createEntityComboBox(label);
+	private CComboBox<CProjectItem<?, ?>> createHierarchyComboBox(final String label) {
+		final CComboBox<CProjectItem<?, ?>> comboBox = createEntityComboBox(label);
 		comboBox.setItemLabelGenerator(item -> {
 			if (item == null) {
 				return "";
@@ -240,7 +240,7 @@ public class CGnntBoardFilterToolbar extends CHorizontalLayout {
 		return availableValues.stream().filter(selectedValue::equals).findFirst().orElse(null);
 	}
 
-	private static CProjectItem<?> preserveHierarchySelection(final CProjectItem<?> selectedValue, final List<CProjectItem<?>> availableValues) {
+	private static CProjectItem<?, ?> preserveHierarchySelection(final CProjectItem<?, ?> selectedValue, final List<CProjectItem<?, ?>> availableValues) {
 		if (selectedValue == null || availableValues == null) {
 			return null;
 		}
@@ -271,19 +271,19 @@ public class CGnntBoardFilterToolbar extends CHorizontalLayout {
 	}
 
 	private void refreshFeatureOptions() {
-		final List<CProjectItem<?>> availableLevel1Items = currentProject != null
+		final List<CProjectItem<?, ?>> availableLevel1Items = currentProject != null
 				? CAgileToolbarSupport.filterByAncestorLevel(hierarchyNavigationService.listItemsAtLevel(currentProject, 1), 0, comboBoxEpic.getValue())
 				: List.of();
-		final CProjectItem<?> preservedFeature = preserveHierarchySelection(comboBoxFeature.getValue(), availableLevel1Items);
+		final CProjectItem<?, ?> preservedFeature = preserveHierarchySelection(comboBoxFeature.getValue(), availableLevel1Items);
 		comboBoxFeature.setItems(availableLevel1Items);
 		comboBoxFeature.setValue(preservedFeature);
 	}
 
 	private void refreshUserStoryOptions() {
-		List<CProjectItem<?>> availableLevel2Items = currentProject != null ? hierarchyNavigationService.listItemsAtLevel(currentProject, 2) : List.of();
+		List<CProjectItem<?, ?>> availableLevel2Items = currentProject != null ? hierarchyNavigationService.listItemsAtLevel(currentProject, 2) : List.of();
 		availableLevel2Items = CAgileToolbarSupport.filterByAncestorLevel(availableLevel2Items, 0, comboBoxEpic.getValue());
 		availableLevel2Items = CAgileToolbarSupport.filterByAncestorLevel(availableLevel2Items, 1, comboBoxFeature.getValue());
-		final CProjectItem<?> preservedUserStory = preserveHierarchySelection(comboBoxUserStory.getValue(), availableLevel2Items);
+		final CProjectItem<?, ?> preservedUserStory = preserveHierarchySelection(comboBoxUserStory.getValue(), availableLevel2Items);
 		comboBoxUserStory.setItems(availableLevel2Items);
 		comboBoxUserStory.setValue(preservedUserStory);
 	}
@@ -295,9 +295,9 @@ public class CGnntBoardFilterToolbar extends CHorizontalLayout {
 		currentProject = project;
 		internalUpdate = true;
 		try {
-			final List<CProjectItem<?>> level0Items = currentProject != null ? hierarchyNavigationService.listItemsAtLevel(currentProject, 0) : List.of();
-			final List<CProjectItem<?>> level1Items = currentProject != null ? hierarchyNavigationService.listItemsAtLevel(currentProject, 1) : List.of();
-			final List<CProjectItem<?>> level2Items = currentProject != null ? hierarchyNavigationService.listItemsAtLevel(currentProject, 2) : List.of();
+			final List<CProjectItem<?, ?>> level0Items = currentProject != null ? hierarchyNavigationService.listItemsAtLevel(currentProject, 0) : List.of();
+			final List<CProjectItem<?, ?>> level1Items = currentProject != null ? hierarchyNavigationService.listItemsAtLevel(currentProject, 1) : List.of();
+			final List<CProjectItem<?, ?>> level2Items = currentProject != null ? hierarchyNavigationService.listItemsAtLevel(currentProject, 2) : List.of();
 			final List<CUser> users = currentProject != null ? userService.listByProject(currentProject) : List.of();
 			final List<CSprint> sprints = currentProject != null ? sprintService.listByProject(currentProject) : List.of();
 

@@ -13,6 +13,9 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CPageServiceMeeting;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.api.interfaces.CCloneOptions;
+import tech.derbent.api.parentrelation.domain.CParentRelation;
+import tech.derbent.plm.meetings.domain.CMeetingType;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -29,7 +32,7 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 })
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CMeetingService extends CProjectItemService<CMeeting> implements IEntityRegistrable, IEntityWithView {
+public class CMeetingService extends CProjectItemService<CMeeting, CMeetingType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingService.class);
 	private final CMeetingTypeService typeService;
@@ -51,7 +54,7 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 	 * @param target  the target entity to copy to
 	 * @param options clone options controlling what fields to copy */
 	@Override
-	public void copyEntityFieldsTo(final CMeeting source, final CEntityDB<?> target, final tech.derbent.api.interfaces.CCloneOptions options) {
+	public void copyEntityFieldsTo(final CMeeting source, final CEntityDB<?> target, final CCloneOptions options) {
 		// Call parent to copy project item fields
 		super.copyEntityFieldsTo(source, target, options);
 		// Only copy if target is a Meeting
@@ -126,10 +129,12 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
 		final CMeeting meeting = (CMeeting) entity;
-		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+		@SuppressWarnings ("unchecked")
+		final IHasStatusAndWorkflow<?, ?> typedEntity = (IHasStatusAndWorkflow<?, ?>) entity;
+		initializeNewEntity_IHasStatusAndWorkflow(typedEntity, sessionService.getActiveCompany().orElseThrow(), typeService,
 				statusService);
 		if (meeting.getParentRelation() == null) {
-			meeting.setParentRelation(new tech.derbent.api.parentrelation.domain.CParentRelation(meeting));
+			meeting.setParentRelation(new CParentRelation(meeting));
 		} else {
 			meeting.getParentRelation().setOwnerItem(meeting);
 		}

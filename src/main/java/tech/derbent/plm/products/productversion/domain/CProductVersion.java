@@ -29,7 +29,7 @@ import tech.derbent.plm.products.productversiontype.domain.CProductVersionType;
 @Entity
 @Table (name = "\"cproductversion\"")
 @AttributeOverride (name = "id", column = @Column (name = "productversion_id"))
-public class CProductVersion extends CProjectItem<CProductVersion> implements IHasStatusAndWorkflow<CProductVersion>, IHasAttachments, IHasComments {
+public class CProductVersion extends CProjectItem<CProductVersion, CProductVersionType> implements IHasStatusAndWorkflow<CProductVersion, CProductVersionType>, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#6B8E23"; // X11 OliveDrab - product versions (darker)
 	public static final String DEFAULT_ICON = "vaadin:tag";
@@ -87,7 +87,7 @@ public class CProductVersion extends CProjectItem<CProductVersion> implements IH
 	public Set<CComment> getComments() { return comments; }
 
 	@Override
-	public CTypeEntity<?> getEntityType() { return entityType; }
+	public CProductVersionType getEntityType() { return entityType; }
 
 	public CProduct getProduct() { return product; }
 
@@ -129,7 +129,7 @@ public class CProductVersion extends CProjectItem<CProductVersion> implements IH
 	}
 
 	@Override
-	public void setEntityType(CTypeEntity<?> typeEntity) {
+	public void setEntityType(final CProductVersionType typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CProductVersionType.class, "Type entity must be an instance of CProductVersionType");
 		Check.notNull(getProject(), "Project must be set before assigning product version type");
@@ -137,7 +137,7 @@ public class CProductVersion extends CProjectItem<CProductVersion> implements IH
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning product version type");
 		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
 				+ typeEntity.getCompany().getId() + " does not match product version project company id " + getProject().getCompany().getId());
-		entityType = (CProductVersionType) typeEntity;
+		entityType = typeEntity;
 		updateLastModified();
 	}
 

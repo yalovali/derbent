@@ -3,6 +3,7 @@ package tech.derbent.api.dashboard.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.dashboard.dashboardprojecttype.domain.CDashboardProjectType;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.projects.domain.CProject;
 
@@ -17,7 +18,7 @@ import tech.derbent.api.projects.domain.CProject;
  * Provides dashboard widget management for project-scoped dashboard entities.
  */
 @MappedSuperclass  // Abstract entities are @MappedSuperclass
-public abstract class CDashboardProject<EntityClass> extends CProjectItem<EntityClass> {
+public abstract class CDashboardProject<EntityClass> extends CProjectItem<EntityClass, CDashboardProjectType> {
     
     // Dashboard widget configuration field
     @Column(name = "dashboard_widget", length = 100)

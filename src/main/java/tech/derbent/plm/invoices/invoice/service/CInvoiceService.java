@@ -13,6 +13,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.plm.invoices.invoicetype.domain.CInvoiceType;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -31,7 +32,7 @@ import tech.derbent.plm.invoices.payment.service.CPaymentService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll
-public class CInvoiceService extends CProjectItemService<CInvoice> implements IEntityRegistrable, IEntityWithView {
+public class CInvoiceService extends CProjectItemService<CInvoice, CInvoiceType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CInvoiceService.class);
 

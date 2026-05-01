@@ -7,9 +7,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
+import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.api.entityOfProject.service.IProjectItemRespository;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
@@ -25,12 +28,13 @@ import tech.derbent.plm.agile.domain.CAgileEntity;
 import tech.derbent.plm.links.domain.IHasLinks;
 
 @PreAuthorize ("isAuthenticated()")
-public abstract class CAgileEntityService<EntityClass extends CAgileEntity<EntityClass, ?>> extends CProjectItemService<EntityClass> {
+public abstract class CAgileEntityService<EntityClass extends CAgileEntity<EntityClass, TypeClass>,
+		TypeClass extends CTypeEntity<TypeClass>> extends CProjectItemService<EntityClass, TypeClass> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAgileEntityService.class);
 	private final CActivityPriorityService activityPriorityService;
 
-	protected CAgileEntityService(final tech.derbent.api.entityOfProject.service.IProjectItemRespository<EntityClass> repository, final Clock clock,
+	protected CAgileEntityService(final IProjectItemRespository<EntityClass> repository, final Clock clock,
 			final ISessionService sessionService, final CProjectItemStatusService statusService,
 			final CActivityPriorityService activityPriorityService) {
 		super(repository, clock, sessionService, statusService);
@@ -66,7 +70,9 @@ public abstract class CAgileEntityService<EntityClass extends CAgileEntity<Entit
 		targetAgile.setPriority(source.getPriority());
 		if (target.getClass().equals(source.getClass())) {
 			// Only copy type if same class (Epic->Epic, Feature->Feature, etc.)
-			targetAgile.setEntityType(source.getEntityType());
+			@SuppressWarnings ("unchecked")
+			final CAgileEntity<?, TypeClass> typedTargetAgile = (CAgileEntity<?, TypeClass>) targetAgile;
+			typedTargetAgile.setEntityType(source.getEntityType());
 		}
 		// Handle dates conditionally
 		if (!options.isResetDates()) {
@@ -107,8 +113,8 @@ public abstract class CAgileEntityService<EntityClass extends CAgileEntity<Entit
 		return ((IAgileRepository<EntityClass>) repository).getDataProviderValuesOfUser(currentUser);
 	}
 
-	protected abstract tech.derbent.api.entityOfProject.service.IProjectItemRespository<EntityClass> getTypedRepository();
-	protected abstract tech.derbent.api.entityOfProject.domain.CTypeEntityService<?> getTypeService();
+	protected abstract IProjectItemRespository<EntityClass> getTypedRepository();
+	protected abstract CTypeEntityService<TypeClass> getTypeService();
 
 	@Override
 	public void initializeNewEntity(final Object entity) {
@@ -117,8 +123,9 @@ public abstract class CAgileEntityService<EntityClass extends CAgileEntity<Entit
 		final EntityClass entityCasted = (EntityClass) entity;
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize entity"));
-		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(),
-				getTypeService(), statusService);
+		@SuppressWarnings ("unchecked")
+		final IHasStatusAndWorkflow<?, ?> typedEntity = (IHasStatusAndWorkflow<?, ?>) entity;
+		initializeNewEntity_IHasStatusAndWorkflow(typedEntity, sessionService.getActiveCompany().orElseThrow(), getTypeService(), statusService);
 		final java.util.List<CActivityPriority> priorities = activityPriorityService.listByCompany(currentProject.getCompany());
 		Check.notEmpty(priorities,
 				"No activity priorities available in company " + currentProject.getCompany().getName() + " - cannot initialize new entity");

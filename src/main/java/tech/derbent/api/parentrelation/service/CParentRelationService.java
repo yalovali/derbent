@@ -59,7 +59,7 @@ public class CParentRelationService extends COneToOneRelationServiceBase<CParent
      * @param  entity the entity
      * @return        the level from entity type, or -1 if not determinable
      */
-    public static int getEntityLevel(final CProjectItem<?> entity) {
+    public static int getEntityLevel(final CProjectItem<?, ?> entity) {
         return CHierarchyNavigationService.getEntityLevel(entity);
     }
 
@@ -70,13 +70,13 @@ public class CParentRelationService extends COneToOneRelationServiceBase<CParent
      * @return        the depth level (0 for root items)
      */
     @Transactional(readOnly = true)
-    public static int getDepth(final CProjectItem<?> entity) {
+    public static int getDepth(final CProjectItem<?, ?> entity) {
         Check.notNull(entity, "Entity cannot be null");
         if (!(entity instanceof IHasParentRelation hasRelation)) {
             return 0;
         }
         int depth = 0;
-        CProjectItem<?> current = hasRelation.getParentItem();
+        CProjectItem<?, ?> current = hasRelation.getParentItem();
         final Set<Long> visited = new HashSet<>();
         while (current != null && current.getId() != null) {
             if (visited.contains(current.getId())) {
@@ -101,7 +101,7 @@ public class CParentRelationService extends COneToOneRelationServiceBase<CParent
      * @param entity the entity (must implement IHasParentRelation)
      */
     @Transactional
-    public void clearParent(final CProjectItem<?> entity) {
+    public void clearParent(final CProjectItem<?, ?> entity) {
         validateOwnership(entity, IHasParentRelation.class);
         final IHasParentRelation hasRelation = (IHasParentRelation) entity;
         Check.notNull(hasRelation.getParentRelation(), "Entity must have a parent relation");
@@ -116,7 +116,7 @@ public class CParentRelationService extends COneToOneRelationServiceBase<CParent
      * @return      list of all descendant entities
      */
     @Transactional(readOnly = true)
-    public List<CProjectItem<?>> getAllDescendants(final CProjectItem<?> item) {
+    public List<CProjectItem<?, ?>> getAllDescendants(final CProjectItem<?, ?> item) {
         Check.notNull(item, "Item cannot be null");
         Check.notNull(item.getId(), "Item must be persisted");
         return hierarchyNavigationService.getAllDescendants(item);
@@ -129,7 +129,7 @@ public class CParentRelationService extends COneToOneRelationServiceBase<CParent
      * @return        list of child entities
      */
     @Transactional(readOnly = true)
-    public List<CProjectItem<?>> getChildren(final CProjectItem<?> parent) {
+    public List<CProjectItem<?, ?>> getChildren(final CProjectItem<?, ?> parent) {
         Check.notNull(parent, "Parent item cannot be null");
         Check.notNull(parent.getId(), "Parent item must be persisted");
         return hierarchyNavigationService.listChildren(parent);
@@ -152,7 +152,7 @@ public class CParentRelationService extends COneToOneRelationServiceBase<CParent
      * @return        the parent item, or null if none
      */
     @Transactional(readOnly = true)
-    public CProjectItem<?> getParent(final CProjectItem<?> entity) {
+    public CProjectItem<?, ?> getParent(final CProjectItem<?, ?> entity) {
         Check.notNull(entity, "Entity cannot be null");
         if (!(entity instanceof IHasParentRelation)) {
             return null;
@@ -170,12 +170,12 @@ public class CParentRelationService extends COneToOneRelationServiceBase<CParent
      * @return list of root entities
      */
     @Transactional(readOnly = true)
-    public List<CProjectItem<?>> getRootItems() {
+    public List<CProjectItem<?, ?>> getRootItems() {
         final List<CParentRelation> relations =
                 ((IParentRelationRepository) repository).findRootItems();
-        final List<CProjectItem<?>> roots = new ArrayList<>();
+        final List<CProjectItem<?, ?>> roots = new ArrayList<>();
         relations.forEach((final CParentRelation relation) -> {
-            final CProjectItem<?> entity = relation.getOwnerItem();
+            final CProjectItem<?, ?> entity = relation.getOwnerItem();
             if (entity != null) {
                 roots.add(entity);
             }
@@ -205,7 +205,7 @@ public class CParentRelationService extends COneToOneRelationServiceBase<CParent
      * @param parent the parent item, or null to make root item
      */
     @Transactional
-    public void setParent(final CProjectItem<?> entity, final CProjectItem<?> parent) {
+    public void setParent(final CProjectItem<?, ?> entity, final CProjectItem<?, ?> parent) {
         validateOwnership(entity, IHasParentRelation.class);
         final IHasParentRelation hasRelation = (IHasParentRelation) entity;
         Check.notNull(hasRelation.getParentRelation(), "Entity must have a parent relation");
@@ -230,7 +230,7 @@ public class CParentRelationService extends COneToOneRelationServiceBase<CParent
                         entity.getClass().getSimpleName(), entity.getId(), entityLevel);
             }
         }
-        final CProjectItem<?> previousParent = hasRelation.getParentRelation().getParentItem();
+        final CProjectItem<?, ?> previousParent = hasRelation.getParentRelation().getParentItem();
         hasRelation.getParentRelation().setParentItem(parent);
         if (parent != null) {
             LOGGER.info("Established parent-child relationship: '{}' -> '{}'", parent.getName(),
@@ -249,7 +249,7 @@ public class CParentRelationService extends COneToOneRelationServiceBase<CParent
      * @param  parent                    the proposed parent
      * @throws IllegalArgumentException if parent type violates hierarchy rules
      */
-    protected void validateParentType(final CProjectItem<?> entity, final CProjectItem<?> parent) {
+    protected void validateParentType(final CProjectItem<?, ?> entity, final CProjectItem<?, ?> parent) {
         if (parent == null) {
             return;
         }
@@ -281,14 +281,14 @@ public class CParentRelationService extends COneToOneRelationServiceBase<CParent
      * @return        true if circular dependency would be created
      */
     @Transactional(readOnly = true)
-    public boolean wouldCreateCircularDependency(final CProjectItem<?> parent,
-            final CProjectItem<?> child) {
+    public boolean wouldCreateCircularDependency(final CProjectItem<?, ?> parent,
+            final CProjectItem<?, ?> child) {
         Check.notNull(parent, "Parent item cannot be null");
         Check.notNull(child, "Child entity cannot be null");
         Check.notNull(parent.getId(), "Parent ID cannot be null");
         Check.notNull(child.getId(), "Child ID cannot be null");
         final String childKey = child.getClass().getSimpleName() + ":" + child.getId();
-        CProjectItem<?> current = parent;
+        CProjectItem<?, ?> current = parent;
         final Set<String> visited = new HashSet<>();
         while (current != null && current.getId() != null) {
             final String currentKey = current.getClass().getSimpleName() + ":" + current.getId();

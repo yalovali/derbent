@@ -35,7 +35,7 @@ import tech.derbent.plm.validation.validationsuite.domain.CValidationSuite;
 @Entity
 @Table (name = "cvalidationcase")
 @AttributeOverride (name = "id", column = @Column (name = "validationcase_id"))
-public class CValidationCase extends CProjectItem<CValidationCase> implements IHasStatusAndWorkflow<CValidationCase>, IHasAttachments, IHasComments {
+public class CValidationCase extends CProjectItem<CValidationCase, CValidationCaseType> implements IHasStatusAndWorkflow<CValidationCase, CValidationCaseType>, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#4169E1"; // RoyalBlue - testing and quality
 	public static final String DEFAULT_ICON = "vaadin:clipboard-check";
@@ -125,7 +125,7 @@ public class CValidationCase extends CProjectItem<CValidationCase> implements IH
 	public Set<CComment> getComments() { return comments; }
 
 	@Override
-	public CTypeEntity<?> getEntityType() { return entityType; }
+	public CValidationCaseType getEntityType() { return entityType; }
 
 	public String getPreconditions() { return preconditions; }
 
@@ -167,7 +167,7 @@ public class CValidationCase extends CProjectItem<CValidationCase> implements IH
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	@Override
-	public void setEntityType(CTypeEntity<?> typeEntity) {
+	public void setEntityType(final CValidationCaseType typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CValidationCaseType.class, "Type entity must be an instance of CValidationCaseType");
 		Check.notNull(getProject(), "Project must be set before assigning validation case type");
@@ -175,7 +175,7 @@ public class CValidationCase extends CProjectItem<CValidationCase> implements IH
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning validation case type");
 		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
 				+ typeEntity.getCompany().getId() + " does not match validation case project company id " + getProject().getCompany().getId());
-		entityType = (CValidationCaseType) typeEntity;
+		entityType = typeEntity;
 		updateLastModified();
 	}
 

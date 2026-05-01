@@ -43,7 +43,7 @@ public class CDynamicPageRouter extends CAbstractPage implements HasUrlParameter
 	 * @param pageRouter     the router responsible for rendering the one-pager
 	 * @param sessionService session service used to resolve the active project
 	 * @param contentOwner   optional content owner to be notified of entity changes, can be null */
-	public static void displayEntityInDynamicOnepager(final CProjectItem<?> onepagerEntity, final CDynamicPageRouter pageRouter,
+	public static void displayEntityInDynamicOnepager(final CProjectItem<?, ?> onepagerEntity, final CDynamicPageRouter pageRouter,
 			final ISessionService sessionService, final IContentOwner contentOwner) {
 		Check.notNull(pageRouter, "Dynamic page router cannot be null");
 		Check.notNull(sessionService, "Session service cannot be null");

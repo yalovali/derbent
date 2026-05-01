@@ -43,8 +43,8 @@ import tech.derbent.plm.meetings.service.IMeetingRepository;
 @Entity
 @Table (name = "csprint")
 @AttributeOverride (name = "id", column = @Column (name = "sprint_id"))
-public class CSprint extends CProjectItem<CSprint>
-		implements IHasStatusAndWorkflow<CSprint>, IGnntEntityItem, IHasIcon, IHasAttachments, IHasComments {
+public class CSprint extends CProjectItem<CSprint, CSprintType>
+		implements IHasStatusAndWorkflow<CSprint, CSprintType>, IGnntEntityItem, IHasIcon, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#8377C5"; // CDE Active Purple - time-boxed work
 	public static final String DEFAULT_ICON = "vaadin:calendar-clock";
@@ -308,7 +308,7 @@ public class CSprint extends CProjectItem<CSprint>
 	/** Gets the sprint type.
 	 * @return the sprint type */
 	@Override
-	public CTypeEntity<?> getEntityType() { return entityType; }
+	public CSprintType getEntityType() { return entityType; }
 
 	/** Gets the icon for Gantt chart display.
 	 * @return the sprint icon identifier */
@@ -525,7 +525,7 @@ public class CSprint extends CProjectItem<CSprint>
 	}
 
 	@Override
-	public void setEntityType(CTypeEntity<?> typeEntity) {
+	public void setEntityType(final CSprintType typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CSprintType.class, "Type entity must be an instance of CSprintType");
 		Check.notNull(getProject(), "Project must be set before assigning sprint type");
@@ -534,7 +534,7 @@ public class CSprint extends CProjectItem<CSprint>
 		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
 				"Type entity company id " + typeEntity.getCompany().getId()
 						+ " does not match sprint project company id " + getProject().getCompany().getId());
-		entityType = (CSprintType) typeEntity;
+		entityType = typeEntity;
 		updateLastModified();
 	}
 	// Scrum Guide 2020 - Getters/Setters

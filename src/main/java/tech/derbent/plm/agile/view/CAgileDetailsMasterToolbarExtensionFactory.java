@@ -285,7 +285,7 @@ public class CAgileDetailsMasterToolbarExtensionFactory implements IDetailsMaste
 			if (epicOption.isNone()) {
 				final List<CFeature> result = new ArrayList<>();
 				for (final CFeature feature : allFeatures) {
-					final CProjectItem<?> parent = feature != null ? feature.getParentItem() : null;
+					final CProjectItem<?, ?> parent = feature != null ? feature.getParentItem() : null;
 					if (!(parent instanceof CEpic)) {
 						result.add(feature);
 					}
@@ -423,7 +423,7 @@ public class CAgileDetailsMasterToolbarExtensionFactory implements IDetailsMaste
 			}
 		}
 
-		private CFilterOption<CEpic> toOptionOrNone(final CProjectItem<?> possibleEpic, final String noneLabel) {
+		private CFilterOption<CEpic> toOptionOrNone(final CProjectItem<?, ?> possibleEpic, final String noneLabel) {
 			if (possibleEpic == null) {
 				return CFilterOption.none(noneLabel);
 			}

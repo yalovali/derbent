@@ -43,8 +43,8 @@ public final class CProjectHierarchyDialogSupport {
 		this.hierarchyNavigationService = hierarchyNavigationService;
 	}
 
-	public void openAddExistingDialog(final String dialogTitle, final CProjectItem<?> parent,
-			final Predicate<Class<? extends CProjectItem<?>>> classFilter, final Runnable onSuccess) {
+	public void openAddExistingDialog(final String dialogTitle, final CProjectItem<?, ?> parent,
+			final Predicate<Class<? extends CProjectItem<?, ?>>> classFilter, final Runnable onSuccess) {
 		try {
 			Check.notNull(parent, "Parent cannot be null");
 			Check.notNull(parent.getId(), "Parent must be saved before adding children");
@@ -53,7 +53,7 @@ public final class CProjectHierarchyDialogSupport {
 				CNotificationService.showWarning("No compatible existing child items were found in this project");
 				return;
 			}
-			final CDialogEntitySelection<CProjectItem<?>> dialog =
+			final CDialogEntitySelection<CProjectItem<?, ?>> dialog =
 					new CDialogEntitySelection<>(dialogTitle, entityTypes, config -> listAvailableItemsForSelection(parent, config), items -> {
 						items.forEach(item -> attachChildToParent(item, parent));
 						runSafely(onSuccess);
@@ -65,8 +65,8 @@ public final class CProjectHierarchyDialogSupport {
 		}
 	}
 
-	public void openCreateDialog(final CProject<?> project, final CProjectItem<?> parent,
-			final Predicate<Class<? extends CProjectItem<?>>> classFilter, final Runnable onSuccess) {
+	public void openCreateDialog(final CProject<?> project, final CProjectItem<?, ?> parent,
+			final Predicate<Class<? extends CProjectItem<?, ?>>> classFilter, final Runnable onSuccess) {
 		try {
 			final List<EntityTypeConfig<?>> entityTypes =
 					createFilterableTypes(parent != null ? getCreatableChildClasses(parent, classFilter) : getCreatableRootClasses(project, classFilter));
@@ -89,11 +89,11 @@ public final class CProjectHierarchyDialogSupport {
 		}
 	}
 
-	public void openEditDialog(final CProjectItem<?> entity, final Runnable onSaveSuccess) throws Exception {
+	public void openEditDialog(final CProjectItem<?, ?> entity, final Runnable onSaveSuccess) throws Exception {
 		openEditDialog(entity, onSaveSuccess, null);
 	}
 
-	public void openEditDialog(final CProjectItem<?> entity, final Runnable onSaveSuccess, final Runnable onCancel) throws Exception {
+	public void openEditDialog(final CProjectItem<?, ?> entity, final Runnable onSaveSuccess, final Runnable onCancel) throws Exception {
 		Check.notNull(entity, "Entity cannot be null");
 		final String route = CDialogDynamicPage.buildDynamicRouteForEntity(entity);
 		final CDialogDynamicPage dialog = new CDialogDynamicPage(route);
@@ -101,17 +101,17 @@ public final class CProjectHierarchyDialogSupport {
 		dialog.open();
 	}
 
-	public boolean hasCreatableItems(final CProject<?> project, final CProjectItem<?> parent,
-			final Predicate<Class<? extends CProjectItem<?>>> classFilter) {
+	public boolean hasCreatableItems(final CProject<?> project, final CProjectItem<?, ?> parent,
+			final Predicate<Class<? extends CProjectItem<?, ?>>> classFilter) {
 		return !(parent != null ? getCreatableChildClasses(parent, classFilter) : getCreatableRootClasses(project, classFilter)).isEmpty();
 	}
 
-	public boolean hasSelectableExistingChildren(final CProjectItem<?> parent,
-			final Predicate<Class<? extends CProjectItem<?>>> classFilter) {
+	public boolean hasSelectableExistingChildren(final CProjectItem<?, ?> parent,
+			final Predicate<Class<? extends CProjectItem<?, ?>>> classFilter) {
 		return !getExistingChildClasses(parent, classFilter).isEmpty();
 	}
 
-	private void attachChildToParent(final CProjectItem<?> child, final CProjectItem<?> parent) {
+	private void attachChildToParent(final CProjectItem<?, ?> child, final CProjectItem<?, ?> parent) {
 		Check.notNull(child, "child cannot be null");
 		Check.notNull(parent, "parent cannot be null");
 		parentRelationService.setParent(child, parent);
@@ -128,24 +128,24 @@ public final class CProjectHierarchyDialogSupport {
 	@SuppressWarnings({
 			"rawtypes", "unchecked"
 	})
-	private EntityTypeConfig<?> createEntityTypeConfig(final Class<? extends CProjectItem<?>> entityClass) {
+	private EntityTypeConfig<?> createEntityTypeConfig(final Class<? extends CProjectItem<?, ?>> entityClass) {
 		final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
 		final CAbstractService<?> service = (CAbstractService<?>) CSpringContext.getBean(serviceClass);
 		return EntityTypeConfig.createWithRegistryName((Class) entityClass, (CAbstractService) service);
 	}
 
-	private List<EntityTypeConfig<?>> createFilterableTypes(final List<Class<? extends CProjectItem<?>>> entityClasses) {
+	private List<EntityTypeConfig<?>> createFilterableTypes(final List<Class<? extends CProjectItem<?, ?>>> entityClasses) {
 		if (entityClasses == null || entityClasses.isEmpty()) {
 			return List.of();
 		}
-		final List<Class<? extends CProjectItem<?>>> sortedClasses = entityClasses.stream()
+		final List<Class<? extends CProjectItem<?, ?>>> sortedClasses = entityClasses.stream()
 				.sorted(Comparator.comparing(entityClass -> {
 					final String title = CEntityRegistry.getEntityTitleSingular(entityClass);
 					return title != null ? title : entityClass.getSimpleName();
 				}, String.CASE_INSENSITIVE_ORDER))
 				.toList();
 		final List<EntityTypeConfig<?>> entityTypes = new ArrayList<>();
-		for (final Class<? extends CProjectItem<?>> entityClass : sortedClasses) {
+		for (final Class<? extends CProjectItem<?, ?>> entityClass : sortedClasses) {
 			entityTypes.add(createEntityTypeConfig(entityClass));
 		}
 		if (entityTypes.size() <= 1) {
@@ -160,7 +160,7 @@ public final class CProjectHierarchyDialogSupport {
 	@SuppressWarnings({
 			"rawtypes", "unchecked"
 	})
-	private void createNewChildEntity(final CProject<?> project, final CProjectItem<?> parent, final EntityTypeConfig<?> config,
+	private void createNewChildEntity(final CProject<?> project, final CProjectItem<?, ?> parent, final EntityTypeConfig<?> config,
 			final Runnable onSuccess) {
 		Check.notNull(project, "Project cannot be null");
 		Check.notNull(config, "config cannot be null");
@@ -170,10 +170,10 @@ public final class CProjectHierarchyDialogSupport {
 			final CEntityOfProjectService<?> projectService = (CEntityOfProjectService<?>) service;
 			final Object created = projectService.newEntity("New " + config.getDisplayName(), project);
 			Check.isTrue(created instanceof CProjectItem, "New entity is not a project item: " + created.getClass().getSimpleName());
-			final CProjectItem<?> child = (CProjectItem<?>) created;
+			final CProjectItem<?, ?> child = (CProjectItem<?, ?>) created;
 			final Object saved = service.save(child);
 			Check.isTrue(saved instanceof CProjectItem, "Saved entity is not a project item");
-			final CProjectItem<?> savedChild = (CProjectItem<?>) saved;
+			final CProjectItem<?, ?> savedChild = (CProjectItem<?, ?>) saved;
 			if (parent != null) {
 				parentRelationService.setParent(savedChild, parent);
 				service.save(savedChild);
@@ -192,8 +192,8 @@ public final class CProjectHierarchyDialogSupport {
 		}
 	}
 
-	private List<Class<? extends CProjectItem<?>>> getCreatableChildClasses(final CProjectItem<?> parent,
-			final Predicate<Class<? extends CProjectItem<?>>> classFilter) {
+	private List<Class<? extends CProjectItem<?, ?>>> getCreatableChildClasses(final CProjectItem<?, ?> parent,
+			final Predicate<Class<? extends CProjectItem<?, ?>>> classFilter) {
 		if (parent == null) {
 			return List.of();
 		}
@@ -201,13 +201,13 @@ public final class CProjectHierarchyDialogSupport {
 				.toList();
 	}
 
-	private List<Class<? extends CProjectItem<?>>> getCreatableRootClasses(final CProject<?> project,
-			final Predicate<Class<? extends CProjectItem<?>>> classFilter) {
+	private List<Class<? extends CProjectItem<?, ?>>> getCreatableRootClasses(final CProject<?> project,
+			final Predicate<Class<? extends CProjectItem<?, ?>>> classFilter) {
 		if (project == null) {
 			return List.of();
 		}
-		final List<Class<? extends CProjectItem<?>>> classes = new ArrayList<>();
-		for (final Class<? extends CProjectItem<?>> entityClass : hierarchyNavigationService.listHierarchyEntityClasses()) {
+		final List<Class<? extends CProjectItem<?, ?>>> classes = new ArrayList<>();
+		for (final Class<? extends CProjectItem<?, ?>> entityClass : hierarchyNavigationService.listHierarchyEntityClasses()) {
 			try {
 				final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
 				final Object serviceBean = serviceClass != null ? CSpringContext.getBean(serviceClass) : null;
@@ -215,7 +215,7 @@ public final class CProjectHierarchyDialogSupport {
 					continue;
 				}
 				final Object previewEntity = projectService.newEntity("Preview " + entityClass.getSimpleName(), project);
-				if (!(previewEntity instanceof CProjectItem<?> projectItem) || CHierarchyNavigationService.canEntityHaveParent(projectItem)
+				if (!(previewEntity instanceof CProjectItem<?, ?> projectItem) || CHierarchyNavigationService.canEntityHaveParent(projectItem)
 						|| !matchesFilter(entityClass, classFilter)) {
 					continue;
 				}
@@ -228,17 +228,17 @@ public final class CProjectHierarchyDialogSupport {
 	}
 
 	@SuppressWarnings("unchecked")
-	private List<Class<? extends CProjectItem<?>>> getExistingChildClasses(final CProjectItem<?> parent,
-			final Predicate<Class<? extends CProjectItem<?>>> classFilter) {
+	private List<Class<? extends CProjectItem<?, ?>>> getExistingChildClasses(final CProjectItem<?, ?> parent,
+			final Predicate<Class<? extends CProjectItem<?, ?>>> classFilter) {
 		if (parent == null) {
 			return List.of();
 		}
-		final List<Class<? extends CProjectItem<?>>> result = new ArrayList<>();
+		final List<Class<? extends CProjectItem<?, ?>>> result = new ArrayList<>();
 		hierarchyNavigationService.listSelectableChildCandidates(parent).stream()
 				.map(CProjectItem::getClass)
 				.distinct()
-				.filter(entityClass -> matchesFilter((Class<? extends CProjectItem<?>>) entityClass, classFilter))
-				.forEach(entityClass -> result.add((Class<? extends CProjectItem<?>>) entityClass));
+				.filter(entityClass -> matchesFilter((Class<? extends CProjectItem<?, ?>>) entityClass, classFilter))
+				.forEach(entityClass -> result.add((Class<? extends CProjectItem<?, ?>>) entityClass));
 		return result;
 	}
 
@@ -246,19 +246,19 @@ public final class CProjectHierarchyDialogSupport {
 		return config != null && ALL_TYPES_DISPLAY_NAME.equals(config.getDisplayName());
 	}
 
-	private List<CProjectItem<?>> listAvailableItemsForSelection(final CProjectItem<?> parent, final EntityTypeConfig<?> config) {
+	private List<CProjectItem<?, ?>> listAvailableItemsForSelection(final CProjectItem<?, ?> parent, final EntityTypeConfig<?> config) {
 		if (parent == null || config == null) {
 			return List.of();
 		}
-		final List<CProjectItem<?>> candidates = hierarchyNavigationService.listSelectableChildCandidates(parent);
+		final List<CProjectItem<?, ?>> candidates = hierarchyNavigationService.listSelectableChildCandidates(parent);
 		if (isAllTypesConfig(config)) {
 			return candidates;
 		}
 		return candidates.stream().filter(candidate -> config.getEntityClass().isAssignableFrom(candidate.getClass())).toList();
 	}
 
-	private boolean matchesFilter(final Class<? extends CProjectItem<?>> entityClass,
-			final Predicate<Class<? extends CProjectItem<?>>> classFilter) {
+	private boolean matchesFilter(final Class<? extends CProjectItem<?, ?>> entityClass,
+			final Predicate<Class<? extends CProjectItem<?, ?>>> classFilter) {
 		return classFilter == null || classFilter.test(entityClass);
 	}
 
@@ -271,7 +271,7 @@ public final class CProjectHierarchyDialogSupport {
 	@SuppressWarnings({
 			"rawtypes", "unchecked"
 	})
-	private void saveEntity(final CProjectItem<?> entity) {
+	private void saveEntity(final CProjectItem<?, ?> entity) {
 		final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entity.getClass());
 		final CAbstractService service = (CAbstractService) CSpringContext.getBean(serviceClass);
 		service.save(entity);

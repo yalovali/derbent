@@ -30,6 +30,7 @@ import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.plm.activities.domain.CActivity;
@@ -46,8 +47,8 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 @Entity
 @Table (name = "cissue")
 @AttributeOverride (name = "id", column = @Column (name = "issue_id"))
-public class CIssue extends CProjectItem<CIssue>
-		implements IHasStatusAndWorkflow<CIssue>, IGnntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments, IHasLinks,
+public class CIssue extends CProjectItem<CIssue, CIssueType>
+		implements IHasStatusAndWorkflow<CIssue, CIssueType>, IGnntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments, IHasLinks,
 		IHasParentRelation {
 
 	public static final String DEFAULT_COLOR = "#D32F2F"; // Red for issues/bugs
@@ -70,7 +71,7 @@ public class CIssue extends CProjectItem<CIssue>
 			displayName = "Agile Parent", required = false, readOnly = false, description = "Agile hierarchy parent selector", hidden = false,
 			createComponentMethod = "createComponentParent", dataProviderBean = "pageservice", captionVisible = false
 	)
-	private final CProjectItem<?> placeHolder_createComponentParent = null;
+	private final CProjectItem<?, ?> placeHolder_createComponentParent = null;
 	// Actual Result
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
@@ -212,7 +213,7 @@ public class CIssue extends CProjectItem<CIssue>
 
 	@Override
 	public Set<CComment> getComments() { return comments; }
-	public CProjectItem<?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
+	public CProjectItem<?, ?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
 
 	public LocalDate getDueDate() { return dueDate; }
 	// ========================================================================
@@ -316,13 +317,17 @@ public class CIssue extends CProjectItem<CIssue>
 
 	public void setDueDate(final LocalDate dueDate) { this.dueDate = dueDate; }
 
-	public void setEntityType(final CIssueType entityType) { this.entityType = entityType; }
-
 	@Override
-	public void setEntityType(final CTypeEntity<?> typeEntity) {
-		if (typeEntity instanceof CIssueType) {
-			setEntityType((CIssueType) typeEntity);
-		}
+	public void setEntityType(final CIssueType typeEntity) {
+		Check.notNull(typeEntity, "Type entity must not be null");
+		Check.notNull(getProject(), "Project must be set before assigning issue type");
+		Check.notNull(getProject().getCompany(), "Project company must be set before assigning issue type");
+		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning issue type");
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
+				"Type entity company id " + typeEntity.getCompany().getId() + " does not match issue project company id "
+						+ getProject().getCompany().getId());
+		entityType = typeEntity;
+		updateLastModified();
 	}
 
 	public void setExpectedResult(final String expectedResult) { this.expectedResult = expectedResult; }

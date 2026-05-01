@@ -11,6 +11,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.plm.storage.storagetype.domain.CStorageType;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -25,7 +26,7 @@ import tech.derbent.plm.storage.storagetype.service.CStorageTypeService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll
-public class CStorageService extends CProjectItemService<CStorage> implements IEntityRegistrable, IEntityWithView {
+public class CStorageService extends CProjectItemService<CStorage, CStorageType> implements IEntityRegistrable, IEntityWithView {
 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CStorageService.class);
@@ -57,7 +58,9 @@ public class CStorageService extends CProjectItemService<CStorage> implements IE
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+		@SuppressWarnings ("unchecked")
+		final IHasStatusAndWorkflow<?, ?> typedEntity = (IHasStatusAndWorkflow<?, ?>) entity;
+		initializeNewEntity_IHasStatusAndWorkflow(typedEntity, sessionService.getActiveCompany().orElseThrow(), typeService,
 				statusService);
 	}
 

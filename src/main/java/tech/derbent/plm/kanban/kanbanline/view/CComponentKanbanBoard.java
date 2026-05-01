@@ -504,7 +504,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		// Get the backlog component from the event source
 		Check.instanceOf(selectEvent.getSource(), CComponentBacklog.class, "Selection event source must be CComponentBacklog");
 		final CComponentBacklog backlogComponent = (CComponentBacklog) selectEvent.getSource();
-		final CProjectItem<?> selectedItem = backlogComponent.getSelectedBacklogItem();
+		final CProjectItem<?, ?> selectedItem = backlogComponent.getSelectedBacklogItem();
 		LOGGER.debug("Kanban board backlog item selection changed to {}", selectedItem != null ? selectedItem.getId() : "null");
 		// Clear postit selection when backlog item is selected
 		if (selectedPostit != null) {
@@ -536,7 +536,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		selectedPostit.setSelected(true);
 		final ISprintableItem sprintableEntity = postit.resolveSprintableItem();
 		Check.instanceOf(sprintableEntity, CProjectItem.class, "Sprintable item must be a CEntityDB for Kanban board details display");
-		CDynamicPageRouter.displayEntityInDynamicOnepager((CProjectItem<?>) sprintableEntity, currentEntityPageRouter, sessionService, this);
+		CDynamicPageRouter.displayEntityInDynamicOnepager((CProjectItem<?, ?>) sprintableEntity, currentEntityPageRouter, sessionService, this);
 		// Persist selected item ID (only if not restoring)
 		if (!isRestoring && persist_isEnabled()) {
 			persistValue("selectedSprintItemId", postit.getEntity().getId());

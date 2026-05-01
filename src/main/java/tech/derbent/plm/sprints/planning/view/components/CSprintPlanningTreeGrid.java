@@ -90,7 +90,7 @@ public final class CSprintPlanningTreeGrid extends CAbstractSprintPlanningTreeGr
 			final long points = sprintItem != null && sprintItem.getStoryPoint() != null
 					? sprintItem.getStoryPoint()
 					: 0L;
-			final boolean done = entity instanceof final CProjectItem<?> projectItem
+			final boolean done = entity instanceof final CProjectItem<?, ?> projectItem
 					&& projectItem.getStatus() != null
 					&& Boolean.TRUE.equals(projectItem.getStatus().getFinalStatus());
 			final CSprintPlanningSprintMetrics metrics =

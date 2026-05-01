@@ -41,8 +41,8 @@ import tech.derbent.plm.risks.risktype.domain.CRiskType;
 @Entity
 @Table (name = "\"crisk\"")
 @AttributeOverride (name = "id", column = @Column (name = "risk_id"))
-public class CRisk extends CProjectItem<CRisk>
-		implements IHasStatusAndWorkflow<CRisk>, IHasAttachments, IHasComments, IHasLinks, IHasParentRelation {
+public class CRisk extends CProjectItem<CRisk, CRiskType>
+		implements IHasStatusAndWorkflow<CRisk, CRiskType>, IHasAttachments, IHasComments, IHasLinks, IHasParentRelation {
 
 	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - caution
 	public static final String DEFAULT_ICON = "vaadin:warning";
@@ -65,7 +65,7 @@ public class CRisk extends CProjectItem<CRisk>
 			displayName = "Agile Parent", required = false, readOnly = false, description = "Agile hierarchy parent selector", hidden = false,
 			createComponentMethod = "createComponentParent", dataProviderBean = "pageservice", captionVisible = false
 	)
-	private final CProjectItem<?> placeHolder_createComponentParent = null;
+	private final CProjectItem<?, ?> placeHolder_createComponentParent = null;
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "risk_id")
@@ -191,7 +191,7 @@ public class CRisk extends CProjectItem<CRisk>
 	}
 
 	// IHasParentRelation interface methods
-	public CProjectItem<?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
+	public CProjectItem<?, ?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
 
 	// IHasAttachments interface methods
 	@Override
@@ -204,7 +204,7 @@ public class CRisk extends CProjectItem<CRisk>
 	public Set<CComment> getComments() { return comments; }
 
 	@Override
-	public CTypeEntity<?> getEntityType() { return entityType; }
+	public CRiskType getEntityType() { return entityType; }
 
 	public String getImpact() { return impact; }
 
@@ -312,7 +312,7 @@ public class CRisk extends CProjectItem<CRisk>
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	@Override
-	public void setEntityType(CTypeEntity<?> typeEntity) {
+	public void setEntityType(final CRiskType typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CRiskType.class, "Type entity must be an instance of CRiskType");
 		Check.notNull(getProject(), "Project must be set before assigning risk type");
@@ -320,7 +320,7 @@ public class CRisk extends CProjectItem<CRisk>
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning risk type");
 		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
 				+ typeEntity.getCompany().getId() + " does not match risk project company id " + getProject().getCompany().getId());
-		entityType = (CRiskType) typeEntity;
+		entityType = typeEntity;
 		updateLastModified();
 	}
 

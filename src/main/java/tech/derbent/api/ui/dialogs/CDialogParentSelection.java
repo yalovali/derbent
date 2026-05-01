@@ -50,14 +50,14 @@ public class CDialogParentSelection extends CDialog {
 	private CButton buttonClear;
 	private CButton buttonSelect;
 	// Configuration
-	private final CProjectItem<?> childItem;
+	private final CProjectItem<?, ?> childItem;
 	private final CTypeEntity<?> childType;
 	// UI Components
-	private ComboBox<CProjectItem<?>> comboBoxLevel1;
-	private ComboBox<CProjectItem<?>> comboBoxLevel2;
-	private ComboBox<CProjectItem<?>> comboBoxLevel3;
-	private ComboBox<CProjectItem<?>> comboBoxLevel4;
-	private final Consumer<CProjectItem<?>> onSelection;
+	private ComboBox<CProjectItem<?, ?>> comboBoxLevel1;
+	private ComboBox<CProjectItem<?, ?>> comboBoxLevel2;
+	private ComboBox<CProjectItem<?, ?>> comboBoxLevel3;
+	private ComboBox<CProjectItem<?, ?>> comboBoxLevel4;
+	private final Consumer<CProjectItem<?, ?>> onSelection;
 	// Services
 	private final CParentChildRelationService parentChildService;
 	private final CProject<?> project;
@@ -65,7 +65,7 @@ public class CDialogParentSelection extends CDialog {
 	/** Creates a parent selection dialog.
 	 * @param childItem   the item that needs a parent assigned
 	 * @param onSelection callback when parent is selected (receives selected parent or null for clear) */
-	public CDialogParentSelection(final CProjectItem<?> childItem, final Consumer<CProjectItem<?>> onSelection) {
+	public CDialogParentSelection(final CProjectItem<?, ?> childItem, final Consumer<CProjectItem<?, ?>> onSelection) {
 		Objects.requireNonNull(childItem, "Child item cannot be null");
 		Objects.requireNonNull(childItem.getId(), "Child item must be persisted");
 		Objects.requireNonNull(onSelection, "Selection callback cannot be null");
@@ -109,9 +109,9 @@ public class CDialogParentSelection extends CDialog {
 	 * @return list of valid parent candidates from current project */
 	@SuppressWarnings ({
 	})
-	private List<CProjectItem<?>> findParentCandidates(final int childLevel) {
+	private List<CProjectItem<?, ?>> findParentCandidates(final int childLevel) {
 		final int requiredParentLevel = childLevel > 0 ? childLevel - 1 : Integer.MAX_VALUE; // leaf can have any non-leaf parent
-		final List<CProjectItem<?>> candidates = new ArrayList<>();
+		final List<CProjectItem<?, ?>> candidates = new ArrayList<>();
 		for (final String entityName : CEntityRegistry.getAllRegisteredEntityKeys()) {
 			try {
 				final Class<?> entityClass = CEntityRegistry.getEntityClass(entityName);
@@ -122,9 +122,9 @@ public class CDialogParentSelection extends CDialog {
 				if (serviceClass == null || !CProjectItemService.class.isAssignableFrom(serviceClass)) {
 					continue;
 				}
-				final CProjectItemService<?> service = (CProjectItemService<?>) CSpringContext.getBean(serviceClass);
+				final CProjectItemService<?, ?> service = (CProjectItemService<?, ?>) CSpringContext.getBean(serviceClass);
 				service.findAll().forEach(item -> {
-					final CProjectItem<?> projItem = item;
+					final CProjectItem<?, ?> projItem = item;
 					if (projItem.getProject() != null && projItem.getProject().getId().equals(project.getId())
 							&& !projItem.getId().equals(childItem.getId())) {
 						final int itemLevel = CParentRelationService.getEntityLevel(projItem);
@@ -145,7 +145,7 @@ public class CDialogParentSelection extends CDialog {
 	@Override
 	public String getDialogTitleString() { return "Select Parent for " + childItem.getName(); }
 
-	private CTypeEntity<?> getEntityType(final CProjectItem<?> item) {
+	private CTypeEntity<?> getEntityType(final CProjectItem<?, ?> item) {
 		try {
 			final Method getEntityTypeMethod = item.getClass().getMethod("getEntityType");
 			final Object entityType = getEntityTypeMethod.invoke(item);
@@ -185,7 +185,7 @@ public class CDialogParentSelection extends CDialog {
 	protected void on_buttonSelect_clicked() {
 		try {
 			// Find the last non-null combobox value (deepest level selected)
-			CProjectItem<?> selectedParent = null;
+			CProjectItem<?, ?> selectedParent = null;
 			if (comboBoxLevel4 != null && comboBoxLevel4.getValue() != null) {
 				selectedParent = comboBoxLevel4.getValue();
 			} else if (comboBoxLevel3 != null && comboBoxLevel3.getValue() != null) {
@@ -250,7 +250,7 @@ public class CDialogParentSelection extends CDialog {
 			warningSpan.getStyle().set("color", "var(--lumo-error-text-color)");
 			layout.add(warningSpan);
 		} else {
-			final List<CProjectItem<?>> candidates = findParentCandidates(childLevel);
+			final List<CProjectItem<?, ?>> candidates = findParentCandidates(childLevel);
 			if (candidates.isEmpty()) {
 				final CSpan warningSpan = new CSpan("No valid parent candidates found for this item type. "
 						+ "Ensure parent entity types are configured with the correct hierarchy level.");

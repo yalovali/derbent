@@ -14,6 +14,7 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.activities.service.CActivityPriorityService;
 import tech.derbent.plm.agile.domain.CUserStory;
+import tech.derbent.plm.agile.domain.CUserStoryType;
 
 /**
  * Service for agile user stories.
@@ -24,7 +25,7 @@ import tech.derbent.plm.agile.domain.CUserStory;
 @Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CUserStoryService extends CAgileEntityService<CUserStory> implements IEntityRegistrable, IEntityWithView {
+public class CUserStoryService extends CAgileEntityService<CUserStory, CUserStoryType> implements IEntityRegistrable, IEntityWithView {
 
 	private final CUserStoryTypeService typeService;
 
@@ -56,5 +57,5 @@ public class CUserStoryService extends CAgileEntityService<CUserStory> implement
 	protected IProjectItemRespository<CUserStory> getTypedRepository() { return (IProjectItemRespository<CUserStory>) repository; }
 
 	@Override
-	protected CTypeEntityService<?> getTypeService() { return typeService; }
+	protected CTypeEntityService<CUserStoryType> getTypeService() { return typeService; }
 }

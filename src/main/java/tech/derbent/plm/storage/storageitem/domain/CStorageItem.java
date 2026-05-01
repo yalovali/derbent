@@ -36,7 +36,7 @@ import tech.derbent.plm.storage.storage.domain.CStorage;
 @Entity
 @Table (name = "cstorageitem")
 @AttributeOverride (name = "id", column = @Column (name = "storageitem_id"))
-public class CStorageItem extends CProjectItem<CStorageItem> implements IHasStatusAndWorkflow<CStorageItem>, IHasAttachments, IHasComments {
+public class CStorageItem extends CProjectItem<CStorageItem, CStorageItemType> implements IHasStatusAndWorkflow<CStorageItem, CStorageItemType>, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#008B8B";
 	public static final String DEFAULT_ICON = "vaadin:archive";
@@ -272,7 +272,7 @@ public class CStorageItem extends CProjectItem<CStorageItem> implements IHasStat
 	public void setCurrentQuantity(final BigDecimal currentQuantity) { this.currentQuantity = currentQuantity; }
 
 	@Override
-	public void setEntityType(final CTypeEntity<?> typeEntity) {
+	public void setEntityType(final CStorageItemType typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CStorageItemType.class, "Type entity must be an instance of CStorageItemType");
 		Check.notNull(getProject(), "Project must be set before assigning storage item type");
@@ -280,7 +280,7 @@ public class CStorageItem extends CProjectItem<CStorageItem> implements IHasStat
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning storage item type");
 		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
 				+ typeEntity.getCompany().getId() + " does not match storage item project company id " + getProject().getCompany().getId());
-		entityType = (CStorageItemType) typeEntity;
+		entityType = typeEntity;
 		updateLastModified();
 	}
 

@@ -264,12 +264,12 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		return fieldConfigs;
 	}
 
-	private static CProjectItem<?> resolveEpic(final Object entity) {
+	private static CProjectItem<?, ?> resolveEpic(final Object entity) {
 		// Grid filters still use legacy query keys, but their values are resolved from hierarchy levels.
 		return CHierarchyNavigationService.resolveAncestorAtLevel(entity, 0);
 	}
 
-	private static CProjectItem<?> resolveFeature(final Object entity) {
+	private static CProjectItem<?, ?> resolveFeature(final Object entity) {
 		return CHierarchyNavigationService.resolveAncestorAtLevel(entity, 1);
 	}
 
@@ -277,7 +277,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		if (entity instanceof final ISprintableItem sprintableItem) {
 			return sprintableItem.getAssignedTo();
 		}
-		if (entity instanceof final CProjectItem<?> projectItem) {
+		if (entity instanceof final CProjectItem<?, ?> projectItem) {
 			return projectItem.getAssignedTo();
 		}
 		return null;
@@ -291,7 +291,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		return null;
 	}
 
-	private static CProjectItem<?> resolveUserStory(final Object entity) {
+	private static CProjectItem<?, ?> resolveUserStory(final Object entity) {
 		return CHierarchyNavigationService.resolveAncestorAtLevel(entity, 2);
 	}
 

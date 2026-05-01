@@ -25,7 +25,8 @@ Implement consistent status initialization in THREE places:
 ### Implementation
 
 ```java
-public class CProjectItemService<EntityClass extends CProjectItem<EntityClass>> 
+public class CProjectItemService<EntityClass extends CProjectItem<EntityClass, TypeClass>,
+		TypeClass extends CTypeEntity<TypeClass>>
         extends CEntityOfProjectService<EntityClass> {
     
     @Override

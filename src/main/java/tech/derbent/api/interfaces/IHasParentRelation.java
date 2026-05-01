@@ -48,7 +48,7 @@ public interface IHasParentRelation {
 	default void clearParentItem() {
 		final CParentRelation parentRelation = getParentRelation();
 		Check.notNull(parentRelation, "Parent relation cannot be null");
-		final CProjectItem<?> previousParent = parentRelation.getParentItem();
+		final CProjectItem<?, ?> previousParent = parentRelation.getParentItem();
 		parentRelation.setParentItem(null);
 		if (previousParent != null) {
 			LOGGER.info("Cleared parent item '{}' from item '{}'", previousParent.getName(), getName());
@@ -65,7 +65,7 @@ public interface IHasParentRelation {
 
 	/** Get the parent item in the hierarchy.
 	 * @return the parent project item, or null if this is a root item */
-	default CProjectItem<?> getParentItem() {
+	default CProjectItem<?, ?> getParentItem() {
 		final CParentRelation parentRelation = getParentRelation();
 		Check.notNull(parentRelation, "Parent relation must not be null");
 		return parentRelation.getParentItem();
@@ -85,7 +85,7 @@ public interface IHasParentRelation {
 	/** Set the parent item in the hierarchy. This method delegates to the parent relation entity.
 	 * @param parentItem the parent project item, or null to make this a root item */
 	@Transactional
-	default void setParentItem(final CProjectItem<?> parentItem) {
+	default void setParentItem(final CProjectItem<?, ?> parentItem) {
 		final CParentRelation parentRelation = getParentRelation();
 		Check.notNull(parentRelation, "Parent relation cannot be null");
 		// Prevent self-reference

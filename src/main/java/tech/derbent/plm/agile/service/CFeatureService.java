@@ -14,6 +14,7 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.activities.service.CActivityPriorityService;
 import tech.derbent.plm.agile.domain.CFeature;
+import tech.derbent.plm.agile.domain.CFeatureType;
 
 /**
  * Service for level-1 agile features.
@@ -24,7 +25,7 @@ import tech.derbent.plm.agile.domain.CFeature;
 @Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CFeatureService extends CAgileEntityService<CFeature> implements IEntityRegistrable, IEntityWithView {
+public class CFeatureService extends CAgileEntityService<CFeature, CFeatureType> implements IEntityRegistrable, IEntityWithView {
 
 	private final CFeatureTypeService typeService;
 
@@ -56,5 +57,5 @@ public class CFeatureService extends CAgileEntityService<CFeature> implements IE
 	protected IProjectItemRespository<CFeature> getTypedRepository() { return (IProjectItemRespository<CFeature>) repository; }
 
 	@Override
-	protected CTypeEntityService<?> getTypeService() { return typeService; }
+	protected CTypeEntityService<CFeatureType> getTypeService() { return typeService; }
 }

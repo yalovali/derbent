@@ -383,7 +383,7 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		}
 	}
 
-	private boolean isClosed(final CProjectItem<?> item) {
+	private boolean isClosed(final CProjectItem<?, ?> item) {
 		final CProjectItemStatus status = item != null ? item.getStatus() : null;
 		return status != null && Boolean.TRUE.equals(status.getFinalStatus());
 	}
@@ -393,7 +393,7 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		return status != null && Boolean.TRUE.equals(status.getFinalStatus());
 	}
 
-	public boolean shouldIncludeItem(final CProjectItem<?> item) {
+	public boolean shouldIncludeItem(final CProjectItem<?, ?> item) {
 		if (item == null) {
 			return false;
 		}
@@ -401,7 +401,7 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		return CSearchTextFilterSupport.matches(getSprintSearchText(), item.getName(), item.getDescription());
 	}
 
-	public boolean shouldIncludeBacklogItem(final CProjectItem<?> item) {
+	public boolean shouldIncludeBacklogItem(final CProjectItem<?, ?> item) {
 		// Leaf backlog grid uses its own search input; do not reuse sprint/parent searches.
 		if (item == null || !CSearchTextFilterSupport.matches(getBacklogLeafSearchText(), item.getName(), item.getDescription())) {
 			return false;
@@ -413,7 +413,7 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		return backlogStateFilter == EStateFilter.CLOSED ? closed : !closed;
 	}
 
-	public boolean shouldIncludeBacklogParentItem(final CProjectItem<?> item) {
+	public boolean shouldIncludeBacklogParentItem(final CProjectItem<?, ?> item) {
 		if (item == null || !CSearchTextFilterSupport.matches(getBacklogParentSearchText(), item.getName(), item.getDescription())) {
 			return false;
 		}

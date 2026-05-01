@@ -16,8 +16,8 @@ public final class CAgileToolbarSupport {
 
 	private CAgileToolbarSupport() {}
 
-	public static <T extends CProjectItem<?>> List<T> filterByAncestorLevel(final List<T> items, final int level,
-			final CProjectItem<?> expectedAncestor) {
+	public static <T extends CProjectItem<?, ?>> List<T> filterByAncestorLevel(final List<T> items, final int level,
+			final CProjectItem<?, ?> expectedAncestor) {
 		if (items == null || items.isEmpty()) {
 			return List.of();
 		}
@@ -50,17 +50,17 @@ public final class CAgileToolbarSupport {
 	}
 
 	public static CEpic resolveEpic(final Object entity) {
-		final CProjectItem<?> ancestor = CHierarchyNavigationService.resolveAncestorAtLevel(entity, 0);
+		final CProjectItem<?, ?> ancestor = CHierarchyNavigationService.resolveAncestorAtLevel(entity, 0);
 		return ancestor instanceof CEpic epic ? epic : null;
 	}
 
 	public static CFeature resolveFeature(final Object entity) {
-		final CProjectItem<?> ancestor = CHierarchyNavigationService.resolveAncestorAtLevel(entity, 1);
+		final CProjectItem<?, ?> ancestor = CHierarchyNavigationService.resolveAncestorAtLevel(entity, 1);
 		return ancestor instanceof CFeature feature ? feature : null;
 	}
 
 	public static CUserStory resolveUserStory(final Object entity) {
-		final CProjectItem<?> ancestor = CHierarchyNavigationService.resolveAncestorAtLevel(entity, 2);
+		final CProjectItem<?, ?> ancestor = CHierarchyNavigationService.resolveAncestorAtLevel(entity, 2);
 		return ancestor instanceof CUserStory userStory ? userStory : null;
 	}
 }

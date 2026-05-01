@@ -37,14 +37,14 @@ public class CGnntHierarchyMoveService {
 	}
 
 	@Transactional
-	public CProjectItem<?> reparentItem(final CProjectItem<?> child, final CProjectItem<?> dropTarget) {
+	public CProjectItem<?, ?> reparentItem(final CProjectItem<?, ?> child, final CProjectItem<?, ?> dropTarget) {
 		Check.notNull(child, "Dragged Gnnt item cannot be null");
 		Check.notNull(dropTarget, "Drop target Gnnt item cannot be null");
 		Check.notNull(child.getId(), "Dragged Gnnt item must be persisted");
 		Check.notNull(dropTarget.getId(), "Drop target Gnnt item must be persisted");
 		Check.isTrue(!CHierarchyNavigationService.isSameEntity(child, dropTarget), "An item cannot be dropped onto itself");
 
-		final CProjectItem<?> effectiveParent = resolveEffectiveParent(child, dropTarget);
+		final CProjectItem<?, ?> effectiveParent = resolveEffectiveParent(child, dropTarget);
 		validateMove(child, dropTarget, effectiveParent);
 
 		parentRelationService.setParent(child, effectiveParent);
@@ -54,13 +54,13 @@ public class CGnntHierarchyMoveService {
 	}
 
 	@SuppressWarnings ("unchecked")
-	private <T extends CProjectItem<T>> void saveEntity(final CProjectItem<?> entity) {
+	private <T extends CProjectItem<T, ?>> void saveEntity(final CProjectItem<?, ?> entity) {
 		// Registry lookup returns an untyped bean, so we narrow via cast after runtime validation.
 		final CAbstractService<T> service = (CAbstractService<T>) resolveService(entity);
 		service.save((T) entity);
 	}
 
-	private CProjectItem<?> resolveEffectiveParent(final CProjectItem<?> child, final CProjectItem<?> dropTarget) {
+	private CProjectItem<?, ?> resolveEffectiveParent(final CProjectItem<?, ?> child, final CProjectItem<?, ?> dropTarget) {
 		final int childLevel = CHierarchyNavigationService.getEntityLevel(child);
 		final int targetLevel = CHierarchyNavigationService.getEntityLevel(dropTarget);
 		// UX rule: if the user drops on a same-level item, treat it as "move as sibling" (use the target's parent).
@@ -70,7 +70,7 @@ public class CGnntHierarchyMoveService {
 		return dropTarget;
 	}
 
-	private void validateMove(final CProjectItem<?> child, final CProjectItem<?> dropTarget, final CProjectItem<?> effectiveParent) {
+	private void validateMove(final CProjectItem<?, ?> child, final CProjectItem<?, ?> dropTarget, final CProjectItem<?, ?> effectiveParent) {
 		if (effectiveParent == null) {
 			final int childLevel = CHierarchyNavigationService.getEntityLevel(child);
 			Check.isTrue(childLevel == 0 || childLevel == -1,
@@ -94,7 +94,7 @@ public class CGnntHierarchyMoveService {
 		}
 	}
 
-	private CAbstractService<?> resolveService(final CProjectItem<?> entity) {
+	private CAbstractService<?> resolveService(final CProjectItem<?, ?> entity) {
 		final Class<?> entityClass = ProxyUtils.getUserClass(entity.getClass());
 		final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
 		Check.notNull(serviceClass, "No service registered for hierarchy item type: " + entityClass.getSimpleName());

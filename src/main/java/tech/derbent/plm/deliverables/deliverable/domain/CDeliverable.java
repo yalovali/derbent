@@ -36,8 +36,8 @@ import tech.derbent.plm.deliverables.deliverabletype.domain.CDeliverableType;
 @Entity
 @Table (name = "\"cdeliverable\"")
 @AttributeOverride (name = "id", column = @Column (name = "deliverable_id"))
-public class CDeliverable extends CProjectItem<CDeliverable>
-		implements IHasStatusAndWorkflow<CDeliverable>, IHasAttachments, IHasComments, IHasParentRelation {
+public class CDeliverable extends CProjectItem<CDeliverable, CDeliverableType>
+		implements IHasStatusAndWorkflow<CDeliverable, CDeliverableType>, IHasAttachments, IHasComments, IHasParentRelation {
 
 	public static final String DEFAULT_COLOR = "#BC8F8F"; // X11 RosyBrown - deliverable items (darker)
 	public static final String DEFAULT_ICON = "vaadin:clipboard-check";
@@ -60,7 +60,7 @@ public class CDeliverable extends CProjectItem<CDeliverable>
 			displayName = "Parent", required = false, readOnly = false, description = "Hierarchy parent selector", hidden = false,
 			createComponentMethod = "createComponentParent", dataProviderBean = "pageservice", captionVisible = false
 	)
-	private final CProjectItem<?> placeHolder_createComponentParent = null;
+	private final CProjectItem<?, ?> placeHolder_createComponentParent = null;
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "deliverable_id")
@@ -106,10 +106,10 @@ public class CDeliverable extends CProjectItem<CDeliverable>
 	@Override
 	public Set<CComment> getComments() { return comments; }
 
-	public CProjectItem<?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
+	public CProjectItem<?, ?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
 
 	@Override
-	public CTypeEntity<?> getEntityType() { return entityType; }
+	public CDeliverableType getEntityType() { return entityType; }
 
 	@Override
 	public CWorkflowEntity getWorkflow() {
@@ -129,7 +129,7 @@ public class CDeliverable extends CProjectItem<CDeliverable>
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	@Override
-	public void setEntityType(CTypeEntity<?> typeEntity) {
+	public void setEntityType(final CDeliverableType typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CDeliverableType.class, "Type entity must be an instance of CDeliverableType");
 		Check.notNull(getProject(), "Project must be set before assigning deliverable type");
@@ -137,7 +137,7 @@ public class CDeliverable extends CProjectItem<CDeliverable>
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning deliverable type");
 		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
 				+ typeEntity.getCompany().getId() + " does not match deliverable project company id " + getProject().getCompany().getId());
-		entityType = (CDeliverableType) typeEntity;
+		entityType = typeEntity;
 		updateLastModified();
 	}
 

@@ -122,7 +122,7 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 	 * @param item the project item entity
 	 * @return list of valid next statuses */
 	@Transactional (readOnly = true)
-	public List<CProjectItemStatus> getValidNextStatuses(final IHasStatusAndWorkflow<?> item) {
+	public List<CProjectItemStatus> getValidNextStatuses(final IHasStatusAndWorkflow<?, ?> item) {
 		try {
 			Check.notNull(item, "Project item cannot be null when retrieving valid next statuses");
 			final CWorkflowEntity workflow = item.getWorkflow();
@@ -183,7 +183,7 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 		super.initializeNewEntity(entity);
 	}
 
-	public List<CProjectItemStatus> resolveStatusesForColumn(CKanbanColumn targetColumn, IHasStatusAndWorkflow<?> iSprintableItem) {
+	public List<CProjectItemStatus> resolveStatusesForColumn(CKanbanColumn targetColumn, IHasStatusAndWorkflow<?, ?> iSprintableItem) {
 		// the whole status for the column
 		final List<CProjectItemStatus> columnStatuses = targetColumn.getIncludedStatuses();
 		// possible next steps for the sprint item

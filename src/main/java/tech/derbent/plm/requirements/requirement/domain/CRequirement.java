@@ -44,8 +44,8 @@ import tech.derbent.plm.requirements.requirementtype.domain.CRequirementType;
 @Entity
 @Table (name = "crequirement")
 @AttributeOverride (name = "id", column = @Column (name = "requirement_id"))
-public class CRequirement extends CProjectItem<CRequirement>
-		implements IHasStatusAndWorkflow<CRequirement>, IHasAttachments, IHasComments, IHasLinks, IHasParentRelation {
+public class CRequirement extends CProjectItem<CRequirement, CRequirementType>
+		implements IHasStatusAndWorkflow<CRequirement, CRequirementType>, IHasAttachments, IHasComments, IHasLinks, IHasParentRelation {
 
 	public static final String DEFAULT_COLOR = "#7B5EA7";
 	public static final String DEFAULT_ICON = "vaadin:clipboard-text";
@@ -111,7 +111,7 @@ public class CRequirement extends CProjectItem<CRequirement>
 			description = "Hierarchy parent selector for this requirement", hidden = false,
 			createComponentMethod = "createComponentParent", dataProviderBean = "pageservice", captionVisible = false
 	)
-	private final CProjectItem<?> placeHolder_createComponentParent = null;
+	private final CProjectItem<?, ?> placeHolder_createComponentParent = null;
 	@Transient
 	@AMetaData (
 			displayName = "Children", required = false, readOnly = false,
@@ -119,7 +119,7 @@ public class CRequirement extends CProjectItem<CRequirement>
 			createComponentMethod = "createComponentParentChildren", dataProviderBean = "pageservice",
 			captionVisible = false
 	)
-	private final CProjectItem<?> placeHolder_createComponentParentChildren = null;
+	private final CProjectItem<?, ?> placeHolder_createComponentParentChildren = null;
 	@Column (nullable = true, length = 500)
 	@Size (max = 500)
 	@AMetaData (
@@ -163,7 +163,7 @@ public class CRequirement extends CProjectItem<CRequirement>
 	public LocalDate getEndDate() { return dueDate; }
 
 	@Override
-	public CTypeEntity<?> getEntityType() { return entityType; }
+	public CRequirementType getEntityType() { return entityType; }
 
 	@Override
 	public String getIconString() { return DEFAULT_ICON; }
@@ -174,9 +174,9 @@ public class CRequirement extends CProjectItem<CRequirement>
 	@Override
 	public CParentRelation getParentRelation() { return parentRelation; }
 
-	public CProjectItem<?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
+	public CProjectItem<?, ?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
 
-	public CProjectItem<?> getPlaceHolder_createComponentParentChildren() {
+	public CProjectItem<?, ?> getPlaceHolder_createComponentParentChildren() {
 		return placeHolder_createComponentParentChildren;
 	}
 
@@ -210,7 +210,7 @@ public class CRequirement extends CProjectItem<CRequirement>
 	public void setDueDate(final LocalDate dueDate) { this.dueDate = dueDate; }
 
 	@Override
-	public void setEntityType(final CTypeEntity<?> typeEntity) {
+	public void setEntityType(final CRequirementType typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CRequirementType.class, "Type entity must be an instance of CRequirementType");
 		Check.notNull(getProject(), "Project must be set before assigning requirement type");
@@ -219,7 +219,7 @@ public class CRequirement extends CProjectItem<CRequirement>
 		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
 				"Type entity company id %s does not match requirement project company id %s"
 						.formatted(typeEntity.getCompany().getId(), getProject().getCompany().getId()));
-		entityType = (CRequirementType) typeEntity;
+		entityType = typeEntity;
 		updateLastModified();
 	}
 

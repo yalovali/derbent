@@ -114,9 +114,9 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 			}
 		}).setWidth(WIDTH_RESPONSIBLE_COMPACT).setFlexGrow(0).setResizable(true).setKey("assignedTo").setHeader("Responsible");
 		grid.addComponentColumn(item -> {
-			if (item.getEntity() instanceof IHasStatusAndWorkflow<?>) {
+			if (item.getEntity() instanceof IHasStatusAndWorkflow<?, ?>) {
 				try {
-					return new CLabelEntity(((IHasStatusAndWorkflow<?>) item.getEntity()).getStatus());
+					return new CLabelEntity(((IHasStatusAndWorkflow<?, ?>) item.getEntity()).getStatus());
 				} catch (final Exception e) {
 					return new Span("-");
 				}

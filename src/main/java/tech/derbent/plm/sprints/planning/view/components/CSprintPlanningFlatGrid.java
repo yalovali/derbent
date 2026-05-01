@@ -104,7 +104,7 @@ public class CSprintPlanningFlatGrid extends CAbstractGnntGridBase {
 		grid.addColumn(item -> {
 			final Object entity = item != null ? item.getEntity() : null;
 			if (!(entity instanceof final ISprintableItem sprintableItem)
-					|| !(entity instanceof final CProjectItem<?> projectItem)) {
+					|| !(entity instanceof final CProjectItem<?, ?> projectItem)) {
 				return "";
 			}
 			final CSprintItem sprintItem = sprintableItem.getSprintItem();

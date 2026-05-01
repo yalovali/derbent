@@ -47,7 +47,7 @@ import tech.derbent.bab.utils.CJsonSerializer.EJsonScenario;
 @DiscriminatorColumn (name = "project_type_discriminator", discriminatorType = DiscriminatorType.STRING)
 @JsonFilter ("babScenarioFilter")
 public abstract class CProject<EntityClass extends CProject<EntityClass>> extends CEntityOfCompany<EntityClass>
-		implements ISearchable, IHasStatusAndWorkflow<EntityClass> {
+		implements ISearchable, IHasStatusAndWorkflow<EntityClass, CProjectType> {
 
 	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_CONFIGURATION = createExcludedFieldMap_BabConfiguration();
 	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
@@ -109,7 +109,7 @@ public abstract class CProject<EntityClass extends CProject<EntityClass>> extend
 	// Kanban line getter removed - moved to CProject_Derbent
 
 	@Override
-	public CTypeEntity<?> getEntityType() { return entityType; }
+	public CProjectType getEntityType() { return entityType; }
 
 	@Override
 	public CProjectItemStatus getStatus() { return status; }
@@ -210,15 +210,14 @@ public abstract class CProject<EntityClass extends CProject<EntityClass>> extend
 	// Kanban line setter removed - moved to CProject_Derbent
 
 	@Override
-	public void setEntityType(final CTypeEntity<?> typeEntity) {
+	public void setEntityType(final CProjectType typeEntity) {
 		if (typeEntity != null) {
-			Check.instanceOf(typeEntity, CProjectType.class, "Type entity must be an instance of CProjectType");
 			Check.notNull(getCompany(), "Company must be set before assigning project type");
 			Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning project type");
 			Check.isTrue(typeEntity.getCompany().getId().equals(getCompany().getId()),
 					"Type entity company id " + typeEntity.getCompany().getId() + " does not match project company id " + getCompany().getId());
 		}
-		entityType = (CProjectType) typeEntity;
+		entityType = typeEntity;
 		updateLastModified();
 	}
 

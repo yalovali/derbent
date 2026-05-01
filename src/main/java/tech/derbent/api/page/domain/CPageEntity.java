@@ -21,7 +21,7 @@ import tech.derbent.api.screens.domain.CGridEntity;
 		"menu_title", "project_id"
 }))
 @AttributeOverride (name = "id", column = @Column (name = "pageentity_id"))
-public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
+public class CPageEntity extends CProjectItem<CPageEntity, CPageEntityType> implements IHasIcon {
 
 	public static final String DEFAULT_COLOR = "#BDB76B"; // X11 DarkKhaki - navigation pages (darker)
 	public static final String DEFAULT_ICON = "vaadin:file";
@@ -66,6 +66,16 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
 			hidden = false, maxLength = 10000
 	)
 	private String content;
+
+	@ManyToOne
+	@JoinColumn (name = "entitytype_id", nullable = true)
+	@AMetaData (
+			displayName = "Page Type", required = false, readOnly = false,
+			description = "Type/category of the page", hidden = false, dataProviderBean = "CPageEntityTypeService",
+			setBackgroundFromColor = true, useIcon = true
+	)
+	private CPageEntityType entityType;
+
 	@ManyToOne
 	@JoinColumn (name = "detail_section_id")
 	@AMetaData (
@@ -145,6 +155,9 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
 	public CGridEntity getGridEntity() { return gridEntity; }
 
 	@Override
+	public CPageEntityType getEntityType() { return entityType; }
+
+	@Override
 	public String getIconString() { return iconString != null ? iconString : DEFAULT_ICON; }
 
 	public String getMenuOrder() { return menuOrder; }
@@ -200,6 +213,12 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
 	public void setDetailSection(CDetailSection detailSection) { this.detailSection = detailSection; }
 
 	public void setGridEntity(CGridEntity gridEntity) { this.gridEntity = gridEntity; }
+
+	@Override
+	public void setEntityType(final CPageEntityType entityType) {
+		this.entityType = entityType;
+		updateLastModified();
+	}
 
 	public void setIcon(String icon) { iconString = icon; }
 

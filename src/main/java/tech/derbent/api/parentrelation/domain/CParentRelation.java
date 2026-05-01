@@ -53,7 +53,7 @@ import tech.derbent.api.registry.CEntityRegistry;
  * Stores hierarchy data (parent item reference). Enforces level-based parent constraints for all entity types.
  * NOTE: DB table name kept as "cagile_parent_relation" for backward compatibility.
  * </p>
- * @see tech.derbent.api.interfaces.IHasParentRelation */
+ * @see IHasParentRelation */
 @Entity
 @Table (name = "cagile_parent_relation")
 @AttributeOverride (name = "id", column = @Column (name = "agile_parent_relation_id"))
@@ -81,7 +81,7 @@ public class CParentRelation extends COneToOneRelationBase<CParentRelation> {
 	protected CParentRelation() {}
 
 	/** Constructor with owner item. */
-	public CParentRelation(final CProjectItem<?> ownerItem) {
+	public CParentRelation(final CProjectItem<?, ?> ownerItem) {
 		super(ownerItem);
 		initializeDefaults();
 	}
@@ -97,7 +97,7 @@ public class CParentRelation extends COneToOneRelationBase<CParentRelation> {
 
 	/** Get the parent item in the hierarchy.
 	 * @return the parent project item, or null if this is a root item */
-	public CProjectItem<?> getParentItem() {
+	public CProjectItem<?, ?> getParentItem() {
 		if (parentItemId == null || parentItemType == null || parentItemType.isEmpty() || parentItemId == 0L) {
 			return null;
 		}
@@ -108,7 +108,7 @@ public class CParentRelation extends COneToOneRelationBase<CParentRelation> {
 			final CAbstractService<?> service = (CAbstractService<?>) CSpringContext.getBean(serviceClass);
 			final Optional<?> entityOpt = service.getById(parentItemId);
 			if (entityOpt.isPresent()) {
-				return (CProjectItem<?>) entityOpt.get();
+				return (CProjectItem<?, ?>) entityOpt.get();
 			}
 		} catch (final Exception e) {
 			// Log warning but return null - this prevents cascading failures
@@ -144,7 +144,7 @@ public class CParentRelation extends COneToOneRelationBase<CParentRelation> {
 
 	/** Set the parent item in the hierarchy.
 	 * @param parentItem the parent project item, or null to make this a root item */
-	public void setParentItem(final CProjectItem<?> parentItem) {
+	public void setParentItem(final CProjectItem<?, ?> parentItem) {
 		if (parentItem == null) {
 			parentItemId = null;
 			parentItemType = null;
