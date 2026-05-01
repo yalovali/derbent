@@ -59,6 +59,7 @@ public class CRequirementInitializerService extends CProjectItemInitializerServi
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(List.of("id", "name", "entityType", "assignedTo", "startDate", "dueDate", "status", "project", "createdDate"));
+		grid.setEditableColumnFields(List.of("name", "assignedTo", "startDate", "dueDate", "status"));
 		return grid;
 	}
 

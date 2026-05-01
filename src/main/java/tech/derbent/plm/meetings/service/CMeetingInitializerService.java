@@ -114,6 +114,7 @@ public class CMeetingInitializerService extends CProjectItemInitializerService {
 		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
 		grid.setColumnFields(List.of("id", "name", "description", "entityType", "project", "startDate", "startTime",
 				"endDate", "endTime", "createdBy", "createdDate", "status", "location"));
+		grid.setEditableColumnFields(List.of("name", "startDate", "endDate", "status", "location"));
 		return grid;
 	}
 

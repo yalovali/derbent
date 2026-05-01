@@ -84,6 +84,7 @@ public class CRiskInitializerService extends CProjectItemInitializerService {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(List.of("id", "name", "description", "riskSeverity", "status", "project", "assignedTo",
 				"createdBy", "createdDate"));
+		grid.setEditableColumnFields(List.of("name", "assignedTo", "status"));
 		return grid;
 	}
 

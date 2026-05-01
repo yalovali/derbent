@@ -89,6 +89,7 @@ public class CEpicInitializerService extends CProjectItemInitializerService {
 		grid.setColumnFields(List.of("id", "name", "componentWidget", "entityType", "assignedTo", "createdBy",
 				"startDate", "dueDate", "completionDate", "progressPercentage", "estimatedHours", "actualHours",
 				"remainingHours", "status", "priority", "project", "createdDate", "lastModifiedDate"));
+		grid.setEditableColumnFields(List.of("name", "assignedTo", "startDate", "dueDate", "progressPercentage", "estimatedHours", "actualHours", "remainingHours", "status", "priority"));
 		return grid;
 	}
 

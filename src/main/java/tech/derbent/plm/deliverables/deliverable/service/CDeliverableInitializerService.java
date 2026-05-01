@@ -63,6 +63,7 @@ public class CDeliverableInitializerService extends CProjectItemInitializerServi
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(
 				List.of("id", "name", "description", "status", "project", "assignedTo", "createdBy", "createdDate"));
+		grid.setEditableColumnFields(List.of("name", "assignedTo", "status"));
 		return grid;
 	}
 

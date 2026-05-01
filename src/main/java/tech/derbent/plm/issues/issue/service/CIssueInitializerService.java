@@ -78,6 +78,7 @@ public class CIssueInitializerService extends CProjectItemInitializerService {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(List.of("id", "name", "description", "issueSeverity", "issuePriority", "status", "project",
 				"assignedTo", "dueDate", "resolvedDate", "createdBy", "createdDate"));
+		grid.setEditableColumnFields(List.of("name", "issuePriority", "assignedTo", "dueDate", "status"));
 		return grid;
 	}
 

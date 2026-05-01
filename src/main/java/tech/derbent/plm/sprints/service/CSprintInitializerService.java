@@ -148,6 +148,7 @@ public class CSprintInitializerService extends CProjectItemInitializerService {
 		grid.setColumnFields(List.of("id", "name", "entityType", "description",
 				"startDate", "endDate", "status", "color", "assignedTo",
 				"itemCount", "project", "createdDate", "lastModifiedDate"));
+		grid.setEditableColumnFields(List.of("name", "startDate", "endDate", "status"));
 		return grid;
 	}
 
