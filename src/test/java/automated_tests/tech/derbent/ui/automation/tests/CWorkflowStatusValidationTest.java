@@ -30,12 +30,13 @@ import tech.derbent.Application;
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = Application.class)
 @TestPropertySource(properties = {
+		"spring.profiles.active=derbent",
 		"spring.datasource.url=jdbc:h2:mem:testdb",
 		"spring.datasource.username=sa",
 		"spring.datasource.password=",
 		"spring.datasource.driver-class-name=org.h2.Driver",
-		"spring.jpa.hibernate.ddl-auto=create-drop",
-		"server.port=8081"
+		"spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect",
+		"spring.jpa.hibernate.ddl-auto=create-drop"
 })
 @DisplayName("🔄 Workflow Status and Name Validation Test Suite")
 public class CWorkflowStatusValidationTest extends CBaseUITest {
