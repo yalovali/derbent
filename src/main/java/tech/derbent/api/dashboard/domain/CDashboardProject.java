@@ -1,6 +1,9 @@
 package tech.derbent.api.dashboard.domain;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.dashboard.dashboardprojecttype.domain.CDashboardProjectType;
@@ -19,8 +22,17 @@ import tech.derbent.api.projects.domain.CProject;
  */
 @MappedSuperclass  // Abstract entities are @MappedSuperclass
 public abstract class CDashboardProject<EntityClass> extends CProjectItem<EntityClass, CDashboardProjectType> {
-    
-    // Dashboard widget configuration field
+
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "entitytype_id", nullable = true)
+	@AMetaData (
+			displayName = "Dashboard Project Type", required = false, readOnly = false,
+			description = "Type category of this dashboard project", hidden = false, dataProviderBean = "service",
+			setBackgroundFromColor = true, useIcon = true
+	)
+	private CDashboardProjectType entityType;
+
+	// Dashboard widget configuration field
     @Column(name = "dashboard_widget", length = 100)
     @AMetaData(
         displayName = "Dashboard Widget",
@@ -48,8 +60,18 @@ public abstract class CDashboardProject<EntityClass> extends CProjectItem<Entity
     // No implementation here - each concrete class implements
     
     // Common getters/setters
+	@Override
+	public CDashboardProjectType getEntityType() { return entityType; }
+
     public String getDashboardWidget() { return dashboardWidget; }
-    public void setDashboardWidget(String dashboardWidget) { 
+
+	@Override
+	public void setEntityType(final CDashboardProjectType entityType) {
+		this.entityType = entityType;
+		updateLastModified();
+	}
+
+    public void setDashboardWidget(final String dashboardWidget) {
         this.dashboardWidget = dashboardWidget;
         updateLastModified();
     }

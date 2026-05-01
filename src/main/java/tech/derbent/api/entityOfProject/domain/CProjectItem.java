@@ -8,7 +8,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.Transient;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
@@ -20,10 +19,6 @@ import tech.derbent.api.utils.Check;
 @MappedSuperclass
 public abstract class CProjectItem<EntityClass, TypeClass extends CTypeEntity<TypeClass>>
 		extends CEntityOfProject<EntityClass> {
-
-	// Type Management
-	@Transient
-	protected TypeClass entityType;
 
 	// Status and Priority Management
 	@ManyToOne (fetch = FetchType.EAGER)
@@ -42,12 +37,9 @@ public abstract class CProjectItem<EntityClass, TypeClass extends CTypeEntity<Ty
 		super(clazz, name, project);
 	}
 
-	public TypeClass getEntityType() { return entityType; }
+	public abstract TypeClass getEntityType();
 
-	public void setEntityType(final TypeClass entityType) {
-		this.entityType = entityType;
-		updateLastModified();
-	}
+	public abstract void setEntityType(TypeClass entityType);
 
 	/** Get the end date for Gantt chart display.
 	 * @return the end date as LocalDate, or null if not set */
