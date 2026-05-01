@@ -412,6 +412,12 @@ class TelegramAIAgentBot:
         return "unknown"
 
     @staticmethod
+    def format_ratio(part: Optional[int], total: Optional[int]) -> str:
+        if part is None or total in (None, 0):
+            return "unknown"
+        return f"{(part / total) * 100:.1f}%"
+
+    @staticmethod
     def format_duration(seconds: float) -> str:
         total = max(0, int(seconds))
         days, remainder = divmod(total, 86400)
@@ -426,6 +432,34 @@ class TelegramAIAgentBot:
             parts.append(f"{minutes}m")
         parts.append(f"{secs}s")
         return " ".join(parts)
+
+    @staticmethod
+    def summarize_ps_output(output: str, limit: int = 5) -> str:
+        lines = [line.strip() for line in output.splitlines() if line.strip()]
+        if not lines:
+            return "No process data."
+
+        rows = []
+        for raw_line in lines:
+            parts = raw_line.split(None, 5)
+            if len(parts) < 6:
+                continue
+            pid, ppid, stat, cpu, mem, comm = parts
+            rows.append(
+                f"{pid:>6} {cpu:>5} {mem:>5} {stat:<5} {comm[:28]}"
+            )
+            if len(rows) >= limit:
+                break
+
+        if not rows:
+            return "No process data."
+
+        return "\n".join(
+            [
+                "  PID   %CPU   %MEM STAT CMD",
+                *rows,
+            ]
+        )
 
     def read_meminfo(self) -> Dict[str, int]:
         meminfo: Dict[str, int] = {}
@@ -953,9 +987,9 @@ class TelegramAIAgentBot:
             except (ValueError, IndexError):
                 uptime_seconds = None
 
-        load_avg = "n/a"
+        load_avg = None
         try:
-            load_avg = ", ".join(f"{value:.2f}" for value in os.getloadavg())
+            load_avg = os.getloadavg()
         except (AttributeError, OSError):
             pass
 
@@ -963,41 +997,59 @@ class TelegramAIAgentBot:
         mem_total = meminfo.get("MemTotal")
         mem_available = meminfo.get("MemAvailable", meminfo.get("MemFree"))
         mem_used = (mem_total - mem_available) if mem_total is not None and mem_available is not None else None
+        mem_used_pct = self.format_ratio(mem_used, mem_total)
+        mem_free_pct = self.format_ratio(mem_available, mem_total)
 
         disk_usage = shutil.disk_usage(self.working_dir)
+        disk_used_pct = self.format_ratio(disk_usage.used, disk_usage.total)
         disk_line = (
-            f"{self.format_bytes(disk_usage.used)} used / "
+            f"{self.format_bytes(disk_usage.used)} used ({disk_used_pct}) / "
             f"{self.format_bytes(disk_usage.free)} free / "
             f"{self.format_bytes(disk_usage.total)} total"
         )
 
         cpu_result = await self.run_process_with_timeout(
-            args=["ps", "aux", "--sort=-%cpu"],
+            args=["ps", "-eo", "pid,ppid,stat,pcpu,pmem,comm", "--sort=-pcpu", "--no-headers"],
             cwd=self.working_dir,
             timeout=10,
             env=self.build_env(),
         )
         mem_result = await self.run_process_with_timeout(
-            args=["ps", "aux", "--sort=-%mem"],
+            args=["ps", "-eo", "pid,ppid,stat,pcpu,pmem,comm", "--sort=-pmem", "--no-headers"],
             cwd=self.working_dir,
             timeout=10,
             env=self.build_env(),
         )
 
-        def summarize_ps(output: str, limit: int = 6) -> str:
-            lines = [line.rstrip() for line in output.splitlines() if line.strip()]
-            if not lines:
-                return "No process data."
-            return "\n".join(lines[:limit])
+        def process_block(result: dict) -> str:
+            if result["rc"] != 0:
+                error = result["stderr"].strip() or result["stdout"].strip() or "ps command failed."
+                return f"process lookup failed: {error}"
+            return self.summarize_ps_output(result["stdout"])
+
+        cpu_rows = process_block(cpu_result)
+        mem_rows = process_block(mem_result)
+        cores = os.cpu_count() or 1
+        load_line = "unknown"
+        if load_avg is not None:
+            load_1, load_5, load_15 = load_avg
+            load_line = (
+                f"{load_1:.2f} / {load_5:.2f} / {load_15:.2f} "
+                f"(1m {(load_1 / cores) * 100:.1f}% of {cores} cores)"
+            )
 
         reply = (
-            f"host={host}\n"
-            f"uptime={self.format_duration(uptime_seconds) if uptime_seconds is not None else 'unknown'}\n"
-            f"loadavg={load_avg}\n"
-            f"memory={self.format_bytes(mem_used)} used / {self.format_bytes(mem_total)} total\n"
-            f"disk={disk_line}\n\n"
-            f"top_cpu:\n{summarize_ps(cpu_result['stdout'])}\n\n"
-            f"top_mem:\n{summarize_ps(mem_result['stdout'])}"
+            f"PC snapshot\n"
+            f"host: {host}\n"
+            f"uptime: {self.format_duration(uptime_seconds) if uptime_seconds is not None else 'unknown'}\n"
+            f"load: {load_line}\n"
+            f"memory: {self.format_bytes(mem_used)} used ({mem_used_pct}) / {self.format_bytes(mem_total)} total, "
+            f"{self.format_bytes(mem_available)} free ({mem_free_pct})\n"
+            f"disk: {disk_line}\n\n"
+            f"Top CPU\n"
+            f"{cpu_rows}\n\n"
+            f"Top Memory\n"
+            f"{mem_rows}"
         )
         for part in split_telegram(reply):
             await update.message.reply_text(part)
