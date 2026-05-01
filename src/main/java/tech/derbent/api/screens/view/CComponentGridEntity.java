@@ -24,8 +24,12 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.editor.Editor;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.ValueProvider;
@@ -692,6 +696,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			// Add drag-drop listeners to propagate events to this component's listeners
 			setupGridDragDropListeners();
 			createGridColumns();
+			// Wire inline editing for columns declared in CGridEntity.editableColumnFields
+			setupGridEditor();
 			grid.setRefreshConsumer(event -> grid_refresh_consumer());
 			refreshGrid();
 			this.add(grid);
@@ -1173,6 +1179,184 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	@Override
 	public String toString() {
 		return "CComponentGridEntity for " + (entityClass != null ? entityClass.getSimpleName() : "Unknown Entity");
+	}
+
+	// ==================== Inline Grid.Editor (editable columns) ====================
+
+	/**
+	 * Wires Vaadin Grid.Editor for all columns declared in CGridEntity.editableColumnFields.
+	 *
+	 * Architecture: creates exactly one editor component per editable column via CGridEditorFactory.
+	 * Memory cost is O(editable_columns) regardless of row count – not O(rows × columns).
+	 *
+	 * Flow:
+	 *   1. User clicks a row cell → activateEditorForRow() is called
+	 *   2. Grid.Editor shows editor components in that row only
+	 *   3. Binder writes field values back to the bean on every change (unbuffered)
+	 *   4. When the row loses focus / another row is clicked → closeListener fires → saveEditorItem()
+	 */
+	@SuppressWarnings ({"unchecked", "rawtypes"})
+	private void setupGridEditor() {
+		final List<String> editableFields = gridEntity.getEditableColumnFields();
+		if (editableFields == null || editableFields.isEmpty()) {
+			LOGGER.debug("No editableColumnFields configured – Grid.Editor not activated for {}",
+					entityClass != null ? entityClass.getSimpleName() : "unknown entity");
+			return;
+		}
+
+		// Use raw Binder/Grid/Editor types to work around CGrid<?> wildcard type erasure
+		final Binder rawBinder = new Binder(entityClass);
+		final CGrid rawGrid = grid;
+		final Editor rawEditor = rawGrid.getEditor();
+		rawEditor.setBinder(rawBinder);
+		// Unbuffered: binder writes field values to the bean immediately on each change
+		rawEditor.setBuffered(false);
+
+		int wiredCount = 0;
+		final List<FieldConfig> editableConfigs = parseSelectedFields(editableFields, entityClass);
+
+		for (final FieldConfig fieldConfig : editableConfigs) {
+			final String fieldName = fieldConfig.getFieldInfo().getFieldName();
+
+			// Look up the already-created column by the key set during createGridColumns()
+			final Grid.Column column = rawGrid.getColumnByKey(fieldName);
+			if (column == null) {
+				LOGGER.warn("Column '{}' not found – cannot attach editor component (check addEntityColumn key fix)", fieldName);
+				continue;
+			}
+
+			final HasValue editorComponent = CGridEditorFactory.createEditorComponent(fieldConfig);
+			if (editorComponent == null) {
+				LOGGER.debug("No editor component created for field '{}' – skipping", fieldName);
+				continue;
+			}
+
+			// Connect the Vaadin component to the entity bean field via reflection
+			bindEditorField(rawBinder, editorComponent, fieldConfig.getField());
+
+			// Attach editor component to the column; shown only when that row is being edited
+			column.setEditorComponent((Component) editorComponent);
+
+			// Give the column header a pencil prefix so users know it is editable
+			markColumnHeaderAsEditable(column, fieldConfig.getFieldInfo().getDisplayName());
+			wiredCount++;
+		}
+
+		if (wiredCount == 0) {
+			LOGGER.debug("No editable columns could be wired – Grid.Editor inactive");
+			return;
+		}
+
+		// Single click on any cell activates edit mode for that row
+		// Use typed 'grid' (CGrid<?>) so ItemClickEvent carries getItem()/getColumn()
+		grid.addItemClickListener(event ->
+				activateEditorForRow(rawEditor, event.getItem(), event.getColumn()));
+
+		// Persist to DB whenever the currently-edited row loses focus (unbuffered → bean is up-to-date)
+		// EditorCloseEvent is raw here because rawEditor is raw; getItem() returns Object
+		rawEditor.addCloseListener(event -> saveEditorItem(event.getItem()));
+
+		LOGGER.info("Grid.Editor wired: {} editable column(s) for entity {}",
+				wiredCount, entityClass.getSimpleName());
+	}
+
+	/**
+	 * Binds a Vaadin HasValue editor component to a Java Field using reflection-based getter/setter.
+	 * Raw Binder is intentional – the entity type is only known at runtime.
+	 */
+	@SuppressWarnings ({"unchecked", "rawtypes"})
+	private static void bindEditorField(final Binder rawBinder,
+			final HasValue component, final Field field) {
+		// Make field accessible once; the lambda keeps the reference alive
+		field.setAccessible(true);
+		rawBinder.forField(component).bind(
+				entity -> {
+					try {
+						return field.get(entity);
+					} catch (final IllegalAccessException e) {
+						LOGGER.error("Editor binding read error for field '{}': {}", field.getName(), e.getMessage());
+						return null;
+					}
+				},
+				(entity, value) -> {
+					try {
+						// Primitive fields cannot hold null – use zero/false as safe defaults
+						if (field.getType() == int.class) {
+							field.set(entity, value != null ? value : 0);
+						} else if (field.getType() == boolean.class) {
+							field.set(entity, value != null ? value : Boolean.FALSE);
+						} else {
+							field.set(entity, value);
+						}
+					} catch (final IllegalAccessException e) {
+						LOGGER.error("Editor binding write error for field '{}': {}", field.getName(), e.getMessage());
+					}
+				});
+	}
+
+	/**
+	 * Activates the Grid.Editor for the clicked row.
+	 * Closes the previously edited row first (triggering closeListener → save).
+	 * Focuses the editor component in the clicked column for immediate input.
+	 */
+	@SuppressWarnings ({"rawtypes", "unchecked"})
+	private static void activateEditorForRow(final Editor rawEditor,
+			final Object item, final Grid.Column<?> clickedColumn) {
+		try {
+			if (rawEditor.isOpen()) {
+				// Clicking the same row that is already being edited – just focus the field
+				if (item != null && item.equals(rawEditor.getItem())) {
+					focusEditorComponent(clickedColumn);
+					return;
+				}
+				// Different row: cancel closes the current row (fires closeListener → save)
+				rawEditor.cancel();
+			}
+			rawEditor.editItem(item);
+			focusEditorComponent(clickedColumn);
+		} catch (final Exception e) {
+			LOGGER.warn("Error activating Grid.Editor for row: {}", e.getMessage());
+		}
+	}
+
+	/** Focuses the editor component in a column, if it is a Focusable component. */
+	private static void focusEditorComponent(final Grid.Column<?> column) {
+		final Component editorComponent = column.getEditorComponent();
+		if (editorComponent instanceof Focusable<?> focusable) {
+			focusable.focus();
+		}
+	}
+
+	/**
+	 * Replaces the column header with a pencil-prefixed version to signal inline editability.
+	 * Uses the same CColorUtils.createStyledHeader as the rest of the grid for visual consistency.
+	 */
+	@SuppressWarnings ("rawtypes")
+	private static void markColumnHeaderAsEditable(final Grid.Column column, final String displayName) {
+		// "✏ " prefix signals to the user that this column supports inline editing
+		column.setHeader(CColorUtils.createStyledHeader("✏ " + displayName, CColorUtils.CRUD_UPDATE_COLOR));
+	}
+
+	/**
+	 * Persists an inline-edited entity to the database through the grid's configured service bean.
+	 * Called automatically from the Grid.Editor close listener after every edited row loses focus.
+	 */
+	@SuppressWarnings ({"unchecked", "rawtypes"})
+	private void saveEditorItem(final Object item) {
+		if (item == null) {
+			return;
+		}
+		try {
+			final CAbstractService service =
+					(CAbstractService) CSpringContext.getBean(gridEntity.getDataServiceBeanName());
+			service.save((CEntityDB) item);
+			LOGGER.debug("Inline-edit saved: {} id={}",
+					item.getClass().getSimpleName(),
+					item instanceof CEntityDB<?> e ? e.getId() : "?");
+		} catch (final Exception e) {
+			LOGGER.error("Inline-edit save failed for {}: {}", item.getClass().getSimpleName(), e.getMessage());
+			CNotificationService.showErrorDialog("Inline edit save failed: " + e.getMessage());
+		}
 	}
 
 	/** Unregisters all widget components from the page service to prevent memory leaks. */

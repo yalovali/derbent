@@ -362,6 +362,10 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 				}
 				return labelEntity;
 			}).setWidth(width).setFlexGrow(0).setSortable(true).setResizable(true);
+			// Set column key so getColumnByKey(fieldName) works for Grid.Editor binding
+			if (key != null && !key.isBlank()) {
+				column.setKey(key);
+			}
 			return styleColumnHeader(column, header);
 		} catch (final Exception e) {
 			LOGGER.error("Error adding entity column for header: {}: {}, key: {} clazz:", header, e.getMessage(), key, clazz.getSimpleName());

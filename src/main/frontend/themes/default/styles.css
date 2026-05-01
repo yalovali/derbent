@@ -52,6 +52,28 @@ vaadin-combo-box-overlay[theme~="derbent-hide-combobox-checkmark"] vaadin-combo-
     padding-inline-start: var(--lumo-space-s);
 }
 
+/* ============================================
+   INLINE GRID EDITOR – editable-column visual cues
+   Applied by CComponentGridEntity.setupGridEditor()
+   ============================================ */
+
+/* Active editor row: subtle highlight so the user knows which row is being edited */
+vaadin-grid::part(row):has(vaadin-grid-cell-content > .vaadin-grid-editor) {
+    background-color: var(--lumo-primary-color-10pct, rgba(22, 118, 243, 0.07));
+}
+
+/* Editor input fields inside the grid: compact height to fit grid row */
+vaadin-grid vaadin-text-field::part(input-field),
+vaadin-grid vaadin-integer-field::part(input-field),
+vaadin-grid vaadin-big-decimal-field::part(input-field),
+vaadin-grid vaadin-date-picker::part(input-field),
+vaadin-grid vaadin-combo-box::part(input-field) {
+    min-height: 28px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    font-size: var(--lumo-font-size-s);
+}
+
 /* CDashboardView styles */
 .cdashboard-view {
     width: 100%;
