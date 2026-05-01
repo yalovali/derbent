@@ -296,40 +296,104 @@ public class CGridInlineEditTest extends CBaseUITest {
 	}
 
 	/**
-	 * Finds the first data row cell in the column whose ✏-prefixed header matches
-	 * headerText, then clicks it to open the inline editor.
+	 * Clicks the first body cell whose column header carries a ✏ pencil prefix and
+	 * optionally matches headerText. If no column matches headerText exactly, falls
+	 * back to the first ✏-prefixed column.
+	 *
+	 * Strategy: find the column index of the ✏ header, then click the same-indexed
+	 * body cell in the first data row.
 	 */
 	private boolean clickEditableCellByHeaderText(final String headerText) {
 		try {
 			final Locator grid = page.locator("vaadin-grid").first();
-			final Locator headerCells = grid.locator(
-					"vaadin-grid-cell[part~='header-cell'] vaadin-grid-cell-content");
-			int targetIndex = -1;
-			for (int i = 0; i < headerCells.count(); i++) {
-				final String text = headerCells.nth(i).innerText();
-				if (text != null && text.contains("✏") && text.toLowerCase().contains(headerText.toLowerCase())) {
-					targetIndex = i;
-					LOGGER.info("Editable column '{}' at header-cell index {}", headerText, i);
-					break;
+
+			// Collect header cells via multiple selectors (Vaadin shadow DOM varies by version)
+			final String[] headerSelectors = {
+					"vaadin-grid-cell[part~='header-cell'] vaadin-grid-cell-content",
+					"vaadin-grid-sorter",
+					"vaadin-grid-cell-content"
+			};
+
+			int targetIndexByLabel = -1;
+			int firstPencilIndex = -1;
+			int headersFound = 0;
+
+			for (final String sel : headerSelectors) {
+				final Locator cells = grid.locator(sel);
+				headersFound = cells.count();
+				if (headersFound == 0) {
+					continue;
+				}
+				for (int i = 0; i < headersFound; i++) {
+					String text;
+					try {
+						text = cells.nth(i).innerText();
+					} catch (final Exception ignored) {
+						continue;
+					}
+					if (text == null) {
+						continue;
+					}
+					if (text.contains("✏")) {
+						if (firstPencilIndex < 0) {
+							firstPencilIndex = i;
+						}
+						if (text.toLowerCase().contains(headerText.toLowerCase())) {
+							targetIndexByLabel = i;
+							LOGGER.info("Editable column '{}' at index {} via selector '{}'", headerText, i, sel);
+							break;
+						}
+					}
+				}
+				if (firstPencilIndex >= 0) {
+					break; // found pencil headers with this selector
 				}
 			}
 
-			final Locator bodyCells = grid.locator(
-					"vaadin-grid-cell[part~='body-cell'] vaadin-grid-cell-content");
-			if (targetIndex >= 0 && bodyCells.count() > targetIndex) {
-				bodyCells.nth(targetIndex).click();
-				wait_500();
-				return true;
+			final int targetIndex = targetIndexByLabel >= 0 ? targetIndexByLabel : firstPencilIndex;
+			if (targetIndex < 0) {
+				LOGGER.warn("No ✏-prefixed header found for '{}'", headerText);
+				return false;
 			}
-			// Fallback: click first body cell
-			if (bodyCells.count() > 0) {
-				LOGGER.warn("Column-indexed click fell back to first body cell");
-				bodyCells.first().click();
-				wait_500();
-				return true;
+			if (targetIndexByLabel < 0) {
+				LOGGER.warn("Header '{}' not found; clicking first pencil column at index {}", headerText, targetIndex);
 			}
-			LOGGER.warn("No body cells found in the grid");
-			return false;
+
+			// Grid body cells live in deep shadow DOM — CSS selectors can't reach them.
+			// Use coordinate-based click: find the header sorter's X centre, then click
+			// one row-height below the header in the grid's body area.
+			final Locator grid2 = page.locator("vaadin-grid").first();
+			final com.microsoft.playwright.options.BoundingBox gridBox = grid2.boundingBox();
+			if (gridBox == null) {
+				LOGGER.warn("Grid bounding box unavailable");
+				return false;
+			}
+
+			// Try to get the X-centre of the target column from its sorter element
+			double targetX = gridBox.x + gridBox.width / 2; // default: grid centre
+			try {
+				// Re-locate the matching sorter to get its position
+				final Locator sorters = grid2.locator("vaadin-grid-sorter");
+				for (int i = 0; i < sorters.count(); i++) {
+					final String text = sorters.nth(i).innerText();
+					if (text != null && text.contains("✏") && text.toLowerCase().contains(headerText.toLowerCase())) {
+						final com.microsoft.playwright.options.BoundingBox sorterBox = sorters.nth(i).boundingBox();
+						if (sorterBox != null) {
+							targetX = sorterBox.x + sorterBox.width / 2;
+							LOGGER.info("Using sorter X-centre={} for column '{}'", targetX, headerText);
+						}
+						break;
+					}
+				}
+			} catch (final Exception ignored) { /* keep default X */ }
+
+			// Vaadin grid header row is typically ~40px; rows are ~40-50px each.
+			// Click at Y = grid.top + header(40px) + half-row(25px).
+			final double targetY = gridBox.y + 40 + 25;
+			LOGGER.info("Coordinate click at ({}, {}) to activate grid editor", targetX, targetY);
+			page.mouse().click(targetX, targetY);
+			wait_500();
+			return true;
 		} catch (final Exception e) {
 			LOGGER.warn("clickEditableCellByHeaderText error: {}", e.getMessage());
 			return false;
