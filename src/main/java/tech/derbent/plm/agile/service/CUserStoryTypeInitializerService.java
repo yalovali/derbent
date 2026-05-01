@@ -13,6 +13,8 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CEntityNamedInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.services.CEntityTypeInitializerService;
+import tech.derbent.api.workflow.domain.CWorkflowEntity;
+import tech.derbent.api.workflow.service.CWorkflowEntityService;
 import tech.derbent.plm.agile.domain.CUserStoryType;
 
 /** Initializer for user story type screens and sample data.
@@ -76,5 +78,21 @@ public class CUserStoryTypeInitializerService extends CEntityTypeInitializerServ
 			userStoryType.setLevel(2);
 			userStoryType.setCanHaveChildren(true);
 		});
+		// Assign the Agile Item Workflow so new user stories start in "To Do" (first Kanban column) when sprint planning populates the backlog.
+		// Same pattern as CSprintTypeInitializerService assigning the Sprint Workflow to sprint types.
+		final CWorkflowEntityService workflowService = CSpringContext.getBean(CWorkflowEntityService.class);
+		final CWorkflowEntity agileWorkflow =
+				workflowService.findByNameAndCompany("Agile Item Workflow", company).orElse(null);
+		if (agileWorkflow != null) {
+			userStoryTypeService.listByCompany(company).stream().filter(type -> type.getWorkflow() == null)
+					.forEach(type -> {
+						type.setWorkflow(agileWorkflow);
+						userStoryTypeService.save(type);
+					});
+		} else {
+			LOGGER.warn(
+					"Agile Item Workflow not found for company '{}' — user story types will have no workflow assigned",
+					company.getName());
+		}
 	}
 }

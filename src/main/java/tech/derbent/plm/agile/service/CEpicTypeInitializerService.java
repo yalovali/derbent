@@ -13,6 +13,8 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CEntityNamedInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.services.CEntityTypeInitializerService;
+import tech.derbent.api.workflow.domain.CWorkflowEntity;
+import tech.derbent.api.workflow.service.CWorkflowEntityService;
 import tech.derbent.plm.agile.domain.CEpicType;
 
 /** Initializer for epic type screens and seed data.
@@ -75,5 +77,19 @@ public class CEpicTypeInitializerService extends CEntityTypeInitializerService {
 			epicType.setLevel(0);
 			epicType.setCanHaveChildren(true);
 		});
+		// Assign the Agile Item Workflow so new epics start in "To Do" (first Kanban column) when sprint planning populates the backlog.
+		// This follows the same pattern as CSprintTypeInitializerService, which looks up the Sprint Workflow by name and assigns it to all sprint types.
+		final CWorkflowEntityService workflowService = CSpringContext.getBean(CWorkflowEntityService.class);
+		final CWorkflowEntity agileWorkflow =
+				workflowService.findByNameAndCompany("Agile Item Workflow", company).orElse(null);
+		if (agileWorkflow != null) {
+			epicTypeService.listByCompany(company).stream().filter(type -> type.getWorkflow() == null).forEach(type -> {
+				type.setWorkflow(agileWorkflow);
+				epicTypeService.save(type);
+			});
+		} else {
+			LOGGER.warn("Agile Item Workflow not found for company '{}' — epic types will have no workflow assigned",
+					company.getName());
+		}
 	}
 }

@@ -60,27 +60,34 @@ public class CProjectItemStatusInitializerService extends CStatusInitializerServ
 
 	public static void initializeSample(final CCompany company, final boolean minimal) throws Exception {
 		// Status data: [name, description, color, isFinalStatus, sortOrder]
-		// Following standard Agile/Scrum terminology
+		// Sort orders use increments of 10 so new statuses can be inserted without renumbering.
+		// Agile item statuses (10-40): used by Epic/Feature/UserStory/Activity workflows.
+		// Sprint-specific statuses (50-80): used only by the Sprint Workflow.
+		// Terminal statuses (70-90): Done/Canceled/Cancelled end any workflow.
 		final String[][] data = {
 				{
-						"To Do", "Work item is ready to be started", "#95a5a6", "false", "1"
+						"To Do", "Work item is ready to be started — sits in the backlog/first Kanban column", "#95a5a6",
+						"false", "10"
 				}, {
-						"In Progress", "Work item is actively being worked on", "#3498db", "false", "2"
+						"In Progress", "Work item is actively being worked on", "#3498db", "false", "20"
 				}, {
-						"In Review", "Work item is being reviewed or tested", "#9b59b6", "false", "3"
+						"In Review", "Work item is under peer review or QA testing", "#9b59b6", "false", "30"
 				}, {
-						"Blocked", "Work item is blocked by dependencies or issues", "#e67e22", "false", "4"
+						"Blocked", "Work item is blocked by an unresolved dependency or issue", "#e67e22", "false", "40"
 				}, {
-						// Sprint planning workflow uses these statuses (kept mid-range so existing sample workflows keep their To Do → Done → Cancelled paths).
-						"Planning", "Sprint is being prepared (items can be added/removed)", "#16a085", "false", "4"
+						// Sprint-specific: used by the Sprint Workflow (Planning → Started → Done/Canceled).
+						"Planning", "Sprint is being prepared — backlog items can be added or removed", "#16a085",
+						"false", "50"
 				}, {
-						"Started", "Sprint is active (work in progress)", "#2980b9", "false", "4"
+						"Started", "Sprint is active — team is executing committed backlog items", "#2980b9", "false",
+						"60"
 				}, {
-						"Done", "Work item has been completed successfully", "#27ae60", "true", "5"
+						"Done", "Work item or sprint has been completed successfully", "#27ae60", "true", "70"
 				}, {
-						"Canceled", "Sprint was canceled before completion", "#c0392b", "true", "5"
+						// Sprint-specific terminal status; kept separate from 'Cancelled' for sprint retrospective filtering.
+						"Canceled", "Sprint was canceled before reaching its goal", "#c0392b", "true", "80"
 				}, {
-						"Cancelled", "Work item has been cancelled or abandoned", "#e74c3c", "true", "6"
+						"Cancelled", "Work item has been cancelled or abandoned", "#e74c3c", "true", "90"
 				}
 		};
 		initializeCompanyEntity(data,

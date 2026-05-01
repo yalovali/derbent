@@ -126,6 +126,79 @@ public class CWorkflowEntityInitializerService extends CWorkflowBaseInitializati
 				.orElseThrow(() -> new IllegalStateException("BAB workflow not found after initialization"));
 	}
 
+	/** Creates the canonical Agile Item Workflow used by Epic, Feature, UserStory and Activity types.
+	 * <p>
+	 * Standard Kanban/Scrum agile column flow:
+	 * <pre>
+	 *   To Do → In Progress → In Review → Done
+	 *                ↕              ↕
+	 *             Blocked      In Progress (back)
+	 *                ↓
+	 *           Cancelled (from any active state)
+	 *           Done/Cancelled → To Do (restart/re-open)
+	 * </pre>
+	 * The initial status is "To Do" so that newly created items land in the first Kanban column ("To Do"),
+	 * which is the standard starting point when sprint planning populates the backlog.
+	 * <p>
+	 * Pattern note: the initial status is encoded on a transition whose {@code isInitialStatus=true} flag is set,
+	 * and the framework reads {@code relation.getToStatus()} to determine what status to assign on item creation.
+	 * We reuse the "Done → To Do" restart transition as the initial-status carrier so we don't need a
+	 * dummy placeholder transition (same technique as the Sprint Workflow using "Started → Planning"). */
+	private static void initializeSampleAgileItemWorkflow(final CCompany company, final List<CProjectItemStatus> statuses,
+			final List<CUserProjectRole> roles, final CWorkflowEntityService workflowEntityService,
+			final CWorkflowStatusRelationService workflowStatusRelationService) {
+		final String workflowName = "Agile Item Workflow";
+		if (workflowEntityService.findByNameAndCompany(workflowName, company).isPresent()) {
+			return;
+		}
+		final List<String> requiredStatusNames = List.of("To Do", "In Progress", "In Review", "Blocked", "Done",
+				"Cancelled");
+		final boolean allPresent = requiredStatusNames.stream().allMatch(name -> statuses.stream()
+				.anyMatch(status -> status != null && name.equalsIgnoreCase(status.getName())));
+		if (!allPresent) {
+			LOGGER.warn(
+					"Skipping agile item workflow initialization for company '{}' because required statuses are missing: {}",
+					company.getName(), requiredStatusNames);
+			return;
+		}
+		final CWorkflowEntity workflow = new CWorkflowEntity(workflowName, company);
+		workflow.setDescription(
+				"Standard agile Kanban workflow: To Do → In Progress → In Review → Done. Used by Epic, Feature, UserStory and Activity types.");
+		workflowEntityService.save(workflow);
+		// "Done → To Do" is marked isInitialStatus=true so the framework assigns "To Do" to brand-new items
+		// (those with no current status). The same transition also serves as the re-open/restart path.
+		createFlowFromTo(workflow, "Done", "To Do", statuses, roles, true, workflowStatusRelationService);
+		// Forward progress transitions (the happy path through Kanban columns)
+		createFlowFromTo(workflow, "To Do", "In Progress", statuses, roles, workflowStatusRelationService);
+		createFlowFromTo(workflow, "In Progress", "In Review", statuses, roles, workflowStatusRelationService);
+		createFlowFromTo(workflow, "In Review", "Done", statuses, roles, workflowStatusRelationService);
+		// Backward transitions — move an item earlier in the flow without cancelling it
+		createFlowFromTo(workflow, "In Progress", "To Do", statuses, roles, workflowStatusRelationService);
+		createFlowFromTo(workflow, "In Review", "In Progress", statuses, roles, workflowStatusRelationService);
+		// Blocking flow — item is stalled but not cancelled
+		createFlowFromTo(workflow, "In Progress", "Blocked", statuses, roles, workflowStatusRelationService);
+		createFlowFromTo(workflow, "Blocked", "In Progress", statuses, roles, workflowStatusRelationService);
+		// Cancellation — allowed from any active state
+		createFlowFromTo(workflow, "To Do", "Cancelled", statuses, roles, workflowStatusRelationService);
+		createFlowFromTo(workflow, "In Progress", "Cancelled", statuses, roles, workflowStatusRelationService);
+		createFlowFromTo(workflow, "In Review", "Cancelled", statuses, roles, workflowStatusRelationService);
+		createFlowFromTo(workflow, "Blocked", "Cancelled", statuses, roles, workflowStatusRelationService);
+		// Re-open a cancelled item back to the backlog
+		createFlowFromTo(workflow, "Cancelled", "To Do", statuses, roles, workflowStatusRelationService);
+	}
+
+	/** Creates the Sprint Workflow used by Sprint types.
+	 * <p>
+	 * Standard Scrum sprint lifecycle:
+	 * <pre>
+	 *   Planning → Started → Done
+	 *                   ↓
+	 *               Canceled
+	 *   Done/Canceled → Planning (restart)
+	 * </pre>
+	 * The initial status is "Planning" (sprints begin in planning, not yet active).
+	 * Pattern: "Started → Planning" with {@code isInitialStatus=true} marks "Planning" as the initial status
+	 * while also providing the sprint-restart transition. */
 	private static void initializeSampleSprintWorkflow(final CCompany company, final List<CProjectItemStatus> statuses,
 			final List<CUserProjectRole> roles, final CWorkflowEntityService workflowEntityService,
 			final CWorkflowStatusRelationService workflowStatusRelationService) {
@@ -143,15 +216,20 @@ public class CWorkflowEntityInitializerService extends CWorkflowBaseInitializati
 			return;
 		}
 		final CWorkflowEntity workflow = new CWorkflowEntity(workflowName, company);
-		workflow.setDescription("Sprint lifecycle workflow (Planning/Started/Done/Canceled)");
+		workflow.setDescription("Sprint lifecycle workflow: Planning → Started → Done / Canceled");
 		workflowEntityService.save(workflow);
-		// NOTE: initialStatus is derived from relation.toStatus; we point a marked transition TO Planning so new sprints start in Planning.
+		// "Started → Planning" marked isInitialStatus=true so new sprints start in "Planning" (sprint backlog preparation).
+		// This transition also serves as the sprint-restart path after Done or Canceled.
 		createFlowFromTo(workflow, "Started", "Planning", statuses, roles, true, workflowStatusRelationService);
+		// Forward: sprint backlog is ready, team begins executing
 		createFlowFromTo(workflow, "Planning", "Started", statuses, roles, workflowStatusRelationService);
+		// Sprint can be cancelled while still in planning (e.g. scope change)
 		createFlowFromTo(workflow, "Planning", "Canceled", statuses, roles, workflowStatusRelationService);
+		// Sprint completes at end of timebox
 		createFlowFromTo(workflow, "Started", "Done", statuses, roles, workflowStatusRelationService);
+		// Sprint is interrupted/abandoned mid-execution
 		createFlowFromTo(workflow, "Started", "Canceled", statuses, roles, workflowStatusRelationService);
-		// Allow restarting a sprint after completion/cancelation (useful for demo data + corrections).
+		// Allow restarting a sprint after completion or cancellation (useful for demo data and corrections)
 		createFlowFromTo(workflow, "Done", "Planning", statuses, roles, workflowStatusRelationService);
 		createFlowFromTo(workflow, "Canceled", "Planning", statuses, roles, workflowStatusRelationService);
 	}
@@ -273,7 +351,11 @@ public class CWorkflowEntityInitializerService extends CWorkflowBaseInitializati
 					workflowStatusRelationService);
 			initializeSampleWorkflow("Project Status Workflow", company, statuses, roles, workflowEntityService,
 					workflowStatusRelationService);
-			// Sprint planning needs a dedicated workflow so sprints can move through Planning → Started → Done/Canceled states.
+			// Agile item workflow: used by Epic, Feature, UserStory, and Activity types.
+			// Initial status is "To Do" so new items land in the first Kanban column when sprint planning populates the backlog.
+			initializeSampleAgileItemWorkflow(company, statuses, roles, workflowEntityService,
+					workflowStatusRelationService);
+			// Sprint-specific workflow: Planning → Started → Done/Canceled (assigned only to Sprint types, not to backlog items).
 			initializeSampleSprintWorkflow(company, statuses, roles, workflowEntityService,
 					workflowStatusRelationService);
 		} catch (final Exception e) {

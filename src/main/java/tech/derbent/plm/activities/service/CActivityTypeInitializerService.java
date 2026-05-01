@@ -15,6 +15,8 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CEntityNamedInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.services.CEntityTypeInitializerService;
+import tech.derbent.api.workflow.domain.CWorkflowEntity;
+import tech.derbent.api.workflow.service.CWorkflowEntityService;
 import tech.derbent.plm.activities.domain.CActivityType;
 
 public class CActivityTypeInitializerService extends CEntityTypeInitializerService {
@@ -75,8 +77,25 @@ public class CActivityTypeInitializerService extends CEntityTypeInitializerServi
 				}
 		};
 		final CCompany company = project.getCompany();
-		initializeCompanyEntity(nameAndDescriptions,
-				(CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
-				company, minimal, null);
+		final CActivityTypeService activityTypeService =
+				(CActivityTypeService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
+		initializeCompanyEntity(nameAndDescriptions, activityTypeService, company, minimal, null);
+		// Assign the Agile Item Workflow so new activities start in "To Do" (first Kanban column) when sprint planning populates the backlog.
+		// Activities are leaf-level items in the Epic→Feature→UserStory→Activity hierarchy and appear on the Kanban board alongside user stories.
+		// Same pattern as CSprintTypeInitializerService assigning the Sprint Workflow to sprint types.
+		final CWorkflowEntityService workflowService = CSpringContext.getBean(CWorkflowEntityService.class);
+		final CWorkflowEntity agileWorkflow =
+				workflowService.findByNameAndCompany("Agile Item Workflow", company).orElse(null);
+		if (agileWorkflow != null) {
+			activityTypeService.listByCompany(company).stream().filter(type -> type.getWorkflow() == null)
+					.forEach(type -> {
+						type.setWorkflow(agileWorkflow);
+						activityTypeService.save(type);
+					});
+		} else {
+			LOGGER.warn(
+					"Agile Item Workflow not found for company '{}' — activity types will have no workflow assigned",
+					company.getName());
+		}
 	}
 }
