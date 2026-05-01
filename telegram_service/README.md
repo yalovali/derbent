@@ -21,7 +21,7 @@ Quickstart
    - add your Telegram numeric user id to allowed_user_ids and admin_user_ids
    - verify working_dir (default: /home/yasin/git/derbent)
    - choose default_agent (`codex` or `copilot`)
-   - add any number of `custom_prompts` with aliases like `durum`, `/durum`, `raporla`
+   - add any number of `custom_prompts` you actually use
    - exec_mode: "auto" (currently set to auto based on your choice)
    - allow_unsafe_exec: false (set true only for admin and with care)
 
@@ -38,15 +38,14 @@ Quickstart
 
 Commands
 --------
-- /prompt [agent] <text> -> sends a one-shot prompt to the default or selected AI agent
-- /agent <agent> <text>  -> sends a one-shot prompt to a specific AI agent
 - /task [agent] <text>   -> starts a long-running background AI task
 - /taskstatus            -> shows current background task output
-- /agents                -> lists configured AI agents
-- /run <cmd>      -> executes command subject to whitelist / admin override
-- /logs <n>       -> admin only: tail logs
-- /status         -> show service status
-- custom aliases  -> run JSON-defined prompts, for example `hi`, `durum`, `/durum`, `raporla`, `/raporla`
+- /agent <agent>         -> changes the default AI agent
+- /status                -> shows the default agent and available agent names
+- /top                   -> shows system stats and top processes
+- /run <cmd>             -> executes command subject to whitelist / admin override
+- /logs <n>              -> admin only: tail logs
+- custom aliases         -> run JSON-defined prompts, for example `hi`
 
 Security
 --------
