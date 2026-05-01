@@ -55,3 +55,36 @@
     width: 20px;
     height: 20px;
 }
+
+/* Sprint context badge shown in Status Board mode */
+.kanban-sprint-badge {
+    display: inline-block;
+    background-color: #E3F2FD;
+    color: #1565C0;
+    border: 1px solid #90CAF9;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.kanban-backlog-badge {
+    display: inline-block;
+    background-color: #F3E5F5;
+    color: #6A1B9A;
+    border: 1px solid #CE93D8;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Status Board mode indicator on the columns container */
+.kanban-status-board-mode {
+    border-top: 2px solid var(--lumo-primary-color-50pct);
+}

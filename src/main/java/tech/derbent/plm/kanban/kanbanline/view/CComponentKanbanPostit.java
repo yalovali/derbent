@@ -27,10 +27,12 @@ import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
+import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.enhanced.CContextActionDefinition;
 import tech.derbent.api.ui.component.enhanced.CContextMenuSupport;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.plm.sprints.domain.CSprint;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 
 /** CComponentPostit - A compact post-it style widget for displaying project items inside kanban columns. */
@@ -45,6 +47,7 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 	private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new HashSet<>();
 	private ContextMenu contextMenu;
 	private List<CContextActionDefinition<CComponentKanbanPostit>> contextActions = List.of();
+	private HorizontalLayout layoutSprintBadge;
 
 	/** Creates a post-it card for the given sprint item. */
 	public CComponentKanbanPostit(final CSprintItem item) {
@@ -56,8 +59,37 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 		setPadding(true);
 		setSpacing(false);
 		getElement().setAttribute("tabindex", "0");
+		// Sprint badge line — added after super() to append after layoutLeft's existing lines
+		layoutSprintBadge = new HorizontalLayout();
+		layoutSprintBadge.setWidthFull();
+		layoutSprintBadge.getStyle().set("margin-top", "2px");
+		layoutSprintBadge.setVisible(false);
+		layoutLeft.add(layoutSprintBadge);
 		addClickListener(on_component_click());
 		initializeContextMenu();
+	}
+
+	/** Shows or hides the sprint context badge for Status Board mode. */
+	public void setStatusBoardMode(final boolean enabled) {
+		if (!enabled) {
+			layoutSprintBadge.setVisible(false);
+			return;
+		}
+		layoutSprintBadge.removeAll();
+		final CSprint sprint = entity != null ? entity.getSprint() : null;
+		if (sprint != null) {
+			final CSpan badge = new CSpan(sprint.getName() != null ? sprint.getName() : "Sprint");
+			badge.addClassName("kanban-sprint-badge");
+			layoutSprintBadge.add(badge);
+		} else {
+			final CSpan badge = new CSpan("Backlog");
+			badge.addClassName("kanban-backlog-badge");
+			layoutSprintBadge.add(badge);
+		}
+		layoutSprintBadge.setVisible(true);
+		// Expand height to accommodate the badge row
+		final String height = "140px";
+		getStyle().set("height", height).set("min-height", height).set("max-height", height);
 	}
 
 	/** Builds the primary title line. */

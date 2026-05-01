@@ -45,6 +45,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	// With caching: 1 filter call per column (85% reduction)
 	// Cache is invalidated when sprintItems or column value changes.
 	private List<CSprintItem> cachedFilteredItems = List.of();
+	private boolean statusBoardMode = false;
 	private final Set<ComponentEventListener<CDragDropEvent>> dragDropListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragStartEvent>> dragStartListeners = new HashSet<>();
@@ -320,6 +321,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		itemsLayout.removeAll();
 		for (final CSprintItem item : getFilteredItems()) { // Use cached filtered items
 			final CComponentKanbanPostit postit = new CComponentKanbanPostit(item);
+			postit.setStatusBoardMode(statusBoardMode);
 			postit.drag_setDragEnabled(true);
 			postit.drag_setDropEnabled(true);
 			postit.setRefreshCallback(() -> refreshStoryPointTotal());
@@ -330,6 +332,11 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		}
 		// Refresh story point total after items change
 		refreshStoryPointTotal();
+	}
+
+	/** Sets whether this column is in Status Board mode (shows sprint badges on postits). */
+	public void setStatusBoardMode(final boolean statusBoardMode) {
+		this.statusBoardMode = statusBoardMode;
 	}
 
 	/** Refreshes the status summary label. */

@@ -68,6 +68,11 @@ public class CSprintFilter extends CAbstractFilterComponent<CSprint> {
 		}
 	}
 
+	/** Shows or hides this filter based on the current board mode. */
+	public void setVisible(final boolean visible) {
+		comboBox.setVisible(visible);
+	}
+
 	@Override
 	protected void updateComponentValue(final CSprint value) {
 		comboBox.setValue(value);

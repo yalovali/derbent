@@ -1,6 +1,7 @@
 package tech.derbent.plm.sprints.service;
 
 import java.time.Clock;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -11,12 +12,15 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.exceptions.CValidationException;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.screens.service.IOrderedEntityService;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.activities.service.IActivityRepository;
+import tech.derbent.plm.issues.issue.domain.CIssue;
+import tech.derbent.plm.issues.issue.service.IIssueRepository;
 import tech.derbent.plm.meetings.domain.CMeeting;
 import tech.derbent.plm.meetings.service.IMeetingRepository;
 import tech.derbent.plm.sprints.domain.CSprint;
@@ -40,6 +44,41 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 	@Override
 	public String checkDeleteAllowed(final CSprintItem item) {
 		return super.checkDeleteAllowed(item);
+	}
+
+	/** Find all sprint items for all items in a project (across Activity, Meeting, Issue).
+	 * Used by Status Board mode to show every project item regardless of sprint membership.
+	 * @param project the project
+	 * @return combined list of sprint items with parentItem set */
+	public List<CSprintItem> findAllByProjectWithItems(final CProject<?> project) {
+		Check.notNull(project, "Project cannot be null");
+		final IActivityRepository activityRepo = CSpringContext.getBean(IActivityRepository.class);
+		final IMeetingRepository meetingRepo = CSpringContext.getBean(IMeetingRepository.class);
+		final IIssueRepository issueRepo = CSpringContext.getBean(IIssueRepository.class);
+		final List<CSprintItem> result = new ArrayList<>();
+		for (final CActivity activity : activityRepo.listByProjectForPageView(project)) {
+			final CSprintItem si = activity.getSprintItem();
+			if (si != null) {
+				si.setParentItem(activity);
+				result.add(si);
+			}
+		}
+		for (final CMeeting meeting : meetingRepo.listByProjectForPageView(project)) {
+			final CSprintItem si = meeting.getSprintItem();
+			if (si != null) {
+				si.setParentItem(meeting);
+				result.add(si);
+			}
+		}
+		for (final CIssue issue : issueRepo.listByProjectForPageView(project)) {
+			final CSprintItem si = issue.getSprintItem();
+			if (si != null) {
+				si.setParentItem(issue);
+				result.add(si);
+			}
+		}
+		LOGGER.info("[StatusBoard] Loaded {} sprint items for project {}", result.size(), project.getId());
+		return result;
 	}
 
 	/** Find all sprint items by sprint ID.

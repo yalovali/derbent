@@ -62,6 +62,50 @@ vaadin-grid::part(row):has(vaadin-grid-cell-content > .vaadin-grid-editor) {
     background-color: var(--lumo-primary-color-10pct, rgba(22, 118, 243, 0.07));
 }
 
+/* Remove label/helper-text/error slots that add vertical space above and below the input.
+   These parts exist in every Vaadin field host even when empty, causing the editor row to
+   grow taller than a normal read-only row.  Hiding them collapses that extra height. */
+vaadin-grid vaadin-text-field::part(label),
+vaadin-grid vaadin-integer-field::part(label),
+vaadin-grid vaadin-big-decimal-field::part(label),
+vaadin-grid vaadin-number-field::part(label),
+vaadin-grid vaadin-date-picker::part(label),
+vaadin-grid vaadin-combo-box::part(label) {
+    display: none;
+}
+
+vaadin-grid vaadin-text-field::part(helper-text),
+vaadin-grid vaadin-integer-field::part(helper-text),
+vaadin-grid vaadin-big-decimal-field::part(helper-text),
+vaadin-grid vaadin-number-field::part(helper-text),
+vaadin-grid vaadin-date-picker::part(helper-text),
+vaadin-grid vaadin-combo-box::part(helper-text) {
+    display: none;
+}
+
+vaadin-grid vaadin-text-field::part(error-message),
+vaadin-grid vaadin-integer-field::part(error-message),
+vaadin-grid vaadin-big-decimal-field::part(error-message),
+vaadin-grid vaadin-number-field::part(error-message),
+vaadin-grid vaadin-date-picker::part(error-message),
+vaadin-grid vaadin-combo-box::part(error-message) {
+    display: none;
+}
+
+/* Constrain the component host element to the same height as the input-field it wraps.
+   Without this the host still reserves space via Lumo's --lumo-size-m baseline height. */
+vaadin-grid vaadin-text-field,
+vaadin-grid vaadin-integer-field,
+vaadin-grid vaadin-big-decimal-field,
+vaadin-grid vaadin-number-field,
+vaadin-grid vaadin-date-picker,
+vaadin-grid vaadin-combo-box {
+    height: 32px;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+}
+
 /* Editor input fields inside the grid: compact height to fit grid row */
 vaadin-grid vaadin-text-field::part(input-field),
 vaadin-grid vaadin-integer-field::part(input-field),
@@ -69,6 +113,7 @@ vaadin-grid vaadin-big-decimal-field::part(input-field),
 vaadin-grid vaadin-date-picker::part(input-field),
 vaadin-grid vaadin-combo-box::part(input-field) {
     min-height: 28px;
+    max-height: 32px;
     padding-top: 2px;
     padding-bottom: 2px;
     font-size: var(--lumo-font-size-s);
