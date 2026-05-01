@@ -38,9 +38,10 @@ Quickstart
 
 Commands
 --------
-- /task [agent] <text>   -> starts a long-running background AI task
-- /taskstatus            -> shows current background task output
+- /task <text>           -> starts a long-running background AI task with the active agent
+- /task                  -> shows current task status
 - /agent <agent>         -> changes the default AI agent
+- /agent                 -> shows the current default agent status
 - /status                -> shows the default agent and available agent names
 - /top                   -> shows system stats and top processes
 - /run <cmd>             -> executes command subject to whitelist / admin override

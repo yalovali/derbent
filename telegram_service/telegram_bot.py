@@ -3,9 +3,10 @@
 Telegram AI Agent Bot
 
 Komutlar:
-- /task [agent] <mesaj>   : Uzun AI işini arka planda çalıştırır, timeout yoktur.
-- /taskstatus             : Arka plan task çıktısının son halini gösterir.
+- /task <mesaj>           : Aktif ajanla uzun AI işini arka planda çalıştırır.
+- /task                   : Çalışan task durumunu gösterir.
 - /agent <agent>          : Varsayılan AI ajanını değiştirir.
+- /agent                  : Mevcut ajan durumunu gösterir.
 - /top                    : Sistem istatistikleri ve en yoğun process'leri gösterir.
 - /run <komut>            : Lokal Ubuntu shell komutu çalıştırır.
 - hazır komutlar          : telegram_config.json içindeki custom_prompts ile tanımlanır.
@@ -148,6 +149,26 @@ def tail_file(path: Path, max_chars: int = 3500) -> str:
         return "Henüz task log yok."
     text = path.read_text(errors="replace")
     return text[-max_chars:] if text else "Task log boş."
+
+
+def collapse_duplicate_lines(text: str) -> str:
+    lines = text.splitlines()
+    if not lines:
+        return text
+
+    collapsed: List[str] = []
+    last_line = None
+    for line in lines:
+        if line == last_line:
+            continue
+        collapsed.append(line)
+        last_line = line
+
+    trailing_newline = text.endswith("\n")
+    result = "\n".join(collapsed)
+    if trailing_newline and result:
+        result += "\n"
+    return result
 
 
 def is_allowed_by_whitelist(cmd: List[str], whitelist: List[str]) -> bool:
@@ -723,7 +744,6 @@ class TelegramAIAgentBot:
         command_specs = [
             ("help", "Yardım ve komut listesi"),
             ("task", "Arka plan AI task"),
-            ("taskstatus", "Çalışan task durumu"),
             ("agent", "Varsayılan AI ajanını değiştir"),
             ("status", "Servis durumu"),
             ("top", "Sistem istatistikleri"),
@@ -753,7 +773,7 @@ class TelegramAIAgentBot:
 
         keyboard = [
             ["/help", "/task"],
-            ["/taskstatus", "/agent"],
+            ["/agent", "/status"],
             ["/status", "/top"],
             ["/cancel", "/logs"],
         ]
@@ -781,9 +801,10 @@ class TelegramAIAgentBot:
 
         msg = (
             "/help - yardım\n"
-            "/task [agent] <text> - uzun işi arka planda başlatır\n"
-            "/taskstatus - çalışan task durumunu ve son logları gösterir\n"
+            "/task <text> - aktif ajanla uzun işi arka planda başlatır\n"
+            "/task - çalışan task durumunu gösterir\n"
             "/agent <agent> - varsayılan ajanı değiştirir\n"
+            "/agent - mevcut ajan durumunu gösterir\n"
             "/status - servis ve ajan özeti\n"
             "/top - sistem istatistikleri ve process özeti\n"
             "/cancel - çalışan task'ı durdurur\n"
@@ -815,11 +836,29 @@ class TelegramAIAgentBot:
             f"available_agents={agent_names}"
         )
 
-    def parse_agent_prefix(self, args: List[str]) -> Tuple[str, str]:
-        if args and normalize_alias(args[0].rstrip(":")) in self.agent_aliases:
-            agent_key = self.resolve_agent_key(args[0].rstrip(":"))
-            return agent_key, " ".join(args[1:]).strip()
-        return self.default_agent, " ".join(args).strip()
+    def format_agent_status(self, agent_key: str) -> str:
+        agent = self.agents[agent_key]
+        display_name = agent.get("display_name", agent_key)
+        aliases = ", ".join(agent.get("aliases", [])) or "none"
+        mode = agent.get("api_type", "cli")
+        working_dir = agent.get("working_dir", self.working_dir)
+        executable = agent.get("executable", "api")
+        interactive = "yes" if agent.get("interactive", False) else "no"
+        busy = "yes" if self.task_agent == agent_key and (
+            (self.task_process and self.task_process.isalive())
+            or (self._running_api_task and not self._running_api_task.done())
+        ) else "no"
+
+        return (
+            f"agent={display_name}\n"
+            f"key={agent_key}\n"
+            f"aliases={aliases}\n"
+            f"mode={mode}\n"
+            f"interactive={interactive}\n"
+            f"executable={executable}\n"
+            f"working_dir={working_dir}\n"
+            f"active_task={busy}"
+        )
 
     def parse_agent_prefix_text(self, text: str) -> Tuple[str, str]:
         parts = text.strip().split(maxsplit=1)
@@ -839,14 +878,18 @@ class TelegramAIAgentBot:
         if not await self.require_allowed(update):
             return
 
-        if len(context.args) != 1:
-            await update.message.reply_text("Usage: /agent <agent>")
+        if not context.args:
+            await update.message.reply_text(self.format_agent_status(self.default_agent))
             return
 
         try:
             agent_key = self.resolve_agent_key(context.args[0])
         except ConfigurationError as exc:
             await update.message.reply_text(str(exc))
+            return
+
+        if len(context.args) > 1:
+            await update.message.reply_text("Usage: /agent <agent>")
             return
 
         try:
@@ -986,7 +1029,7 @@ class TelegramAIAgentBot:
         api_task_running = self._running_api_task and not self._running_api_task.done()
         if self._agent_busy or (self.task_process and self.task_process.isalive()) or api_task_running:
             await update.message.reply_text(
-                "Zaten çalışan bir ajan var. /taskstatus ile kontrol et veya /cancel ile durdur."
+                "Zaten çalışan bir ajan var. /task ile kontrol et veya /cancel ile durdur."
             )
             return
 
@@ -1052,24 +1095,24 @@ class TelegramAIAgentBot:
 
     async def task(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """
-        Uzun AI işini arka planda PTY ile başlatır.
-        Timeout uygulanmaz; /taskstatus ile log okunur.
+        Uzun AI işini aktif ajanla arka planda başlatır.
+        Parametresiz çağrıldığında task durumunu gösterir.
         """
         if not await self.require_allowed(update):
             return
 
-        agent_key, text = self.parse_agent_prefix(context.args)
+        text = " ".join(context.args).strip()
         if not text:
-            await update.message.reply_text("Usage: /task [agent] <text>")
+            await self.task_status(update, context)
             return
 
-        await self.start_background_task(update, text, agent_key)
+        await self.start_background_task(update, text, self.default_agent)
 
     async def start_background_task(self, update: Update, text: str, agent_key: str):
         api_task_running = self._running_api_task and not self._running_api_task.done()
         if self._agent_busy or (self.task_process and self.task_process.isalive()) or api_task_running:
             await update.message.reply_text(
-                "Zaten çalışan bir ajan var. /taskstatus ile kontrol et veya /cancel ile durdur."
+                "Zaten çalışan bir ajan var. /task ile kontrol et veya /cancel ile durdur."
             )
             return
 
@@ -1104,7 +1147,7 @@ class TelegramAIAgentBot:
             )
             await update.message.reply_text(
                 f"{display_name} API task başladı.\n"
-                "/taskstatus ile son çıktıyı görebilirsin."
+                "/task ile son durumu görebilirsin."
             )
             return
 
@@ -1127,7 +1170,7 @@ class TelegramAIAgentBot:
 
             await update.message.reply_text(
                 f"{display_name} task başladı.\nPTY PID={child.pid}\n"
-                "/taskstatus ile son çıktıyı görebilirsin."
+                "/task ile son durumu görebilirsin."
             )
 
             asyncio.create_task(self.watch_pty_task(child, agent_key))
@@ -1143,6 +1186,7 @@ class TelegramAIAgentBot:
         """
         agent = self.agents[agent_key]
         display_name = agent.get("display_name", agent_key)
+        last_logged_fragment = ""
         patterns = [
             r"(?i)permission.*\?",
             r"(?i)allow.*\?",
@@ -1163,12 +1207,19 @@ class TelegramAIAgentBot:
                     )
 
                     if child.before:
-                        log.write(child.before)
-                        log.flush()
+                        fragment = child.before
+                        if fragment != last_logged_fragment:
+                            log.write(fragment)
+                            log.flush()
+                            last_logged_fragment = fragment
 
                     if idx in [0, 1, 2, 3, 4, 5, 6]:
                         if child.after:
-                            log.write(child.after)
+                            fragment = child.after
+                            if fragment != last_logged_fragment:
+                                log.write(fragment)
+                                log.flush()
+                                last_logged_fragment = fragment
                         if agent.get("auto_answer_permission", False):
                             answer = agent.get("permission_answer", "y")
                             child.sendline(answer)
@@ -1184,15 +1235,15 @@ class TelegramAIAgentBot:
 
                     if idx == 7:
                         if child.before:
-                            log.write(child.before)
+                            fragment = child.before
+                            if fragment != last_logged_fragment:
+                                log.write(fragment)
+                                last_logged_fragment = fragment
                         log.write("\n[TASK FINISHED]\n")
                         log.flush()
                         break
 
                     if idx == 8:
-                        if child.before:
-                            log.write(child.before)
-                            log.flush()
                         continue
 
                 except Exception as e:
@@ -1206,7 +1257,7 @@ class TelegramAIAgentBot:
 
         self.logger.info("Background PTY task finished agent=%s", agent_key)
 
-    async def durum(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def task_status(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not await self.require_allowed(update):
             return
 
@@ -1226,7 +1277,7 @@ class TelegramAIAgentBot:
         if self.task_started_at:
             elapsed = f"{int(time.time() - self.task_started_at)}s"
 
-        last = tail_file(self.task_log_path, max_chars=3400)
+        last = collapse_duplicate_lines(tail_file(self.task_log_path, max_chars=3400))
         display_name = self.agents.get(self.task_agent or "", {}).get(
             "display_name", self.task_agent or "unknown"
         )
@@ -1519,9 +1570,6 @@ class TelegramAIAgentBot:
         app.add_handler(CommandHandler("status", self.status))
         app.add_handler(CommandHandler("agent", self.agent_prompt))
         app.add_handler(CommandHandler("task", self.task))
-        app.add_handler(CommandHandler("taskstatus", self.durum))
-        if "durum" not in self.custom_command_names:
-            app.add_handler(CommandHandler("durum", self.durum))
         app.add_handler(CommandHandler("top", self.top))
         app.add_handler(CommandHandler("cancel", self.cancel))
         app.add_handler(CommandHandler("run", self.run))

@@ -79,7 +79,7 @@
       "aliases": ["hi", "/hi"],
       "agent": "claude",
       "mode": "prompt",
-      "prompt": "Kullanıcıya Türkçe kısa ve sıcak bir selam ver. Bu Telegram AI Agent botunda kullanılabilecek /help, /agent, /status, /task, /taskstatus ve /top komutlarını birkaç kısa maddeyle açıkla."
+      "prompt": "Kullanıcıya Türkçe kısa ve sıcak bir selam ver. Bu Telegram AI Agent botunda kullanılabilecek /help, /agent, /status, /task ve /top komutlarını birkaç kısa maddeyle açıkla."
     },
     "durum": {
       "description": "Bugünkü eposta kayıtlarını raporla",
@@ -100,5 +100,5 @@
   "timeout": 3600,
   "pty_idle_timeout": 15,
   "poll_interval": 5.0,
-  "task_reminder": "Uzun işler için /task [agent] <komut> kullan. Varsayılan ajanı /agent <agent> ile değiştirip son durumu /taskstatus ile sorabilirsin."
+  "task_reminder": "Uzun işler için /task <komut> kullan. Varsayılan ajanı /agent <agent> ile değiştirip /task ile son durumu sorabilirsin."
 }
