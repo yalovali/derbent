@@ -27,7 +27,6 @@ import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.plm.orders.currency.domain.CCurrency;
 import tech.derbent.plm.orders.currency.service.CCurrencyService;
 import tech.derbent.plm.orders.order.domain.COrder;
-import tech.derbent.plm.orders.type.domain.COrderType;
 import tech.derbent.plm.orders.type.service.COrderTypeService;
 
 @Profile ({

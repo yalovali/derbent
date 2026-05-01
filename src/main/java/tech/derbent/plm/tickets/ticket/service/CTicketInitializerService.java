@@ -41,6 +41,7 @@ public class CTicketInitializerService extends CProjectItemInitializerService {
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz);
+			CProjectItemInitializerService.createScreenLines(detailSection, clazz, project, false);
 			// Identity and Request Metadata
 			detailSection.addScreenLine(CDetailLinesService.createSection("Request Information"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "externalReference"));
@@ -64,9 +65,8 @@ public class CTicketInitializerService extends CProjectItemInitializerService {
 			// Status and Assignment
 			detailSection.addScreenLine(CDetailLinesService.createSection("Status & Assignment"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "serviceDepartment"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+			
 			CParentRelationInitializerService.addDefaultSection(detailSection, clazz, project);
 			// Resolution
 			detailSection.addScreenLine(CDetailLinesService.createSection("Resolution"));
@@ -88,7 +88,7 @@ public class CTicketInitializerService extends CProjectItemInitializerService {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "contextInformation"));
 			// Audit
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+			
 			// Attachments section - standard section for ALL entities
 			CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
 			// Comments section - standard section for discussion entities

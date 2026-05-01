@@ -1167,7 +1167,7 @@ public class C{Entity}InitializerService extends CInitializerServiceBase {
         
         // Audit section
         detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+        
         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
         
@@ -1399,7 +1399,7 @@ mvn spring-boot:run -Dspring.profiles.active=h2
 **Problem**:
 ```java
 // Type entity initializer
-detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+
 // ERROR: java.lang.NoSuchFieldException: createdBy
 ```
 

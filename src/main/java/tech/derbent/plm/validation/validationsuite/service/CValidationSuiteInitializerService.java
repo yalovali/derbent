@@ -38,13 +38,13 @@ public class CValidationSuiteInitializerService extends CEntityOfProjectInitiali
 			detailSection.addScreenLine(CDetailLinesService.createSection("Validation Cases"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "validationCases"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Context"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+			
 			// Attachments section
 			CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
 			// Comments section
 			CCommentInitializerService.addDefaultSection(detailSection, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+			
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

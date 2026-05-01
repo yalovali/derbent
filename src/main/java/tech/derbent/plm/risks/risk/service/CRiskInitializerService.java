@@ -43,10 +43,10 @@ public class CRiskInitializerService extends CProjectItemInitializerService {
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz);
+			CProjectItemInitializerService.createScreenLines(detailSection, clazz, project, false);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "riskSeverity"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
+			
 			CParentRelationInitializerService.addDefaultSection(detailSection, clazz, project);
 			// ISO 31000:2018 Risk Assessment Section
 			detailSection.addScreenLine(CDetailLinesService.createSection("Risk Assessment (ISO 31000)"));
@@ -68,7 +68,7 @@ public class CRiskInitializerService extends CProjectItemInitializerService {
 			// Comments section - standard section for discussion entities
 			CCommentInitializerService.addDefaultSection(detailSection, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+			
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

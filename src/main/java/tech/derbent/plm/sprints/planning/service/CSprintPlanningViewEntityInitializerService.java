@@ -33,7 +33,7 @@ public class CSprintPlanningViewEntityInitializerService extends CEntityOfProjec
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz);
-		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+		
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "backlogGridType"));
 		detailSection.addScreenLine(CDetailLinesService.createSection("Sprint Planning Board"));
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sprintPlanningBoard"));

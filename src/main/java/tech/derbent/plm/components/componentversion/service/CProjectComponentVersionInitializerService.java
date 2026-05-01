@@ -27,12 +27,12 @@ public class CProjectComponentVersionInitializerService extends CProjectItemInit
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz);
+			CProjectItemInitializerService.createScreenLines(detailSection, clazz, project, false);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "projectComponent"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
+			
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+			
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

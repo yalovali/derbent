@@ -32,7 +32,7 @@ public class CCurrencyInitializerService extends CEntityOfProjectInitializerServ
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "currencyCode"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "currencySymbol"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+			
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

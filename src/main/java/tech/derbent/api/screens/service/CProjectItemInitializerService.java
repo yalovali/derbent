@@ -9,5 +9,6 @@ public abstract class CProjectItemInitializerService extends CEntityOfProjectIni
 			final boolean newSection) throws NoSuchFieldException {
 		CEntityOfProjectInitializerService.createScreenLines(scr, clazz, project, newSection);
 		scr.addScreenLine("Type", CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
+		
 	}
 }

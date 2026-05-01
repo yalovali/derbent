@@ -626,7 +626,7 @@ detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "s
 
 // Context section
 detailSection.addScreenLine(CDetailLinesService.createSection("Context"));
-detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+
 detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
 
 // Attachments section (if IHasAttachments)
@@ -637,7 +637,7 @@ tech.derbent.plm.comments.service.CCommentInitializerService.addCommentsSection(
 
 // Audit section
 detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+
 detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 ```
@@ -1195,7 +1195,7 @@ CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
 CCommentInitializerService.addCommentsSection(detailSection, clazz);
 
 // Include createdBy in audit section
-detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+
 
 // Use initializeProjectEntity in initializeSample()
 ```

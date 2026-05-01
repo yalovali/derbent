@@ -12,7 +12,9 @@ public abstract class CEntityOfProjectInitializerService extends CEntityNamedIni
 
 	protected static void createScreenLines(final CDetailSection scr, final Class<?> clazz, final CProject<?> project,
 			final boolean newSection) throws NoSuchFieldException {
-		CEntityNamedInitializerService.createScreenLines(scr, clazz, project, false);
-		// CAuxillaries.hasField(clazz, "project");
+		CEntityNamedInitializerService.createScreenLines(scr, clazz, project, true);
+		scr.addScreenLine("Type", CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
+		scr.addScreenLine("Type", CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+		scr.addScreenLine("Type", CDetailLinesService.createLineFromDefaults(clazz, "project"));
 	}
 }

@@ -57,13 +57,13 @@ public class CValidationSessionInitializerService extends CEntityOfProjectInitia
 			detailSection.addScreenLine(CDetailLinesService.createSection("Validation Case Results"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "validationCaseResults"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Context"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+			
 			// Attachments section
 			CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
 			// Comments section
 			CCommentInitializerService.addDefaultSection(detailSection, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+			
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			detailSection.debug_printScreenInformation();

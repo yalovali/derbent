@@ -114,7 +114,7 @@ public class C{Entity}InitializerService extends CProjectItemInitializerService 
             // --- entity-specific sections ---
             scr.addScreenLine(CDetailLinesService.createSection("Details"));
             scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
-            scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
+            
             // --- standard composition (if applicable) ---
             CAttachmentInitializerService.addDefaultSection(scr, clazz);
             CLinkInitializerService.addDefaultSection(scr, clazz);

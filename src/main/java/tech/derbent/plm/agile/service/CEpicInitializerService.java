@@ -42,8 +42,6 @@ public class CEpicInitializerService extends CProjectItemInitializerService {
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
 			CProjectItemInitializerService.createScreenLines(scr, clazz, project, true);
 			scr.addScreenLine(CDetailLinesService.createSection("System Access"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			scr.addScreenLine(CDetailLinesService.createSection("Schedule"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "startDate"));
@@ -53,7 +51,7 @@ public class CEpicInitializerService extends CProjectItemInitializerService {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "estimatedHours"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actualHours"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "remainingHours"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
+			
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priority"));
 			scr.addScreenLine(CDetailLinesService.createSection("Financials"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "estimatedCost"));

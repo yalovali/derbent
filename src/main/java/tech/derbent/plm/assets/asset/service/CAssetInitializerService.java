@@ -44,8 +44,7 @@ public class CAssetInitializerService extends CProjectItemInitializerService {
 			// Assignment and Location Section
 			detailSection.addScreenLine(CDetailLinesService.createSection("Assignment & Location"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
+			
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "user"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "location"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentAsset"));
@@ -71,7 +70,7 @@ public class CAssetInitializerService extends CProjectItemInitializerService {
 			CLinkInitializerService.addDefaultSection(detailSection, clazz);
 			// Comments section - standard section for discussion entities
 			CCommentInitializerService.addDefaultSection(detailSection, clazz);
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+			
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

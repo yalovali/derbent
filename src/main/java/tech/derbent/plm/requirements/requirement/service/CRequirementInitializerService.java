@@ -14,8 +14,8 @@ import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CEntityOfProjectInitializerService;
+import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CProjectItemInitializerService;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
@@ -38,10 +38,9 @@ public class CRequirementInitializerService extends CProjectItemInitializerServi
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz);
+		CProjectItemInitializerService.createScreenLines(detailSection, clazz, project, false);
 		detailSection.addScreenLine(CDetailLinesService.createSection("Planning"));
-		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
-		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
-		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+		
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "startDate"));
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dueDate"));
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
@@ -58,39 +57,46 @@ public class CRequirementInitializerService extends CProjectItemInitializerServi
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "entityType", "assignedTo", "startDate", "dueDate", "status", "project", "createdDate"));
+		grid.setColumnFields(List.of("id", "name", "entityType", "assignedTo", "startDate", "dueDate", "status",
+				"project", "createdDate"));
 		grid.setEditableColumnFields(List.of("name", "assignedTo", "startDate", "dueDate", "status"));
 		return grid;
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
+			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder, null);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	public static CRequirement[] initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
-		record RequirementSeed(String name, String description, String source, String acceptanceCriteria, int typeIndex, int startOffsetDays,
-				int durationDays, Integer parentIndex) {}
-		final List<RequirementSeed> seeds = List.of(
-				new RequirementSeed("Customer Workspace Reliability", "Top-level reliability theme for customer-facing workspace experiences",
-						"Portfolio Steering Committee", "Reliability work is grouped under a shared objective and measurable outcomes.", 0, 28, 50,
-						null),
-				new RequirementSeed("Authentication Resilience Capability", "Capability requirement for stronger session and identity handling",
+		record RequirementSeed(String name, String description, String source, String acceptanceCriteria, int typeIndex,
+				int startOffsetDays, int durationDays, Integer parentIndex) {}
+		final List<RequirementSeed> seeds = List.of(new RequirementSeed("Customer Workspace Reliability",
+				"Top-level reliability theme for customer-facing workspace experiences", "Portfolio Steering Committee",
+				"Reliability work is grouped under a shared objective and measurable outcomes.", 0, 28, 50, null),
+				new RequirementSeed("Authentication Resilience Capability",
+						"Capability requirement for stronger session and identity handling",
 						"Security Architecture Review",
-						"Capability definition covers MFA enrollment, suspicious session revocation, and recovery options.", 1, 24, 35, 0),
+						"Capability definition covers MFA enrollment, suspicious session revocation, and recovery options.",
+						1, 24, 35, 0),
 				new RequirementSeed("Allow self-service MFA enrollment",
 						"Detailed requirement for enabling workspace admins to enroll MFA without operator support",
 						"Enterprise customer request #4821",
-						"Workspace admins can enroll MFA, receive recovery codes, and verify setup in a single guided flow.", 2, 21, 14, 1),
+						"Workspace admins can enroll MFA, receive recovery codes, and verify setup in a single guided flow.",
+						2, 21, 14, 1),
 				new RequirementSeed("Support audit-backed session revocation",
-						"Detailed requirement for revoking suspicious sessions with traceable operator actions", "Security operations backlog",
-						"Analysts can revoke a session, notify the user, and review the resulting audit event.", 2, 18, 10, 1));
+						"Detailed requirement for revoking suspicious sessions with traceable operator actions",
+						"Security operations backlog",
+						"Analysts can revoke a session, notify the user, and review the resulting audit event.", 2, 18,
+						10, 1));
 		try {
 			final CRequirementService requirementService = CSpringContext.getBean(CRequirementService.class);
-			final CRequirementTypeService requirementTypeService = CSpringContext.getBean(CRequirementTypeService.class);
+			final CRequirementTypeService requirementTypeService =
+					CSpringContext.getBean(CRequirementTypeService.class);
 			final CUserService userService = CSpringContext.getBean(CUserService.class);
 			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 			final List<CRequirementType> types = requirementTypeService.listByCompany(project.getCompany());
@@ -128,7 +134,8 @@ public class CRequirementInitializerService extends CProjectItemInitializerServi
 			}
 			return createdRequirements;
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample requirements for project: {} reason={}", project.getName(), e.getMessage());
+			LOGGER.error("Error initializing sample requirements for project: {} reason={}", project.getName(),
+					e.getMessage());
 			throw e;
 		}
 	}

@@ -40,6 +40,7 @@ public class CIssueInitializerService extends CProjectItemInitializerService {
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz);
+			CProjectItemInitializerService.createScreenLines(detailSection, clazz, project, false);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "issueSeverity"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "issuePriority"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
@@ -49,8 +50,7 @@ public class CIssueInitializerService extends CProjectItemInitializerService {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "expectedResult"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actualResult"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Context"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
+			
 			CParentRelationInitializerService.addDefaultSection(detailSection, clazz, project);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "linkedActivity"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dueDate"));
@@ -62,7 +62,7 @@ public class CIssueInitializerService extends CProjectItemInitializerService {
 			// Comments section - standard section for discussion entities
 			CCommentInitializerService.addDefaultSection(detailSection, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+			
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

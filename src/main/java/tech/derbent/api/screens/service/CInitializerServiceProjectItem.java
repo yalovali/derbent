@@ -13,6 +13,6 @@ public abstract class CInitializerServiceProjectItem extends CInitializerService
 		Check.fieldExists(clazz, "entityType");
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 		Check.fieldExists(clazz, "status");
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
+		
 	}
 }

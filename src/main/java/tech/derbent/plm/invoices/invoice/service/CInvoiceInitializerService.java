@@ -68,7 +68,7 @@ public class CInvoiceInitializerService extends CProjectItemInitializerService {
 			detailSection.addScreenLine(CDetailLinesService.createSection("Payments"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "payments"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Context"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+			
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "issuedBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "relatedMilestone"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isMilestonePayment"));
@@ -82,7 +82,7 @@ public class CInvoiceInitializerService extends CProjectItemInitializerService {
 			CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
 			// Comments section
 			CCommentInitializerService.addDefaultSection(detailSection, clazz);
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+			
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

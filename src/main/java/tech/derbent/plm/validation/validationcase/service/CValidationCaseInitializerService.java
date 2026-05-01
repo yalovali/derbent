@@ -36,6 +36,7 @@ public class CValidationCaseInitializerService extends CProjectItemInitializerSe
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz);
+			CProjectItemInitializerService.createScreenLines(detailSection, clazz, project, false);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priority"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "severity"));
@@ -47,15 +48,14 @@ public class CValidationCaseInitializerService extends CProjectItemInitializerSe
 			detailSection.addScreenLine(CDetailLinesService.createSection("Validation Steps"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "validationSteps"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Context"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
+			
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "validationSuite"));
 			// Attachments section
 			CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
 			// Comments section
 			CCommentInitializerService.addDefaultSection(detailSection, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+			
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

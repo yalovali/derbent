@@ -20,7 +20,6 @@ import jakarta.validation.constraints.NotNull;
 import tech.derbent.api.parentrelation.domain.CParentRelation;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.projects.domain.CProject;

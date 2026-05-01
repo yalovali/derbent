@@ -51,7 +51,7 @@ public class CBabDeviceInitializerService extends CEntityOfCompanyInitializerSer
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "macAddress"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("System"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+			
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

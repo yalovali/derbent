@@ -18,7 +18,6 @@ import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
-import tech.derbent.api.screens.service.CEntityNamedInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CProjectItemInitializerService;
 import tech.derbent.api.users.domain.CUser;
@@ -113,11 +112,8 @@ public class CActivityInitializerService extends CProjectItemInitializerService 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
-			CEntityNamedInitializerService.createScreenLines(scr, clazz, project, true);
+			CProjectItemInitializerService.createScreenLines(scr, clazz, project, true);
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "acceptanceCriteria"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			scr.addScreenLine(CDetailLinesService.createSection("Schedule"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "startDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dueDate"));
@@ -125,7 +121,6 @@ public class CActivityInitializerService extends CProjectItemInitializerService 
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "progressPercentage"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "estimatedHours"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priority"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			/******************/
 			// Attachments section - standard section for ALL entities
 			CAttachmentInitializerService.addDefaultSection(scr, clazz);
@@ -139,7 +134,6 @@ public class CActivityInitializerService extends CProjectItemInitializerService 
 			scr.addScreenLine(CDetailLinesService.createSection("Additional Information"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notes"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "results"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			CParentRelationInitializerService.addDefaultSection(scr, clazz, project);
 			scr.debug_printScreenInformation();
 			return scr;

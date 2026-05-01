@@ -36,9 +36,9 @@ public class CCustomerInitializerService extends CProjectItemInitializerService 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz);
+			CProjectItemInitializerService.createScreenLines(detailSection, clazz, project, false);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
+			
 			detailSection.addScreenLine(CDetailLinesService.createSection("Company Information"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companyName"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "industry"));
@@ -58,7 +58,7 @@ public class CCustomerInitializerService extends CProjectItemInitializerService 
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lifetimeValue"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "customerNotes"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+			
 			// Attachments section - standard section for ALL entities
 			CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
 			// Comments section - standard section for discussion entities

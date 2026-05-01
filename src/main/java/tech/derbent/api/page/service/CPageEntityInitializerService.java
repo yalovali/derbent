@@ -28,7 +28,7 @@ public class CPageEntityInitializerService extends CProjectItemInitializerServic
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			CProjectItemInitializerService.createScreenLines(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "pageService"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+			
 			detailSection.addScreenLine(CDetailLinesService.createSection("Navigation"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "menuTitle"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "menuOrder"));

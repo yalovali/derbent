@@ -202,7 +202,7 @@ cat docs/architecture/NEW_ENTITY_COMPLETE_CHECKLIST.md
 
 ```java
 // ❌ WRONG - Type entities don't have createdBy
-detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+
 
 // ✅ CORRECT - Only createdDate and lastModifiedDate
 detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));

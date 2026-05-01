@@ -157,7 +157,7 @@ public class CKanbanLineInitializerService extends CEntityOfCompanyInitializerSe
 					if (index == 0) {
 						// Scrum Board: 5-column standard Scrum workflow
 						// Each status is assigned to EXACTLY ONE column to prevent overlap
-						createColumn("Backlog", company, statusService, line, "To Do");
+						createColumn("To Do", company, statusService, line, "To Do");
 						createColumn("In Progress", company, statusService, line, "In Progress");
 						createColumn("In Review", company, statusService, line, "In Review");
 						createColumn("Blocked", company, statusService, line, "Blocked");

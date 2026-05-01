@@ -19,7 +19,6 @@ import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.plm.decisions.domain.CDecision;
-import tech.derbent.plm.decisions.domain.CDecisionType;
 
 /** CDecisionService - Service class for CDecision entities. Layer: Service (MVC) Provides business logic operations for decision management including
  * validation, creation, approval workflow management, and project-based queries. */

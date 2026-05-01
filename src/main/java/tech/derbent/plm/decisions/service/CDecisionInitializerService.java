@@ -78,13 +78,11 @@ public class CDecisionInitializerService extends CProjectItemInitializerService 
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			// create screen lines
 			CProjectItemInitializerService.createScreenLines(detailSection, clazz, project, true);
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+			
 			detailSection.addScreenLine(CDetailLinesService.createSection("Schedule"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+			
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "reviewDate"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Associations"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "estimatedCost"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			CParentRelationInitializerService.addDefaultSection(detailSection, clazz, project);
