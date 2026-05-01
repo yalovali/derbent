@@ -178,6 +178,8 @@ public class CWorkflowEntityInitializerService extends CWorkflowBaseInitializati
 		// Blocking flow — item is stalled but not cancelled
 		createFlowFromTo(workflow, "In Progress", "Blocked", statuses, roles, workflowStatusRelationService);
 		createFlowFromTo(workflow, "Blocked", "In Progress", statuses, roles, workflowStatusRelationService);
+		// Unblock back to start — required so a blocked item can be dragged to the "To Do" kanban column
+		createFlowFromTo(workflow, "Blocked", "To Do", statuses, roles, workflowStatusRelationService);
 		// Cancellation — allowed from any active state
 		createFlowFromTo(workflow, "To Do", "Cancelled", statuses, roles, workflowStatusRelationService);
 		createFlowFromTo(workflow, "In Progress", "Cancelled", statuses, roles, workflowStatusRelationService);

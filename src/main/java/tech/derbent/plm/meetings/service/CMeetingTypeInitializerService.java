@@ -5,16 +5,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CEntityNamedInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.services.CEntityTypeInitializerService;
+import tech.derbent.api.workflow.domain.CWorkflowEntity;
+import tech.derbent.api.workflow.service.CWorkflowEntityService;
 import tech.derbent.plm.meetings.domain.CMeetingType;
 
 public class CMeetingTypeInitializerService extends CEntityTypeInitializerService {
@@ -73,8 +73,22 @@ public class CMeetingTypeInitializerService extends CEntityTypeInitializerServic
 				}
 		};
 		final CCompany company = project.getCompany();
-		initializeCompanyEntity(nameAndDescriptions,
-				(CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
-				company, minimal, null);
+		final CMeetingTypeService meetingTypeService = CSpringContext.getBean(CMeetingTypeService.class);
+		initializeCompanyEntity(nameAndDescriptions, meetingTypeService, company, minimal, null);
+		// Assign the Agile Item Workflow so meetings can move from backlog to kanban columns via valid transitions.
+		// Same pattern as Epic/Feature/UserStory/Activity/Issue type initializers.
+		final CWorkflowEntityService workflowService = CSpringContext.getBean(CWorkflowEntityService.class);
+		final CWorkflowEntity agileWorkflow =
+				workflowService.findByNameAndCompany("Agile Item Workflow", company).orElse(null);
+		if (agileWorkflow != null) {
+			meetingTypeService.listByCompany(company).stream().filter(type -> type.getWorkflow() == null)
+					.forEach(type -> {
+						type.setWorkflow(agileWorkflow);
+						meetingTypeService.save(type);
+					});
+		} else {
+			LOGGER.warn("Agile Item Workflow not found for company '{}' — meeting types will have no workflow assigned",
+					company.getName());
+		}
 	}
 }
