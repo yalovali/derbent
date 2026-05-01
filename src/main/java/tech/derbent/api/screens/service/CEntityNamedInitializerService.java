@@ -1,5 +1,6 @@
 package tech.derbent.api.screens.service;
 
+import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.utils.Check;
@@ -7,6 +8,7 @@ import tech.derbent.api.utils.Check;
 public abstract class CEntityNamedInitializerService extends CInitializerServiceBase {
 
 	public static final String BASE_PANEL_NAME = "Description";
+	static final Class<?> clazz = CEntityNamed.class;
 
 	protected static void createScreenLines(final CDetailSection scr, final Class<?> clazz,
 			@SuppressWarnings ("unused") final CProject<?> project, final boolean newSection)

@@ -108,7 +108,7 @@ public final class CGridEditorFactory {
 	}
 
 	/** IntegerField with step arrows. */
-	private static IntegerField buildIntegerField(final EntityFieldInfo fieldInfo) {
+	private static IntegerField buildIntegerField(@SuppressWarnings ("unused") final EntityFieldInfo fieldInfo) {
 		final IntegerField nf = new IntegerField();
 		nf.setWidthFull();
 		nf.setStepButtonsVisible(true);
