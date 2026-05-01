@@ -177,6 +177,7 @@ class TelegramAIAgentBot:
         self.task_prompt: Optional[str] = None
         self.task_agent: Optional[str] = None
         self.task_log_path = self.log_dir / self.task_log_name
+        self._agent_busy: bool = False
 
     def load_agents(self) -> Dict[str, Dict[str, Any]]:
         agents = self.config.get("agents")
@@ -560,6 +561,7 @@ class TelegramAIAgentBot:
             "cancel": "Çalışan taskı iptal et",
             "run": "Shell komutu çalıştır",
             "logs": "Bot loglarını göster (admin)",
+            "config": "Kullanıcı erişimini yönet (admin)",
         }
         if "durum" not in self.custom_command_names:
             command_map["durum"] = "Çalışan task durumu"
@@ -754,6 +756,12 @@ class TelegramAIAgentBot:
             await self.send_to_agent(update, prompt_text, agent_key)
 
     async def send_to_agent(self, update: Update, text: str, agent_key: str):
+        if self._agent_busy or (self.task_process and self.task_process.isalive()):
+            await update.message.reply_text(
+                "Zaten çalışan bir ajan var. /taskstatus ile kontrol et veya /cancel ile durdur."
+            )
+            return
+
         uid = update.effective_user.id
         username = update.effective_user.username
         agent = self.agents[agent_key]
@@ -772,19 +780,22 @@ class TelegramAIAgentBot:
         )
 
         self.logger.info("AI prompt from %s (%s), agent=%s", username, uid, agent_key)
-
+        self._agent_busy = True
         await update.message.reply_text(f"{display_name} çalışıyor...")
 
-        if agent.get("interactive", False):
-            result = await self.run_agent_pty(agent_key, text, self.timeout)
-        else:
-            args = self.build_agent_command(agent_key, text, include_prompt_as_arg=True)
-            result = await self.run_process_with_timeout(
-                args=args,
-                cwd=agent.get("working_dir", self.working_dir),
-                timeout=self.timeout,
-                env=self.build_env(agent_key),
-            )
+        try:
+            if agent.get("interactive", False):
+                result = await self.run_agent_pty(agent_key, text, self.timeout)
+            else:
+                args = self.build_agent_command(agent_key, text, include_prompt_as_arg=True)
+                result = await self.run_process_with_timeout(
+                    args=args,
+                    cwd=agent.get("working_dir", self.working_dir),
+                    timeout=self.timeout,
+                    env=self.build_env(agent_key),
+                )
+        finally:
+            self._agent_busy = False
 
         rc = result["rc"]
         stdout = result["stdout"].strip()
@@ -798,8 +809,11 @@ class TelegramAIAgentBot:
             len(stderr),
         )
 
-        output = stdout or stderr or "Boş cevap."
-        reply = f"Agent={display_name}\nRC={rc}\n\n{output}"
+        if rc != 0:
+            output = stderr or stdout or "Boş cevap."
+            reply = f"[{display_name} hata RC={rc}]\n{output}"
+        else:
+            reply = stdout or stderr or "Boş cevap."
 
         for part in split_telegram(reply):
             await update.message.reply_text(part)
@@ -820,9 +834,9 @@ class TelegramAIAgentBot:
         await self.start_background_task(update, text, agent_key)
 
     async def start_background_task(self, update: Update, text: str, agent_key: str):
-        if self.task_process and self.task_process.isalive():
+        if self._agent_busy or (self.task_process and self.task_process.isalive()):
             await update.message.reply_text(
-                "Zaten çalışan bir task var. /taskstatus ile kontrol et veya /cancel ile durdur."
+                "Zaten çalışan bir ajan var. /taskstatus ile kontrol et veya /cancel ile durdur."
             )
             return
 
@@ -1046,6 +1060,138 @@ class TelegramAIAgentBot:
         for part in split_telegram(reply):
             await update.message.reply_text(part)
 
+    async def config_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """
+        Admin-only config editor.
+
+        Usage:
+          /config add reply           — reply yapılan kişiyi ekle
+          /config remove reply        — reply yapılan kişiyi çıkar
+          /config add userid <id>     — ID ile ekle
+          /config remove userid <id>  — ID ile çıkar
+          /config list userids        — listeyi göster
+        """
+        if not await self.require_allowed(update):
+            return
+
+        uid = update.effective_user.id
+        if not self.is_admin(uid):
+            await update.message.reply_text("Only admins can use /config.")
+            return
+
+        args = context.args
+        if not args:
+            await update.message.reply_text(
+                "Kullanım:\n"
+                "/config add reply           — reply yapılan kişiyi ekle\n"
+                "/config remove reply        — reply yapılan kişiyi çıkar\n"
+                "/config add userid <id>     — ID ile ekle\n"
+                "/config remove userid <id>  — ID ile çıkar\n"
+                "/config list userids        — listeyi göster"
+            )
+            return
+
+        action = args[0].lower()
+
+        if action == "list" and len(args) >= 2 and args[1].lower() == "userids":
+            ids = sorted(self.config.get("allowed_user_ids", []))
+            await update.message.reply_text(
+                "allowed_user_ids:\n" + "\n".join(str(i) for i in ids)
+            )
+            return
+
+        if action == "add" and len(args) >= 2 and args[1].lower() == "reply":
+            replied = update.message.reply_to_message
+            if not replied or not replied.from_user:
+                await update.message.reply_text(
+                    "Bir mesaja reply yaparak /config add reply yaz."
+                )
+                return
+            target_id = replied.from_user.id
+            target_name = replied.from_user.full_name
+            ids: list = self.config.setdefault("allowed_user_ids", [])
+            if target_id in ids:
+                await update.message.reply_text(
+                    f"{target_name} ({target_id}) zaten whitelist'te."
+                )
+                return
+            ids.append(target_id)
+            self.allowed_users.add(target_id)
+            CONFIG_PATH.write_text(
+                json.dumps(self.config, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+            self.logger.info("config: add userid=%s name=%s by admin=%s", target_id, target_name, uid)
+            await update.message.reply_text(
+                f"{target_name} ({target_id}) whitelist'e eklendi."
+            )
+            return
+
+        if action == "remove" and len(args) >= 2 and args[1].lower() == "reply":
+            replied = update.message.reply_to_message
+            if not replied or not replied.from_user:
+                await update.message.reply_text(
+                    "Bir mesaja reply yaparak /config remove reply yaz."
+                )
+                return
+            target_id = replied.from_user.id
+            target_name = replied.from_user.full_name
+            ids = self.config.setdefault("allowed_user_ids", [])
+            if target_id not in ids:
+                await update.message.reply_text(
+                    f"{target_name} ({target_id}) whitelist'te değil."
+                )
+                return
+            ids.remove(target_id)
+            self.allowed_users.discard(target_id)
+            CONFIG_PATH.write_text(
+                json.dumps(self.config, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+            self.logger.info("config: remove userid=%s name=%s by admin=%s", target_id, target_name, uid)
+            await update.message.reply_text(
+                f"{target_name} ({target_id}) whitelist'ten çıkarıldı."
+            )
+            return
+
+        if action in ("add", "remove") and len(args) >= 3 and args[1].lower() == "userid":
+            try:
+                target_id = int(args[2])
+            except ValueError:
+                await update.message.reply_text("User ID sayı olmalı.")
+                return
+
+            ids = self.config.setdefault("allowed_user_ids", [])
+
+            if action == "add":
+                if target_id in ids:
+                    await update.message.reply_text(f"{target_id} zaten whitelist'te.")
+                    return
+                ids.append(target_id)
+                self.allowed_users.add(target_id)
+                verb = "eklendi"
+            else:
+                if target_id not in ids:
+                    await update.message.reply_text(f"{target_id} whitelist'te değil.")
+                    return
+                ids.remove(target_id)
+                self.allowed_users.discard(target_id)
+                verb = "çıkarıldı"
+
+            CONFIG_PATH.write_text(
+                json.dumps(self.config, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+            self.logger.info("config: %s userid=%s by admin=%s", verb, target_id, uid)
+            await update.message.reply_text(f"{target_id} whitelist'e {verb}.")
+            return
+
+        await update.message.reply_text(
+            "Kullanım:\n"
+            "/config add reply           — reply yapılan kişiyi ekle\n"
+            "/config remove reply        — reply yapılan kişiyi çıkar\n"
+            "/config add userid <id>     — ID ile ekle\n"
+            "/config remove userid <id>  — ID ile çıkar\n"
+            "/config list userids        — listeyi göster"
+        )
+
     async def logs(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not await self.require_allowed(update):
             return
@@ -1101,6 +1247,7 @@ class TelegramAIAgentBot:
         app.add_handler(CommandHandler("cancel", self.cancel))
         app.add_handler(CommandHandler("run", self.run))
         app.add_handler(CommandHandler("logs", self.logs))
+        app.add_handler(CommandHandler("config", self.config_command))
 
         # Kullanıcı sadece "/" yazdığında öneri butonlarını gösterir.
         app.add_handler(MessageHandler(filters.Regex("^/$"), self.show_suggestions))

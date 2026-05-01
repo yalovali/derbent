@@ -26,9 +26,19 @@
   "bot_log": "telegram_bot.log",
   "prompt_log": "ai_prompts.log",
   "task_log": "ai_task.log",
-  "path_prepend": ["/home/yasin/.nvm/versions/node/v22.22.2/bin"],
-  "default_agent": "codex",
+  "path_prepend": ["/home/yasin/.nvm/versions/node/v22.22.2/bin", "/home/yasin/.local/bin"],
+  "default_agent": "claude",
   "agents": {
+    "claude": {
+      "display_name": "Claude",
+      "aliases": ["claude", "cc", "claudecode"],
+      "executable": "/home/yasin/.local/bin/claude",
+      "args": ["-p", "--dangerously-skip-permissions", "--allowed-tools", "Bash,Read,Edit,Write,Glob,Grep,WebSearch,WebFetch", "--"],
+      "interactive": false,
+      "prompt_as_arg": true,
+      "working_dir": "/home/yasin/git/derbent",
+      "auto_answer_permission": false
+    },
     "codex": {
       "display_name": "Codex",
       "aliases": ["codex", "kodex"],
@@ -52,27 +62,27 @@
       "permission_answer": "y"
     }
   },
-  "bot_names": ["bot", "agent", "lova", "codex", "copilot"],
+  "bot_names": ["bot", "agent", "lova", "codex", "copilot", "claude", "cc"],
   "always_reply_triggers": ["help", "yardim", "yardım"],
   "custom_prompts": {
     "hi": {
       "description": "Kısa selamlama ve kullanım özeti",
       "aliases": ["hi", "selam", "merhaba", "hello", "/hi"],
-      "agent": "codex",
+      "agent": "claude",
       "mode": "prompt",
       "prompt": "Kullanıcıya Türkçe kısa ve sıcak bir selam ver. Bu Telegram AI Agent botunda kullanılabilecek /help, /prompt, /task, /agents ve hazır komutları birkaç kısa maddeyle açıkla."
     },
     "durum": {
       "description": "Bugünkü eposta kayıtlarını raporla",
       "aliases": ["durum", "/durum"],
-      "agent": "codex",
+      "agent": "claude",
       "mode": "task",
       "prompt": "home dizininde yer alan onedrive dizinine git. Orada yer alan ai/data dizininde bugüne ait eposta kayıtlarını incele. Birkaç paragraf halinde en önemli verileri kullanıcıya renkli ve anlaşılır şekilde raporla."
     },
     "raporla": {
       "description": "Günlük verileri anlaşılır rapora çevir",
       "aliases": ["raporla", "/raporla"],
-      "agent": "codex",
+      "agent": "claude",
       "mode": "task",
       "prompt": "home dizininde yer alan onedrive dizinine git. Orada yer alan ai/data dizininde bugüne ait eposta kayıtlarını incele. En önemli gelişmeleri, riskleri ve önerilen aksiyonları Türkçe, kısa başlıklarla ve okunabilir şekilde raporla."
     }
