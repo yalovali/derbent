@@ -43,8 +43,7 @@ public class CInvoiceInitializerService extends CProjectItemInitializerService {
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
-			final CDetailSection detailSection =
-					CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
+			final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "invoiceNumber"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "invoiceDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dueDate"));
@@ -83,10 +82,7 @@ public class CInvoiceInitializerService extends CProjectItemInitializerService {
 			CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
 			// Comments section
 			CCommentInitializerService.addDefaultSection(detailSection, clazz);
-			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

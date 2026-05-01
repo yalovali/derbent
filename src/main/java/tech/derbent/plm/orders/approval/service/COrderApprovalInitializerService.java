@@ -21,6 +21,7 @@ import tech.derbent.plm.orders.order.service.COrderService;
 /** Initializes UI metadata for {@link COrderApproval} entities. */
 public final class COrderApprovalInitializerService extends CEntityNamedInitializerService {
 
+	@SuppressWarnings ("hiding")
 	public static final String BASE_PANEL_NAME = "Approval Details";
 	private static final Class<?> ENTITY_CLASS = COrderApproval.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(COrderApprovalInitializerService.class);

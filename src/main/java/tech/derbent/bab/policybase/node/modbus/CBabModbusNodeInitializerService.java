@@ -33,7 +33,7 @@ public final class CBabModbusNodeInitializerService extends CInitializerServiceB
 
 	/** Create detail view with all Modbus node fields. */
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
-		final CDetailSection scr = CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
+		final CDetailSection scr = CEntityOfProjectInitializerService.createBasicView(project, clazz);
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));

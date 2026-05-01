@@ -36,7 +36,7 @@ public class CAssetInitializerService extends CProjectItemInitializerService {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			// Basic Information Section
-			CEntityNamedInitializerService.createBasicView(detailSection, clazz, project, true);
+			CEntityNamedInitializerService.createScreenLines(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "brand"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "model"));
@@ -72,11 +72,7 @@ public class CAssetInitializerService extends CProjectItemInitializerService {
 			CLinkInitializerService.addDefaultSection(detailSection, clazz);
 			// Comments section - standard section for discussion entities
 			CCommentInitializerService.addDefaultSection(detailSection, clazz);
-			// Audit Section
-			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

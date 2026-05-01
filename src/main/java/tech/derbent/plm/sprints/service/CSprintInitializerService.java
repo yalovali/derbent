@@ -83,7 +83,7 @@ public class CSprintInitializerService extends CProjectItemInitializerService {
 			throws Exception {
 		try {
 			final CDetailSection scr = CEntityOfProjectInitializerService
-					.createBasicView(project, clazz, true);
+					.createBasicView(project, clazz);
 			scr.addScreenLine(
 					CDetailLinesService.createSection("Sprint Details"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz,

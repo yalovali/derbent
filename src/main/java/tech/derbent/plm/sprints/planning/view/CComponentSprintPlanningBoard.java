@@ -974,23 +974,30 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 				CNotificationService.showWarning("Select a saved backlog item first");
 				return;
 			}
-			final CDialogClone dialog = new CDialogClone(entity, copiedEntity -> {
-				try {
-					saveEntity((CEntityDB<?>) copiedEntity);
-					refreshComponent();
-					final String displayName = copiedEntity instanceof final CEntityNamed<?> named ? named.getName()
-							: copiedEntity.getClass().getSimpleName();
-					CNotificationService.showSuccess("Copied '%s'".formatted(displayName));
-				} catch (final Exception ex) {
-					LOGGER.error("Failed to save copied backlog item: {}", ex.getMessage(), ex);
-					CNotificationService.showException("Unable to copy item", ex);
-				}
-			});
-			dialog.open();
+			@SuppressWarnings ({"rawtypes", "unchecked"})
+			final CEntityDB entityRaw = (CEntityDB) entity;
+			openCopyToDialogForEntity(entityRaw);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to open copy-to dialog: {}", e.getMessage(), e);
 			CNotificationService.showException("Unable to open copy dialog", e);
 		}
+	}
+
+	private <EntityClass extends CEntityDB<EntityClass>> void openCopyToDialogForEntity(final EntityClass entity)
+			throws Exception {
+		final CDialogClone<EntityClass> dialog = new CDialogClone<>(entity, copiedEntity -> {
+			try {
+				saveEntity(copiedEntity);
+				refreshComponent();
+				final String displayName = copiedEntity instanceof final CEntityNamed<?> named ? named.getName()
+						: copiedEntity.getClass().getSimpleName();
+				CNotificationService.showSuccess("Copied '%s'".formatted(displayName));
+			} catch (final Exception ex) {
+				LOGGER.error("Failed to save copied backlog item: {}", ex.getMessage(), ex);
+				CNotificationService.showException("Unable to copy item", ex);
+			}
+		});
+		dialog.open();
 	}
 
 	private void openCreateLeafItemDialog(final CGnntItem context) {

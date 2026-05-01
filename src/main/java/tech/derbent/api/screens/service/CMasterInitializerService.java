@@ -25,15 +25,11 @@ public class CMasterInitializerService extends CEntityOfProjectInitializerServic
 		Check.notNull(project, "project cannot be null");
 		try {
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
-			CEntityNamedInitializerService.createBasicView(scr, clazz, project, true);
+			CEntityNamedInitializerService.createScreenLines(scr, clazz, project, true);
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			scr.addScreenLine(CDetailLinesService.createSection("Configuration"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sectionType"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sectionDBName"));
-			scr.addScreenLine(CDetailLinesService.createSection("Audit"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {

@@ -105,7 +105,7 @@ check_fully_qualified_derbent() {
   fi
 
   local matches
-  matches=$(rg -n "tech\.derbent\." "${files[@]}" || true)
+  matches=$(rg --with-filename -n "tech\.derbent\." "${files[@]}" || true)
   if [ -z "$matches" ]; then
     pass "No fully-qualified tech.derbent.* references"
     return

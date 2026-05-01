@@ -42,7 +42,7 @@ public class CFeatureInitializerService extends CProjectItemInitializerService {
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
-			CEntityNamedInitializerService.createBasicView(scr, clazz, project, true);
+			CEntityNamedInitializerService.createScreenLines(scr, clazz, project, true);
 			scr.addScreenLine(CDetailLinesService.createSection("System Access"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
@@ -72,9 +72,6 @@ public class CFeatureInitializerService extends CProjectItemInitializerService {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notes"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "results"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			CParentRelationInitializerService.addDefaultSection(scr, clazz, project);
 			CParentRelationInitializerService.addDefaultChildrenSection(scr, clazz, project);
 			scr.debug_printScreenInformation();
@@ -90,7 +87,8 @@ public class CFeatureInitializerService extends CProjectItemInitializerService {
 		grid.setColumnFields(List.of("id", "name", "componentWidget", "entityType", "assignedTo", "createdBy",
 				"startDate", "dueDate", "completionDate", "progressPercentage", "estimatedHours", "actualHours",
 				"remainingHours", "status", "priority", "project", "createdDate", "lastModifiedDate"));
-		grid.setEditableColumnFields(List.of("name", "assignedTo", "startDate", "dueDate", "progressPercentage", "estimatedHours", "actualHours", "remainingHours", "status", "priority"));
+		grid.setEditableColumnFields(List.of("name", "assignedTo", "startDate", "dueDate", "progressPercentage",
+				"estimatedHours", "actualHours", "remainingHours", "status", "priority"));
 		return grid;
 	}
 

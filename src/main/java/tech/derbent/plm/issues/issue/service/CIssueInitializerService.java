@@ -39,8 +39,7 @@ public class CIssueInitializerService extends CProjectItemInitializerService {
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
-			final CDetailSection detailSection =
-					CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
+			final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "issueSeverity"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "issuePriority"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
@@ -64,8 +63,6 @@ public class CIssueInitializerService extends CProjectItemInitializerService {
 			CCommentInitializerService.addDefaultSection(detailSection, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

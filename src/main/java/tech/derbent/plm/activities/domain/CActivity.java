@@ -51,8 +51,8 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 @Entity
 @Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
-public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndWorkflow<CActivity>, IGnntEntityItem, ISprintableItem, IHasIcon,
-		IHasAttachments, IHasComments, IHasLinks, IHasParentRelation {
+public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndWorkflow<CActivity>, IGnntEntityItem,
+		ISprintableItem, IHasIcon, IHasAttachments, IHasComments, IHasLinks, IHasParentRelation {
 
 	public static final String DEFAULT_COLOR = "#4966B0"; // OpenWindows Selection Blue - actionable items
 	public static final String DEFAULT_ICON = "vaadin:tasks";
@@ -61,8 +61,8 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
 	public static final String VIEW_NAME = "Activities View";
 
-	/** Get the default sort field for this entity type. PERFORMANCE OPTIMIZED: Static method for time-sensitive entities. Activities should be sorted
-	 * by due date (most urgent first).
+	/** Get the default sort field for this entity type. PERFORMANCE OPTIMIZED: Static method for time-sensitive entities. Activities should be sorted by
+	 * due date (most urgent first).
 	 * @return default order field name */
 	public static String getDefaultOrderByStatic() { return "dueDate"; }
 
@@ -71,70 +71,54 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	@Size (max = 2000)
 	@AMetaData (
 			displayName = "Acceptance Criteria", required = false, readOnly = false, defaultValue = "",
-			description = "Criteria that must be met for the activity to be considered complete", hidden = false, maxLength = 2000
+			description = "Criteria that must be met for the activity to be considered complete", hidden = false,
+			maxLength = 2000
 	)
 	private String acceptanceCriteria = "";
-	// Basic Activity Information
-	@Column (nullable = true, precision = 12, scale = 2)
-	@DecimalMin (value = "0.0", message = "Actual cost must be positive")
-	@DecimalMax (value = "999999.99", message = "Actual cost cannot exceed 999999.99")
-	@AMetaData (
-			displayName = "Actual Cost", required = false, readOnly = false, defaultValue = "0.00",
-			description = "Actual cost spent on this activity", hidden = false
-	)
-	private BigDecimal actualCost = BigDecimal.ZERO;
-	@Column (nullable = true, precision = 10, scale = 2)
-	@DecimalMin (value = "0.0", message = "Actual hours must be positive")
-	@DecimalMax (value = "9999.99", message = "Actual hours cannot exceed 9999.99")
-	@AMetaData (
-			displayName = "Actual Hours", required = false, readOnly = false, defaultValue = "0.00",
-			description = "Actual time spent on this activity in hours", hidden = false
-	)
-	private BigDecimal actualHours = BigDecimal.ZERO;
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "activity_id")
 	@AMetaData (
-			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this activity", hidden = false,
-			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
+			displayName = "Attachments", required = false, readOnly = false,
+			description = "File attachments for this activity", hidden = false, dataProviderBean = "CAttachmentService",
+			createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
 	// One-to-Many relationship with comments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "activity_id")
 	@AMetaData (
-			displayName = "Comments", required = false, readOnly = false, description = "Comments for this activity", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
+			displayName = "Comments", required = false, readOnly = false, description = "Comments for this activity",
+			hidden = false, dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@Column (name = "completion_date", nullable = true)
-	@AMetaData (displayName = "Completion Date", required = false, readOnly = true, description = "Actual completion date", hidden = false)
+	@AMetaData (
+			displayName = "Completion Date", required = false, readOnly = true, description = "Actual completion date",
+			hidden = false
+	)
 	private LocalDate completionDate = null;
 	@AMetaData (
-			displayName = "Component Widget", required = false, readOnly = false, description = "Component Widget for item", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "buildDataProviderComponentWidget"
+			displayName = "Component Widget", required = false, readOnly = false,
+			description = "Component Widget for item", hidden = false, dataProviderBean = "pageservice",
+			dataProviderMethod = "buildDataProviderComponentWidget"
 	)
 	private final CComponentWidgetEntity<CActivity> componentWidget = null;
 	@Column (nullable = true)
-	@AMetaData (displayName = "Due Date", required = false, readOnly = false, description = "Expected completion date", hidden = false)
+	@AMetaData (
+			displayName = "Due Date", required = false, readOnly = false, description = "Expected completion date",
+			hidden = false
+	)
 	private LocalDate dueDate;
 	// Type Management - concrete implementation of parent's typeEntity
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
-			displayName = "Activity Type", required = false, readOnly = false, description = "Type category of the activity", hidden = false,
-			dataProviderBean = "CActivityTypeService", setBackgroundFromColor = true, useIcon = true
+			displayName = "Activity Type", required = false, readOnly = false,
+			description = "Type category of the activity", hidden = false, dataProviderBean = "CActivityTypeService",
+			setBackgroundFromColor = true, useIcon = true
 	)
 	private CActivityType entityType;
-	// Budget Management
-	@Column (nullable = true, precision = 12, scale = 2)
-	@DecimalMin (value = "0.0", message = "Estimated cost must be positive")
-	@DecimalMax (value = "999999.99", message = "Estimated cost cannot exceed 999999.99")
-	@AMetaData (
-			displayName = "Estimated Cost", required = false, readOnly = false, defaultValue = "0.00",
-			description = "Estimated cost to complete this activity", hidden = false
-	)
-	private BigDecimal estimatedCost = BigDecimal.ZERO;
 	// Time Tracking
 	@Column (nullable = true, precision = 10, scale = 2)
 	@DecimalMin (value = "0.0", message = "Estimated hours must be positive")
@@ -144,27 +128,19 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			description = "Estimated time in hours to complete this activity", hidden = false
 	)
 	private BigDecimal estimatedHours = BigDecimal.ZERO;
-	@Column (nullable = true, precision = 10, scale = 2)
-	@DecimalMin (value = "0.0", message = "Hourly rate must be positive")
-	@DecimalMax (value = "9999.99", message = "Hourly rate cannot exceed 9999.99")
-	@AMetaData (
-			displayName = "Hourly Rate", required = false, readOnly = false, defaultValue = "0.00", description = "Hourly rate for cost calculation",
-			hidden = false
-	)
-	private BigDecimal hourlyRate = BigDecimal.ZERO;
 	// One-to-Many relationship with links - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "activity_id")
 	@AMetaData (
-			displayName = "Links", required = false, readOnly = false, description = "Links to other entities", hidden = false,
-			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
+			displayName = "Links", required = false, readOnly = false, description = "Links to other entities",
+			hidden = false, dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
 	)
 	private Set<CLink> links = new HashSet<>();
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
-			displayName = "Notes", required = false, readOnly = false, defaultValue = "", description = "Additional notes and comments",
-			hidden = false, maxLength = 2000
+			displayName = "Notes", required = false, readOnly = false, defaultValue = "",
+			description = "Additional notes and comments", hidden = false, maxLength = 2000
 	)
 	private String notes = "";
 	// Agile Parent Relation - REQUIRED: every activity must have an agile parent relation for agile hierarchy
@@ -172,20 +148,22 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
 	@NotNull (message = "Agile parent relation is required for agile hierarchy")
 	@AMetaData (
-			displayName = "Agile Parent Relation", required = true, readOnly = true, description = "Agile hierarchy tracking for this activity",
-			hidden = true
+			displayName = "Agile Parent Relation", required = true, readOnly = true,
+			description = "Agile hierarchy tracking for this activity", hidden = true
 	)
 	private CParentRelation parentRelation;
 	@Transient
 	@AMetaData (
-			displayName = "Agile Parent", required = false, readOnly = false, description = "Agile hierarchy parent selector", hidden = false,
+			displayName = "Agile Parent", required = false, readOnly = false,
+			description = "Agile hierarchy parent selector", hidden = false,
 			createComponentMethod = "createComponentParent", dataProviderBean = "pageservice", captionVisible = false
 	)
 	private final CProjectItem<?> placeHolder_createComponentParent = null;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "cactivitypriority_id", nullable = true)
 	@AMetaData (
-			displayName = "Priority", required = false, readOnly = false, description = "Priority level of the activity", hidden = false,
+			displayName = "Priority", required = false, readOnly = false,
+			description = "Priority level of the activity", hidden = false,
 			dataProviderBean = "CActivityPriorityService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CActivityPriority priority;
@@ -193,30 +171,25 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	@Min (value = 0, message = "Progress percentage must be between 0 and 100")
 	@Max (value = 100, message = "Progress percentage must be between 0 and 100")
 	@AMetaData (
-			displayName = "Progress %", required = false, readOnly = false, defaultValue = "0", description = "Completion percentage (0-100)",
-			hidden = false
+			displayName = "Progress %", required = false, readOnly = false, defaultValue = "0",
+			description = "Completion percentage (0-100)", hidden = false
 	)
 	private Integer progressPercentage = 0;
-	@Column (nullable = true, precision = 10, scale = 2)
-	@DecimalMin (value = "0.0", message = "Remaining hours must be positive")
-	@DecimalMax (value = "9999.99", message = "Remaining hours cannot exceed 9999.99")
-	@AMetaData (
-			displayName = "Remaining Hours", required = false, readOnly = false, defaultValue = "0.00",
-			description = "Estimated remaining time in hours", hidden = false
-	)
-	private BigDecimal remainingHours = BigDecimal.ZERO;
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
-			displayName = "Results", required = false, readOnly = false, defaultValue = "", description = "Results and outcomes of the activity",
-			hidden = false, maxLength = 2000
+			displayName = "Results", required = false, readOnly = false, defaultValue = "",
+			description = "Results and outcomes of the activity", hidden = false, maxLength = 2000
 	)
 	private String results = "";
 	// Sprint Item relationship - REQUIRED: every activity must have a sprint item for progress tracking
 	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn (name = "sprintitem_id", nullable = false)
 	@NotNull (message = "Sprint item is required for progress tracking")
-	@AMetaData (displayName = "Sprint Item", required = true, readOnly = true, description = "Progress tracking for this activity", hidden = true)
+	@AMetaData (
+			displayName = "Sprint Item", required = true, readOnly = true,
+			description = "Progress tracking for this activity", hidden = true
+	)
 	private CSprintItem sprintItem;
 	@Column (name = "sprint_order", nullable = true)
 	@Min (value = 1, message = "Sprint order must be positive")
@@ -227,8 +200,8 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	private Integer sprintOrder = Integer.MAX_VALUE;
 	@Column (nullable = true)
 	@AMetaData (
-			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the activity",
-			hidden = false
+			displayName = "Start Date", required = false, readOnly = false,
+			description = "Planned or actual start date of the activity", hidden = false
 	)
 	private LocalDate startDate = LocalDate.now();
 	@Column (nullable = true)
@@ -253,27 +226,6 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		return componentWidget;
 	}
 
-	/** Calculate the cost variance (actual cost - estimated cost).
-	 * @return the cost variance, positive if over budget, negative if under budget */
-	public BigDecimal calculateCostVariance() {
-		if (!(actualCost == null || estimatedCost == null)) {
-			return actualCost.subtract(estimatedCost);
-		}
-		LOGGER.debug("calculateCostVariance() - Missing cost data, actual={}, estimated={}", actualCost, estimatedCost);
-		return BigDecimal.ZERO;
-	}
-
-	/** Calculate the time variance (actual hours - estimated hours).
-	 * @return the time variance, positive if over estimated, negative if under estimated */
-	public BigDecimal calculateTimeVariance() {
-		if (actualHours == null || estimatedHours == null) {
-			return BigDecimal.ZERO;
-		}
-		final BigDecimal variance = actualHours.subtract(estimatedHours);
-		LOGGER.debug("calculateTimeVariance() - Time variance calculated: {}", variance);
-		return variance;
-	}
-
 	@PostLoad
 	protected void ensureSprintItemParent() {
 		if (sprintItem != null) {
@@ -285,11 +237,6 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	}
 
 	public String getAcceptanceCriteria() { return acceptanceCriteria; }
-
-	public BigDecimal getActualCost() { return actualCost != null ? actualCost : BigDecimal.ZERO; }
-	// Getters and Setters with proper logging and null checking
-
-	public BigDecimal getActualHours() { return actualHours != null ? actualHours : BigDecimal.ZERO; }
 
 	@Override
 	public Set<CAttachment> getAttachments() { return attachments; }
@@ -323,11 +270,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	@Override
 	public CTypeEntity<?> getEntityType() { return entityType; }
 
-	public BigDecimal getEstimatedCost() { return estimatedCost; }
-
 	public BigDecimal getEstimatedHours() { return estimatedHours; }
-
-	public BigDecimal getHourlyRate() { return hourlyRate; }
 
 	/** Gets the icon for Gantt chart display.
 	 * @return the activity icon identifier */
@@ -351,8 +294,6 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		Check.notNull(sprintItem, "Sprint item must not be null");
 		return sprintItem.getProgressPercentage();
 	}
-
-	public BigDecimal getRemainingHours() { return remainingHours; }
 
 	public String getResults() { return results; }
 
@@ -397,8 +338,8 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		final boolean isFullProgress = progressPercentage != null && progressPercentage >= 100;
 		final boolean isFinalStatus = status != null && status.getFinalStatus();
 		final boolean completed = hasCompletionDate || isFullProgress || isFinalStatus;
-		LOGGER.debug("isCompleted() - Activity id={} completed={} (completionDate={}, progress={}, finalStatus={})", getId(), completed,
-				hasCompletionDate, progressPercentage, isFinalStatus);
+		LOGGER.debug("isCompleted() - Activity id={} completed={} (completionDate={}, progress={}, finalStatus={})",
+				getId(), completed, hasCompletionDate, progressPercentage, isFinalStatus);
 		return completed;
 	}
 
@@ -409,15 +350,16 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			return false;
 		}
 		final boolean overdue = LocalDate.now().isAfter(dueDate);
-		LOGGER.debug("isOverdue() - Activity id={} overdue={} (dueDate={}, today={})", getId(), overdue, dueDate, LocalDate.now());
+		LOGGER.debug("isOverdue() - Activity id={} overdue={} (dueDate={}, today={})", getId(), overdue, dueDate,
+				LocalDate.now());
 		return overdue;
 	}
 
 	/** Checks if this entity matches the given search value in the specified fields. This implementation extends CProjectItem to also search in
 	 * activity-specific entity fields like entityType and priority.
 	 * @param searchValue the value to search for (case-insensitive)
-	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "name" field. Supported field names: all parent
-	 *                    fields plus "entityType", "priority"
+	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "name" field. Supported field names: all parent fields
+	 *                    plus "entityType", "priority"
 	 * @return true if the entity matches the search criteria in any of the specified fields */
 	@Override
 	public boolean matchesFilter(final String searchValue, final java.util.Collection<String> fieldNames) {
@@ -429,10 +371,12 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
 		// Check entity fields
-		if (fieldNames.remove("entityType") && getEntityType() != null && getEntityType().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
+		if (fieldNames.remove("entityType") && getEntityType() != null
+				&& getEntityType().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
-		if (fieldNames.remove("priority") && getPriority() != null && getPriority().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
+		if (fieldNames.remove("priority") && getPriority() != null
+				&& getPriority().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
 		return false;
@@ -440,22 +384,6 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	public void setAcceptanceCriteria(final String acceptanceCriteria) {
 		this.acceptanceCriteria = acceptanceCriteria;
-		updateLastModified();
-	}
-
-	public void setActualCost(final BigDecimal actualCost) {
-		if (actualCost != null && actualCost.compareTo(BigDecimal.ZERO) < 0) {
-			LOGGER.warn("setActualCost - Attempting to set negative actual cost: {} for activity id={}", actualCost, getId());
-		}
-		this.actualCost = actualCost != null ? actualCost : BigDecimal.ZERO;
-		updateLastModified();
-	}
-
-	public void setActualHours(final BigDecimal actualHours) {
-		if (actualHours != null && actualHours.compareTo(BigDecimal.ZERO) < 0) {
-			LOGGER.warn("setActualHours - Attempting to set negative actual hours: {} for activity id={}", actualHours, getId());
-		}
-		this.actualHours = actualHours != null ? actualHours : BigDecimal.ZERO;
 		updateLastModified();
 	}
 
@@ -496,33 +424,19 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		Check.notNull(getProject(), "Project must be set before assigning activity type");
 		Check.notNull(getProject().getCompany(), "Project company must be set before assigning activity type");
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning activity type");
-		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
-				+ typeEntity.getCompany().getId() + " does not match activity project company id " + getProject().getCompany().getId());
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
+				"Type entity company id " + typeEntity.getCompany().getId()
+						+ " does not match activity project company id " + getProject().getCompany().getId());
 		entityType = (CActivityType) typeEntity;
-		updateLastModified();
-	}
-
-	public void setEstimatedCost(final BigDecimal estimatedCost) {
-		if (estimatedCost != null && estimatedCost.compareTo(BigDecimal.ZERO) < 0) {
-			LOGGER.warn("setEstimatedCost - Attempting to set negative estimated cost: {} for activity id={}", estimatedCost, getId());
-		}
-		this.estimatedCost = estimatedCost;
 		updateLastModified();
 	}
 
 	public void setEstimatedHours(final BigDecimal estimatedHours) {
 		if (estimatedHours != null && estimatedHours.compareTo(BigDecimal.ZERO) < 0) {
-			LOGGER.warn("setEstimatedHours - Attempting to set negative estimated hours: {} for activity id={}", estimatedHours, getId());
+			LOGGER.warn("setEstimatedHours - Attempting to set negative estimated hours: {} for activity id={}",
+					estimatedHours, getId());
 		}
 		this.estimatedHours = estimatedHours;
-		updateLastModified();
-	}
-
-	public void setHourlyRate(final BigDecimal hourlyRate) {
-		if (hourlyRate != null && hourlyRate.compareTo(BigDecimal.ZERO) < 0) {
-			LOGGER.warn("setHourlyRate - Attempting to set negative hourly rate: {} for activity id={}", hourlyRate, getId());
-		}
-		this.hourlyRate = hourlyRate;
 		updateLastModified();
 	}
 
@@ -545,14 +459,6 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	public void setProgressPercentage(final Integer progressPercentage) {
 		Check.notNull(sprintItem, "Sprint item must not be null");
 		sprintItem.setProgressPercentage(progressPercentage);
-		updateLastModified();
-	}
-
-	public void setRemainingHours(final BigDecimal remainingHours) {
-		if (remainingHours != null && remainingHours.compareTo(BigDecimal.ZERO) < 0) {
-			LOGGER.warn("setRemainingHours - Attempting to set negative remaining hours: {} for activity id={}", remainingHours, getId());
-		}
-		this.remainingHours = remainingHours;
 		updateLastModified();
 	}
 

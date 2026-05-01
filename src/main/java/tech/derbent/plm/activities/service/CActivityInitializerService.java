@@ -52,7 +52,7 @@ public class CActivityInitializerService extends CProjectItemInitializerService 
 	private static final boolean showInQuickToolbar = true;
 
 	/** Add relationships (comments, attachments, links) to sample activities. */
-	private static void addRelationshipsToActivities(final List<CActivity> activities, final CProject<?> project) {
+	private static void _addRelationshipsToActivities(final List<CActivity> activities, final CProject<?> project) {
 		try {
 			final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
 			// Add comments to first activity
@@ -113,26 +113,19 @@ public class CActivityInitializerService extends CProjectItemInitializerService 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
-			CEntityNamedInitializerService.createBasicView(scr, clazz, project, true);
-			scr.addScreenLine(CDetailLinesService.createSection("System Access"));
+			CEntityNamedInitializerService.createScreenLines(scr, clazz, project, true);
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "acceptanceCriteria"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			scr.addScreenLine(CDetailLinesService.createSection("Schedule"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "startDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dueDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "completionDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "progressPercentage"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "estimatedHours"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actualHours"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "remainingHours"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priority"));
-			scr.addScreenLine(CDetailLinesService.createSection("Financials"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "estimatedCost"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actualCost"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "hourlyRate"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "acceptanceCriteria"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			/******************/
 			// Attachments section - standard section for ALL entities
 			CAttachmentInitializerService.addDefaultSection(scr, clazz);
@@ -147,9 +140,6 @@ public class CActivityInitializerService extends CProjectItemInitializerService 
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notes"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "results"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			CParentRelationInitializerService.addDefaultSection(scr, clazz, project);
 			scr.debug_printScreenInformation();
 			return scr;
@@ -278,11 +268,6 @@ public class CActivityInitializerService extends CProjectItemInitializerService 
 				activity.setDueDate(activity.getStartDate().plusDays(seed.durationDays()));
 				activity.setStoryPoint(Long.valueOf(seed.storyPoints()));
 				activity.setEstimatedHours(BigDecimal.valueOf(seed.estimatedHours()));
-				activity.setActualHours(BigDecimal.valueOf(seed.actualHours()));
-				activity.setRemainingHours(BigDecimal.valueOf(Math.max(seed.estimatedHours() - seed.actualHours(), 0)));
-				activity.setHourlyRate(BigDecimal.valueOf(115));
-				activity.setEstimatedCost(activity.getHourlyRate().multiply(activity.getEstimatedHours()));
-				activity.setActualCost(activity.getHourlyRate().multiply(activity.getActualHours()));
 				activity.setProgressPercentage(seed.progressPercentage());
 				activity.setResults(
 						seed.progressPercentage() >= 45 ? "Implementation slice reviewed with product and QA." : "");
@@ -316,7 +301,7 @@ public class CActivityInitializerService extends CProjectItemInitializerService 
 			}
 			// Add relationships: comments, attachments, links (only if not minimal)
 			if (!minimal && !createdActivities.isEmpty()) {
-				addRelationshipsToActivities(createdActivities, project);
+				_addRelationshipsToActivities(createdActivities, project);
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample activities for project: {} reason={}", project.getName(),

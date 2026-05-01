@@ -30,8 +30,7 @@ public class CValidationSuiteInitializerService extends CEntityOfProjectInitiali
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
-			final CDetailSection detailSection =
-					CEntityOfProjectInitializerService.createBasicView(project, clazz, false);
+			final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection("Suite Details"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "objective"));
@@ -46,8 +45,6 @@ public class CValidationSuiteInitializerService extends CEntityOfProjectInitiali
 			CCommentInitializerService.addDefaultSection(detailSection, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
@@ -78,14 +75,14 @@ public class CValidationSuiteInitializerService extends CEntityOfProjectInitiali
 		if (!existingScenarios.isEmpty()) {
 			LOGGER.info("Clearing {} existing validation suites for project: {}", existingScenarios.size(),
 					project.getName());
-			for (final CValidationSuite existingScenario : existingScenarios) {
+			existingScenarios.forEach((final CValidationSuite existingScenario) -> {
 				try {
 					validationSuiteService.delete(existingScenario);
 				} catch (final Exception e) {
 					LOGGER.warn("Could not delete existing validation suite {}: {}", existingScenario.getId(),
 							e.getMessage());
 				}
-			}
+			});
 		}
 		final String[][] nameAndDescriptions = {
 				{

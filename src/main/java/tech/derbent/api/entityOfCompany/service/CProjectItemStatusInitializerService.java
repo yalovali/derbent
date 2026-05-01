@@ -29,15 +29,11 @@ public class CProjectItemStatusInitializerService extends CStatusInitializerServ
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
-			CEntityNamedInitializerService.createBasicView(scr, clazz, project, true);
+			CEntityNamedInitializerService.createScreenLines(scr, clazz, project, true);
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "finalStatus"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
-			scr.addScreenLine(CDetailLinesService.createSection("Audit"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {

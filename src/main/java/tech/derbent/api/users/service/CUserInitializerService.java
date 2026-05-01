@@ -29,6 +29,7 @@ public class CUserInitializerService extends CEntityOfCompanyInitializerService 
 	private static final String BAB_ADMIN_LOGIN = "admin";
 	private static final String BAB_ADMIN_NAME = "Admin";
 	private static final String BAB_ADMIN_PASSWORD = "test123";
+	@SuppressWarnings ("hiding")
 	public static final String BASE_PANEL_NAME = "User Information";
 	static final Class<?> clazz = CUser.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserInitializerService.class);
@@ -69,10 +70,7 @@ public class CUserInitializerService extends CEntityOfCompanyInitializerService 
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "profilePictureData"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Additional Information"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "activities"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Settings"));
 			detailSection

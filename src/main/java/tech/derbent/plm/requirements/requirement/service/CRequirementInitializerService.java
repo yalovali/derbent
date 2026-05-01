@@ -37,7 +37,7 @@ public class CRequirementInitializerService extends CProjectItemInitializerServi
 	private static final boolean showInQuickToolbar = true;
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
-		final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz, true);
+		final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz);
 		detailSection.addScreenLine(CDetailLinesService.createSection("Planning"));
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));

@@ -24,7 +24,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.grid.Grid;
@@ -1311,40 +1310,32 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	 */
 	@SuppressWarnings ({"rawtypes", "unchecked"})
 	private static void activateEditorForRow(final Editor rawEditor,
-			final Object item, final Grid.Column<?> clickedColumn) {
+			final Object item, @SuppressWarnings ("unused") final Grid.Column<?> clickedColumn) {
 		try {
 			if (rawEditor.isOpen()) {
-				// Clicking the same row that is already being edited – just focus the field
+				// Clicking the same row that is already being edited – no-op
 				if (item != null && item.equals(rawEditor.getItem())) {
-					focusEditorComponent(clickedColumn);
 					return;
 				}
 				// Different row: cancel closes the current row (fires closeListener → save)
 				rawEditor.cancel();
 			}
 			rawEditor.editItem(item);
-			focusEditorComponent(clickedColumn);
+			// Note: do NOT call focus() here – Vaadin fires the JS focus before the editor
+			// row DOM is ready, which causes a TypeError in the browser console.
 		} catch (final Exception e) {
 			LOGGER.warn("Error activating Grid.Editor for row: {}", e.getMessage());
 		}
 	}
 
-	/** Focuses the editor component in a column, if it is a Focusable component. */
-	private static void focusEditorComponent(final Grid.Column<?> column) {
-		final Component editorComponent = column.getEditorComponent();
-		if (editorComponent instanceof Focusable<?> focusable) {
-			focusable.focus();
-		}
-	}
-
 	/**
-	 * Replaces the column header with a pencil-prefixed version to signal inline editability.
-	 * Uses the same CColorUtils.createStyledHeader as the rest of the grid for visual consistency.
+	 * Replaces the column header text with a pencil-prefixed plain string.
+	 * Plain-text header avoids a Vaadin JS TypeError that occurs when a
+	 * Span-based styled header is combined with setEditorComponent().
 	 */
 	@SuppressWarnings ("rawtypes")
 	private static void markColumnHeaderAsEditable(final Grid.Column column, final String displayName) {
-		// "✏ " prefix signals to the user that this column supports inline editing
-		column.setHeader(CColorUtils.createStyledHeader("✏ " + displayName, CColorUtils.CRUD_UPDATE_COLOR));
+		column.setHeader("✏ " + displayName);
 	}
 
 	/**
