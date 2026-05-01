@@ -23,6 +23,7 @@ import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.plm.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.plm.kanban.kanbanline.domain.CKanbanLine;
@@ -335,12 +336,26 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			// Get the underlying item (Activity or Meeting) for logging
 			final ISprintableItem item = sprintItem.getParentItem();
 			Objects.requireNonNull(item, "Sprint item must have an underlying item");
-			LOGGER.info("[BacklogDrop] Moving sprint item {} (parent: {}) from sprint to backlog (status preserved)", sprintItem.getId(),
+			LOGGER.info("[BacklogDrop] Moving sprint item {} (parent: {}) from sprint to backlog", sprintItem.getId(),
 					item.getId());
-			// CRITICAL FIX: Use unified service instead of manual delete
-			// Old code deleted sprint item which caused cascade delete of parent entity
-			// New code sets sprint to NULL which correctly moves item to backlog
+			// Clear sprint assignment — sets sprint=null (backlog semantics)
 			item.moveSprintItemToBacklog();
+			// Reset status to the workflow's initial status ("To Do") so backlog items
+			// never carry sprint-phase statuses like "Blocked" or "In Progress".
+			// An item in the backlog isn't being actively worked on, so sprint statuses are meaningless there.
+			final IHasStatusAndWorkflow<?, ?> statusItem = (IHasStatusAndWorkflow<?, ?>) item;
+			final CWorkflowEntity workflow = statusItem.getWorkflow();
+			CProjectItemStatus resetStatus = null;
+			if (workflow != null) {
+				final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
+				resetStatus = statusService.getInitialStatusFromWorkflow(workflow);
+				if (resetStatus != null) {
+					item.setStatus(resetStatus);
+					item.saveProjectItem();
+					LOGGER.info("[BacklogDrop] Reset status of item {} to '{}' (workflow initial status)", item.getId(), resetStatus.getName());
+				}
+			}
+			final String resetStatusName = resetStatus != null ? resetStatus.getName() : "unchanged";
 			// CRITICAL: Defer UI refresh until after Vaadin drop event completes
 			componentKanbanBoard.getUI().ifPresent(ui -> ui.access(() -> {
 				// Refresh both board and backlog
@@ -350,8 +365,8 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 				if (backlogColumn != null) {
 					backlogColumn.refreshComponent();
 				}
-				CNotificationService.showSuccess("Item removed from sprint and returned to backlog");
-				LOGGER.info("Successfully removed sprint item {} from sprint (status preserved)", sprintItem.getId());
+				CNotificationService.showSuccess("Item returned to backlog with status '" + resetStatusName + "'");
+				LOGGER.info("Successfully returned sprint item {} to backlog (status reset to '{}')", sprintItem.getId(), resetStatusName);
 			}));
 		} catch (final Exception e) {
 			LOGGER.error("Failed to remove sprint item from sprint reason={}", e.getMessage());
