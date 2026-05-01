@@ -14,6 +14,8 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.screens.service.CDetailLinesService;
+import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.utils.Check;
 
 /** CScreen - Domain entity representing screen views for entities. Layer: Domain (MVC) Inherits from CEntityOfProject to provide project association.
@@ -37,8 +39,8 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 	// change nullable to false in future versions after data migration
 	@Column (name = "defaultSection", nullable = true)
 	@AMetaData (
-			displayName = "Default For Type", required = false, readOnly = false, description = "Whether this entity definition is default",
-			hidden = false, defaultValue = "true"
+			displayName = "Default For Type", required = false, readOnly = false,
+			description = "Whether this entity definition is default", hidden = false, defaultValue = "true"
 	)
 	private Boolean defaultSection = true;
 	@OneToMany (mappedBy = "detailSection", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
@@ -47,22 +49,23 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 	@Column (name = "entity_type", nullable = false, length = 100)
 	@Size (max = 100, message = "Entity type cannot exceed 100 characters")
 	@AMetaData (
-			displayName = "Entity Type", required = true, readOnly = false, description = "Type of entity this screen is designed for",
-			hidden = false, maxLength = 100, dataProviderBean = "CViewsService", dataProviderMethod = "getComboValuesOfBaseType"
+			displayName = "Entity Type", required = true, readOnly = false,
+			description = "Type of entity this screen is designed for", hidden = false, maxLength = 100,
+			dataProviderBean = "CViewsService", dataProviderMethod = "getComboValuesOfBaseType"
 	)
 	private String entityType = "";
 	@Column (name = "header_text", nullable = true, length = 500)
 	@Size (max = 500, message = "Header text cannot exceed 500 characters")
 	@AMetaData (
-			displayName = "Header Text", required = false, readOnly = false, description = "Header text to display at the top of the screen",
-			hidden = false, maxLength = 500
+			displayName = "Header Text", required = false, readOnly = false,
+			description = "Header text to display at the top of the screen", hidden = false, maxLength = 500
 	)
 	private String headerText = "";
 	@Column (name = "screen_title", nullable = true, length = 255)
 	@Size (max = 255, message = "Screen title cannot exceed 255 characters")
 	@AMetaData (
-			displayName = "Screen Title", required = false, readOnly = false, description = "Title to display for this screen view", hidden = false,
-			maxLength = 255
+			displayName = "Screen Title", required = false, readOnly = false,
+			description = "Title to display for this screen view", hidden = false, maxLength = 255
 	)
 	private String screenTitle = "";
 
@@ -83,6 +86,40 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 		}
 		detailLines.add(detailLine);
 		detailLine.setDetailSection(this);
+	}
+
+	public void addScreenLine(final String sectionName, final CDetailLines detailLine) {
+		Check.notNull(sectionName, "sectionName must not be null");
+		Check.notNull(detailLine, "screenLine must not be null");
+		int sectionIndex = -1;
+		for (int i = 0; i < detailLines.size(); i++) {
+			final CDetailLines line = detailLines.get(i);
+			if (CEntityFieldService.SECTION_START.equals(line.getRelationFieldName())
+					&& sectionName.equals(line.getSectionName())) {
+				sectionIndex = i;
+				break;
+			}
+		}
+		if (sectionIndex == -1) {
+			final CDetailLines sectionLine = CDetailLinesService.createSection(sectionName);
+			detailLines.add(sectionLine);
+			sectionLine.setDetailSection(this);
+			sectionIndex = detailLines.size() - 1;
+		}
+		int insertIndex = detailLines.size();
+		for (int i = sectionIndex + 1; i < detailLines.size(); i++) {
+			final CDetailLines line = detailLines.get(i);
+			if (CEntityFieldService.SECTION_START.equals(line.getRelationFieldName())) {
+				insertIndex = i;
+				break;
+			}
+		}
+		detailLines.add(insertIndex, detailLine);
+		detailLine.setDetailSection(this);
+		for (int i = 0; i < detailLines.size(); i++) {
+			final CDetailLines line = detailLines.get(i);
+			line.setItemOrder(i + 1);
+		}
 	}
 
 	public void debug_printScreenInformation() {
@@ -126,7 +163,9 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 		// Do not call CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
-	public void setAttributeNonDeletable(boolean attributeNonDeletable) { this.attributeNonDeletable = attributeNonDeletable; }
+	public void setAttributeNonDeletable(boolean attributeNonDeletable) {
+		this.attributeNonDeletable = attributeNonDeletable;
+	}
 
 	public void setDefaultSection(Boolean defaultSection) { this.defaultSection = defaultSection; }
 
@@ -140,6 +179,7 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 
 	@Override
 	public String toString() {
-		return "CScreen{id=%d, name='%s', entityType='%s', screenTitle='%s'}".formatted(getId(), getName(), entityType, screenTitle);
+		return "CScreen{id=%d, name='%s', entityType='%s', screenTitle='%s'}".formatted(getId(), getName(), entityType,
+				screenTitle);
 	}
 }
