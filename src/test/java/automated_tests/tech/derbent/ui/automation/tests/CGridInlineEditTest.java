@@ -1,8 +1,11 @@
 package automated_tests.tech.derbent.ui.automation.tests;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,19 +22,21 @@ import tech.derbent.Application;
 /**
  * Playwright tests for the inline Grid.Editor architecture.
  *
- * Verifies:
- *   1. Editable column headers carry the ✏ prefix.
- *   2. Clicking a grid cell activates the inline editor for that row only.
- *   3. Editing a text value and moving to another row auto-saves the change.
- *   4. Non-editable columns (id, createdDate) remain plain text.
- *   5. No JS error dialogs appear during the editing flow.
+ * Navigation uses the CPageTestAuxillary pattern (project standard) – buttons
+ * at `/cpagetestauxillary` with `data-route` attributes provide stable URLs for
+ * all entity pages, including project-scoped ones that are not in the top-level menu.
  *
- * Test data lifecycle: creates one Activity, edits it inline, then deletes it.
- * Everything runs against an ephemeral H2 database – no external state required.
+ * Verified scenarios:
+ *   1. Editable column headers show the ✏ pencil prefix.
+ *   2. Non-editable columns (e.g. id) have no pencil prefix.
+ *   3. Clicking a cell in an editable column activates the inline editor.
+ *   4. A text-field input is rendered inside the active editor row.
+ *   5. Changing the name value and triggering close auto-saves to the DB.
+ *   6. After grid refresh the edited value is still shown.
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = Application.class)
 @TestPropertySource(properties = {
-	"spring.datasource.url=jdbc:h2:mem:testdb_inline",
+	"spring.datasource.url=jdbc:h2:mem:testdb",
 	"spring.datasource.username=sa",
 	"spring.datasource.password=",
 	"spring.datasource.driver-class-name=org.h2.Driver",
@@ -42,24 +47,24 @@ import tech.derbent.Application;
 public class CGridInlineEditTest extends CBaseUITest {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CGridInlineEditTest.class);
-
-	/** Text used when creating the test activity. */
+	private static final String AUX_PAGE_ROUTE = "cpagetestauxillary";
+	private static final String BUTTON_SELECTOR = "[id^='test-aux-btn-']";
+	/** Keyword matching the aux-page button title for the Activity grid. */
+	private static final String ACTIVITY_PAGE_KEYWORD = "Activities";
 	private static final String ACTIVITY_ORIGINAL_NAME = "InlineEdit-Original";
-
-	/** Text used after inline-editing the activity name. */
-	private static final String ACTIVITY_EDITED_NAME = "InlineEdit-Updated";
+	private static final String ACTIVITY_EDITED_NAME   = "InlineEdit-Updated";
 
 	private int screenshotCounter = 1;
 
 	// ---------------------------------------------------------------------------
-	// Tests
+	// Main test
 	// ---------------------------------------------------------------------------
 
 	@Test
-	@DisplayName("Editable column headers show pencil prefix and cell click opens inline editor")
+	@DisplayName("Editable headers show pencil, cell click opens editor, close auto-saves")
 	void testInlineEditActivatesAndSaves() {
 		if (!isBrowserAvailable()) {
-			LOGGER.warn("Browser not available – skipping inline-edit test (expected in CI without browser)");
+			LOGGER.warn("Browser not available – skipping inline-edit test");
 			Assumptions.assumeTrue(false, "Browser not available");
 			return;
 		}
@@ -67,96 +72,95 @@ public class CGridInlineEditTest extends CBaseUITest {
 		try {
 			Files.createDirectories(Paths.get("target/screenshots"));
 
-			// ── Step 1: login and navigate to Activities ──────────────────────────────
+			// ── Step 1: login ────────────────────────────────────────────────────────
 			loginToApplication();
 			snap("01-login");
 
-			final boolean navigated = navigateToDynamicPageByEntityType("CActivity");
-			assertTrue(navigated, "Navigation to Activities view failed");
+			// ── Step 2: navigate to Activity Management via the aux test page ─────────
+			final String activityRoute = findActivityRouteViaAuxPage();
+			assertTrue(activityRoute != null && !activityRoute.isBlank(),
+					"Could not find Activity Management button on the aux test page");
+			LOGGER.info("Navigating to Activity Management at route: {}", activityRoute);
+
+			page.navigate("http://localhost:" + port + "/" + activityRoute,
+					new Page.NavigateOptions().setTimeout(60000)
+							.setWaitUntil(com.microsoft.playwright.options.WaitUntilState.DOMCONTENTLOADED));
 			wait_2000();
-			snap("02-activities-view");
+			performFailFastCheck("After navigate to Activity");
+			snap("02-activity-page");
 
 			page.waitForSelector("vaadin-grid", new Page.WaitForSelectorOptions().setTimeout(15000));
 
-			// ── Step 2: create an activity so the grid has at least one row ────────────
-			LOGGER.info("Creating a test activity for inline-edit test");
+			// ── Step 3: create a test activity so the grid has data ───────────────────
+			LOGGER.info("Creating test activity '{}'", ACTIVITY_ORIGINAL_NAME);
 			clickNew();
 			wait_1000();
 			snap("03-new-dialog");
-
 			fillFirstTextField(ACTIVITY_ORIGINAL_NAME);
 			wait_500();
 			clickSave();
 			wait_2000();
 			performFailFastCheck("After activity create");
 			snap("04-activity-created");
-
 			clickRefresh();
 			wait_1000();
 
-			// ── Step 3: verify at least one editable column header carries the ✏ prefix
+			// ── Step 4: verify at least one header has the ✏ pencil ────────────────
 			LOGGER.info("Verifying pencil prefix on editable column headers");
-			final boolean hasPencilHeader = verifyEditableHeaderExists();
-			assertTrue(hasPencilHeader, "No column header with ✏ prefix found – setupGridEditor() may not have run");
-			snap("05-pencil-headers-verified");
+			assertTrue(verifyEditableHeaderExists(),
+					"No ✏ column header found – setupGridEditor() may not have run");
+			snap("05-pencil-headers-ok");
 
-			// ── Step 4: verify non-editable column 'id' has no pencil prefix ───────────
-			LOGGER.info("Verifying 'id' column is NOT marked as editable");
-			final boolean idColumnIsPlain = verifyColumnHeaderIsPlain("id");
-			assertTrue(idColumnIsPlain, "'id' column should not have a ✏ prefix");
+			// ── Step 5: verify the 'id' header has NO pencil ────────────────────────
+			LOGGER.info("Verifying 'id' column is NOT marked editable");
+			assertTrue(verifyColumnHeaderIsPlain("id"),
+					"'id' column should not have a ✏ prefix");
 
-			// ── Step 5: click the Name cell of the first data row to activate editor ───
+			// ── Step 6: click an editable Name cell to activate the editor ──────────
 			LOGGER.info("Clicking Name cell to activate inline editor");
-			final boolean editorActivated = clickEditableCellByHeaderText("Name");
-			assertTrue(editorActivated, "Inline editor did not activate after cell click");
+			assertTrue(clickEditableCellByHeaderText("Name"),
+					"Inline editor did not activate after cell click");
 			wait_500();
 			snap("06-editor-activated");
 
-			// ── Step 6: check that a text input is now visible inside the grid ─────────
-			LOGGER.info("Verifying text input is visible in the active editor row");
-			final boolean inputVisible = isEditorInputVisible();
-			assertTrue(inputVisible, "No text-field input found inside the active grid editor row");
+			// ── Step 7: verify a text input is visible in the active editor row ─────
+			LOGGER.info("Verifying text input is visible inside the active editor row");
+			assertTrue(isEditorInputVisible(),
+					"No text-field input found inside the active grid editor row");
 			snap("07-editor-input-visible");
 
-			// ── Step 7: clear the text field and type the new name ────────────────────
-			LOGGER.info("Clearing existing name and typing '{}'", ACTIVITY_EDITED_NAME);
+			// ── Step 8: replace the text with the edited name ─────────────────────
+			LOGGER.info("Replacing name with '{}'", ACTIVITY_EDITED_NAME);
 			final Locator editorInput = page.locator("vaadin-grid vaadin-text-field input").first();
 			editorInput.click();
 			wait_200();
-			// Select-all then replace avoids partial-text issues
 			editorInput.selectText();
 			wait_200();
 			editorInput.fill(ACTIVITY_EDITED_NAME);
 			wait_500();
 			snap("08-name-typed");
 
-			// ── Step 8: click the header area (outside rows) to close the editor ────────
-			// Clicking another part of the grid triggers the close listener → auto-save.
-			LOGGER.info("Closing editor by clicking grid header to trigger auto-save");
-			final Locator gridHeader = page.locator("vaadin-grid-sorter, vaadin-grid thead").first();
-			if (gridHeader.count() > 0) {
-				gridHeader.first().click();
-			} else {
-				// fallback: click the page body outside the editor
-				page.locator("body").click(new Locator.ClickOptions().setPosition(10, 10));
-			}
+			// ── Step 9: close the editor by clicking the grid header → triggers auto-save
+			LOGGER.info("Closing editor by clicking outside to trigger auto-save");
+			closeEditorByClickingOutside();
 			wait_1500();
 			performFailFastCheck("After inline editor close");
 			snap("09-editor-closed");
 
-			// ── Step 9: refresh and verify the new name persists ─────────────────────
-			LOGGER.info("Refreshing grid to verify saved value");
+			// ── Step 10: refresh and verify the edit persisted ───────────────────────
+			LOGGER.info("Refreshing grid to verify persisted value");
 			clickRefresh();
 			wait_2000();
 			snap("10-after-refresh");
 
-			final boolean editedNameVisible = isTextVisibleInGrid(ACTIVITY_EDITED_NAME);
-			assertTrue(editedNameVisible,
-					"Edited name '" + ACTIVITY_EDITED_NAME + "' not found in grid after refresh – auto-save may have failed");
+			assertTrue(isTextVisibleInGrid(ACTIVITY_EDITED_NAME),
+					"Edited name '" + ACTIVITY_EDITED_NAME + "' not visible in grid – auto-save may have failed");
+			assertFalse(isTextVisibleInGrid(ACTIVITY_ORIGINAL_NAME),
+					"Original name '" + ACTIVITY_ORIGINAL_NAME + "' still visible – edit was not applied");
 			snap("11-edited-name-confirmed");
 
-			// ── Step 10: clean up – delete the test activity ──────────────────────────
-			LOGGER.info("Cleaning up – deleting test activity");
+			// ── Step 11: clean up ─────────────────────────────────────────────────────
+			LOGGER.info("Cleaning up test activity");
 			clickFirstGridRow();
 			wait_500();
 			clickDelete();
@@ -167,7 +171,7 @@ public class CGridInlineEditTest extends CBaseUITest {
 				wait_1000();
 			}
 			performFailFastCheck("After activity delete");
-			snap("12-activity-deleted");
+			snap("12-deleted");
 
 			LOGGER.info("Inline-edit test completed successfully");
 
@@ -179,146 +183,206 @@ public class CGridInlineEditTest extends CBaseUITest {
 	}
 
 	// ---------------------------------------------------------------------------
-	// Helpers
+	// Navigation helpers
 	// ---------------------------------------------------------------------------
 
-	/** Returns true if at least one column header text contains the ✏ pencil character. */
+	/**
+	 * Navigates to the CPageTestAuxillary page, waits for buttons to render,
+	 * then returns the `data-route` value for the Activity Management button.
+	 * Returns null when no matching button is found.
+	 */
+	private String findActivityRouteViaAuxPage() {
+		final String auxUrl = "http://localhost:" + port + "/" + AUX_PAGE_ROUTE;
+		LOGGER.info("Navigating to aux test page: {}", auxUrl);
+		page.navigate(auxUrl, new Page.NavigateOptions().setTimeout(60000)
+				.setWaitUntil(com.microsoft.playwright.options.WaitUntilState.DOMCONTENTLOADED));
+		wait_2000();
+
+		// If we were redirected to login, re-authenticate and retry
+		if (page.url().contains("/login")) {
+			LOGGER.warn("Redirected to login from aux page – re-authenticating");
+			loginToApplication();
+			page.navigate(auxUrl);
+			wait_2000();
+		}
+		snap("aux-page-loaded");
+
+		// Wait up to 15 s for buttons to appear
+		final long deadline = System.currentTimeMillis() + 15_000;
+		while (page.locator(BUTTON_SELECTOR).count() == 0 && System.currentTimeMillis() < deadline) {
+			wait_500();
+		}
+
+		final Locator buttons = page.locator(BUTTON_SELECTOR);
+		final int count = buttons.count();
+		LOGGER.info("Found {} navigation buttons on aux page", count);
+
+		final List<String> seen = new ArrayList<>();
+		for (int i = 0; i < count; i++) {
+			try {
+				final Locator btn = buttons.nth(i);
+				final String title = btn.textContent().trim();
+				final String route = btn.getAttribute("data-route");
+				seen.add(title);
+				if (title.equalsIgnoreCase(ACTIVITY_PAGE_KEYWORD)) {
+					LOGGER.info("Found Activity button: title='{}' route='{}'", title, route);
+					return route;
+				}
+			} catch (final Exception e) {
+				LOGGER.warn("Could not read aux button {}: {}", i, e.getMessage());
+			}
+		}
+		LOGGER.warn("Activity button not found. Available buttons: {}", seen);
+		return null;
+	}
+
+	// ---------------------------------------------------------------------------
+	// Grid editor assertion helpers
+	// ---------------------------------------------------------------------------
+
+	/** Returns true if at least one column header contains the ✏ pencil character. */
 	private boolean verifyEditableHeaderExists() {
 		try {
 			final Locator grid = page.locator("vaadin-grid").first();
-			// Headers can be plain text nodes or Span components created by CColorUtils
-			final Locator headerCells = grid.locator("vaadin-grid-cell-content span, vaadin-grid-sorter");
-			final int count = headerCells.count();
-			for (int i = 0; i < count; i++) {
-				final String text = headerCells.nth(i).innerText();
+			final Locator headerContent = grid.locator(
+					"vaadin-grid-cell[part~='header-cell'] vaadin-grid-cell-content");
+			for (int i = 0; i < headerContent.count(); i++) {
+				final String text = headerContent.nth(i).innerText();
 				if (text != null && text.contains("✏")) {
-					LOGGER.info("Found editable header: '{}'", text.trim());
+					LOGGER.info("Editable header found: '{}'", text.trim());
 					return true;
 				}
 			}
-			// Also check direct text content of grid header cells
-			final Locator allHeaderContent = grid.locator("vaadin-grid-cell[part~='header-cell'] vaadin-grid-cell-content");
-			final int hCount = allHeaderContent.count();
-			for (int i = 0; i < hCount; i++) {
-				final String text = allHeaderContent.nth(i).innerText();
+			// Fallback: any span/sorter inside header area
+			final Locator spans = grid.locator("vaadin-grid-sorter, vaadin-grid-cell-content span");
+			for (int i = 0; i < spans.count(); i++) {
+				final String text = spans.nth(i).innerText();
 				if (text != null && text.contains("✏")) {
-					LOGGER.info("Found editable header (header-cell): '{}'", text.trim());
 					return true;
 				}
 			}
-			LOGGER.warn("No editable (✏) column headers found in the grid");
+			LOGGER.warn("No ✏ column headers found");
 			return false;
 		} catch (final Exception e) {
-			LOGGER.warn("verifyEditableHeaderExists failed: {}", e.getMessage());
+			LOGGER.warn("verifyEditableHeaderExists error: {}", e.getMessage());
 			return false;
 		}
 	}
 
-	/** Returns true if the header of the named column does NOT contain a ✏ pencil. */
+	/** Returns true if the column identified by name does NOT carry a ✏ pencil. */
 	private boolean verifyColumnHeaderIsPlain(final String columnName) {
 		try {
 			final Locator grid = page.locator("vaadin-grid").first();
-			final Locator headerCells = grid.locator("vaadin-grid-cell[part~='header-cell'] vaadin-grid-cell-content");
-			final int count = headerCells.count();
-			for (int i = 0; i < count; i++) {
-				final String text = headerCells.nth(i).innerText();
+			final Locator headerContent = grid.locator(
+					"vaadin-grid-cell[part~='header-cell'] vaadin-grid-cell-content");
+			for (int i = 0; i < headerContent.count(); i++) {
+				final String text = headerContent.nth(i).innerText();
 				if (text == null) {
 					continue;
 				}
-				// Match the column by partial name (case-insensitive) but no pencil
-				if (text.toLowerCase().contains(columnName.toLowerCase()) && !text.contains("✏")) {
-					return true;
+				if (text.toLowerCase().contains(columnName.toLowerCase()) && text.contains("✏")) {
+					return false;
 				}
 			}
-			// Column header not found at all is acceptable (it may not be visible)
 			return true;
 		} catch (final Exception e) {
-			LOGGER.warn("verifyColumnHeaderIsPlain failed: {}", e.getMessage());
+			LOGGER.warn("verifyColumnHeaderIsPlain error: {}", e.getMessage());
 			return true;
 		}
 	}
 
 	/**
-	 * Finds the data cell in the first data row that is in the same column as the
-	 * header matching the given text, then clicks it to activate the inline editor.
+	 * Finds the first data row cell in the column whose ✏-prefixed header matches
+	 * headerText, then clicks it to open the inline editor.
 	 */
 	private boolean clickEditableCellByHeaderText(final String headerText) {
 		try {
 			final Locator grid = page.locator("vaadin-grid").first();
-			// Find the column index whose header contains the ✏ + headerText
-			final Locator headerCells = grid.locator("vaadin-grid-cell[part~='header-cell'] vaadin-grid-cell-content");
-			int targetColumnIndex = -1;
-			final int hCount = headerCells.count();
-			for (int i = 0; i < hCount; i++) {
+			final Locator headerCells = grid.locator(
+					"vaadin-grid-cell[part~='header-cell'] vaadin-grid-cell-content");
+			int targetIndex = -1;
+			for (int i = 0; i < headerCells.count(); i++) {
 				final String text = headerCells.nth(i).innerText();
 				if (text != null && text.contains("✏") && text.toLowerCase().contains(headerText.toLowerCase())) {
-					targetColumnIndex = i;
-					LOGGER.info("Found editable column '{}' at index {}", headerText, i);
+					targetIndex = i;
+					LOGGER.info("Editable column '{}' at header-cell index {}", headerText, i);
 					break;
 				}
 			}
 
-			if (targetColumnIndex < 0) {
-				LOGGER.warn("Editable column header '{}' not found; falling back to first data cell", headerText);
-				// Fallback: click the first non-header cell
-				final Locator allCells = grid.locator("vaadin-grid-cell[part~='body-cell'] vaadin-grid-cell-content");
-				if (allCells.count() > 0) {
-					allCells.first().click();
-					wait_500();
-					return true;
-				}
-				return false;
-			}
-
-			// Click the cell at the same column index in the first data row
-			final Locator bodyCells = grid.locator("vaadin-grid-cell[part~='body-cell'] vaadin-grid-cell-content");
-			if (bodyCells.count() > targetColumnIndex) {
-				bodyCells.nth(targetColumnIndex).click();
+			final Locator bodyCells = grid.locator(
+					"vaadin-grid-cell[part~='body-cell'] vaadin-grid-cell-content");
+			if (targetIndex >= 0 && bodyCells.count() > targetIndex) {
+				bodyCells.nth(targetIndex).click();
 				wait_500();
 				return true;
 			}
-
-			// If column-indexed click didn't work, fall back to first body cell
+			// Fallback: click first body cell
 			if (bodyCells.count() > 0) {
 				LOGGER.warn("Column-indexed click fell back to first body cell");
 				bodyCells.first().click();
 				wait_500();
 				return true;
 			}
+			LOGGER.warn("No body cells found in the grid");
 			return false;
 		} catch (final Exception e) {
-			LOGGER.warn("clickEditableCellByHeaderText failed: {}", e.getMessage());
+			LOGGER.warn("clickEditableCellByHeaderText error: {}", e.getMessage());
 			return false;
 		}
 	}
 
-	/** Returns true if a text input is currently visible inside the vaadin-grid (editor is active). */
+	/** Returns true if a text-field (or numeric-field) input is visible inside the grid editor. */
 	private boolean isEditorInputVisible() {
 		try {
 			final Locator inputs = page.locator("vaadin-grid vaadin-text-field input");
 			if (inputs.count() > 0 && inputs.first().isVisible()) {
 				return true;
 			}
-			// Also accept integer or big-decimal fields as valid editor inputs
-			final Locator numericInputs = page.locator(
+			final Locator numInputs = page.locator(
 					"vaadin-grid vaadin-integer-field input, vaadin-grid vaadin-big-decimal-field input");
-			return numericInputs.count() > 0 && numericInputs.first().isVisible();
+			return numInputs.count() > 0 && numInputs.first().isVisible();
 		} catch (final Exception e) {
-			LOGGER.warn("isEditorInputVisible check failed: {}", e.getMessage());
+			LOGGER.warn("isEditorInputVisible error: {}", e.getMessage());
 			return false;
 		}
 	}
 
-	/** Returns true if any grid cell shows the given text. */
+	/** Returns true if any grid cell contains the given text. */
 	private boolean isTextVisibleInGrid(final String text) {
 		try {
 			final Locator grid = page.locator("vaadin-grid").first();
-			final Locator cells = grid.locator("vaadin-grid-cell-content").filter(
-					new Locator.FilterOptions().setHasText(text));
-			return cells.count() > 0;
+			return grid.locator("vaadin-grid-cell-content")
+					.filter(new Locator.FilterOptions().setHasText(text))
+					.count() > 0;
 		} catch (final Exception e) {
-			LOGGER.warn("isTextVisibleInGrid check failed: {}", e.getMessage());
+			LOGGER.warn("isTextVisibleInGrid error: {}", e.getMessage());
 			return false;
+		}
+	}
+
+	/**
+	 * Closes the active Grid.Editor by clicking outside the data rows.
+	 * The close listener on the editor then triggers auto-save.
+	 */
+	private void closeEditorByClickingOutside() {
+		try {
+			// Click a grid header sorter to move focus away from the editor row
+			final Locator sorter = page.locator("vaadin-grid-sorter").first();
+			if (sorter.count() > 0) {
+				sorter.first().click();
+				return;
+			}
+			// Fallback: click the toolbar area above the grid
+			final Locator toolbar = page.locator(".crud-toolbar, .view-toolbar").first();
+			if (toolbar.count() > 0) {
+				toolbar.first().click();
+				return;
+			}
+			// Last resort: press Escape (closes editor without save in some Vaadin configs)
+			page.keyboard().press("Tab");
+		} catch (final Exception e) {
+			LOGGER.warn("closeEditorByClickingOutside fallback: {}", e.getMessage());
 		}
 	}
 
@@ -330,21 +394,11 @@ public class CGridInlineEditTest extends CBaseUITest {
 		takeScreenshot(String.format("%03d-%s", screenshotCounter++, label), false);
 	}
 
-	/** 200 ms pause – used between rapid UI interactions. */
 	private void wait_200() {
-		try {
-			Thread.sleep(200);
-		} catch (final InterruptedException ie) {
-			Thread.currentThread().interrupt();
-		}
+		try { Thread.sleep(200); } catch (final InterruptedException ie) { Thread.currentThread().interrupt(); }
 	}
 
-	/** 1500 ms pause – waits for auto-save and UI update after editor close. */
 	private void wait_1500() {
-		try {
-			Thread.sleep(1500);
-		} catch (final InterruptedException ie) {
-			Thread.currentThread().interrupt();
-		}
+		try { Thread.sleep(1500); } catch (final InterruptedException ie) { Thread.currentThread().interrupt(); }
 	}
 }
