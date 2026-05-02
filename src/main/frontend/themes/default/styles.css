@@ -7,6 +7,15 @@
 @import url("basedetails.css");
 @import url("gantt.css");
 
+/* Import view: row-level feedback for sheet result grid */
+vaadin-grid::part(import-row-error) {
+    background-color: var(--lumo-error-color-10pct);
+}
+
+vaadin-grid::part(import-row-ok) {
+    background-color: var(--lumo-success-color-10pct);
+}
+
 /* ============================================
    GLOBAL FONT SIZE OVERRIDES
    Reduce Lumo default font sizes by ~15-20% to maximize workspace usage
