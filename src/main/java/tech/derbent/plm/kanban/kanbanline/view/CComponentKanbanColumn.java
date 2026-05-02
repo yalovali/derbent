@@ -67,9 +67,10 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 
 	/** Creates the kanban column component and its layout. */
 	public CComponentKanbanColumn() {
-		setPadding(true);
-		setSpacing(true);
-		getStyle().set("gap", CUIConstants.GAP_TINY);
+		setPadding(false);
+		setSpacing(false);
+		getStyle().set("padding", CUIConstants.PADDING_SMALL);
+		getStyle().set("gap", CUIConstants.GAP_EXTRA_TINY);
 		getStyle().set("flex", "1 1 0");
 		getStyle().set("min-width", "220px");
 		setWidth("0");
@@ -80,31 +81,32 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		getStyle().set("border-radius", "10px").set("box-shadow", "0 1px 3px rgba(0, 0, 0, 0.1)");
 		headerLayout = new CHorizontalLayout();
 		headerLayout.setWidthFull();
-		headerLayout.setSpacing(true);
+		headerLayout.setSpacing(false);
+		headerLayout.getStyle().set("gap", CUIConstants.GAP_TINY);
 		headerLayout.setAlignItems(Alignment.CENTER);
 		title = new CH4("");
 		title.getStyle().set("margin", "0").set("flex-grow", "1");
 		itemCountLabel = new CSpan();
-		itemCountLabel.getStyle().set("background-color", "#E3F2FD").set("color", "#1565C0").set("padding", "4px 8px")
-				.set("border-radius", "6px").set("font-size", "12px").set("font-weight", "700").set("white-space", "nowrap");
+		itemCountLabel.getStyle().set("background-color", "#E3F2FD").set("color", "#1565C0").set("padding", CUIConstants.PADDING_LABEL)
+				.set("border-radius", "6px").set("font-size", "11px").set("font-weight", "700").set("white-space", "nowrap");
 		storyPointTotalLabel = new CSpan();
-		storyPointTotalLabel.getStyle().set("background-color", "#E8F5E9").set("color", "#2E7D32").set("padding", "4px 8px")
-				.set("border-radius", "6px").set("font-size", "12px").set("font-weight", "700").set("white-space", "nowrap");
+		storyPointTotalLabel.getStyle().set("background-color", "#E8F5E9").set("color", "#2E7D32").set("padding", CUIConstants.PADDING_LABEL)
+				.set("border-radius", "6px").set("font-size", "11px").set("font-weight", "700").set("white-space", "nowrap");
 		buttonToggleCompact = new CButton(VaadinIcon.ANGLE_LEFT.create());
 		buttonToggleCompact.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_SMALL);
-		buttonToggleCompact.getStyle().set("padding", "var(--lumo-space-xs)");
+		buttonToggleCompact.getStyle().set("padding", "2px");
 		buttonToggleCompact.getElement().setAttribute("aria-label", "Toggle column width");
 		buttonToggleCompact.getElement().setAttribute("title", "Toggle column width");
 		buttonToggleCompact.addClickListener(event -> setCompactView(!compactView));
 		headerLayout.add(title, itemCountLabel, storyPointTotalLabel, buttonToggleCompact);
 		add(headerLayout);
 		statusesLabel = new CLabelEntity();
-		statusesLabel.getStyle().set("font-size", "11px").set("color", "#666").set("margin-bottom", "0px").set("padding", "0px 0px");
+		statusesLabel.getStyle().set("font-size", "11px").set("color", "#666").set("margin", "0").set("padding", "0");
 		add(statusesLabel);
 		itemsLayout = new CVerticalLayout(false, true, false);
 		itemsLayout.setPadding(false);
 		itemsLayout.setSpacing(false);
-		itemsLayout.getStyle().set("gap", CUIConstants.GAP_TINY);
+		itemsLayout.getStyle().set("gap", CUIConstants.GAP_EXTRA_TINY);
 		itemsLayout.setWidthFull();
 		itemsLayout.setHeight(null);
 		itemsLayout.addClassName("kanban-column-items");

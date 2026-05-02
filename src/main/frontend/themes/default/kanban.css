@@ -1,6 +1,6 @@
 .kanban-board-columns {
     align-items: flex-start;
-    gap: var(--lumo-space-m);
+    gap: var(--lumo-space-s);
 }
 
 /* Equal-width columns by default (flexbox - HorizontalLayout uses display:flex). */

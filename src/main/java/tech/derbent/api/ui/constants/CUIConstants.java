@@ -115,11 +115,12 @@ public final class CUIConstants {
 	public static final String FORM_FIELD_FIXED_WIDTH_TEXTAREA = FIELD_WIDTH_WIDE;
 	/** Extra tiny gap for very compact layouts like grid items: 2px */
 	public static final String GAP_EXTRA_TINY = "2px";
-	public static final String GAP_LARGE = "24px";
-	public static final String GAP_SMALL = "6px";
-	public static final String GAP_STANDARD = "12px";
-	public static final String GAP_TINY = "4px";
-	public static final String GAP_XLARGE = "32px";
+	/** Tight spacing defaults (more compact UI across the app). */
+	public static final String GAP_TINY = "3px";
+	public static final String GAP_SMALL = "4px";
+	public static final String GAP_STANDARD = "8px";
+	public static final String GAP_LARGE = "16px";
+	public static final String GAP_XLARGE = "24px";
 	public static final String GRADIENT_ERROR = "linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%)";
 	/** Info gradient background */
 	public static final String GRADIENT_INFO = "linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)";
