@@ -15,6 +15,7 @@ import tech.derbent.api.companies.service.CCompanyInitializerService;
 import tech.derbent.api.companies.service.CCompanyService;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusInitializerService;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
+import tech.derbent.api.imports.service.CDataImportInitializerService;
 import tech.derbent.api.page.service.CPageEntityInitializerService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
@@ -589,6 +590,7 @@ public class CDataInitializer {
 					CValidationCaseInitializerService.initializeSample(project, minimal);
 					CValidationSessionInitializerService.initializeSample(project, minimal);
 					CKanbanLineInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CDataImportInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					if (minimal) {
 						break;
 					}

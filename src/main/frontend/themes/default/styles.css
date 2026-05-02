@@ -263,23 +263,15 @@ vaadin-scroller{
     flex-wrap: wrap;
     gap: var(--lumo-space-xs);
 }
-#custom-master-toolbar-search {
-    padding-top: 0px !important;
-}
-#custom-master-filter-epic {
-	padding-top: 0px !important;
-}
-#custom-master-filter-feature{
-	padding-top: 0px !important;
-}
-#custom-master-filter-user-story{
-	padding-top: 0px !important;
-}
-#custom-master-filter-responsible{
-	padding-top: 0px !important;
-}
-#custom-master-filter-sprint{
-	padding-top: 0px !important;
+vaadin-text-field[has-label],
+vaadin-combo-box[has-label],
+vaadin-integer-field[has-label],
+vaadin-number-field[has-label],
+vaadin-date-picker[has-label],
+vaadin-select[has-label],
+vaadin-email-field[has-label],
+vaadin-time-picker[has-label] {
+    padding-top: 0 !important;
 }
 
 /* ============================================

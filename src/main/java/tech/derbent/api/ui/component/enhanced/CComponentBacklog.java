@@ -3,12 +3,16 @@ package tech.derbent.api.ui.component.enhanced;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Span;
+import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
@@ -99,6 +103,12 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?,
 	private CProjectItem<?, ?> selectedBacklogItem;
 	/** Selection listeners for notification pattern */
 	private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new HashSet<>();
+	/** Reference to the toolbar so the parent filter can be added after setup */
+	private CComponentFilterToolbar backlogToolbar;
+	/** ComboBox for filtering backlog items by their parent (only in compact mode) */
+	private ComboBox<CProjectItem<?, ?>> parentFilterComboBox;
+	/** Guard flag to prevent re-entrant refreshGrid() calls when updating parent filter options */
+	private boolean inParentFilterUpdate = false;
 
 	/** Constructor for backlog component.
 	 * @param project project to load backlog items for (required) */
@@ -118,6 +128,9 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?,
 		CSpringContext.getBean(CMeetingService.class);
 		CSpringContext.getBean(CIssueService.class);
 		setupComponent();
+		if (compactMode) {
+			setupParentFilter();
+		}
 		setDynamicHeight("600px");
 		// CRITICAL: Select first entity type BEFORE enabling persistence
 		// This ensures it's the "initial default" that gets saved on first load
@@ -172,11 +185,6 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?,
 							sprintableItem.getStatus().getName() != null ? sprintableItem.getStatus().getName() : "");
 				}
 			}).setKey("status").setHeader("Status").setWidth("120px").setFlexGrow(0).setResizable(true);
-			grid.addComponentColumn(item -> item != null && item.getAssignedTo() != null
-					? CLabelEntity.createCompactUserLabel(item.getAssignedTo()) : new Span("")).setKey("assignedTo")
-					.setHeader("Responsible").setWidth("170px").setFlexGrow(0).setResizable(true);
-			grid.addDateColumn(CProjectItem::getStartDate, "Start", "startDate");
-			grid.addDateColumn(CProjectItem::getEndDate, "End", "endDate");
 			grid.addStoryPointColumn(item -> {
 				Check.instanceOf(item, ISprintableItem.class, "Backlog item must implement ISprintableItem");
 				return (ISprintableItem) item;
@@ -196,17 +204,85 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?,
 	/** Factory method for search toolbar - overridden to support compact mode configuration. */
 	@Override
 	protected CComponentFilterToolbar create_gridSearchToolbar() {
-		// Create toolbar with compact config if needed
 		final CComponentGridSearchToolbar.ToolbarConfig config = new CComponentGridSearchToolbar.ToolbarConfig();
 		if (compactMode) {
-			// Compact mode: hide all filters, leaving only the type selector combobox
 			config.setIdFilter(false).setNameFilter(false).setDescriptionFilter(false).setStatusFilter(false)
 					.setClearButton(false);
 		} else {
-			// Normal mode: show all filters
 			config.showAll();
 		}
-		return new CComponentFilterToolbar(config);
+		backlogToolbar = new CComponentFilterToolbar(config);
+		return backlogToolbar;
+	}
+
+	/** Applies the parent filter to the current list data view. Called after applyFilters() sets items. */
+	private void applyParentFilter() {
+		if (parentFilterComboBox == null || getGrid() == null) {
+			return;
+		}
+		final CProjectItem<?, ?> selectedParent = parentFilterComboBox.getValue();
+		if (selectedParent == null || selectedParent.getId() == null) {
+			return;
+		}
+		getGrid().getListDataView().addFilter(item -> {
+			if (!(item instanceof final IHasParentRelation iHasParent)) {
+				return false;
+			}
+			final CProjectItem<?, ?> parent = iHasParent.getParentItem();
+			return parent != null && selectedParent.getId().equals(parent.getId());
+		});
+	}
+
+	/** Updates the parent filter ComboBox options from the currently visible grid items. */
+	private void updateParentFilterOptions() {
+		if (parentFilterComboBox == null || getGrid() == null) {
+			return;
+		}
+		inParentFilterUpdate = true;
+		try {
+			final List<CProjectItem<?, ?>> parents = getGrid().getListDataView().getItems()
+					.filter(item -> item instanceof IHasParentRelation)
+					.map(item -> ((IHasParentRelation) item).getParentItem()).filter(Objects::nonNull)
+					.filter(p -> p.getId() != null).distinct().collect(Collectors.toList());
+			final CProjectItem<?, ?> savedValue = parentFilterComboBox.getValue();
+			parentFilterComboBox.setItems(parents);
+			if (savedValue != null
+					&& parents.stream().anyMatch(p -> p.getId().equals(savedValue.getId()))) {
+				parentFilterComboBox.setValue(savedValue);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error updating parent filter options reason={}", e.getMessage());
+		} finally {
+			inParentFilterUpdate = false;
+		}
+	}
+
+	/** Sets up the parent filter ComboBox in the compact toolbar. Called once after setupComponent(). */
+	private void setupParentFilter() {
+		if (backlogToolbar == null) {
+			return;
+		}
+		parentFilterComboBox = new ComboBox<>();
+		parentFilterComboBox.setPlaceholder("Parent");
+		parentFilterComboBox.setItemLabelGenerator(item -> item != null ? item.getName() : "");
+		parentFilterComboBox.setClearButtonVisible(true);
+		parentFilterComboBox.setWidth("130px");
+		backlogToolbar.addFilterComponent(parentFilterComboBox);
+		parentFilterComboBox.addValueChangeListener(e -> {
+			if (!inParentFilterUpdate) {
+				refreshGrid();
+			}
+		});
+		// Second listener fires after the base class applyFilters() listener
+		backlogToolbar.addFilterChangeListener(event -> applyParentFilter());
+	}
+
+	/** Overrides to update parent filter options and re-apply parent filter after items are reloaded. */
+	@Override
+	protected void on_comboBoxEntityType_selectionChanged(final EntityTypeConfig<?> config) {
+		super.on_comboBoxEntityType_selectionChanged(config);
+		updateParentFilterOptions();
+		applyParentFilter();
 	}
 
 	@Override
