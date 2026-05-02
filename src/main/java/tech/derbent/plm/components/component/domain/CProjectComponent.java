@@ -64,7 +64,9 @@ public class CProjectComponent extends CProjectItem<CProjectComponent, CProjectC
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
 			displayName = "Component Type", required = false, readOnly = false, description = "Type category of the component", hidden = false,
-			dataProviderBean = "CComponentTypeService", setBackgroundFromColor = true, useIcon = true
+			dataProviderBean = "CProjectComponentTypeService", setBackgroundFromColor = true, useIcon = true
+			// WHY: the actual Spring service bean for CProjectComponentType is CProjectComponentTypeService; using a non-existing
+			// bean breaks dynamic page form building (and full Playwright navigation).
 	)
 	private CProjectComponentType entityType;
 	/** Default constructor for JPA. */

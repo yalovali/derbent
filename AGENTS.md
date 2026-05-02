@@ -29,7 +29,8 @@ These are thin pointers. The shared `.github/agents/` system is the SSOT — eve
 - Use the orchestrated agent workflow for every task.
 - For code tasks, run compile with warnings visible and fix warnings introduced in touched files.
 - For completed tasks, run at least one selective Playwright test unless the user explicitly forbids tests.
-- Add explanatory comments only when changed logic is not obvious.
+- Add **WHY** comments when changed logic is not obvious or spans layers (UI↔service↔import).
+- Prefer small refactors that reduce complexity/duplication when touching code.
 - Finalize completed tasks with a git commit and push unless the user explicitly says not to or push is unavailable.
 
 ## Critical implementation guards

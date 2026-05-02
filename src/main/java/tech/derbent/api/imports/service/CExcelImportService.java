@@ -148,6 +148,10 @@ public class CExcelImportService {
                 continue;
             }
             final CImportRowResult rowResult = handler.importRow(rowData, project, r + 1, options);
+            // WHY: Excel init is often used interactively; row-level logs make CI/Playwright failures diagnosable.
+            if (rowResult != null && rowResult.isError()) {
+                LOGGER.warn("Import row error (sheet={}, row={}): {}", sheet.getSheetName(), r + 1, rowResult.getErrorMessage());
+            }
             sheetResult.addRowResult(rowResult);
         }
         return sheetResult;

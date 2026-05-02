@@ -1,7 +1,6 @@
 package tech.derbent.api.authentication.view;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -39,7 +38,7 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.imports.domain.CImportOptions;
 import tech.derbent.api.imports.domain.CImportResult;
 import tech.derbent.api.imports.service.CExcelImportService;
-import tech.derbent.api.imports.service.CSystemInitExcelGenerator;
+import tech.derbent.api.imports.service.CExcelTemplateService;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CColorAwareComboBox;
@@ -85,22 +84,25 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	private final Environment environment;
 	private final Div errorMessage = new Div();
 	private final CExcelImportService excelImportService;
+	private final CExcelTemplateService excelTemplateService;
 	private final Button loginButton = new CButton("Login", CColorUtils.createStyledIcon("vaadin:sign-in", CColorUtils.CRUD_SAVE_COLOR));
 	private final PasswordField passwordField = new PasswordField();
 	private final Button resetDbButton = new CButton("DB Full", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
 	private final Button resetDbMinimalButton = new CButton("DB Min", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
-	private final Button resetDbExcelButton = new CButton("DB Excel", CColorUtils.createStyledIcon("vaadin:file-table", CColorUtils.CRUD_UPDATE_COLOR));
+	private final Button resetDbExcelButton = new CButton("DB Excel", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
+	// WHY: keep the Excel bootstrap entry point visually aligned with DB reset buttons so testers use it by habit.
 	private final CComboBox<String> schemaSelector = new CComboBox<>();
 	private final ISessionService sessionService;
 	private final TextField usernameField = new TextField();
 
 	/** Constructor sets up the custom login form with basic Vaadin components. */
 	public CCustomLoginView(final ISessionService sessionService, final CCompanyService companyService, final Environment environment,
-			final CExcelImportService excelImportService) {
+			final CExcelImportService excelImportService, final CExcelTemplateService excelTemplateService) {
 		this.sessionService = sessionService;
 		this.companyService = companyService;
 		this.environment = environment;
 		this.excelImportService = excelImportService;
+		this.excelTemplateService = excelTemplateService;
 		addClassNames("custom-login-view");
 		setSizeFull();
 		setupForm();
@@ -235,9 +237,10 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 			options.setRollbackOnError(true);
 			options.setSkipUnknownSheets(true);
 			options.setAutoCreateLookups(true);
-			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			CSystemInitExcelGenerator.writeSystemInitWorkbook(baos);
-			return excelImportService.importExcel(new ByteArrayInputStream(baos.toByteArray()), options, project);
+			try (final InputStream in = excelTemplateService.openSystemInitTemplate()) {
+				// WHY: importing a committed workbook makes the Excel init reproducible across machines and CI.
+				return excelImportService.importExcel(in, options, project);
+			}
 		} finally {
 			UI.setCurrent(null);
 			VaadinSession.setCurrent(null);

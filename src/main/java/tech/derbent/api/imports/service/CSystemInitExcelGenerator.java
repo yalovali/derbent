@@ -24,6 +24,8 @@ public final class CSystemInitExcelGenerator {
         createStatusSheet(wb);
         createActivityTypeSheet(wb);
         createIssueTypeSheet(wb);
+        createGridEntitySheet(wb);
+        createPageEntitySheet(wb);
         CSampleImportExcelGenerator.createActivitySheet(wb);
         CSampleImportExcelGenerator.createIssueSheet(wb);
         return wb;
@@ -88,6 +90,51 @@ public final class CSystemInitExcelGenerator {
         CSampleImportExcelGenerator.addRow(sheet, 6, null, "Feature Request", "#7B1FA2");
 
         for (int col = 0; col <= 1; col++) {
+            sheet.autoSizeColumn(col);
+        }
+    }
+
+    private static void createGridEntitySheet(final Workbook wb) {
+        final Sheet sheet = wb.createSheet("Grid Entity");
+        final CellStyle headerStyle = CSampleImportExcelGenerator.createHeaderStyle(wb);
+        final CellStyle commentStyle = CSampleImportExcelGenerator.createCommentStyle(wb);
+
+        CSampleImportExcelGenerator.addRow(sheet, 0, commentStyle, "# Grid Entities (view configuration)");
+        CSampleImportExcelGenerator.addRow(sheet, 1, commentStyle,
+                "# Columns: Name (required), Data Service Bean (required), Column Fields (csv), Editable Column Fields (csv), None Grid");
+        CSampleImportExcelGenerator.addRow(sheet, 2, headerStyle, "Name", "Data Service Bean", "Column Fields",
+                "Editable Column Fields", "None Grid");
+
+        CSampleImportExcelGenerator.addRow(sheet, 3, null,
+                "Activities Grid", "CActivityService", "id,name,status,dueDate,assignedTo", "name,status,dueDate", "false");
+        CSampleImportExcelGenerator.addRow(sheet, 4, null,
+                "Issues Grid", "CIssueService", "id,name,status,dueDate,assignedTo,linkedActivity", "name,status,dueDate", "false");
+
+        for (int col = 0; col <= 4; col++) {
+            sheet.autoSizeColumn(col);
+        }
+    }
+
+    private static void createPageEntitySheet(final Workbook wb) {
+        final Sheet sheet = wb.createSheet("Page Entity");
+        final CellStyle headerStyle = CSampleImportExcelGenerator.createHeaderStyle(wb);
+        final CellStyle commentStyle = CSampleImportExcelGenerator.createCommentStyle(wb);
+
+        CSampleImportExcelGenerator.addRow(sheet, 0, commentStyle, "# Page Entities (navigation pages)");
+        CSampleImportExcelGenerator.addRow(sheet, 1, commentStyle,
+                "# Columns: Name, Menu Title, Menu Order, Page Title, Page Service, Icon, Requires Authentication, Grid Entity, Content");
+        CSampleImportExcelGenerator.addRow(sheet, 2, headerStyle, "Name", "Menu Title", "Menu Order", "Page Title", "Page Service", "Icon",
+                "Requires Authentication", "Grid Entity", "Content");
+
+        // WHY: menu titles must be unique within project; pick stable names under the "Project" root.
+        CSampleImportExcelGenerator.addRow(sheet, 3, null,
+                "Activities Page", "Project.Activities (Excel)", "10.201", "Activities (Excel)", "CPageServiceActivity", "vaadin:tasks", "true",
+                "Activities Grid", "");
+        CSampleImportExcelGenerator.addRow(sheet, 4, null,
+                "Issues Page", "Project.Issues (Excel)", "10.202", "Issues (Excel)", "CPageServiceIssue", "vaadin:bug", "true",
+                "Issues Grid", "");
+
+        for (int col = 0; col <= 8; col++) {
             sheet.autoSizeColumn(col);
         }
     }

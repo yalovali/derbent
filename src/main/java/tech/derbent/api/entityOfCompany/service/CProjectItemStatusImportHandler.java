@@ -63,7 +63,10 @@ public class CProjectItemStatusImportHandler implements IEntityImportHandler<CPr
         if (project.getCompany() == null) {
             return CImportRowResult.error(rowNumber, "Project company is required to create statuses", rowData);
         }
-        final CProjectItemStatus status = new CProjectItemStatus(name, project.getCompany());
+        // WHY: system init Excel is intended to be re-runnable (and also safe on top of code-initialized reference data).
+        // Upsert-by-name avoids unique constraint violations.
+        final CProjectItemStatus status = statusService.findByNameAndCompany(name, project.getCompany())
+                .orElseGet(() -> new CProjectItemStatus(name, project.getCompany()));
 
         final String finalStr = rowData.getOrDefault("finalstatus", "").trim();
         if (!finalStr.isBlank()) {

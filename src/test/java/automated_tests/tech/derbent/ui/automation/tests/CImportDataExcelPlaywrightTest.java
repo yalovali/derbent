@@ -20,6 +20,7 @@ import com.microsoft.playwright.options.AriaRole;
 import automated_tests.tech.derbent.ui.automation.CBaseUITest;
 import tech.derbent.Application;
 import tech.derbent.api.imports.service.CSampleImportExcelGenerator;
+import tech.derbent.api.imports.service.CExcelTemplateService;
 
 // KEYWORDS: Import, Excel, Samples, Playwright
 @SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = Application.class)
@@ -72,6 +73,42 @@ public class CImportDataExcelPlaywrightTest extends CBaseUITest {
 		final Sheet unknown = wb.createSheet("TotallyUnknownSheet");
 		unknown.createRow(0).createCell(0).setCellValue("name");
 		unknown.createRow(1).createCell(0).setCellValue("Some data");
+	}
+
+	@Test
+	@DisplayName ("✅ Import committed system init workbook (non-dry-run)")
+	void testImportCommittedSystemInitWorkbook() throws Exception {
+		if (!isBrowserAvailable()) {
+			LOGGER.warn("⚠️ Browser not available - skipping UI test");
+			Assumptions.assumeTrue(false, "Browser not available");
+			return;
+		}
+		final Path template = Path.of("src/main/resources/" + CExcelTemplateService.SYSTEM_INIT_TEMPLATE_RESOURCE_PATH);
+		if (!Files.exists(template)) {
+			LOGGER.warn("⚠️ System init template not found at {} - skipping", template);
+			Assumptions.assumeTrue(false, "Template not found");
+			return;
+		}
+		loginToApplication();
+		assertTrue(navigateByMenuSearch("Import Data"), "Could not navigate to Import Data");
+		page.locator("vaadin-upload input[type='file']").setInputFiles(template);
+		final Locator dryRun = page.getByLabel("Dry run (validate only, do not save)");
+		if (dryRun.isChecked()) {
+			dryRun.uncheck();
+		}
+		final Locator autoCreate = page.getByLabel("Auto-create missing types/statuses (opt-in)");
+		if (!autoCreate.isChecked()) {
+			autoCreate.check();
+		}
+		final Locator importButton =
+				page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Import").setExact(true));
+		waitForButtonEnabled(importButton);
+		importButton.click();
+		page.waitForSelector("text=Import Summary", new Page.WaitForSelectorOptions().setTimeout(60000));
+		assertTrue(page.locator("text=Errors: 0").count() > 0, "Expected zero errors");
+		assertTrue(page.locator("text=Imported").count() > 0, "Expected imported rows");
+		assertTrue(page.locator("text=Page Entity").count() > 0, "Expected Page Entity sheet result");
+		takeScreenshot("import-data-system-init", false);
 	}
 
 	private static Path writeComplexImportWorkbook() throws Exception {

@@ -62,7 +62,10 @@ public class CIssueTypeImportHandler implements IEntityImportHandler<CIssueType>
         if (project.getCompany() == null) {
             return CImportRowResult.error(rowNumber, "Project company is required to create issue types", rowData);
         }
-        final CIssueType type = new CIssueType(name, project.getCompany());
+        // WHY: system init Excel is intended to be re-runnable (and also safe on top of code-initialized reference data).
+        // Upsert-by-name avoids unique constraint violations.
+        final CIssueType type = issueTypeService.findByNameAndCompany(name, project.getCompany())
+                .orElseGet(() -> new CIssueType(name, project.getCompany()));
         final String color = rowData.getOrDefault("color", "").trim();
         if (!color.isBlank()) {
             type.setColor(color);

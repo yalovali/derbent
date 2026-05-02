@@ -112,7 +112,8 @@ public final class CSampleImportExcelGenerator {
                 "Testing",
                 LocalDate.of(2025, 6, 25),
                 "4.5",
-                "qa");
+                "admin");
+        // WHY: keep the default template importable on top of sample data; 'qa' user may not exist in all environments.
 
         addActivityRow(sheet, 8, dateStyle,
                 "Document rollout plan",
@@ -122,6 +123,19 @@ public final class CSampleImportExcelGenerator {
                 LocalDate.of(2025, 6, 18),
                 "2",
                 "");
+
+        // Formula-based due date (tests formula evaluation + date formatting)
+        addActivityRow(sheet, 9, dateStyle,
+                "Verify formula date",
+                "Due date is generated via formula: E6+14 (safe POI-evaluable date arithmetic)",
+                "To Do",
+                "Testing",
+                LocalDate.of(2025, 6, 1),
+                "1",
+                "");
+        // WHY: Apache POI does not support every Excel function (e.g. TODAY) equally; date math is reliable.
+        sheet.getRow(9).getCell(4).setCellFormula("E6+14");
+        sheet.getRow(9).getCell(4).setCellStyle(dateStyle);
 
         // Auto-size columns
         for (int col = 0; col <= 6; col++) {
@@ -137,35 +151,41 @@ public final class CSampleImportExcelGenerator {
 
         addRow(sheet, 0, commentStyle, "# Issue import template");
         addRow(sheet, 1, commentStyle,
-                "# Columns: Name (required), Description, Status, Issue Type, Due Date");
+                "# Columns: Name (required), Description, Status, Issue Type, Due Date, Linked Activity, Assigned To");
         addRow(sheet, 2, commentStyle,
                 "# Issue Type must match an existing issue type (e.g. Bug, Improvement, Task, Feature Request, Documentation)");
 
         // Header (intentionally includes extra spaces)
-        addRow(sheet, 3, headerStyle, "Name", "Description", "Status", "Issue  Type", "Due   Date");
+        addRow(sheet, 3, headerStyle, "Name", "Description", "Status", "Issue  Type", "Due   Date", "Linked Activity", "Assigned To");
 
         addIssueRow(sheet, 4, dateStyle,
                 "Login button broken on Safari",
                 "Login button does not respond on Safari 16\nRepro: iPhone 15 Pro / iOS 19",
                 "To Do",
                 "Bug",
-                LocalDate.of(2025, 6, 10));
+                LocalDate.of(2025, 6, 10),
+                "Implement authentication",
+                "admin");
 
         addIssueRow(sheet, 5, dateStyle,
                 "Improve dashboard load time",
                 "Dashboard takes > 5s to load with 100+ projects",
                 "To Do",
                 "Improvement",
-                LocalDate.of(2025, 6, 30));
+                LocalDate.of(2025, 6, 30),
+                "Write unit tests",
+                "admin");
 
         addIssueRow(sheet, 6, dateStyle,
                 "Missing export button in reports",
                 "Add CSV export to all report pages",
                 "To Do",
                 "Feature Request",
-                LocalDate.of(2025, 7, 5));
+                LocalDate.of(2025, 7, 5),
+                "Document rollout plan",
+                "");
 
-        for (int col = 0; col <= 4; col++) {
+        for (int col = 0; col <= 6; col++) {
             sheet.autoSizeColumn(col);
         }
     }
@@ -201,7 +221,7 @@ public final class CSampleImportExcelGenerator {
 
     private static void addIssueRow(final Sheet sheet, final int rowIndex, final CellStyle dateStyle,
             final String name, final String description, final String status, final String issueType,
-            final LocalDate dueDate) {
+            final LocalDate dueDate, final String linkedActivity, final String assignedTo) {
         final Row row = sheet.createRow(rowIndex);
         row.createCell(0).setCellValue(name);
         row.createCell(1).setCellValue(description);
@@ -210,6 +230,8 @@ public final class CSampleImportExcelGenerator {
         final var dueCell = row.createCell(4);
         dueCell.setCellValue(java.sql.Date.valueOf(dueDate));
         dueCell.setCellStyle(dateStyle);
+        row.createCell(5).setCellValue(linkedActivity);
+        row.createCell(6).setCellValue(assignedTo);
     }
 
     /** Command-line entry point: generates sample.xlsx in current directory. */

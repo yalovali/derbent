@@ -38,8 +38,8 @@ import tech.derbent.api.imports.domain.CImportSheetResult;
 import tech.derbent.api.imports.service.CDataImportService;
 import tech.derbent.api.imports.service.CExcelImportService;
 import tech.derbent.api.imports.service.CImportHandlerRegistry;
+import tech.derbent.api.imports.service.CExcelTemplateService;
 import tech.derbent.api.imports.service.CSampleImportExcelGenerator;
-import tech.derbent.api.imports.service.CSystemInitExcelGenerator;
 import tech.derbent.api.menu.MyMenu;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.session.service.ISessionService;
@@ -64,6 +64,7 @@ public final class CViewImport extends CAbstractPage {
     private final CDataImportService dataImportService;
     private final CImportHandlerRegistry handlerRegistry;
     private final ISessionService sessionService;
+    private final CExcelTemplateService excelTemplateService;
 
     // Upload state
     private InputStream uploadedStream;
@@ -82,11 +83,13 @@ public final class CViewImport extends CAbstractPage {
     private Span supportedTypesSpan;
 
     public CViewImport(final CExcelImportService importService, final CDataImportService dataImportService,
-            final CImportHandlerRegistry handlerRegistry, final ISessionService sessionService) {
+            final CImportHandlerRegistry handlerRegistry, final ISessionService sessionService,
+            final CExcelTemplateService excelTemplateService) {
         this.importService = importService;
         this.dataImportService = dataImportService;
         this.handlerRegistry = handlerRegistry;
         this.sessionService = sessionService;
+        this.excelTemplateService = excelTemplateService;
     }
 
     @Override
@@ -179,7 +182,7 @@ public final class CViewImport extends CAbstractPage {
         templateAnchor.getElement().setAttribute("download", true);
         templateAnchor.addClassNames(LumoUtility.FontSize.SMALL);
 
-        final Anchor systemInitAnchor = new Anchor(createSystemInitTemplateResource(), "Download system init template");
+        final Anchor systemInitAnchor = new Anchor(createSystemInitTemplateResource(), "Download system init template (committed)");
         systemInitAnchor.getElement().setAttribute("download", true);
         systemInitAnchor.addClassNames(LumoUtility.FontSize.SMALL);
 
@@ -201,13 +204,12 @@ public final class CViewImport extends CAbstractPage {
     }
 
     private StreamResource createSystemInitTemplateResource() {
-        return new StreamResource("system_init_template.xlsx", () -> {
+        return new StreamResource("system_init.xlsx", () -> {
             try {
-                final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                CSystemInitExcelGenerator.writeSystemInitWorkbook(baos);
-                return new java.io.ByteArrayInputStream(baos.toByteArray());
+                // WHY: serve the committed template so what users download matches what "DB Excel" imports.
+                return excelTemplateService.openSystemInitTemplate();
             } catch (final Exception e) {
-                LOGGER.error("Failed to generate system init template reason={}", e.getMessage());
+                LOGGER.error("Failed to open system init template reason={}", e.getMessage());
                 return new java.io.ByteArrayInputStream(new byte[0]);
             }
         });

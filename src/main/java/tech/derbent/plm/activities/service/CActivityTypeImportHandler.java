@@ -62,7 +62,10 @@ public class CActivityTypeImportHandler implements IEntityImportHandler<CActivit
         if (project.getCompany() == null) {
             return CImportRowResult.error(rowNumber, "Project company is required to create activity types", rowData);
         }
-        final CActivityType type = new CActivityType(name, project.getCompany());
+        // WHY: system init Excel is intended to be re-runnable (and also safe on top of code-initialized reference data).
+        // Upsert-by-name avoids unique constraint violations.
+        final CActivityType type = activityTypeService.findByNameAndCompany(name, project.getCompany())
+                .orElseGet(() -> new CActivityType(name, project.getCompany()));
         final String color = rowData.getOrDefault("color", "").trim();
         if (!color.isBlank()) {
             type.setColor(color);
