@@ -587,7 +587,8 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		service.delete(entity.getId());
 	}
 
-	private Map<String, CProjectItem<?, ?>> filterSprintableItems(final Map<String, CProjectItem<?, ?>> hierarchyItemsByKey) {
+	private Map<String, CProjectItem<?, ?>>
+			filterSprintableItems(final Map<String, CProjectItem<?, ?>> hierarchyItemsByKey) {
 		final Map<String, CProjectItem<?, ?>> sprintableItemsByKey = new HashMap<>();
 		for (final Map.Entry<String, CProjectItem<?, ?>> entry : hierarchyItemsByKey.entrySet()) {
 			if (entry.getValue() instanceof ISprintableItem) {
@@ -967,6 +968,7 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		}
 	}
 
+	@SuppressWarnings ("unchecked")
 	private void openCopyToDialog(final CGnntItem context) {
 		try {
 			final CEntityDB<?> entity = resolveEntityContext(context);
@@ -974,8 +976,10 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 				CNotificationService.showWarning("Select a saved backlog item first");
 				return;
 			}
-			@SuppressWarnings ({"rawtypes", "unchecked"})
-			final CEntityDB entityRaw = (CEntityDB) entity;
+			@SuppressWarnings ({
+					"rawtypes"
+			})
+			final CEntityDB entityRaw = entity;
 			openCopyToDialogForEntity(entityRaw);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to open copy-to dialog: {}", e.getMessage(), e);

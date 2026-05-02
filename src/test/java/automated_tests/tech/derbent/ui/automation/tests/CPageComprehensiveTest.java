@@ -87,8 +87,9 @@ import tech.derbent.Application;
  * @see IControlSignature */
 @SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = Application.class)
 @TestPropertySource (properties = {
-		"spring.profiles.active=derbent", "spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa", "spring.datasource.password=",
-		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.hibernate.ddl-auto=create-drop"
+		"spring.profiles.active=derbent", "spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa",
+		"spring.datasource.password=", "spring.datasource.driver-class-name=org.h2.Driver",
+		"spring.jpa.hibernate.ddl-auto=create-drop"
 })
 @DisplayName ("🎯 Comprehensive Page Testing Framework")
 public class CPageComprehensiveTest extends CBaseUITest {
@@ -201,14 +202,15 @@ public class CPageComprehensiveTest extends CBaseUITest {
 	// ========================================
 	private final IComponentTester userTester = new CUserComponentTester();
 
-	/** Check Calimero status after login by examining server logs. Logs ERROR if Calimero is not running, WARNING if status unclear. Then navigates
-	 * to BAB System Settings for comprehensive component testing. */
+	/** Check Calimero status after login by examining server logs. Logs ERROR if Calimero is not running, WARNING if status unclear. Then navigates to
+	 * BAB System Settings for comprehensive component testing. */
 	private void checkCalimeroStatusAfterLogin() {
 		try {
 			LOGGER.info("   🔍 Checking Calimero service status from logs...");
 			// Check browser console for Calimero connection errors
-			final boolean hasCalimeroErrors = page.locator("body").evaluate("() => { return window.console && window.console.error ? true : false; }")
-					.toString().contains("true");
+			final boolean hasCalimeroErrors = page.locator("body")
+					.evaluate("() => { return window.console && window.console.error ? true : false; }").toString()
+					.contains("true");
 			if (hasCalimeroErrors) {
 				LOGGER.error("   ❌ ERROR: Calimero service connection errors detected in browser console");
 				LOGGER.error("   ❌ Calimero is NOT running on port 8077");
@@ -223,7 +225,8 @@ public class CPageComprehensiveTest extends CBaseUITest {
 			// Wait for buttons to load with multiple waits
 			wait_2000();
 			// Try different button text variations
-			Locator settingsButton = page.locator("button").filter(new Locator.FilterOptions().setHasText("BAB Gateway Settings")).first();
+			Locator settingsButton = page.locator("button")
+					.filter(new Locator.FilterOptions().setHasText("BAB Gateway Settings")).first();
 			if (settingsButton.count() == 0) {
 				LOGGER.warn("   ⚠️ WARNING: 'BAB Gateway Settings' button not found, trying alternative selectors...");
 				// Try by data-title attribute
@@ -370,9 +373,9 @@ public class CPageComprehensiveTest extends CBaseUITest {
 	/** Find the component tester responsible for a given control signature. */
 	private IComponentTester findTesterForSignature(@SuppressWarnings ("unused") final IControlSignature signature) {
 		// Check each tester to see if it can test this signature
-		final List<IComponentTester> allTesters = List.of(crudToolbarTester, cloneTester, gridTester, attachmentTester, commentTester, linkTester,
-				projectTester, projectUserSettingsTester, userTester, statusFieldTester, datePickerTester, reportTester, babInterfaceListTester,
-				calimeroStatusTester);
+		final List<IComponentTester> allTesters = List.of(crudToolbarTester, cloneTester, gridTester, attachmentTester,
+				commentTester, linkTester, projectTester, projectUserSettingsTester, userTester, statusFieldTester,
+				datePickerTester, reportTester, babInterfaceListTester, calimeroStatusTester);
 		for (final IComponentTester tester : allTesters) {
 			if (tester.canTest(page)) {
 				return tester;
@@ -412,42 +415,55 @@ public class CPageComprehensiveTest extends CBaseUITest {
 	private List<IControlSignature> initializeControlSignatures() {
 		return List.of(
 				CControlSignature.forSelectorsMinMatch("CRUD Toolbar Signature",
-						List.of("#cbutton-new", "#cbutton-save", "#cbutton-delete", "#cbutton-refresh", "#cbutton-edit", "#cbutton-cancel"), 2,
-						crudToolbarTester),
+						List.of("#cbutton-new", "#cbutton-save", "#cbutton-delete", "#cbutton-refresh", "#cbutton-edit",
+								"#cbutton-cancel"),
+						2, crudToolbarTester),
 				CControlSignature.forSelector("CRUD Save Button Signature", "#cbutton-save", crudToolbarTester),
 				CControlSignature.forSelector("CRUD Delete Button Signature", "#cbutton-delete", crudToolbarTester),
-				CControlSignature
-						.forSelector("Clone Button Signature", "#cbutton-copy-to, #cbutton-clone, [id*='copy-to'], [id*='clone']", cloneTester),
-				CControlSignature.forSelector("Grid Signature", "vaadin-grid, vaadin-grid-pro, so-grid, c-grid", gridTester),
-				CControlSignature.forSelector("Attachment Signature", "#custom-attachment-component, vaadin-upload, [id*='attachment']",
-						attachmentTester),
+				CControlSignature.forSelector("Clone Button Signature",
+						"#cbutton-copy-to, #cbutton-clone, [id*='copy-to'], [id*='clone']", cloneTester),
+				CControlSignature.forSelector("Grid Signature", "vaadin-grid, vaadin-grid-pro, so-grid, c-grid",
+						gridTester),
+				CControlSignature.forSelector("Attachment Signature",
+						"#custom-attachment-component, vaadin-upload, [id*='attachment']", attachmentTester),
 				CControlSignature.forSelector("Attachment Tab Signature",
 						"vaadin-tab:has-text('Attachments'), vaadin-tab:has-text('Attachment'), vaadin-accordion-panel:has-text('Attachments')",
 						attachmentTester),
-				CControlSignature.forSelector("Comment Signature", "#custom-comment-component, [id*='comment']", commentTester),
+				CControlSignature.forSelector("Comment Signature", "#custom-comment-component, [id*='comment']",
+						commentTester),
 				CControlSignature.forSelector("Comment Tab Signature",
 						"vaadin-tab:has-text('Comments'), vaadin-tab:has-text('Comment'), vaadin-accordion-panel:has-text('Comments')",
 						commentTester),
-				CControlSignature.forSelector("Link Signature", "#custom-links-component, #custom-links-grid, #custom-links-toolbar", linkTester),
+				CControlSignature.forSelector("Link Signature",
+						"#custom-links-component, #custom-links-grid, #custom-links-toolbar", linkTester),
 				CControlSignature.forSelector("Link Tab Signature",
-						"vaadin-tab:has-text('Links'), vaadin-tab:has-text('Link'), vaadin-accordion-panel:has-text('Links')", linkTester),
-				CControlSignature.forSelector("Project View Signature", "#field-entityType, label:has-text('Project Type')", projectTester),
-				CControlSignature.forSelector("Project User Settings Signature", "#cbutton-add-relation", projectUserSettingsTester),
-				CControlSignature.forSelector("User View Signature", "#field-login, #field-email, label:has-text('Login')", userTester),
-				CControlSignature.forSelector("Status Combo Signature", "#field-status, vaadin-combo-box[id*='status'], [id*='status-combo']",
-						statusFieldTester),
-				CControlSignature.forSelector("Date Picker Signature", "vaadin-date-picker, vaadin-date-time-picker, [id*='date']", datePickerTester),
+						"vaadin-tab:has-text('Links'), vaadin-tab:has-text('Link'), vaadin-accordion-panel:has-text('Links')",
+						linkTester),
+				CControlSignature.forSelector("Project View Signature",
+						"#field-entityType, label:has-text('Project Type')", projectTester),
+				CControlSignature.forSelector("Project User Settings Signature", "#cbutton-add-relation",
+						projectUserSettingsTester),
+				CControlSignature.forSelector("User View Signature",
+						"#field-login, #field-email, label:has-text('Login')", userTester),
+				CControlSignature.forSelector("Status Combo Signature",
+						"#field-status, vaadin-combo-box[id*='status'], [id*='status-combo']", statusFieldTester),
+				CControlSignature.forSelector("Date Picker Signature",
+						"vaadin-date-picker, vaadin-date-time-picker, [id*='date']", datePickerTester),
 				CControlSignature.forSelector("Report Button Signature", "#cbutton-report", reportTester),
 				CControlSignature.forSelector("BAB Interface Component Signature",
-						"#custom-interfaces-component, #custom-interface-list-root, #custom-interfaces-grid", babInterfaceListTester),
+						"#custom-interfaces-component, #custom-interface-list-root, #custom-interfaces-grid",
+						babInterfaceListTester),
 				CControlSignature.forSelector("BAB Interface Tab Signature",
-						"vaadin-tab:has-text('Interface'), vaadin-accordion-panel:has-text('Interface')", babInterfaceListTester),
+						"vaadin-tab:has-text('Interface'), vaadin-accordion-panel:has-text('Interface')",
+						babInterfaceListTester),
 				CControlSignature.forSelector("Calimero Status Component Signature",
 						"#custom-calimero-status-component, #custom-calimero-control-card", calimeroStatusTester),
 				CControlSignature.forSelector("Calimero Status Tab Signature",
-						"vaadin-tab:has-text('Calimero'), vaadin-accordion-panel:has-text('Calimero')", calimeroStatusTester),
+						"vaadin-tab:has-text('Calimero'), vaadin-accordion-panel:has-text('Calimero')",
+						calimeroStatusTester),
 				CControlSignature.forSelector("CSV Report Dialog Signature", "#custom-dialog-csv-export", reportTester),
-				CControlSignature.forSelector("CSV Field Selector Signature", "vaadin-checkbox[id^='custom-csv-field-']", reportTester));
+				CControlSignature.forSelector("CSV Field Selector Signature",
+						"vaadin-checkbox[id^='custom-csv-field-']", reportTester));
 	}
 
 	/** Check if BAB profile is active for the current Playwright run. */
@@ -476,17 +492,20 @@ public class CPageComprehensiveTest extends CBaseUITest {
 					.setWaitUntil(com.microsoft.playwright.options.WaitUntilState.DOMCONTENTLOADED));
 			wait_1000();
 		} catch (final Exception e) {
-			LOGGER.warn("   ⚠️ Navigation to Test Support Page timed out - clearing cookies and re-authenticating. reason={}", e.getMessage());
+			LOGGER.warn(
+					"   ⚠️ Navigation to Test Support Page timed out - clearing cookies and re-authenticating. reason={}",
+					e.getMessage());
 			page.context().clearCookies();
-			page.navigate("http://localhost:" + port + "/login", new com.microsoft.playwright.Page.NavigateOptions().setTimeout(60000)
-					.setWaitUntil(com.microsoft.playwright.options.WaitUntilState.DOMCONTENTLOADED));
+			page.navigate("http://localhost:" + port + "/login", new com.microsoft.playwright.Page.NavigateOptions()
+					.setTimeout(60000).setWaitUntil(com.microsoft.playwright.options.WaitUntilState.DOMCONTENTLOADED));
 			loginToApplication();
 			page.navigate(targetUrl, new com.microsoft.playwright.Page.NavigateOptions().setTimeout(60000)
 					.setWaitUntil(com.microsoft.playwright.options.WaitUntilState.DOMCONTENTLOADED));
 			wait_1000();
 		}
 		if (!page.url().contains(TEST_AUX_PAGE_ROUTE) && page.url().contains("/login")) {
-			LOGGER.warn("   ⚠️ Redirected to login while navigating to {} - re-authenticating and retrying", TEST_AUX_PAGE_ROUTE);
+			LOGGER.warn("   ⚠️ Redirected to login while navigating to {} - re-authenticating and retrying",
+					TEST_AUX_PAGE_ROUTE);
 			loginToApplication();
 			page.navigate(targetUrl);
 			wait_1000();
@@ -515,8 +534,8 @@ public class CPageComprehensiveTest extends CBaseUITest {
 	}
 
 	/** Filter buttons based on test parameters (keyword or specific button text). Filtering modes: 1. test.targetButtonText: Exact match on button
-	 * display text (user-friendly, recommended) 2. test.targetButtonId: Exact match on button ID (legacy support) 3. test.routeKeyword: Partial match
-	 * on button title (case-insensitive) 4. No filter: Return all buttons Example usage: - mvn test -Dtest=CPageTestComprehensive
+	 * display text (user-friendly, recommended) 2. test.targetButtonId: Exact match on button ID (legacy support) 3. test.routeKeyword: Partial match on
+	 * button title (case-insensitive) 4. No filter: Return all buttons Example usage: - mvn test -Dtest=CPageTestComprehensive
 	 * -Dtest.targetButtonText="BAB System Management" - mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword="dashboard" */
 	private List<ButtonInfo> resolveTargetButtons(final List<ButtonInfo> allButtons) {
 		final String targetButtonText = System.getProperty("test.targetButtonText");
@@ -526,7 +545,8 @@ public class CPageComprehensiveTest extends CBaseUITest {
 		// Priority 1: Exact button text match (user-friendly)
 		if (targetButtonText != null && !targetButtonText.isBlank()) {
 			LOGGER.info("🎯 Filtering by exact button text: \"{}\"", targetButtonText);
-			final List<ButtonInfo> exactMatches = allButtons.stream().filter(b -> b.title.equals(targetButtonText)).collect(Collectors.toList());
+			final List<ButtonInfo> exactMatches =
+					allButtons.stream().filter(b -> b.title.equals(targetButtonText)).collect(Collectors.toList());
 			if (exactMatches.isEmpty()) {
 				throw new AssertionError("No buttons found with exact text: \"" + targetButtonText + "\"");
 			}
@@ -536,7 +556,8 @@ public class CPageComprehensiveTest extends CBaseUITest {
 		// Priority 2: Exact button ID match (legacy support)
 		if (targetButtonId != null && !targetButtonId.isBlank()) {
 			LOGGER.info("🎯 Filtering by exact button ID: {}", targetButtonId);
-			final List<ButtonInfo> exactMatches = allButtons.stream().filter(b -> b.id.equals(targetButtonId)).collect(Collectors.toList());
+			final List<ButtonInfo> exactMatches =
+					allButtons.stream().filter(b -> b.id.equals(targetButtonId)).collect(Collectors.toList());
 			if (exactMatches.isEmpty()) {
 				throw new AssertionError("No buttons found with exact ID: " + targetButtonId);
 			}
@@ -549,15 +570,16 @@ public class CPageComprehensiveTest extends CBaseUITest {
 			return allButtons;
 		}
 		LOGGER.info("🎯 Filtering by route keyword (partial match): \"{}\"", routeKeyword);
-		final List<ButtonInfo> matches =
-				allButtons.stream().filter(b -> b.title.toLowerCase().contains(routeKeyword.toLowerCase())).collect(Collectors.toList());
+		final List<ButtonInfo> matches = allButtons.stream()
+				.filter(b -> b.title.toLowerCase().contains(routeKeyword.toLowerCase())).collect(Collectors.toList());
 		if (matches.isEmpty()) {
 			throw new AssertionError("No buttons found matching keyword: \"" + routeKeyword + "\"");
 		}
 		if (!(!runAllMatches && matches.size() > 1)) {
 			return matches;
 		}
-		LOGGER.info("   ↳ Using first match only (set -Dtest.runAllMatches=true to test all {} matches)", matches.size());
+		LOGGER.info("   ↳ Using first match only (set -Dtest.runAllMatches=true to test all {} matches)",
+				matches.size());
 		return List.of(matches.get(0));
 	}
 
@@ -621,7 +643,8 @@ public class CPageComprehensiveTest extends CBaseUITest {
 						navigateToTestAuxillaryPage();
 						wait_1000();
 					} catch (final Exception e) {
-						LOGGER.warn("⚠️ Failed to reset to Test Support Page after page '{}' reason={}", button.title, e.getMessage());
+						LOGGER.warn("⚠️ Failed to reset to Test Support Page after page '{}' reason={}", button.title,
+								e.getMessage());
 					}
 				}
 			}
@@ -647,7 +670,8 @@ public class CPageComprehensiveTest extends CBaseUITest {
 	private void testComponentsOnPage(@SuppressWarnings ("unused") final String pageName, final PageCoverage coverage) {
 		LOGGER.info("🧩 Step: Detecting and testing components on page...");
 		// Get all signatures that match the current page
-		final List<IControlSignature> matchingSignatures = controlSignatures.stream().filter(sig -> sig.isDetected(page)).toList();
+		final List<IControlSignature> matchingSignatures =
+				controlSignatures.stream().filter(sig -> sig.isDetected(page)).toList();
 		if (matchingSignatures.isEmpty()) {
 			LOGGER.info("   ℹ️ No components detected on this page");
 			coverage.hasComponents = false;
@@ -658,7 +682,8 @@ public class CPageComprehensiveTest extends CBaseUITest {
 		coverage.hasComponents = true;
 		coverage.componentCount = matchingSignatures.size();
 		// Track component types
-		matchingSignatures.forEach((final IControlSignature signature) -> coverage.componentTypes.add(signature.getSignatureName()));
+		matchingSignatures.forEach(
+				(final IControlSignature signature) -> coverage.componentTypes.add(signature.getSignatureName()));
 		LOGGER.info("   🔍 Found {} matching signature(s)", matchingSignatures.size());
 		// Group signatures by component tester
 		final LinkedHashMap<IComponentTester, List<IControlSignature>> testerMap = new LinkedHashMap<>();
@@ -679,7 +704,8 @@ public class CPageComprehensiveTest extends CBaseUITest {
 				tester.test(page);
 				wait_500(); // Small delay between component tests
 			} catch (final Exception e) {
-				LOGGER.error("   ❌ Component test failed for {}: {} reason={}", tester.getComponentName(), e.getMessage(), e.getMessage());
+				LOGGER.error("   ❌ Component test failed for {}: {} reason={}", tester.getComponentName(),
+						e.getMessage(), e.getMessage());
 				// Don't fail entire test - continue with other components
 			}
 		});
@@ -703,8 +729,8 @@ public class CPageComprehensiveTest extends CBaseUITest {
 			// Fill required fields (simplified - just name field)
 			final String testValue = "Test-" + pageName + "-" + System.currentTimeMillis();
 			final Locator nameField = page.locator("#field-name");
-			final Locator nameInput =
-					nameField.count() > 0 && nameField.locator("input").count() > 0 ? nameField.locator("input").first() : nameField;
+			final Locator nameInput = nameField.count() > 0 && nameField.locator("input").count() > 0
+					? nameField.locator("input").first() : nameField;
 			if (nameInput.count() > 0 && nameInput.isEditable()) {
 				nameInput.fill(testValue);
 				LOGGER.info("      ✓ Filled name field: {}", testValue);
@@ -715,7 +741,8 @@ public class CPageComprehensiveTest extends CBaseUITest {
 				saveButton.click();
 				wait_1000();
 				// Check for validation errors
-				final Locator errorDialog = page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText("Error"));
+				final Locator errorDialog = page.locator("vaadin-dialog-overlay[opened]")
+						.filter(new Locator.FilterOptions().setHasText("Error"));
 				if (errorDialog.count() > 0) {
 					LOGGER.warn("      ⚠️ Validation error during save");
 					// Close error dialog
@@ -852,7 +879,8 @@ public class CPageComprehensiveTest extends CBaseUITest {
 			final String filterText = cellText.substring(0, Math.min(3, cellText.length()));
 			// Fill first filter input
 			final Locator firstFilter = filterInputs.first();
-			final Locator filterInput = firstFilter.locator("input").count() > 0 ? firstFilter.locator("input").first() : firstFilter;
+			final Locator filterInput =
+					firstFilter.locator("input").count() > 0 ? firstFilter.locator("input").first() : firstFilter;
 			filterInput.fill(filterText);
 			wait_1000(); // Wait for filtering to apply
 			final int afterCount = getGridRowCountSafe();
@@ -895,13 +923,15 @@ public class CPageComprehensiveTest extends CBaseUITest {
 	}
 
 	/** Test grid pagination if pagination controls are present. */
-	private void testGridPagination(@SuppressWarnings ("unused") final Locator grid, @SuppressWarnings ("unused") final String pageName) {
+	private void testGridPagination(@SuppressWarnings ("unused") final Locator grid,
+			@SuppressWarnings ("unused") final String pageName) {
 		try {
 			LOGGER.info("   📄 Testing grid pagination...");
 			// Look for pagination controls (typically below grid)
-			final Locator paginationNext = page.locator("vaadin-button:has-text('Next'), button:has-text('Next'), vaadin-button[aria-label*='next']");
-			final Locator paginationPrev =
-					page.locator("vaadin-button:has-text('Previous'), button:has-text('Previous'), vaadin-button[aria-label*='previous']");
+			final Locator paginationNext = page.locator(
+					"vaadin-button:has-text('Next'), button:has-text('Next'), vaadin-button[aria-label*='next']");
+			final Locator paginationPrev = page.locator(
+					"vaadin-button:has-text('Previous'), button:has-text('Previous'), vaadin-button[aria-label*='previous']");
 			if (paginationNext.count() == 0 && paginationPrev.count() == 0) {
 				LOGGER.info("      ℹ️ No pagination controls found");
 				return;
@@ -996,7 +1026,8 @@ public class CPageComprehensiveTest extends CBaseUITest {
 				final String afterSort = firstCell.count() > 0 ? firstCell.textContent() : "";
 				if (!beforeSort.equals(afterSort)) {
 					LOGGER.info("      ✓ Sorting changed grid order (first cell: '{}' → '{}')",
-							beforeSort.substring(0, Math.min(20, beforeSort.length())), afterSort.substring(0, Math.min(20, afterSort.length())));
+							beforeSort.substring(0, Math.min(20, beforeSort.length())),
+							afterSort.substring(0, Math.min(20, afterSort.length())));
 				} else {
 					LOGGER.info("      ✓ Clicked column header (order unchanged or already sorted)");
 				}
@@ -1062,8 +1093,8 @@ public class CPageComprehensiveTest extends CBaseUITest {
 	// Phase 5: Coverage Reporting
 	// ========================================
 
-	/** Test a single page comprehensively. Phase 1: Basic navigation ✅ Phase 2: Component testing ✅ Phase 3: CRUD testing (TODO) Phase 4: Grid
-	 * testing (TODO) */
+	/** Test a single page comprehensively. Phase 1: Basic navigation ✅ Phase 2: Component testing ✅ Phase 3: CRUD testing (TODO) Phase 4: Grid testing
+	 * (TODO) */
 	private void testPageComprehensively(final ButtonInfo button, final PageCoverage coverage) {
 		try {
 			// Navigate to page
@@ -1102,8 +1133,9 @@ public class CPageComprehensiveTest extends CBaseUITest {
 			expectedCount = readExpectedNavigationButtonCount();
 			actualCount = buttonLoc.count();
 		}
-		throw new AssertionError("Navigation buttons did not finish rendering on CPageTestAuxillary page (actual=%d, expected=%d)"
-				.formatted(actualCount, expectedCount));
+		throw new AssertionError(
+				"Navigation buttons did not finish rendering on CPageTestAuxillary page (actual=%d, expected=%d)"
+						.formatted(actualCount, expectedCount));
 	}
 
 	/** Walk through all tabs/accordions on the page and test components in each. This ensures comprehensive coverage of tabbed/accordion UIs. */
@@ -1168,7 +1200,8 @@ public class CPageComprehensiveTest extends CBaseUITest {
 					// Test components in this accordion
 					testComponentsOnPage(pageName + " - Accordion: " + accordionText, coverage);
 				} catch (final Exception e) {
-					LOGGER.error("   ❌ Error testing accordion {}: {} reason={}", i + 1, e.getMessage(), e.getMessage());
+					LOGGER.error("   ❌ Error testing accordion {}: {} reason={}", i + 1, e.getMessage(),
+							e.getMessage());
 					// Continue with next accordion
 				}
 			}
@@ -1199,7 +1232,8 @@ public class CPageComprehensiveTest extends CBaseUITest {
 	}
 
 	/** Write CSV report with detailed test results. */
-	private void writeCsvReport(final Path coverageDir, final String timestamp, final List<PageCoverage> coverages) throws IOException {
+	private void writeCsvReport(final Path coverageDir, final String timestamp, final List<PageCoverage> coverages)
+			throws IOException {
 		final Path csvPath = coverageDir.resolve("test-coverage-" + timestamp + ".csv");
 		try (final BufferedWriter writer = Files.newBufferedWriter(csvPath)) {
 			// CSV Header
@@ -1229,7 +1263,8 @@ public class CPageComprehensiveTest extends CBaseUITest {
 	}
 
 	/** Write Markdown summary with statistics. */
-	private void writeMarkdownSummary(final Path coverageDir, final String timestamp, final List<PageCoverage> coverages) throws IOException {
+	private void writeMarkdownSummary(final Path coverageDir, final String timestamp,
+			final List<PageCoverage> coverages) throws IOException {
 		final Path mdPath = coverageDir.resolve("test-summary-" + timestamp + ".md");
 		// Calculate statistics
 		final long totalTests = coverages.size();
@@ -1245,7 +1280,8 @@ public class CPageComprehensiveTest extends CBaseUITest {
 		try (final BufferedWriter writer = Files.newBufferedWriter(mdPath)) {
 			// Title
 			writer.write("# Comprehensive Page Test Report\n\n");
-			writer.write("**Generated**: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + "\n\n");
+			writer.write("**Generated**: "
+					+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + "\n\n");
 			// Summary Statistics
 			writer.write("## Summary Statistics\n\n");
 			writer.write("| Metric | Value |\n");
@@ -1260,10 +1296,13 @@ public class CPageComprehensiveTest extends CBaseUITest {
 			writer.write("## Feature Coverage\n\n");
 			writer.write("| Feature | Pages | Percentage |\n");
 			writer.write("|---------|-------|------------|\n");
-			writer.write("| **Components Detected** | %d | %.1f%% |%n".formatted(pagesWithComponents, pagesWithComponents * 100.0 / totalTests));
-			writer.write("| **CRUD Toolbars** | %d | %.1f%% |%n".formatted(pagesWithCrud, pagesWithCrud * 100.0 / totalTests));
+			writer.write("| **Components Detected** | %d | %.1f%% |%n".formatted(pagesWithComponents,
+					pagesWithComponents * 100.0 / totalTests));
+			writer.write("| **CRUD Toolbars** | %d | %.1f%% |%n".formatted(pagesWithCrud,
+					pagesWithCrud * 100.0 / totalTests));
 			writer.write("| **Grids** | %d | %.1f%% |%n".formatted(pagesWithGrid, pagesWithGrid * 100.0 / totalTests));
-			writer.write("| **Tabs/Accordions** | %d | %.1f%% |%n".formatted(pagesWithTabs, pagesWithTabs * 100.0 / totalTests));
+			writer.write("| **Tabs/Accordions** | %d | %.1f%% |%n".formatted(pagesWithTabs,
+					pagesWithTabs * 100.0 / totalTests));
 			writer.write("\n");
 			// Test Results Table
 			writer.write("## Test Results\n\n");
@@ -1273,10 +1312,11 @@ public class CPageComprehensiveTest extends CBaseUITest {
 				final String status = coverage.passed ? "✅ PASS" : "❌ FAIL";
 				final String components = coverage.hasComponents ? "✓ (" + coverage.componentCount + ")" : "—";
 				final String crud = coverage.hasCrudToolbar ? coverage.testedCrud ? "✓" : "⚠️" : "—";
-				final String grid = coverage.hasGrid ? coverage.testedGrid ? "✓ (" + coverage.gridRowCount + " rows)" : "⚠️" : "—";
+				final String grid =
+						coverage.hasGrid ? coverage.testedGrid ? "✓ (" + coverage.gridRowCount + " rows)" : "⚠️" : "—";
 				final String tabs = coverage.hasTabs ? "✓ (" + coverage.tabCount + ")" : "—";
-				writer.write("| %s | %s | %s | %s | %s | %s | %s |%n".formatted(coverage.pageName, status, coverage.getDurationFormatted(),
-						components, crud, grid, tabs));
+				writer.write("| %s | %s | %s | %s | %s | %s | %s |%n".formatted(coverage.pageName, status,
+						coverage.getDurationFormatted(), components, crud, grid, tabs));
 			}
 			writer.write("\n");
 			// Failed Tests (if any)
@@ -1293,19 +1333,20 @@ public class CPageComprehensiveTest extends CBaseUITest {
 				writer.write("\n");
 			}
 			// Component Details
-			final Map<String, Long> componentCounts =
-					coverages.stream().flatMap(c -> c.componentTypes.stream()).collect(Collectors.groupingBy(s -> s, Collectors.counting()));
+			final Map<String, Long> componentCounts = coverages.stream().flatMap(c -> c.componentTypes.stream())
+					.collect(Collectors.groupingBy(s -> s, Collectors.counting()));
 			if (!componentCounts.isEmpty()) {
 				writer.write("## Component Types Detected\n\n");
 				writer.write("| Component Type | Pages |\n");
 				writer.write("|----------------|-------|\n");
-				componentCounts.entrySet().stream().sorted(Map.Entry.<String, Long>comparingByValue().reversed()).forEach(entry -> {
-					try {
-						writer.write("| %s | %d |%n".formatted(entry.getKey(), entry.getValue()));
-					} catch (final IOException e) {
-						LOGGER.warn("Error writing component count: {}", e.getMessage());
-					}
-				});
+				componentCounts.entrySet().stream().sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+						.forEach(entry -> {
+							try {
+								writer.write("| %s | %d |%n".formatted(entry.getKey(), entry.getValue()));
+							} catch (final IOException e) {
+								LOGGER.warn("Error writing component count: {}", e.getMessage());
+							}
+						});
 				writer.write("\n");
 			}
 			// Footer

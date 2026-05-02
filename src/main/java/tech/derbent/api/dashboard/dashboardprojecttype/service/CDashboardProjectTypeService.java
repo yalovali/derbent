@@ -28,7 +28,7 @@ public class CDashboardProjectTypeService extends CTypeEntityService<CDashboardP
 	public Class<?> getInitializerServiceClass() { return CDashboardProjectTypeInitializerService.class; }
 
 	@Override
-	public Class<?> getPageServiceClass() { return tech.derbent.api.entity.domain.CPageServiceDashboardProjectType.class; }
+	public Class<?> getPageServiceClass() { return CPageServiceDashboardProjectType.class; }
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }

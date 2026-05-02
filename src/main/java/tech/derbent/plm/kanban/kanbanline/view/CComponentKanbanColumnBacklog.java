@@ -74,7 +74,6 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 	 * @param project The project whose backlog items should be displayed (required)
 	 * @throws IllegalArgumentException if project is null */
 	public CComponentKanbanColumnBacklog(final CProject<?> project) {
-		super();
 		Check.notNull(project, "Project cannot be null for backlog column");
 		this.project = project;
 		LOGGER.debug("Creating backlog kanban column for project: {}", project.getName());
@@ -110,11 +109,9 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 		Check.notNull(event, "Drag event cannot be null for backlog column");
 		// For drop events on backlog, mark the target as the backlog column itself
 		// This allows the page service to identify drops onto backlog vs regular columns
-		if (event instanceof final CDragDropEvent dropEvent) {
-			if (dropEvent.getTargetItem() == null) {
-				// Mark this as a backlog drop by setting a special marker
-				dropEvent.setTargetItem(this);
-			}
+		if (event instanceof final CDragDropEvent dropEvent && dropEvent.getTargetItem() == null) {
+			// Mark this as a backlog drop by setting a special marker
+			dropEvent.setTargetItem(this);
 		}
 		LOGGER.debug("[BacklogDrag] Propagating {} event for backlog column", event.getClass().getSimpleName());
 	}
@@ -141,7 +138,9 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 
 	/** Gets the embedded backlog component. Useful for accessing backlog grid, items, and refresh methods.
 	 * @return The CComponentBacklog instance */
-	public CComponentBacklog getBacklogComponent() { return backlogComponent; }
+	public CComponentBacklog getBacklogComponent() {
+		return backlogComponent;
+	}
 
 	/** Gets the project context for this backlog column.
 	 * @return The project whose backlog is displayed */
@@ -153,7 +152,8 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 			return;
 		}
 		try {
-			final List<?> items = backlogComponent.getGrid().getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
+			final List<?> items =
+					backlogComponent.getGrid().getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
 			long totalStoryPoints = 0;
 			for (final Object item : items) {
 				if (item instanceof final ISprintableItem sprintableItem) {
@@ -210,8 +210,8 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 		LOGGER.debug("setItems called on backlog column - ignoring as backlog manages its own data");
 	}
 
-	/** Sets up drag-drop functionality for backlog items. Configures both drag (from backlog) and drop (to backlog) capabilities. Also sets up
-	 * selection notification forwarding to parent components. */
+	/** Sets up drag-drop functionality for backlog items. Configures both drag (from backlog) and drop (to backlog) capabilities. Also sets up selection
+	 * notification forwarding to parent components. */
 	private void setupBacklogDragDrop() {
 		// Enable dragging from backlog grid (backlog component handles this)
 		backlogComponent.drag_setDragEnabled(true);

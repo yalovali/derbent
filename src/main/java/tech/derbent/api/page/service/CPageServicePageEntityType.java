@@ -1,4 +1,4 @@
-package tech.derbent.api.entity.domain;
+package tech.derbent.api.page.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

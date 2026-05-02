@@ -1,4 +1,4 @@
-package tech.derbent.api.entity.domain;
+package tech.derbent.plm.risklevel.riskleveltype.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -134,11 +134,13 @@ public abstract class CBaseUITest {
 		if (normalized.contains("WebSocket connection to") && normalized.contains("/VAADIN/push")) {
 			return true;
 		}
-		if (normalizedLower.startsWith("event ") || normalizedLower.startsWith("event(") || normalizedLower.startsWith("event:")) {
+		if (normalizedLower.startsWith("event ") || normalizedLower.startsWith("event(")
+				|| normalizedLower.startsWith("event:")) {
 			return true;
 		}
-		if (normalizedLower.contains("event") && (normalizedLower.contains("http://localhost") || normalizedLower.contains("https://localhost")
-				|| normalizedLower.contains("http://127.0.0.1") || normalizedLower.contains("https://127.0.0.1"))) {
+		if (normalizedLower.contains("event") && (normalizedLower.contains("http://localhost")
+				|| normalizedLower.contains("https://localhost") || normalizedLower.contains("http://127.0.0.1")
+				|| normalizedLower.contains("https://127.0.0.1"))) {
 			return true;
 		}
 		if (normalized.contains("Refused to apply style") && normalized.contains("text/html")) {
@@ -153,9 +155,12 @@ public abstract class CBaseUITest {
 		final String pluralSegment = baseName.toLowerCase() + "s";
 		final String singularSegment = baseName.toLowerCase();
 		final String[] candidateClasses = {
-				"tech.derbent." + pluralSegment + ".domain." + entityType, "tech.derbent." + singularSegment + ".domain." + entityType,
-				"tech.derbent.plm." + pluralSegment + ".domain." + entityType, "tech.derbent.plm." + singularSegment + ".domain." + entityType,
-				"tech.derbent.base." + pluralSegment + ".domain." + entityType, "tech.derbent.base." + singularSegment + ".domain." + entityType,
+				"tech.derbent." + pluralSegment + ".domain." + entityType,
+				"tech.derbent." + singularSegment + ".domain." + entityType,
+				"tech.derbent.plm." + pluralSegment + ".domain." + entityType,
+				"tech.derbent.plm." + singularSegment + ".domain." + entityType,
+				"tech.derbent.base." + pluralSegment + ".domain." + entityType,
+				"tech.derbent.base." + singularSegment + ".domain." + entityType,
 				"tech.derbent.api.domain." + entityType
 		};
 		for (final String fqcn : candidateClasses) {
@@ -186,7 +191,8 @@ public abstract class CBaseUITest {
 		} catch (final NoSuchFieldException missingField) {
 			LOGGER.debug("VIEW_NAME not declared on {}: {}", viewClass.getSimpleName(), missingField.getMessage());
 		} catch (final Exception reflectionError) {
-			LOGGER.debug("Failed to read VIEW_NAME for {}: {}", viewClass.getSimpleName(), reflectionError.getMessage());
+			LOGGER.debug("Failed to read VIEW_NAME for {}: {}", viewClass.getSimpleName(),
+					reflectionError.getMessage());
 		}
 		final Route route = viewClass.getAnnotation(Route.class);
 		if (route != null && route.value() != null && !route.value().isBlank()) {
@@ -204,8 +210,8 @@ public abstract class CBaseUITest {
 		if (value == null || value.isBlank()) {
 			return safeFallback;
 		}
-		final String sanitized = value.replaceAll("([a-z])([A-Z])", "$1-$2").replaceAll("[^a-zA-Z0-9-]", "-").replaceAll("-{2,}", "-")
-				.replaceAll("(^-|-$)", "").toLowerCase();
+		final String sanitized = value.replaceAll("([a-z])([A-Z])", "$1-$2").replaceAll("[^a-zA-Z0-9-]", "-")
+				.replaceAll("-{2,}", "-").replaceAll("(^-|-$)", "").toLowerCase();
 		return sanitized.isBlank() ? safeFallback : sanitized;
 	}
 
@@ -249,7 +255,8 @@ public abstract class CBaseUITest {
 			wait_500();
 		}
 		// FAIL-FAST: If no confirmation dialog appears, database reset is broken
-		LOGGER.error("❌ CRITICAL: Confirmation dialog not detected after {} attempts ({} seconds)", maxAttempts, maxAttempts * 0.5);
+		LOGGER.error("❌ CRITICAL: Confirmation dialog not detected after {} attempts ({} seconds)", maxAttempts,
+				maxAttempts * 0.5);
 		throw new RuntimeException(
 				"FAIL-FAST: No confirmation dialog appeared after clicking database reset button. Database reset functionality may be broken.");
 	}
@@ -280,13 +287,14 @@ public abstract class CBaseUITest {
 	protected void assertFieldValueEquals(final Class<?> entityClass, final String fieldName, final String expected) {
 		final String actual = readFieldValueById(entityClass, fieldName);
 		if (!expected.equals(actual)) {
-			throw new AssertionError("Field '" + fieldName + "' expected value '" + expected + "' but was '" + actual + "'");
+			throw new AssertionError(
+					"Field '" + fieldName + "' expected value '" + expected + "' but was '" + actual + "'");
 		}
 	}
 
 	private String buildExceptionDialogMessage(final String controlPoint, final Locator dialog) {
-		final StringBuilder message =
-				new StringBuilder("Exception dialog detected at ").append(controlPoint).append(" (url: ").append(safePageUrl()).append(")");
+		final StringBuilder message = new StringBuilder("Exception dialog detected at ").append(controlPoint)
+				.append(" (url: ").append(safePageUrl()).append(")");
 		try {
 			final String dialogText = dialog.textContent();
 			if (dialogText != null && !dialogText.trim().isEmpty()) {
@@ -339,8 +347,10 @@ public abstract class CBaseUITest {
 			synchronized (EXCEPTION_LOCK) {
 				if (!DETECTED_EXCEPTIONS.isEmpty()) {
 					final StringBuilder errorReport = new StringBuilder();
-					errorReport.append("❌ FAIL-FAST: Exceptions detected at control point '").append(controlPoint).append("':\n");
-					DETECTED_EXCEPTIONS.forEach((final String exception) -> errorReport.append("  - ").append(exception).append("\n"));
+					errorReport.append("❌ FAIL-FAST: Exceptions detected at control point '").append(controlPoint)
+							.append("':\n");
+					DETECTED_EXCEPTIONS.forEach(
+							(final String exception) -> errorReport.append("  - ").append(exception).append("\n"));
 					LOGGER.error(errorReport.toString());
 					// Clear exceptions after reporting
 					DETECTED_EXCEPTIONS.clear();
@@ -455,7 +465,8 @@ public abstract class CBaseUITest {
 			// Navigate to BAB System Settings page via menu (NOT deprecated CSystemSettingsView)
 			LOGGER.info("🔄 Ensuring Calimero service is running via BAB System Settings page");
 			// Click menu item with text "BAB System Settings" (from CDashboardProject_BabInitializerService.menuTitle)
-			final Locator menuButton = page.locator("vaadin-side-nav-item").filter(new Locator.FilterOptions().setHasText("BAB System Settings"));
+			final Locator menuButton = page.locator("vaadin-side-nav-item")
+					.filter(new Locator.FilterOptions().setHasText("BAB System Settings"));
 			if (menuButton.count() == 0) {
 				LOGGER.warn("⚠️ BAB System Settings menu item not found - skipping Calimero check");
 				return;
@@ -469,7 +480,8 @@ public abstract class CBaseUITest {
 				return;
 			}
 			// Look for System Monitoring tab and click it
-			final Locator systemMonitoringTab = page.locator("vaadin-tab").filter(new Locator.FilterOptions().setHasText("System Monitoring"));
+			final Locator systemMonitoringTab =
+					page.locator("vaadin-tab").filter(new Locator.FilterOptions().setHasText("System Monitoring"));
 			if (systemMonitoringTab.count() > 0) {
 				systemMonitoringTab.first().click();
 				wait_1000();
@@ -531,7 +543,8 @@ public abstract class CBaseUITest {
 			} else {
 				// FAIL-FAST: No companies means database reset failed
 				LOGGER.error("❌ CRITICAL: No company options found in ComboBox - database reset failed!");
-				throw new RuntimeException("FAIL-FAST: No companies available for login. Database initialization/reset failed.");
+				throw new RuntimeException(
+						"FAIL-FAST: No companies available for login. Database initialization/reset failed.");
 			}
 		} catch (final Exception e) {
 			LOGGER.warn("⚠️ Failed to select company on login page: {}", e.getMessage());
@@ -576,7 +589,8 @@ public abstract class CBaseUITest {
 			LOGGER.info("🧭 Selecting schema '{}' on login page", desiredSchema);
 			schemaCombo.first().click();
 			wait_500();
-			final Locator items = page.locator("vaadin-combo-box-item").filter(new Locator.FilterOptions().setHasText(desiredSchema));
+			final Locator items =
+					page.locator("vaadin-combo-box-item").filter(new Locator.FilterOptions().setHasText(desiredSchema));
 			if (items.count() > 0) {
 				items.first().click();
 				wait_500();
@@ -593,8 +607,8 @@ public abstract class CBaseUITest {
 		if (!isBrowserAvailable()) {
 			return;
 		}
-		final Locator exceptionDialog =
-				page.locator("#" + EXCEPTION_DIALOG_ID + ", #" + EXCEPTION_DETAILS_DIALOG_ID).filter(new Locator.FilterOptions().setHasText(""));
+		final Locator exceptionDialog = page.locator("#" + EXCEPTION_DIALOG_ID + ", #" + EXCEPTION_DETAILS_DIALOG_ID)
+				.filter(new Locator.FilterOptions().setHasText(""));
 		if (exceptionDialog.count() > 0 && exceptionDialog.first().isVisible()) {
 			throw new AssertionError(buildExceptionDialogMessage(controlPoint, exceptionDialog.first()));
 		}
@@ -609,7 +623,8 @@ public abstract class CBaseUITest {
 				throw new AssertionError(buildExceptionDialogMessage(controlPoint, errorOverlay.first()));
 			}
 		}
-		final Locator errorNotification = page.locator("vaadin-notification-card[theme*='error'], vaadin-notification-card:has-text('Error')");
+		final Locator errorNotification =
+				page.locator("vaadin-notification-card[theme*='error'], vaadin-notification-card:has-text('Error')");
 		if (errorNotification.count() > 0 && errorNotification.first().isVisible()) {
 			throw new AssertionError(buildExceptionDialogMessage(controlPoint, errorNotification.first()));
 		}
@@ -628,7 +643,8 @@ public abstract class CBaseUITest {
 				}
 			}
 		} catch (final PlaywrightException e) {
-			throw new AssertionError("Failed to evaluate login error label at " + controlPoint + ": " + e.getMessage(), e);
+			throw new AssertionError("Failed to evaluate login error label at " + controlPoint + ": " + e.getMessage(),
+					e);
 		}
 	}
 
@@ -703,7 +719,8 @@ public abstract class CBaseUITest {
 	}
 
 	/** Fills login fields by first trying the Vaadin shadow DOM input, then falling back to classic HTML selectors. */
-	protected boolean fillLoginField(String hostSelector, String inputSelector, String fieldDescription, String value, String fallbackSelector) {
+	protected boolean fillLoginField(String hostSelector, String inputSelector, String fieldDescription, String value,
+			String fallbackSelector) {
 		try {
 			final Locator host = page.locator(hostSelector);
 			if (host.count() > 0) {
@@ -857,7 +874,9 @@ public abstract class CBaseUITest {
 	}
 
 	/** Checks if browser is available */
-	protected boolean isBrowserAvailable() { return page != null && !page.isClosed(); }
+	protected boolean isBrowserAvailable() {
+		return page != null && !page.isClosed();
+	}
 
 	private boolean isCalimeroStatusRunning(final Locator statusIndicator) {
 		try {
@@ -911,7 +930,8 @@ public abstract class CBaseUITest {
 		if (container.count() > 0) {
 			return container.first();
 		}
-		final String selector = "h2:has-text('Attachments'), h3:has-text('Attachments'), h4:has-text('Attachments'), span:has-text('Attachments')";
+		final String selector =
+				"h2:has-text('Attachments'), h3:has-text('Attachments'), h4:has-text('Attachments'), span:has-text('Attachments')";
 		final Locator header = page.locator(selector);
 		if (header.count() > 0) {
 			return header.first().locator("xpath=ancestor::*[self::vaadin-vertical-layout or self::div][1]");
@@ -921,7 +941,8 @@ public abstract class CBaseUITest {
 
 	/** Helper method to locate attachments grid within a container. */
 	protected Locator locateAttachmentsGrid(final Locator container) {
-		final Locator grid = container.locator("vaadin-grid").filter(new Locator.FilterOptions().setHasText("File Name"));
+		final Locator grid =
+				container.locator("vaadin-grid").filter(new Locator.FilterOptions().setHasText("File Name"));
 		if (grid.count() == 0) {
 			throw new AssertionError("Attachments grid not found");
 		}
@@ -930,8 +951,8 @@ public abstract class CBaseUITest {
 
 	/** Helper method to locate attachment toolbar button by icon name. */
 	protected Locator locateAttachmentToolbarButton(final Locator container, final String iconName) {
-		final Locator button =
-				container.locator("vaadin-button").filter(new Locator.FilterOptions().setHas(page.locator("vaadin-icon[icon='" + iconName + "']")));
+		final Locator button = container.locator("vaadin-button")
+				.filter(new Locator.FilterOptions().setHas(page.locator("vaadin-icon[icon='" + iconName + "']")));
 		if (button.count() == 0) {
 			throw new AssertionError("Toolbar button not found for icon " + iconName);
 		}
@@ -959,7 +980,8 @@ public abstract class CBaseUITest {
 		if (container.count() > 0) {
 			return container.first();
 		}
-		final String selector = "h2:has-text('Comments'), h3:has-text('Comments'), h4:has-text('Comments'), span:has-text('Comments')";
+		final String selector =
+				"h2:has-text('Comments'), h3:has-text('Comments'), h4:has-text('Comments'), span:has-text('Comments')";
 		final Locator header = page.locator(selector);
 		if (header.count() > 0) {
 			return header.first().locator("xpath=ancestor::*[self::vaadin-vertical-layout or self::div][1]");
@@ -969,8 +991,9 @@ public abstract class CBaseUITest {
 
 	/** Locates the parent item selector if present on the page. */
 	protected Locator locateParentItemSelector() {
-		final Locator parentCombo = page.locator("vaadin-combo-box").filter(new Locator.FilterOptions()
-				.setHas(page.locator("label:has-text('Linked Activity'), label:has-text('Parent Item'), label:has-text('Related Activity')")));
+		final Locator parentCombo =
+				page.locator("vaadin-combo-box").filter(new Locator.FilterOptions().setHas(page.locator(
+						"label:has-text('Linked Activity'), label:has-text('Parent Item'), label:has-text('Related Activity')")));
 		return parentCombo.count() > 0 ? parentCombo.first() : null;
 	}
 
@@ -1012,8 +1035,8 @@ public abstract class CBaseUITest {
 		}
 	}
 
-	/** Performs complete login workflow with username and password. This method handles the entire authentication process including form submission
-	 * and redirection verification. */
+	/** Performs complete login workflow with username and password. This method handles the entire authentication process including form submission and
+	 * redirection verification. */
 	protected void loginToApplication() {
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping login attempt");
@@ -1050,14 +1073,16 @@ public abstract class CBaseUITest {
 					LOGGER.debug("ℹ️ Company already selected on login page, skipping DB initialization");
 				}
 			} catch (final Exception e) {
-				LOGGER.warn("⚠️ Could not determine company selection state: {}. Proceeding with login flow.", e.getMessage());
+				LOGGER.warn("⚠️ Could not determine company selection state: {}. Proceeding with login flow.",
+						e.getMessage());
 			}
-			final boolean usernameFilled =
-					fillLoginField("#custom-username-input", "input", "username", username, "input[type='text'], input[type='email']");
+			final boolean usernameFilled = fillLoginField("#custom-username-input", "input", "username", username,
+					"input[type='text'], input[type='email']");
 			if (!usernameFilled) {
 				throw new AssertionError("Username input field not found on login page");
 			}
-			final boolean passwordFilled = fillLoginField("#custom-password-input", "input", "password", password, "input[type='password']");
+			final boolean passwordFilled =
+					fillLoginField("#custom-password-input", "input", "password", password, "input[type='password']");
 			if (!passwordFilled) {
 				throw new AssertionError("Password input field not found on login page");
 			}
@@ -1092,8 +1117,8 @@ public abstract class CBaseUITest {
 			// Common patterns: "Users", "Activities", "Projects", "Meetings", etc.
 			final String[] searchTerms = generateSearchTermsForEntity(entityType);
 			final String[] selectorCandidates = {
-					".hierarchical-menu-item", "vaadin-side-nav-item", "vaadin-tab", "nav a[href]", ".nav-item a[href]", "a[href].menu-link",
-					"a[href].side-nav-link"
+					".hierarchical-menu-item", "vaadin-side-nav-item", "vaadin-tab", "nav a[href]", ".nav-item a[href]",
+					"a[href].menu-link", "a[href].side-nav-link"
 			};
 			logCurrentMenuStructure();
 			final Set<String> visitedCandidates = new HashSet<>();
@@ -1105,10 +1130,12 @@ public abstract class CBaseUITest {
 						menuSearch.first().fill(searchTerm);
 						wait_500();
 					}
-				} catch (final Exception ignored) { /****/ }
+				} catch (final Exception ignored) { /****/
+				}
 				for (final String selector : selectorCandidates) {
 					for (int attempt = 0; attempt < 5; attempt++) {
-						final Locator candidates = page.locator(selector).filter(new Locator.FilterOptions().setHasText(searchTerm));
+						final Locator candidates =
+								page.locator(selector).filter(new Locator.FilterOptions().setHasText(searchTerm));
 						final int count = candidates.count();
 						if (count == 0) {
 							wait_500();
@@ -1126,25 +1153,29 @@ public abstract class CBaseUITest {
 								if (!visitedCandidates.add(candidateKey)) {
 									continue;
 								}
-								LOGGER.info("🎯 Trying menu selector '{}' candidate {} with label '{}'", selector, i, label);
+								LOGGER.info("🎯 Trying menu selector '{}' candidate {} with label '{}'", selector, i,
+										label);
 								final String beforeUrl = page.url();
 								item.scrollIntoViewIfNeeded();
 								item.click();
 								wait_1000();
 								if (!beforeUrl.equals(page.url())) {
-									LOGGER.info("🔗 Navigation triggered via selector {} ({} -> {})", selector, beforeUrl, page.url());
+									LOGGER.info("🔗 Navigation triggered via selector {} ({} -> {})", selector,
+											beforeUrl, page.url());
 								}
 								try {
 									waitForDynamicPageLoad();
-									LOGGER.info("✅ Dynamic page loaded successfully via selector {} and search term {}", selector, searchTerm);
+									LOGGER.info("✅ Dynamic page loaded successfully via selector {} and search term {}",
+											selector, searchTerm);
 									return true;
 								} catch (final AssertionError validationError) {
-									LOGGER.debug("⏳ Dynamic page validation still pending after selector {} / search term {}: {}", selector,
-											searchTerm, validationError.getMessage());
+									LOGGER.debug(
+											"⏳ Dynamic page validation still pending after selector {} / search term {}: {}",
+											selector, searchTerm, validationError.getMessage());
 								}
 							} catch (final Exception clickError) {
-								LOGGER.debug("⚠️ Failed to activate menu item for selector {} / search term {}: {}", selector, searchTerm,
-										clickError.getMessage());
+								LOGGER.debug("⚠️ Failed to activate menu item for selector {} / search term {}: {}",
+										selector, searchTerm, clickError.getMessage());
 							}
 						}
 					}
@@ -1185,14 +1216,15 @@ public abstract class CBaseUITest {
 			}
 			return false;
 		} catch (final Exception e) {
-			final String message = "Failed to navigate to dynamic page for entity type: " + entityType + " - " + e.getMessage();
+			final String message =
+					"Failed to navigate to dynamic page for entity type: " + entityType + " - " + e.getMessage();
 			LOGGER.error("❌ {}", message);
 			throw new AssertionError(message, e);
 		}
 	}
 
-	/** Navigate to the first page entity of a specific project and entity class. This method mimics the menu generator behavior to dynamically get
-	 * page links.
+	/** Navigate to the first page entity of a specific project and entity class. This method mimics the menu generator behavior to dynamically get page
+	 * links.
 	 * @param project     The project to search in (can be null for all projects)
 	 * @param entityClass The entity class to find a page for (e.g., CUser.class, CCompany.class)
 	 * @return true if navigation was successful */
@@ -1225,7 +1257,8 @@ public abstract class CBaseUITest {
 			// Fallback: try navigation via menu system
 			return navigateToDynamicPageByEntityType(entityName);
 		} catch (final Exception e) {
-			final String message = "Failed to navigate to first page for entity class: " + entityClass.getSimpleName() + " - " + e.getMessage();
+			final String message = "Failed to navigate to first page for entity class: " + entityClass.getSimpleName()
+					+ " - " + e.getMessage();
 			LOGGER.error("❌ {}", message);
 			return false;
 		}
@@ -1302,7 +1335,8 @@ public abstract class CBaseUITest {
 			wait_500();
 			return;
 		}
-		final Locator accordion = page.locator("vaadin-accordion-panel").filter(new Locator.FilterOptions().setHasText(text));
+		final Locator accordion =
+				page.locator("vaadin-accordion-panel").filter(new Locator.FilterOptions().setHasText(text));
 		if (accordion.count() <= 0) {
 			return;
 		}
@@ -1475,12 +1509,13 @@ public abstract class CBaseUITest {
 			final String text = msg.text();
 			final String location = msg.location() != null ? msg.location() : "";
 			final String combined = text == null ? location : location.isEmpty() ? text : text + " " + location;
-			boolean condition = msg.type() != null && "error".equalsIgnoreCase(msg.type()) && !isIgnorableConsoleMessage(combined);
+			final boolean condition =
+					msg.type() != null && "error".equalsIgnoreCase(msg.type()) && !isIgnorableConsoleMessage(combined);
 			if (condition) {
 				LOGGER.error("🌐 Browser console error: {} ({})", text, msg.location());
 			}
-			if (text != null && (text.contains("ERROR") || text.contains("Exception") || text.contains("CRITICAL") || text.contains("FATAL"))
-					&& !isIgnorableConsoleMessage(combined)) {
+			if (text != null && (text.contains("ERROR") || text.contains("Exception") || text.contains("CRITICAL")
+					|| text.contains("FATAL")) && !isIgnorableConsoleMessage(combined)) {
 				synchronized (EXCEPTION_LOCK) {
 					DETECTED_EXCEPTIONS.add(text);
 				}
@@ -1578,15 +1613,14 @@ public abstract class CBaseUITest {
 		if (options.count() == 0) {
 			options = page.locator("vaadin-combo-box-item");
 		}
-		if (options.count() == 0) {
-			if (input.count() > 0) {
-				try {
-					input.first().fill("a");
-					wait_500();
-					options = page.locator("vaadin-combo-box-overlay[opened] vaadin-combo-box-item");
-				} catch (final PlaywrightException e) {
-					LOGGER.debug("Unable to filter combo box {} via input: {}", elementId, e.getMessage());
-				}
+		boolean condition = options.count() == 0 && input.count() > 0;
+		if (condition) {
+			try {
+				input.first().fill("a");
+				wait_500();
+				options = page.locator("vaadin-combo-box-overlay[opened] vaadin-combo-box-item");
+			} catch (final PlaywrightException e) {
+				LOGGER.debug("Unable to filter combo box {} via input: {}", elementId, e.getMessage());
 			}
 		}
 		if (options.count() == 0) {
@@ -1625,14 +1659,16 @@ public abstract class CBaseUITest {
 				LOGGER.info("⏱️ Browser slowdown: {}ms per action", slowmo);
 			}
 			LOGGER.info("📺 Viewport size: {}x{}", viewportWidth, viewportHeight);
-			final List<String> launchArguments = new ArrayList<>(Arrays.asList("--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"));
+			final List<String> launchArguments =
+					new ArrayList<>(Arrays.asList("--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"));
 			if (!headless) {
 				launchArguments.add("--start-maximized");
 			}
 			final BrowserType.LaunchOptions launchOptions =
 					new BrowserType.LaunchOptions().setHeadless(headless).setSlowMo(slowmo).setArgs(launchArguments);
 			// Check if chromium is available in Playwright cache
-			final String playwrightCache = System.getProperty("user.home") + "/.cache/ms-playwright/chromium-1091/chrome";
+			final String playwrightCache =
+					System.getProperty("user.home") + "/.cache/ms-playwright/chromium-1091/chrome";
 			final java.io.File cachedChromium = new java.io.File(playwrightCache);
 			if (cachedChromium.exists() && cachedChromium.canExecute()) {
 				// Use cached Playwright Chromium directly to bypass download
@@ -1701,7 +1737,8 @@ public abstract class CBaseUITest {
 
 	private boolean shouldEnsureBabCalimeroService() {
 		final String schema = Optional.ofNullable(System.getProperty("playwright.schema")).orElse("").toLowerCase();
-		final String profiles = Optional.ofNullable(System.getProperty("spring.profiles.active")).orElse("").toLowerCase();
+		final String profiles =
+				Optional.ofNullable(System.getProperty("spring.profiles.active")).orElse("").toLowerCase();
 		return schema.contains("bab") || profiles.contains("bab");
 	}
 
@@ -1813,8 +1850,8 @@ public abstract class CBaseUITest {
 		}
 	}
 
-	/** Performs comprehensive attachment CRUD operations (Upload/Download/Delete). Generic method that can be called from any test for any entity
-	 * with attachments.
+	/** Performs comprehensive attachment CRUD operations (Upload/Download/Delete). Generic method that can be called from any test for any entity with
+	 * attachments.
 	 * @return true if all operations succeeded, false otherwise */
 	protected boolean testAttachmentCrudOperations() {
 		try {
@@ -1853,7 +1890,8 @@ public abstract class CBaseUITest {
 			waitForGridCellText(attachmentsGrid, fileName);
 			LOGGER.info("✅ Attachment uploaded: {}", fileName);
 			// Test DOWNLOAD
-			final Locator uploadedCell = attachmentsGrid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText(fileName));
+			final Locator uploadedCell = attachmentsGrid.locator("vaadin-grid-cell-content")
+					.filter(new Locator.FilterOptions().setHasText(fileName));
 			uploadedCell.first().click();
 			wait_500();
 			final Locator downloadButton = locateAttachmentToolbarButton(attachmentsContainer, "vaadin:download");
@@ -1947,8 +1985,7 @@ public abstract class CBaseUITest {
 	// ENHANCED CRUD TESTING METHODS
 	// ===========================================
 
-	/** Performs comprehensive comment CRUD operations (Add/Edit/Delete). Generic method that can be called from any test for any entity with
-	 * comments.
+	/** Performs comprehensive comment CRUD operations (Add/Edit/Delete). Generic method that can be called from any test for any entity with comments.
 	 * @return true if all operations succeeded, false otherwise */
 	protected boolean testCommentCrudOperations() {
 		try {
@@ -2168,7 +2205,8 @@ public abstract class CBaseUITest {
 			}
 			LOGGER.info("✅ Grid column functionality testing completed for: {}", entityName);
 		} catch (final Exception e) {
-			throw new AssertionError("Grid column functionality test failed for " + entityName + ": " + e.getMessage(), e);
+			throw new AssertionError("Grid column functionality test failed for " + entityName + ": " + e.getMessage(),
+					e);
 		}
 	}
 
@@ -2179,8 +2217,9 @@ public abstract class CBaseUITest {
 		try {
 			// Try multiple approaches to find the company page
 			final String[] companyPageSelectors = {
-					"vaadin-side-nav-item:has-text('Companies')", "vaadin-side-nav-item:has-text('Company')", "a:has-text('Companies')",
-					"a:has-text('Company Management')", "[href*='company']", "[href*='companies']", "text='System.Companies'"
+					"vaadin-side-nav-item:has-text('Companies')", "vaadin-side-nav-item:has-text('Company')",
+					"a:has-text('Companies')", "a:has-text('Company Management')", "[href*='company']",
+					"[href*='companies']", "text='System.Companies'"
 			};
 			for (final String selector : companyPageSelectors) {
 				try {
@@ -2214,8 +2253,8 @@ public abstract class CBaseUITest {
 		try {
 			// Try multiple approaches to find the user page
 			final String[] userPageSelectors = {
-					"vaadin-side-nav-item:has-text('Users')", "vaadin-side-nav-item:has-text('User')", "a:has-text('Users')",
-					"a:has-text('User Management')", "[href*='user']", "text='System.Users'"
+					"vaadin-side-nav-item:has-text('Users')", "vaadin-side-nav-item:has-text('User')",
+					"a:has-text('Users')", "a:has-text('User Management')", "[href*='user']", "text='System.Users'"
 			};
 			for (final String selector : userPageSelectors) {
 				try {
@@ -2280,8 +2319,10 @@ public abstract class CBaseUITest {
 				clickFirstGridRow();
 				wait_500();
 				// Look for activation-related buttons or controls
-				final Locator activateButton = page.locator("vaadin-button:has-text('Activate'), vaadin-button:has-text('Enable')");
-				final Locator deactivateButton = page.locator("vaadin-button:has-text('Deactivate'), vaadin-button:has-text('Disable')");
+				final Locator activateButton =
+						page.locator("vaadin-button:has-text('Activate'), vaadin-button:has-text('Enable')");
+				final Locator deactivateButton =
+						page.locator("vaadin-button:has-text('Deactivate'), vaadin-button:has-text('Disable')");
 				if (activateButton.count() > 0) {
 					LOGGER.info("🟢 Found activation controls");
 					activateButton.first().click();
@@ -2295,7 +2336,8 @@ public abstract class CBaseUITest {
 				} else {
 					LOGGER.info("ℹ️ No activation controls found - checking status field");
 					// Check if there's a status field that might indicate activation state
-					final Locator statusField = page.locator("vaadin-text-field[label*='Status'], vaadin-combo-box[label*='Status']");
+					final Locator statusField =
+							page.locator("vaadin-text-field[label*='Status'], vaadin-combo-box[label*='Status']");
 					if (statusField.count() > 0) {
 						LOGGER.info("📊 Found status field for project state");
 					}
@@ -2347,7 +2389,8 @@ public abstract class CBaseUITest {
 			if (sideNav.count() > 0) {
 				LOGGER.info("📋 Found navigation sidebar");
 				// Test expanding/collapsing if applicable
-				final Locator toggleButton = page.locator("vaadin-button[aria-label*='menu'], button[aria-label*='toggle']");
+				final Locator toggleButton =
+						page.locator("vaadin-button[aria-label*='menu'], button[aria-label*='toggle']");
 				if (toggleButton.count() > 0) {
 					toggleButton.first().click();
 					wait_500();
@@ -2422,7 +2465,8 @@ public abstract class CBaseUITest {
 	/** Verifies that the grid contains data by checking for the presence of grid cells. */
 	protected boolean verifyGridHasData() {
 		try {
-			page.waitForSelector("vaadin-grid, vaadin-grid-pro, so-grid, c-grid, c-grid-pro", new Page.WaitForSelectorOptions().setTimeout(20000));
+			page.waitForSelector("vaadin-grid, vaadin-grid-pro, so-grid, c-grid, c-grid-pro",
+					new Page.WaitForSelectorOptions().setTimeout(20000));
 		} catch (final Exception e) {
 			LOGGER.warn("⚠️ Grid not found while waiting for data: {}", e.getMessage());
 			return false;
@@ -2463,7 +2507,8 @@ public abstract class CBaseUITest {
 		} catch (final Exception waitError) {
 			if (!allowEmpty) {
 				final String errorMsg = "No navigation items found within 10 seconds - test failing fast. "
-						+ "Ensure sample data is loaded and company is selected at login. Error: " + waitError.getMessage();
+						+ "Ensure sample data is loaded and company is selected at login. Error: "
+						+ waitError.getMessage();
 				LOGGER.error("❌ {}", errorMsg);
 				throw new AssertionError(errorMsg, waitError);
 			}
@@ -2496,7 +2541,8 @@ public abstract class CBaseUITest {
 				wait_1000();
 				if (captureScreenshots) {
 					final String prefix = screenshotPrefix == null ? "menu" : screenshotPrefix;
-					final String screenshotName = prefix + "-" + (safeLabel.isBlank() ? "entry-" + (i + 1) : safeLabel + "-" + (i + 1));
+					final String screenshotName =
+							prefix + "-" + (safeLabel.isBlank() ? "entry-" + (i + 1) : safeLabel + "-" + (i + 1));
 					takeScreenshot(screenshotName, false);
 				}
 				visitedLabels.add(label);
@@ -2528,11 +2574,12 @@ public abstract class CBaseUITest {
 	/** Waits for after login state */
 	protected void wait_afterlogin() {
 		try {
-			page.waitForSelector("vaadin-app-layout, vaadin-side-nav, vaadin-drawer-layout", new Page.WaitForSelectorOptions().setTimeout(30000)); // Increased
-																																					// from
-																																					// 15000
-																																					// to
-																																					// 30000
+			page.waitForSelector("vaadin-app-layout, vaadin-side-nav, vaadin-drawer-layout",
+					new Page.WaitForSelectorOptions().setTimeout(30000)); // Increased
+																			// from
+																			// 15000
+																			// to
+																			// 30000
 		} catch (final Exception e) {
 			LOGGER.warn("⚠️ Post-login application shell not detected: {}", e.getMessage());
 		}
@@ -2589,7 +2636,8 @@ public abstract class CBaseUITest {
 	protected Locator waitForDialogWithText(final String text) {
 		final int maxAttempts = 10;
 		for (int attempt = 0; attempt < maxAttempts; attempt++) {
-			final Locator overlay = page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText(text));
+			final Locator overlay =
+					page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText(text));
 			if (overlay.count() > 0) {
 				return overlay.first();
 			}
@@ -2613,7 +2661,8 @@ public abstract class CBaseUITest {
 				throw new AssertionError("Dynamic page shows not found error");
 			}
 			// Wait for interactive elements to be ready
-			page.waitForSelector("vaadin-grid, vaadin-form-layout, vaadin-button", new Page.WaitForSelectorOptions().setTimeout(10000));
+			page.waitForSelector("vaadin-grid, vaadin-form-layout, vaadin-button",
+					new Page.WaitForSelectorOptions().setTimeout(10000));
 			LOGGER.info("✅ Dynamic page loaded successfully without errors");
 		} catch (final Exception e) {
 			final String message = "Dynamic page failed to load properly: " + e.getMessage();
@@ -2626,7 +2675,8 @@ public abstract class CBaseUITest {
 	protected void waitForGridCellGone(final Locator grid, final String text) {
 		final int maxAttempts = 12;
 		for (int attempt = 0; attempt < maxAttempts; attempt++) {
-			final Locator matches = grid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText(text));
+			final Locator matches =
+					grid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText(text));
 			if (matches.count() == 0) {
 				return;
 			}
@@ -2642,7 +2692,8 @@ public abstract class CBaseUITest {
 	protected void waitForGridCellText(final Locator grid, final String text) {
 		final int maxAttempts = 12;
 		for (int attempt = 0; attempt < maxAttempts; attempt++) {
-			if (grid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText(text)).count() > 0) {
+			if (grid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText(text)).count()
+					> 0) {
 				return;
 			}
 			wait_500();
@@ -2673,7 +2724,8 @@ public abstract class CBaseUITest {
 			}
 			wait_500();
 		}
-		if (page.locator("#" + PROGRESS_DIALOG_ID + "[opened]").count() > 0 || page.locator("#" + INFO_OK_BUTTON_ID).count() > 0) {
+		if (page.locator("#" + PROGRESS_DIALOG_ID + "[opened]").count() > 0
+				|| page.locator("#" + INFO_OK_BUTTON_ID).count() > 0) {
 			return;
 		}
 		LOGGER.warn("⚠️ Overlay {} still present after waiting {} seconds", overlaySelector, maxAttempts * 0.5);
@@ -2734,8 +2786,9 @@ public abstract class CBaseUITest {
 			try {
 				page.reload();
 				wait_loginscreen();
-				page.waitForSelector("#" + RESET_DB_FULL_BUTTON_ID, new Page.WaitForSelectorOptions().setTimeout(45000)); // Increased from 30000 to
-																															// 45000
+				page.waitForSelector("#" + RESET_DB_FULL_BUTTON_ID,
+						new Page.WaitForSelectorOptions().setTimeout(45000)); // Increased from 30000 to
+																				// 45000
 			} catch (final Exception retryError) {
 				LOGGER.warn("⚠️ Reset button still not detected after reload: {}", retryError.getMessage());
 				return page.locator("#" + RESET_DB_FULL_BUTTON_ID);
@@ -2752,7 +2805,8 @@ public abstract class CBaseUITest {
 			page.waitForSelector(selector, new Page.WaitForSelectorOptions().setTimeout(10000));
 			return getLocatorWithCheck(selector, description);
 		} catch (final Exception e) {
-			throw new AssertionError("Element not found after wait: " + description + " (selector: " + selector + ")", e);
+			throw new AssertionError("Element not found after wait: " + description + " (selector: " + selector + ")",
+					e);
 		}
 	}
 	// ===========================================

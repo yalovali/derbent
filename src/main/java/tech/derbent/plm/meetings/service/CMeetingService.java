@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.domain.CEntityDB;
-import tech.derbent.api.entity.domain.CPageServiceMeeting;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.interfaces.CCloneOptions;

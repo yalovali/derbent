@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;

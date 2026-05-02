@@ -1,4 +1,4 @@
-package tech.derbent.api.entity.domain;
+package tech.derbent.plm.meetings.service;
 
 import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 

@@ -69,7 +69,8 @@ public abstract class CBaseComponentTester implements IComponentTester {
 				detectAndFailOnException(page, "closeAnyOpenDialog");
 				// If still open, try close button
 				if (overlay.count() > 0) {
-					final Locator closeButton = overlay.locator("vaadin-button:has-text('Close'), vaadin-button:has-text('Cancel')");
+					final Locator closeButton =
+							overlay.locator("vaadin-button:has-text('Close'), vaadin-button:has-text('Cancel')");
 					if (closeButton.count() > 0) {
 						closeButton.first().click();
 						page.waitForTimeout(500);
@@ -104,7 +105,8 @@ public abstract class CBaseComponentTester implements IComponentTester {
 	protected void detectAndFailOnException(final Page page, final String context) {
 		try {
 			// Check for exception dialog
-			final Locator exceptionDialog = page.locator("vaadin-dialog-overlay:has-text('Exception'), vaadin-dialog-overlay:has-text('Error')");
+			final Locator exceptionDialog = page
+					.locator("vaadin-dialog-overlay:has-text('Exception'), vaadin-dialog-overlay:has-text('Error')");
 			if (exceptionDialog.count() > 0 && exceptionDialog.isVisible()) {
 				final String errorText = exceptionDialog.textContent();
 				LOGGER.error("❌ EXCEPTION DETECTED at {}: {}", context, errorText);
@@ -189,7 +191,8 @@ public abstract class CBaseComponentTester implements IComponentTester {
 	 * @return true if field was filled */
 	protected boolean fillFirstEditableField(final Page page, final String value) {
 		try {
-			final Locator textField = page.locator("vaadin-text-field:not([readonly]), input[type='text']:not([readonly])");
+			final Locator textField =
+					page.locator("vaadin-text-field:not([readonly]), input[type='text']:not([readonly])");
 			if (textField.count() > 0) {
 				final Locator host = textField.first();
 				final Locator input = host.locator("input, textarea, [contenteditable='true']");
@@ -277,7 +280,8 @@ public abstract class CBaseComponentTester implements IComponentTester {
 				return;
 			}
 			// Try accordion
-			final Locator accordion = page.locator("vaadin-accordion-panel").filter(new Locator.FilterOptions().setHasText(label));
+			final Locator accordion =
+					page.locator("vaadin-accordion-panel").filter(new Locator.FilterOptions().setHasText(label));
 			if (accordion.count() > 0) {
 				final Locator summary = accordion.locator("summary, [slot='summary']");
 				if (summary.count() > 0 && !accordion.getAttribute("opened").equals("true")) {

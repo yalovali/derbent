@@ -94,10 +94,7 @@ public class CDocumentTypeService extends CEntityOfCompanyService<CDocumentType>
 	public Class<?> getInitializerServiceClass() { return CDocumentTypeInitializerService.class; }
 
 	@Override
-	public Class<?> getPageServiceClass() {
-		// Page service not yet implemented - optional for now
-		return null;
-	}
+	public Class<?> getPageServiceClass() { return CPageServiceDocumentType.class; }
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }

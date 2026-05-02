@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.entity.domain.CPageServicePageEntityType;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.page.domain.CPageEntityType;
 import tech.derbent.api.registry.IEntityRegistrable;

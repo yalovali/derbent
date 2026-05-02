@@ -9,7 +9,8 @@ import com.microsoft.playwright.Page;
 /** Tests attachment component functionality on pages that have file upload capabilities. */
 public class CAttachmentComponentTester extends CBaseComponentTester {
 
-	private static final String ATTACHMENT_COMPONENT_SELECTOR = "#custom-attachment-component, vaadin-upload, [id*='attachment']";
+	private static final String ATTACHMENT_COMPONENT_SELECTOR =
+			"#custom-attachment-component, vaadin-upload, [id*='attachment']";
 
 	@Override
 	public boolean canTest(final Page page) {
@@ -29,8 +30,8 @@ public class CAttachmentComponentTester extends CBaseComponentTester {
 		if (container.count() > 0) {
 			return container.first();
 		}
-		final Locator header =
-				page.locator("h2:has-text('Attachments'), h3:has-text('Attachments'), h4:has-text('Attachments'), span:has-text('Attachments')");
+		final Locator header = page.locator(
+				"h2:has-text('Attachments'), h3:has-text('Attachments'), h4:has-text('Attachments'), span:has-text('Attachments')");
 		if (header.count() > 0) {
 			return header.first().locator("xpath=ancestor::*[self::vaadin-vertical-layout or self::div][1]");
 		}
@@ -38,17 +39,15 @@ public class CAttachmentComponentTester extends CBaseComponentTester {
 	}
 
 	private Locator locateAttachmentsGrid(final Locator container) {
-		final Locator grid = container.locator("vaadin-grid").filter(new Locator.FilterOptions().setHasText("File Name"));
+		final Locator grid =
+				container.locator("vaadin-grid").filter(new Locator.FilterOptions().setHasText("File Name"));
 		return grid.count() == 0 ? null : grid.first();
 	}
 
 	private Locator locateAttachmentToolbarButton(final Locator container, final String iconName) {
-		final Locator button = container.locator("vaadin-button")
-				.filter(new Locator.FilterOptions().setHas(container.page().locator("vaadin-icon[icon='" + iconName + "']")));
-		if (button.count() == 0) {
-			return null;
-		}
-		return button.first();
+		final Locator button = container.locator("vaadin-button").filter(
+				new Locator.FilterOptions().setHas(container.page().locator("vaadin-icon[icon='" + iconName + "']")));
+		return button.count() == 0 ? null : button.first();
 	}
 
 	@Override
@@ -83,8 +82,8 @@ public class CAttachmentComponentTester extends CBaseComponentTester {
 			final Path tempFile = Files.createTempFile("autotest-attachment-", ".txt");
 			Files.writeString(tempFile, "AutoTest attachment content " + System.currentTimeMillis());
 			dialog.locator("vaadin-upload input[type='file']").setInputFiles(tempFile);
-			final Locator dialogUploadButton =
-					dialog.locator("#cbutton-save, #cbutton-ok, vaadin-button:has-text('Save'), vaadin-button:has-text('Upload')");
+			final Locator dialogUploadButton = dialog.locator(
+					"#cbutton-save, #cbutton-ok, vaadin-button:has-text('Save'), vaadin-button:has-text('Upload')");
 			if (dialogUploadButton.count() == 0) {
 				LOGGER.warn("         ⚠️ Upload dialog button not found");
 				closeAnyOpenDialog(page);
@@ -106,7 +105,8 @@ public class CAttachmentComponentTester extends CBaseComponentTester {
 			}
 			waitForGridCellText(grid, fileName);
 			LOGGER.info("         ✅ Attachment uploaded: {}", fileName);
-			final Locator uploadedCell = grid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText(fileName));
+			final Locator uploadedCell =
+					grid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText(fileName));
 			if (uploadedCell.count() > 0) {
 				uploadedCell.first().click();
 				waitMs(page, 500);

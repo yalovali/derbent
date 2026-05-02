@@ -100,12 +100,14 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		labelDiv.getStyle().set("margin-right", CUIConstants.GAP_SMALL);
 	}
 
-	private static void applySelectedOptionDisplay(final ComboBox<CComboBoxOption> comboBox, final EntityFieldInfo fieldInfo) {
+	private static void applySelectedOptionDisplay(final ComboBox<CComboBoxOption> comboBox,
+			final EntityFieldInfo fieldInfo) {
 		comboBox.addValueChangeListener(event -> updateSelectedOptionDisplay(comboBox, fieldInfo, event.getValue()));
 		updateSelectedOptionDisplay(comboBox, fieldInfo, comboBox.getValue());
 	}
 
-	private static void assignDeterministicComponentId(final Component component, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
+	private static void assignDeterministicComponentId(final Component component, final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binder) {
 		if (component == null || fieldInfo == null) {
 			return;
 		}
@@ -125,8 +127,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			return;
 		}
 		final String rawId = "field-%s-%s".formatted(entityPart, fieldInfo.getFieldName());
-		final String normalized = rawId.replaceAll("([a-z])([A-Z])", "$1-$2").replaceAll("[^a-zA-Z0-9-]", "-").replaceAll("-{2,}", "-")
-				.replaceAll("(^-|-$)", "").toLowerCase();
+		final String normalized = rawId.replaceAll("([a-z])([A-Z])", "$1-$2").replaceAll("[^a-zA-Z0-9-]", "-")
+				.replaceAll("-{2,}", "-").replaceAll("(^-|-$)", "").toLowerCase();
 		if (!normalized.isEmpty()) {
 			component.setId(normalized);
 		}
@@ -134,38 +136,46 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 
 	@SuppressWarnings ("unchecked")
 	public static <EntityClass> CVerticalLayoutTop buildEnhancedForm(final Class<?> entityClass) throws Exception {
-		final CEnhancedBinder<EntityClass> enhancedBinder = CBinderFactory.createEnhancedBinder((Class<EntityClass>) entityClass);
+		final CEnhancedBinder<EntityClass> enhancedBinder =
+				CBinderFactory.createEnhancedBinder((Class<EntityClass>) entityClass);
 		return buildForm(entityClass, enhancedBinder, null);
 	}
 
 	@SuppressWarnings ("unchecked")
-	public static <EntityClass> CVerticalLayoutTop buildEnhancedForm(final Class<?> entityClass, final List<String> entityFields) throws Exception {
-		final CEnhancedBinder<EntityClass> enhancedBinder = CBinderFactory.createEnhancedBinder((Class<EntityClass>) entityClass);
+	public static <EntityClass> CVerticalLayoutTop buildEnhancedForm(final Class<?> entityClass,
+			final List<String> entityFields) throws Exception {
+		final CEnhancedBinder<EntityClass> enhancedBinder =
+				CBinderFactory.createEnhancedBinder((Class<EntityClass>) entityClass);
 		return buildForm(entityClass, enhancedBinder, entityFields);
 	}
 
-	public static <EntityClass> CVerticalLayoutTop buildForm(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder) throws Exception {
+	public static <EntityClass> CVerticalLayoutTop buildForm(final Class<?> entityClass,
+			final CEnhancedBinder<EntityClass> binder) throws Exception {
 		return buildForm(entityClass, binder, null, null, null, new CVerticalLayoutTop(false, false, false));
 	}
 
-	public static <EntityClass> CVerticalLayoutTop buildForm(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
-			final List<String> entityFields) throws Exception {
+	public static <EntityClass> CVerticalLayoutTop buildForm(final Class<?> entityClass,
+			final CEnhancedBinder<EntityClass> binder, final List<String> entityFields) throws Exception {
 		return buildForm(entityClass, binder, entityFields, null, null, new CVerticalLayoutTop(false, false, false));
 	}
 
-	public static <EntityClass> CVerticalLayoutTop buildForm(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
-			final List<String> entityFields, final IContentOwner contentOwner) throws Exception {
-		return buildForm(entityClass, binder, entityFields, null, null, new CVerticalLayoutTop(false, false, false), contentOwner);
+	public static <EntityClass> CVerticalLayoutTop buildForm(final Class<?> entityClass,
+			final CEnhancedBinder<EntityClass> binder, final List<String> entityFields,
+			final IContentOwner contentOwner) throws Exception {
+		return buildForm(entityClass, binder, entityFields, null, null, new CVerticalLayoutTop(false, false, false),
+				contentOwner);
 	}
 
-	public static <EntityClass> CVerticalLayoutTop buildForm(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
-			final List<String> entityFields, final Map<String, Component> mapComponents, final Map<String, CHorizontalLayout> mapHorizontalLayouts,
+	public static <EntityClass> CVerticalLayoutTop buildForm(final Class<?> entityClass,
+			final CEnhancedBinder<EntityClass> binder, final List<String> entityFields,
+			final Map<String, Component> mapComponents, final Map<String, CHorizontalLayout> mapHorizontalLayouts,
 			final CVerticalLayoutTop formLayout) throws Exception {
 		return buildForm(entityClass, binder, entityFields, mapComponents, mapHorizontalLayouts, formLayout, null);
 	}
 
-	public static <EntityClass> CVerticalLayoutTop buildForm(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
-			final List<String> entityFields, final Map<String, Component> mapComponents, final Map<String, CHorizontalLayout> mapHorizontalLayouts,
+	public static <EntityClass> CVerticalLayoutTop buildForm(final Class<?> entityClass,
+			final CEnhancedBinder<EntityClass> binder, final List<String> entityFields,
+			final Map<String, Component> mapComponents, final Map<String, CHorizontalLayout> mapHorizontalLayouts,
 			final CVerticalLayoutTop formLayout, final IContentOwner contentOwner) throws Exception {
 		try {
 			Check.notNull(entityClass, "Entity class cannot be null");
@@ -176,14 +186,16 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			final List<Field> sortedFields = getSortedFilteredFieldsList(allFields);
 			// LOGGER.info("Processing {} visible fields for form generation", sortedFields.size());
 			// Create components with enhanced error handling and logging
-			final List<String> resolvedEntityFields =
-					entityFields != null ? entityFields : sortedFields.stream().map(Field::getName).collect(Collectors.toList());
+			final List<String> resolvedEntityFields = entityFields != null ? entityFields
+					: sortedFields.stream().map(Field::getName).collect(Collectors.toList());
 			for (final String fieldName : resolvedEntityFields) {
-				final Field field = sortedFields.stream().filter(f -> f.getName().equals(fieldName)).findFirst().orElse(null);
+				final Field field =
+						sortedFields.stream().filter(f -> f.getName().equals(fieldName)).findFirst().orElse(null);
 				if (field == null) {
 					LOGGER.warn("Field '{}' not found in entity class {}", fieldName, entityClass.getSimpleName());
 				}
-				Check.notNull(field, "Field '" + fieldName + "' not found in entity class " + entityClass.getSimpleName());
+				Check.notNull(field,
+						"Field '" + fieldName + "' not found in entity class " + entityClass.getSimpleName());
 				final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(field);
 				processField(contentOwner, binder, formLayout, mapHorizontalLayouts, fieldInfo, mapComponents);
 			}
@@ -201,8 +213,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	 * @param contentOwner  the content owner (page) for context-aware data providers
 	 * @return the form layout
 	 * @throws Exception if form building fails */
-	public static <EntityClass> CVerticalLayoutTop buildFormWithOwner(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
-			final IContentOwner contentOwner) throws Exception {
+	public static <EntityClass> CVerticalLayoutTop buildFormWithOwner(final Class<?> entityClass,
+			final CEnhancedBinder<EntityClass> binder, final IContentOwner contentOwner) throws Exception {
 		return buildForm(entityClass, binder, null, contentOwner);
 	}
 
@@ -230,23 +242,27 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				final double defaultVal = Double.parseDouble(fieldInfo.getDefaultValue());
 				numberField.setValue(defaultVal);
 			} catch (final NumberFormatException e) {
-				LOGGER.error("Failed to parse default value '{}' as number for field '{}': {}", fieldInfo.getDefaultValue(),
-						fieldInfo.getDisplayName(), e.getMessage());
+				LOGGER.error("Failed to parse default value '{}' as number for field '{}': {}",
+						fieldInfo.getDefaultValue(), fieldInfo.getDisplayName(), e.getMessage());
 				throw new IllegalArgumentException("Invalid default number value: " + fieldInfo.getDefaultValue(), e);
 			}
 		}
 		try {
 			// Use converter to handle BigDecimal conversion
-			binder.forField(numberField).withConverter(value -> value != null ? BigDecimal.valueOf(value) : null,
-					value -> value != null ? value.doubleValue() : null, "Invalid decimal value").bind(fieldInfo.getFieldName());
+			binder.forField(numberField)
+					.withConverter(value -> value != null ? BigDecimal.valueOf(value) : null,
+							value -> value != null ? value.doubleValue() : null, "Invalid decimal value")
+					.bind(fieldInfo.getFieldName());
 			// LOGGER.debug("Successfully bound NumberField with BigDecimal converter for field '{}'", fieldInfo.getFieldName());
 		} catch (final Exception e) {
-			LOGGER.error("Failed to bind BigDecimal field for field '{}': {} - using fallback binding", fieldInfo.getFieldName(), e.getMessage());
+			LOGGER.error("Failed to bind BigDecimal field for field '{}': {} - using fallback binding",
+					fieldInfo.getFieldName(), e.getMessage());
 			// Fallback to simple binding without converter
 			try {
 				safeBindComponent(binder, numberField, fieldInfo.getFieldName(), "NumberField(BigDecimal-fallback)");
 			} catch (final Exception fallbackException) {
-				LOGGER.error("Fallback binding also failed for BigDecimal field '{}': {}", fieldInfo.getFieldName(), fallbackException.getMessage());
+				LOGGER.error("Fallback binding also failed for BigDecimal field '{}': {}", fieldInfo.getFieldName(),
+						fallbackException.getMessage());
 			}
 		}
 		return numberField;
@@ -265,13 +281,14 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			safeBindComponent(binder, checkbox, fieldInfo.getFieldName(), "Checkbox");
 			return checkbox;
 		} catch (final Exception e) {
-			LOGGER.error("Failed to create or bind checkbox for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
+			LOGGER.error("Failed to create or bind checkbox for field '{}': {}", fieldInfo.getFieldName(),
+					e.getMessage());
 			throw e;
 		}
 	}
 
-	private static Component createColorAwareStringComboBox(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder,
-			final List<CComboBoxOption> items) {
+	private static Component createColorAwareIntegerComboBox(final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binder, final List<CComboBoxOption> items) {
 		final ComboBox<CComboBoxOption> comboBox = new ComboBox<>();
 		configureStringComboBoxBase(comboBox, fieldInfo);
 		comboBox.setAllowCustomValue(false);
@@ -281,17 +298,51 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		if (fieldInfo.isClearOnEmptyData() && items.isEmpty()) {
 			comboBox.clear();
 		}
-		final boolean hasDefaultValue = fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty();
+		final boolean hasDefaultValue =
+				fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty();
 		if (hasDefaultValue) {
-			items.stream().filter(item -> fieldInfo.getDefaultValue().equals(item.getValue())).findFirst().ifPresent(comboBox::setValue);
+			items.stream().filter(item -> fieldInfo.getDefaultValue().equals(item.getValue())).findFirst()
+					.ifPresent(comboBox::setValue);
 		} else if (fieldInfo.isAutoSelectFirst() && !items.isEmpty()) {
 			comboBox.setValue(items.get(0));
 		}
 		applySelectedOptionDisplay(comboBox, fieldInfo);
 		if (binder != null) {
 			binder.forField(comboBox)
-					.withConverter(item -> item != null ? item.getValue() : null,
-							value -> items.stream().filter(item -> value != null && value.equals(item.getValue())).findFirst().orElse(null),
+					.withConverter(item -> item != null ? Integer.valueOf(item.getValue()) : null,
+							value -> items.stream()
+									.filter(item -> value != null && Integer.toString(value).equals(item.getValue()))
+									.findFirst().orElse(null),
+							"Invalid integer option")
+					.bind(fieldInfo.getFieldName());
+		}
+		return comboBox;
+	}
+
+	private static Component createColorAwareStringComboBox(final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binder, final List<CComboBoxOption> items) {
+		final ComboBox<CComboBoxOption> comboBox = new ComboBox<>();
+		configureStringComboBoxBase(comboBox, fieldInfo);
+		comboBox.setAllowCustomValue(false);
+		comboBox.setItemLabelGenerator(CComboBoxOption::getName);
+		comboBox.setRenderer(new ComponentRenderer<>(option -> renderColorAwareOptionRow(option, fieldInfo)));
+		comboBox.setItems(items);
+		if (fieldInfo.isClearOnEmptyData() && items.isEmpty()) {
+			comboBox.clear();
+		}
+		final boolean hasDefaultValue =
+				fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty();
+		if (hasDefaultValue) {
+			items.stream().filter(item -> fieldInfo.getDefaultValue().equals(item.getValue())).findFirst()
+					.ifPresent(comboBox::setValue);
+		} else if (fieldInfo.isAutoSelectFirst() && !items.isEmpty()) {
+			comboBox.setValue(items.get(0));
+		}
+		applySelectedOptionDisplay(comboBox, fieldInfo);
+		if (binder != null) {
+			binder.forField(comboBox)
+					.withConverter(item -> item != null ? item.getValue() : null, value -> items.stream()
+							.filter(item -> value != null && value.equals(item.getValue())).findFirst().orElse(null),
 							"Invalid option value")
 					.bind(fieldInfo.getFieldName());
 		}
@@ -304,17 +355,19 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			safeBindComponent(binder, colorPicker, fieldInfo.getFieldName(), "ColorPicker");
 			return colorPicker;
 		} catch (final Exception e) {
-			LOGGER.error("Failed to create or bind color picker for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
+			LOGGER.error("Failed to create or bind color picker for field '{}': {}", fieldInfo.getFieldName(),
+					e.getMessage());
 			throw e;
 		}
 	}
 
-	public static <T extends CEntityDB<T>> CNavigableComboBox<T> createComboBox(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
-			final CEnhancedBinder<?> binder) throws Exception {
+	public static <T extends CEntityDB<T>> CNavigableComboBox<T> createComboBox(final IContentOwner contentOwner,
+			final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) throws Exception {
 		try {
 			Check.notNull(fieldInfo, "FieldInfo for ComboBox creation");
 			// Create navigable combobox with navigation button - it's a CustomField so binding is done on it, not on internal combobox
-			final CNavigableComboBox<T> navigableComboBox = new CNavigableComboBox<>(contentOwner, fieldInfo, dataProviderResolver);
+			final CNavigableComboBox<T> navigableComboBox =
+					new CNavigableComboBox<>(contentOwner, fieldInfo, dataProviderResolver);
 			// Data provider resolution using CDataProviderResolver
 			List<T> items = null;
 			Check.notNull(dataProviderResolver, "DataProviderResolver for field " + fieldInfo.getFieldName());
@@ -344,18 +397,20 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			}
 			return navigableComboBox;
 		} catch (final Exception e) {
-			LOGGER.error("Failed to create or bind NavigableComboBox for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
+			LOGGER.error("Failed to create or bind NavigableComboBox for field '{}': {}", fieldInfo.getFieldName(),
+					e.getMessage());
 			throw e;
 		}
 	}
 
 	@SuppressWarnings ("unchecked")
-	private static <T> MultiSelectComboBox<T> createComboBoxMultiSelect(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
-			final CEnhancedBinder<?> binder) throws Exception {
+	private static <T> MultiSelectComboBox<T> createComboBoxMultiSelect(final IContentOwner contentOwner,
+			final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) throws Exception {
 		try {
 			Check.notNull(fieldInfo, "FieldInfo for ComboBox creation");
 			LOGGER.debug("Creating MultiSelectComboBox for field: {}", fieldInfo.getFieldName());
-			final MultiSelectComboBox<T> comboBox = new MultiSelectComboBox<>(fieldInfo.getIsCaptionVisible() ? fieldInfo.getDisplayName() : "");
+			final MultiSelectComboBox<T> comboBox =
+					new MultiSelectComboBox<>(fieldInfo.getIsCaptionVisible() ? fieldInfo.getDisplayName() : "");
 			comboBox.setItemLabelGenerator(item -> {
 				if (item instanceof CEntityNamed<?>) {
 					return ((CEntityNamed<?>) item).getName();
@@ -372,7 +427,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			Check.notNull(dataProviderResolver, "DataProviderResolver for field " + fieldInfo.getFieldName());
 			// DİKKAT: Diziye çevirip Set.of(...) kullanmıyoruz — bu, Set<CEntityDB[]> üretip tür çıkarımını bozuyordu.
 			final List<?> rawList = dataProviderResolver.resolveDataList(contentOwner, fieldInfo);
-			Check.notNull(rawList, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
+			Check.notNull(rawList,
+					"Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
 			// Tip güvenli toplama: LinkedHashSet ile sıralı ve benzersiz
 			final LinkedHashSet<T> items = rawList.stream().map(e -> (T) e) // runtime cast; provider sözleşmesine güveniyoruz
 					.collect(Collectors.toCollection(LinkedHashSet::new));
@@ -384,7 +440,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			safeBindComponent(binder, comboBox, fieldInfo.getFieldName(), "ComboBox(MultiSelect)");
 			return comboBox;
 		} catch (final Exception e) {
-			LOGGER.error("Failed to create or bind MultiSelectComboBox for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
+			LOGGER.error("Failed to create or bind MultiSelectComboBox for field '{}': {}", fieldInfo.getFieldName(),
+					e.getMessage());
 			throw e;
 		}
 	}
@@ -397,7 +454,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			final Class<?> fieldType = fieldInfo.getFieldTypeClass();
 			Check.notNull(fieldType, "Field type for field " + fieldInfo.getDisplayName());
 			// Check for custom component creation method first (highest priority)
-			if (fieldInfo.getCreateComponentMethod() != null && !fieldInfo.getCreateComponentMethod().trim().isEmpty()) {
+			if (fieldInfo.getCreateComponentMethod() != null
+					&& !fieldInfo.getCreateComponentMethod().trim().isEmpty()) {
 				component = createCustomComponent(contentOwner, fieldInfo, binder);
 				Check.notNull(component, "Custom component for field " + fieldInfo.getFieldName());
 				return component;
@@ -429,21 +487,23 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				} else {
 					component = createComboBoxMultiSelect(contentOwner, fieldInfo, binder);
 				}
-			} else if (!hasDataProvider && (Set.class.isAssignableFrom(fieldType) || List.class.isAssignableFrom(fieldType)
-					|| Collection.class.isAssignableFrom(fieldType))) {
+			} else if (!hasDataProvider && (Set.class.isAssignableFrom(fieldType)
+					|| List.class.isAssignableFrom(fieldType) || Collection.class.isAssignableFrom(fieldType))) {
 				// Collection fields without data provider (e.g., OneToMany relationships like attachments, comments)
 				// These should be handled by separate specialized components, not in the main form
-				LOGGER.debug("Skipping collection field '{}' of type {} - handled by separate component", fieldInfo.getFieldName(),
-						fieldType.getSimpleName());
+				LOGGER.debug("Skipping collection field '{}' of type {} - handled by separate component",
+						fieldInfo.getFieldName(), fieldType.getSimpleName());
 				return null; // Return null to skip this field in form
 			} else if (useSelectionDataProvider && (fieldType == Integer.class || fieldType == int.class)) {
 				component = createIntegerComboBox(contentOwner, fieldInfo, binder);
-			} else if (fieldType == Integer.class || fieldType == int.class || fieldType == Long.class || fieldType == long.class) {
+			} else if (fieldType == Integer.class || fieldType == int.class || fieldType == Long.class
+					|| fieldType == long.class) {
 				// Integer types
 				component = createIntegerField(fieldInfo, binder);
 			} else if (fieldType == BigDecimal.class) {
 				component = createBigDecimalField(fieldInfo, binder);
-			} else if (fieldType == Double.class || fieldType == double.class || fieldType == Float.class || fieldType == float.class) {
+			} else if (fieldType == Double.class || fieldType == double.class || fieldType == Float.class
+					|| fieldType == float.class) {
 				// Floating-point types
 				component = createFloatingPointField(fieldInfo, binder);
 			} else if (fieldType == LocalDate.class) {
@@ -483,8 +543,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 					component = createTextField(fieldInfo, binder);
 				}
 			} else {
-				Check.isTrue(false, "Component field [" + fieldInfo.getFieldName() + "], unsupported field type [" + fieldType.getSimpleName()
-						+ "] for field [" + fieldInfo.getDisplayName() + "]");
+				Check.isTrue(false, "Component field [" + fieldInfo.getFieldName() + "], unsupported field type ["
+						+ fieldType.getSimpleName() + "] for field [" + fieldInfo.getDisplayName() + "]");
 			}
 			// Allow null component for fields that should be skipped (handled by separate components)
 			if (component == null) {
@@ -510,8 +570,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	 * @param binder       the enhanced binder for form binding
 	 * @return the custom component or null if creation fails
 	 * @throws Exception */
-	private static Component createCustomComponent(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder)
-			throws Exception {
+	private static Component createCustomComponent(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binder) throws Exception {
 		try {
 			Check.notNull(fieldInfo, "FieldInfo for custom component creation");
 			Check.notNull(fieldInfo.getCreateComponentMethod(), "CreateComponentMethod for custom component creation");
@@ -524,7 +584,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			//
 			final Component component = dataProviderResolver.resolveDataComponent(contentOwner, fieldInfo);
 			fieldInfo.setDataProviderMethod(oldBeanMethod); // orijinal method adına geri dön
-			Check.notNull(component, "Custom component created by method " + methodName + " for field " + fieldInfo.getFieldName());
+			Check.notNull(component,
+					"Custom component created by method " + methodName + " for field " + fieldInfo.getFieldName());
 			// Set id for better test automation (consistent with other creators)
 			CAuxillaries.setId(component);
 			// Attempt to bind if component exposes HasValueAndElement (bindable)
@@ -534,9 +595,12 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 					safeBindComponent(binder, bindable, fieldInfo.getFieldName(), "CustomComponent");
 				} else if (component instanceof IContentOwner) {
 					// If the custom component is a content owner, let it receive the entity value via setValue when populating
-					LOGGER.info("Custom component for field '{}' is an IContentOwner and will not be auto-bound by binder", fieldInfo.getFieldName());
+					LOGGER.info(
+							"Custom component for field '{}' is an IContentOwner and will not be auto-bound by binder",
+							fieldInfo.getFieldName());
 				} else {
-					LOGGER.info("Custom component for field '{}' is not bindable (no HasValueAndElement) - skipping binder binding",
+					LOGGER.info(
+							"Custom component for field '{}' is not bindable (no HasValueAndElement) - skipping binder binding",
 							fieldInfo.getFieldName());
 				}
 			}
@@ -554,14 +618,16 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return datePicker;
 	}
 
-	private static DateTimePicker createDateTimePicker(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
+	private static DateTimePicker createDateTimePicker(final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binder) {
 		final DateTimePicker dateTimePicker = new DateTimePicker();
 		CAuxillaries.setId(dateTimePicker);
 		safeBindComponent(binder, dateTimePicker, fieldInfo.getFieldName(), "DateTimePicker");
 		return dateTimePicker;
 	}
 
-	private static Component createDirectoryPathSelector(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
+	private static Component createDirectoryPathSelector(final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binder) {
 		try {
 			LOGGER.debug("Creating CDirectoryPathSelector for field: {}", fieldInfo.getFieldName());
 			final CDirectoryPathSelector directoryPathSelector = new CDirectoryPathSelector(fieldInfo);
@@ -569,17 +635,20 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			LOGGER.debug("Successfully created CDirectoryPathSelector for field: {}", fieldInfo.getFieldName());
 			return directoryPathSelector;
 		} catch (final Exception e) {
-			LOGGER.error("Failed to create CDirectoryPathSelector for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
+			LOGGER.error("Failed to create CDirectoryPathSelector for field '{}': {}", fieldInfo.getFieldName(),
+					e.getMessage());
 			throw e;
 		}
 	}
 
-	private static <EntityClass, DetailClass> CComponentFieldSelection<EntityClass, DetailClass> createDualListSelector2(
-			final IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) throws Exception {
+	private static <EntityClass, DetailClass> CComponentFieldSelection<EntityClass, DetailClass>
+			createDualListSelector2(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
+					final CEnhancedBinder<?> binder) throws Exception {
 		Check.notNull(fieldInfo, "FieldInfo for DualListSelector creation");
 		LOGGER.debug("Creating CComponentFieldSelection for field: {}", fieldInfo.getFieldName());
-		final CComponentFieldSelection<EntityClass, DetailClass> dualListSelector = new CComponentFieldSelection<>(dataProviderResolver, contentOwner,
-				fieldInfo, "Available " + fieldInfo.getDisplayName(), "Selected " + fieldInfo.getDisplayName());
+		final CComponentFieldSelection<EntityClass, DetailClass> dualListSelector =
+				new CComponentFieldSelection<>(dataProviderResolver, contentOwner, fieldInfo,
+						"Available " + fieldInfo.getDisplayName(), "Selected " + fieldInfo.getDisplayName());
 		// Set item label generator based on entity type
 		dualListSelector.setItemLabelGenerator(item -> {
 			if (item instanceof CEntityNamed<?>) {
@@ -593,13 +662,15 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			}
 			return "Unknown Item: " + String.valueOf(item);
 		});
-		if (binder != null && fieldInfo.getFieldTypeClass() != null && Set.class.isAssignableFrom(fieldInfo.getFieldTypeClass())) {
+		if (binder != null && fieldInfo.getFieldTypeClass() != null
+				&& Set.class.isAssignableFrom(fieldInfo.getFieldTypeClass())) {
 			@SuppressWarnings ("unchecked")
 			final CEnhancedBinder<Object> typedBinder = (CEnhancedBinder<Object>) binder;
 			final Converter<List<DetailClass>, Set<DetailClass>> converter = new Converter<>() {
 
 				@Override
-				public Result<Set<DetailClass>> convertToModel(final List<DetailClass> value, final ValueContext context) {
+				public Result<Set<DetailClass>> convertToModel(final List<DetailClass> value,
+						final ValueContext context) {
 					if (value == null) {
 						return Result.ok(new LinkedHashSet<>());
 					}
@@ -607,19 +678,22 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				}
 
 				@Override
-				public List<DetailClass> convertToPresentation(final Set<DetailClass> value, final ValueContext context) {
+				public List<DetailClass> convertToPresentation(final Set<DetailClass> value,
+						final ValueContext context) {
 					return value == null ? new ArrayList<>() : new ArrayList<>(value);
 				}
 			};
 			typedBinder.forField(dualListSelector).withConverter(converter).bind(fieldInfo.getFieldName());
-		} else if (binder != null && fieldInfo.getFieldTypeClass() != null && Collection.class.isAssignableFrom(fieldInfo.getFieldTypeClass())
+		} else if (binder != null && fieldInfo.getFieldTypeClass() != null
+				&& Collection.class.isAssignableFrom(fieldInfo.getFieldTypeClass())
 				&& !List.class.isAssignableFrom(fieldInfo.getFieldTypeClass())) {
 			@SuppressWarnings ("unchecked")
 			final CEnhancedBinder<Object> typedBinder = (CEnhancedBinder<Object>) binder;
 			final Converter<List<DetailClass>, Collection<DetailClass>> converter = new Converter<>() {
 
 				@Override
-				public Result<Collection<DetailClass>> convertToModel(final List<DetailClass> value, final ValueContext context) {
+				public Result<Collection<DetailClass>> convertToModel(final List<DetailClass> value,
+						final ValueContext context) {
 					if (value == null) {
 						return Result.ok(new ArrayList<>());
 					}
@@ -627,7 +701,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				}
 
 				@Override
-				public List<DetailClass> convertToPresentation(final Collection<DetailClass> value, final ValueContext context) {
+				public List<DetailClass> convertToPresentation(final Collection<DetailClass> value,
+						final ValueContext context) {
 					return value == null ? new ArrayList<>() : new ArrayList<>(value);
 				}
 			};
@@ -678,7 +753,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			// keep addint items on same line
 			horizontalLayout = prev_horizontalLayout;
 			// make this line have a max width if it's not set already, to prevent it from stretching too much when there are multiple fields on the
-			horizontalLayout.setWidth(CUIConstants.sumPixels(CUIConstants.FIELD_WIDTH_WIDE, CUIConstants.LABEL_WIDTH_FORM, CUIConstants.GAP_TINY));
+			horizontalLayout.setWidth(CUIConstants.sumPixels(CUIConstants.FIELD_WIDTH_WIDE,
+					CUIConstants.LABEL_WIDTH_FORM, CUIConstants.GAP_TINY));
 			// horizontalLayout.setMaxWidth(CUIConstants.FIELD_WIDTH_WIDE + "px");
 		} else {
 			horizontalLayout = new CFormHorizontalLayout();
@@ -710,12 +786,14 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			LOGGER.debug("Successfully created CFilePathSelector for field: {}", fieldInfo.getFieldName());
 			return filePathSelector;
 		} catch (final Exception e) {
-			LOGGER.error("Failed to create CFilePathSelector for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
+			LOGGER.error("Failed to create CFilePathSelector for field '{}': {}", fieldInfo.getFieldName(),
+					e.getMessage());
 			throw e;
 		}
 	}
 
-	private static NumberField createFloatingPointField(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
+	private static NumberField createFloatingPointField(final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binder) {
 		final NumberField numberField = new NumberField();
 		// Set ID for better test automation
 		CAuxillaries.setId(numberField);
@@ -730,90 +808,18 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return numberField;
 	}
 
-	private static CComponentMultiColumnListSelection createMultiColumnGridListSelector(final EntityFieldInfo fieldInfo,
-			final CEnhancedBinder<?> binder, final List<CMultiColumnStringRow> sourceRows) {
-		final CComponentMultiColumnListSelection selector = new CComponentMultiColumnListSelection(fieldInfo.getDisplayName());
-		final List<CColumnDefinition> columnDefinitions = new ArrayList<>();
-		if (!sourceRows.isEmpty()) {
-			// Column definitions are derived from first row map keys.
-			// Key order is preserved because provider builds rows with LinkedHashMap.
-			sourceRows.get(0).columnValues().keySet().forEach(key -> columnDefinitions.add(new CColumnDefinition(key, prettifyColumnHeader(key))));
-		} else {
-			columnDefinitions.add(new CColumnDefinition("protocolVariableName", "Protocol Variable Name"));
-			columnDefinitions.add(new CColumnDefinition("variableType", "Variable Type"));
-			columnDefinitions.add(new CColumnDefinition("recordType", "Record Type"));
-		}
-		selector.setColumns(columnDefinitions);
-		// This defines which column is written back to entity field List<String>.
-		final String returnedColumnId = columnDefinitions.stream().map(CColumnDefinition::id)
-				.filter(id -> "protocolVariableName".equalsIgnoreCase(id) || "name".equalsIgnoreCase(id)).findFirst()
-				.orElse(columnDefinitions.get(0).id());
-		selector.setReturnedColumnId(returnedColumnId);
-		selector.setSourceItems(sourceRows);
-		if (binder != null) {
-			@SuppressWarnings ("unchecked")
-			final CEnhancedBinder<Object> typedBinder = (CEnhancedBinder<Object>) binder;
-			final Converter<List<CMultiColumnStringRow>, List<String>> converter = new Converter<>() {
-
-				@Override
-				public Result<List<String>> convertToModel(final List<CMultiColumnStringRow> value, final ValueContext context) {
-					if (value == null || value.isEmpty()) {
-						return Result.ok(new ArrayList<>());
-					}
-					// Persist only returnedColumnId values (not all visible columns).
-					return Result.ok(value.stream().map(row -> row.getValue(returnedColumnId))
-							.filter(variableName -> variableName != null && !variableName.isBlank()).map(String::trim).distinct().toList());
-				}
-
-				@Override
-				public List<CMultiColumnStringRow> convertToPresentation(final List<String> value, final ValueContext context) {
-					if (value == null || value.isEmpty()) {
-						return new ArrayList<>();
-					}
-					final List<CMultiColumnStringRow> selectedRows = new ArrayList<>();
-					value.forEach(selectedValue -> {
-							if (selectedValue == null || selectedValue.isBlank()) {
-								return;
-							}
-							// Restore selected rows by matching persisted value to returnedColumnId.
-							final CMultiColumnStringRow matchedRow = sourceRows.stream()
-									.filter(row -> selectedValue.equalsIgnoreCase(row.getValue(returnedColumnId))).findFirst()
-								.orElseGet(() -> {
-									final Map<String, String> fallbackColumns = new HashMap<>();
-									columnDefinitions.forEach(def -> fallbackColumns.put(def.id(), ""));
-									fallbackColumns.put(returnedColumnId, selectedValue.trim());
-									return new CMultiColumnStringRow("vaadin:code", "#1C88FF", fallbackColumns);
-								});
-						selectedRows.add(matchedRow);
-					});
-					return selectedRows;
-				}
-			};
-			typedBinder.forField(selector).withConverter(converter).bind(fieldInfo.getFieldName());
-		}
-		return selector;
-	}
-
-	private static String prettifyColumnHeader(final String rawKey) {
-		if (rawKey == null || rawKey.isBlank()) {
-			return "";
-		}
-		final String spaced = rawKey.replaceAll("([a-z])([A-Z])", "$1 $2").replace('_', ' ').trim();
-		return Arrays.stream(spaced.split("\\s+")).filter(token -> !token.isBlank()).map(token -> token.substring(0, 1).toUpperCase() + token.substring(1))
-				.collect(Collectors.joining(" "));
-	}
-
 	private static Component createGridListSelector(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
 			final CEnhancedBinder<?> binder) throws Exception {
 		Check.notNull(fieldInfo, "FieldInfo for GridListSelector creation");
 		LOGGER.debug("Creating grid list selector for field: {}", fieldInfo.getFieldName());
 		final List<?> rawList = dataProviderResolver.resolveDataList(contentOwner, fieldInfo);
-		final boolean protocolVariableProvider = "getComboValuesOfProtocolVariableNames".equals(fieldInfo.getDataProviderMethod());
-		final boolean hasMultiColumnRows = rawList != null && !rawList.isEmpty() && rawList.stream().allMatch(CMultiColumnStringRow.class::isInstance);
+		final boolean protocolVariableProvider =
+				"getComboValuesOfProtocolVariableNames".equals(fieldInfo.getDataProviderMethod());
+		final boolean hasMultiColumnRows = rawList != null && !rawList.isEmpty()
+				&& rawList.stream().allMatch(CMultiColumnStringRow.class::isInstance);
 		if (protocolVariableProvider || hasMultiColumnRows) {
-			final List<CMultiColumnStringRow> sourceRows =
-					rawList == null ? new ArrayList<>() : rawList.stream().filter(CMultiColumnStringRow.class::isInstance)
-							.map(CMultiColumnStringRow.class::cast).toList();
+			final List<CMultiColumnStringRow> sourceRows = rawList == null ? new ArrayList<>() : rawList.stream()
+					.filter(CMultiColumnStringRow.class::isInstance).map(CMultiColumnStringRow.class::cast).toList();
 			return createMultiColumnGridListSelector(fieldInfo, binder, sourceRows);
 		}
 		LOGGER.debug("Using CComponentListSelection fallback for field: {}", fieldInfo.getFieldName());
@@ -837,7 +843,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return gridListSelector;
 	}
 
-	private static ComboBox<String> createIconComboBox(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
+	private static ComboBox<String> createIconComboBox(final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binder) {
 		Check.notNull(fieldInfo, "Field for Icon ComboBox creation");
 		final ComboBox<String> comboBox = new ComboBox<>();
 		// Configure basic properties from metadata
@@ -880,14 +887,17 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		// Set item label generator for text representation
 		comboBox.setItemLabelGenerator(iconName -> iconName);
 		// Handle default value
-		final boolean hasDefaultValue = fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty();
+		final boolean hasDefaultValue =
+				fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty();
 		if (hasDefaultValue) {
 			final String defaultIcon = fieldInfo.getDefaultValue();
 			if (iconItems.contains(defaultIcon)) {
 				comboBox.setValue(defaultIcon);
-				LOGGER.debug("Set Icon ComboBox default value for field '{}': '{}'", fieldInfo.getFieldName(), defaultIcon);
+				LOGGER.debug("Set Icon ComboBox default value for field '{}': '{}'", fieldInfo.getFieldName(),
+						defaultIcon);
 			} else {
-				LOGGER.warn("Default icon '{}' not found in available icons for field '{}'", defaultIcon, fieldInfo.getFieldName());
+				LOGGER.warn("Default icon '{}' not found in available icons for field '{}'", defaultIcon,
+						fieldInfo.getFieldName());
 			}
 		} else if (fieldInfo.isAutoSelectFirst() && !iconItems.isEmpty()) {
 			// Auto-select first item if configured
@@ -923,6 +933,24 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return comboBox;
 	}
 
+	private static Component createIntegerComboBox(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binder) throws Exception {
+		Check.notNull(fieldInfo, "Field for Integer ComboBox creation");
+		final List<?> rawItems = dataProviderResolver.resolveDataList(contentOwner, fieldInfo);
+		if (rawItems == null || rawItems.isEmpty()
+				|| rawItems.stream().allMatch(item -> item == null || item instanceof Integer)) {
+			return createPlainIntegerComboBox(fieldInfo, binder, rawItems == null ? List.of()
+					: rawItems.stream().filter(Integer.class::isInstance).map(Integer.class::cast).toList());
+		}
+		if (rawItems.stream().allMatch(CComboBoxOption.class::isInstance)) {
+			return createColorAwareIntegerComboBox(fieldInfo, binder,
+					rawItems.stream().map(CComboBoxOption.class::cast).toList());
+		}
+		final String sampleType = rawItems.get(0) == null ? "null" : rawItems.get(0).getClass().getName();
+		throw new IllegalArgumentException("Unsupported integer ComboBox data provider result for field '%s': %s"
+				.formatted(fieldInfo.getFieldName(), sampleType));
+	}
+
 	private static NumberField createIntegerField(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
 		final NumberField numberField = new NumberField();
 		CAuxillaries.setId(numberField);
@@ -936,12 +964,16 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		final Class<?> fieldType = fieldInfo.getFieldTypeClass();
 		final String propertyName = fieldInfo.getFieldName();
 		if (fieldType == Integer.class || fieldType == int.class) {
-			binder.forField(numberField).withConverter(value -> value != null ? value.intValue() : null,
-					value -> value != null ? value.doubleValue() : null, "Invalid integer value").bind(propertyName);
+			binder.forField(numberField)
+					.withConverter(value -> value != null ? value.intValue() : null,
+							value -> value != null ? value.doubleValue() : null, "Invalid integer value")
+					.bind(propertyName);
 			// LOGGER.debug("Successfully bound NumberField with Integer converter for field '{}'", fieldInfo.getFieldName());
 		} else if (fieldType == Long.class || fieldType == long.class) {
-			binder.forField(numberField).withConverter(value -> value != null ? value.longValue() : null,
-					value -> value != null ? value.doubleValue() : null, "Invalid long value").bind(propertyName);
+			binder.forField(numberField)
+					.withConverter(value -> value != null ? value.longValue() : null,
+							value -> value != null ? value.doubleValue() : null, "Invalid long value")
+					.bind(propertyName);
 			// LOGGER.debug("Successfully bound NumberField with Long converter for field '{}'", fieldInfo.getFieldName());
 		} else {
 			// Fallback for other number types (Double, etc.)
@@ -950,79 +982,73 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return numberField;
 	}
 
-	private static Component createIntegerComboBox(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder)
-			throws Exception {
-		Check.notNull(fieldInfo, "Field for Integer ComboBox creation");
-		final List<?> rawItems = dataProviderResolver.resolveDataList(contentOwner, fieldInfo);
-		if (rawItems == null || rawItems.isEmpty() || rawItems.stream().allMatch(item -> item == null || item instanceof Integer)) {
-			return createPlainIntegerComboBox(fieldInfo, binder,
-					rawItems == null ? List.of() : rawItems.stream().filter(Integer.class::isInstance).map(Integer.class::cast).toList());
+	private static CComponentMultiColumnListSelection createMultiColumnGridListSelector(final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binder, final List<CMultiColumnStringRow> sourceRows) {
+		final CComponentMultiColumnListSelection selector =
+				new CComponentMultiColumnListSelection(fieldInfo.getDisplayName());
+		final List<CColumnDefinition> columnDefinitions = new ArrayList<>();
+		if (!sourceRows.isEmpty()) {
+			// Column definitions are derived from first row map keys.
+			// Key order is preserved because provider builds rows with LinkedHashMap.
+			sourceRows.get(0).columnValues().keySet()
+					.forEach(key -> columnDefinitions.add(new CColumnDefinition(key, prettifyColumnHeader(key))));
+		} else {
+			columnDefinitions.add(new CColumnDefinition("protocolVariableName", "Protocol Variable Name"));
+			columnDefinitions.add(new CColumnDefinition("variableType", "Variable Type"));
+			columnDefinitions.add(new CColumnDefinition("recordType", "Record Type"));
 		}
-		if (rawItems.stream().allMatch(CComboBoxOption.class::isInstance)) {
-			return createColorAwareIntegerComboBox(fieldInfo, binder, rawItems.stream().map(CComboBoxOption.class::cast).toList());
-		}
-		final String sampleType = rawItems.get(0) == null ? "null" : rawItems.get(0).getClass().getName();
-		throw new IllegalArgumentException(
-				"Unsupported integer ComboBox data provider result for field '%s': %s".formatted(fieldInfo.getFieldName(), sampleType));
-	}
+		selector.setColumns(columnDefinitions);
+		// This defines which column is written back to entity field List<String>.
+		final String returnedColumnId = columnDefinitions.stream().map(CColumnDefinition::id)
+				.filter(id -> "protocolVariableName".equalsIgnoreCase(id) || "name".equalsIgnoreCase(id)).findFirst()
+				.orElse(columnDefinitions.get(0).id());
+		selector.setReturnedColumnId(returnedColumnId);
+		selector.setSourceItems(sourceRows);
+		if (binder != null) {
+			@SuppressWarnings ("unchecked")
+			final CEnhancedBinder<Object> typedBinder = (CEnhancedBinder<Object>) binder;
+			final Converter<List<CMultiColumnStringRow>, List<String>> converter = new Converter<>() {
 
-	private static ComboBox<Integer> createPlainIntegerComboBox(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder,
-			final List<Integer> items) {
-		final ComboBox<Integer> comboBox = new ComboBox<>();
-		configureStringComboBoxBase(comboBox, fieldInfo);
-		comboBox.setAllowCustomValue(false);
-		comboBox.setItems(items);
-		if (fieldInfo.isClearOnEmptyData() && items.isEmpty()) {
-			comboBox.clear();
-		}
-		final boolean hasDefaultValue = fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty();
-		if (hasDefaultValue) {
-			try {
-				final Integer defaultValue = Integer.valueOf(fieldInfo.getDefaultValue());
-				if (items.contains(defaultValue)) {
-					comboBox.setValue(defaultValue);
+				@Override
+				public Result<List<String>> convertToModel(final List<CMultiColumnStringRow> value,
+						final ValueContext context) {
+					if (value == null || value.isEmpty()) {
+						return Result.ok(new ArrayList<>());
+					}
+					// Persist only returnedColumnId values (not all visible columns).
+					return Result.ok(value.stream().map(row -> row.getValue(returnedColumnId))
+							.filter(variableName -> variableName != null && !variableName.isBlank()).map(String::trim)
+							.distinct().toList());
 				}
-			} catch (final NumberFormatException e) {
-				LOGGER.warn("Invalid integer default value '{}' for field '{}'", fieldInfo.getDefaultValue(), fieldInfo.getFieldName());
-			}
-		} else if (fieldInfo.isAutoSelectFirst() && !items.isEmpty()) {
-			comboBox.setValue(items.get(0));
-		}
-		if (binder != null) {
-			binder.bind(comboBox, fieldInfo.getFieldName());
-		}
-		return comboBox;
-	}
 
-	private static Component createColorAwareIntegerComboBox(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder,
-			final List<CComboBoxOption> items) {
-		final ComboBox<CComboBoxOption> comboBox = new ComboBox<>();
-		configureStringComboBoxBase(comboBox, fieldInfo);
-		comboBox.setAllowCustomValue(false);
-		comboBox.setItemLabelGenerator(CComboBoxOption::getName);
-		comboBox.setRenderer(new ComponentRenderer<>(option -> renderColorAwareOptionRow(option, fieldInfo)));
-		comboBox.setItems(items);
-		if (fieldInfo.isClearOnEmptyData() && items.isEmpty()) {
-			comboBox.clear();
+				@Override
+				public List<CMultiColumnStringRow> convertToPresentation(final List<String> value,
+						final ValueContext context) {
+					if (value == null || value.isEmpty()) {
+						return new ArrayList<>();
+					}
+					final List<CMultiColumnStringRow> selectedRows = new ArrayList<>();
+					value.forEach(selectedValue -> {
+						if (selectedValue == null || selectedValue.isBlank()) {
+							return;
+						}
+						// Restore selected rows by matching persisted value to returnedColumnId.
+						final CMultiColumnStringRow matchedRow = sourceRows.stream()
+								.filter(row -> selectedValue.equalsIgnoreCase(row.getValue(returnedColumnId)))
+								.findFirst().orElseGet(() -> {
+									final Map<String, String> fallbackColumns = new HashMap<>();
+									columnDefinitions.forEach(def -> fallbackColumns.put(def.id(), ""));
+									fallbackColumns.put(returnedColumnId, selectedValue.trim());
+									return new CMultiColumnStringRow("vaadin:code", "#1C88FF", fallbackColumns);
+								});
+						selectedRows.add(matchedRow);
+					});
+					return selectedRows;
+				}
+			};
+			typedBinder.forField(selector).withConverter(converter).bind(fieldInfo.getFieldName());
 		}
-		final boolean hasDefaultValue = fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty();
-		if (hasDefaultValue) {
-			items.stream().filter(item -> fieldInfo.getDefaultValue().equals(item.getValue())).findFirst().ifPresent(comboBox::setValue);
-		} else if (fieldInfo.isAutoSelectFirst() && !items.isEmpty()) {
-			comboBox.setValue(items.get(0));
-		}
-		applySelectedOptionDisplay(comboBox, fieldInfo);
-		if (binder != null) {
-			binder.forField(comboBox)
-					.withConverter(item -> item != null ? Integer.valueOf(item.getValue()) : null,
-							value -> items.stream()
-									.filter(item -> value != null && Integer.toString(value).equals(item.getValue()))
-									.findFirst()
-									.orElse(null),
-							"Invalid integer option")
-					.bind(fieldInfo.getFieldName());
-		}
-		return comboBox;
+		return selector;
 	}
 
 	private static Component createPictureSelector(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
@@ -1033,8 +1059,38 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return pictureSelector;
 	}
 
-	private static ComboBox<String> createPlainStringComboBox(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder,
-			final List<String> items) {
+	private static ComboBox<Integer> createPlainIntegerComboBox(final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binder, final List<Integer> items) {
+		final ComboBox<Integer> comboBox = new ComboBox<>();
+		configureStringComboBoxBase(comboBox, fieldInfo);
+		comboBox.setAllowCustomValue(false);
+		comboBox.setItems(items);
+		if (fieldInfo.isClearOnEmptyData() && items.isEmpty()) {
+			comboBox.clear();
+		}
+		final boolean hasDefaultValue =
+				fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty();
+		if (hasDefaultValue) {
+			try {
+				final Integer defaultValue = Integer.valueOf(fieldInfo.getDefaultValue());
+				if (items.contains(defaultValue)) {
+					comboBox.setValue(defaultValue);
+				}
+			} catch (final NumberFormatException e) {
+				LOGGER.warn("Invalid integer default value '{}' for field '{}'", fieldInfo.getDefaultValue(),
+						fieldInfo.getFieldName());
+			}
+		} else if (fieldInfo.isAutoSelectFirst() && !items.isEmpty()) {
+			comboBox.setValue(items.get(0));
+		}
+		if (binder != null) {
+			binder.bind(comboBox, fieldInfo.getFieldName());
+		}
+		return comboBox;
+	}
+
+	private static ComboBox<String> createPlainStringComboBox(final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binder, final List<String> items) {
 		final ComboBox<String> comboBox = new ComboBox<>();
 		configureStringComboBoxBase(comboBox, fieldInfo);
 		comboBox.setItems(items);
@@ -1043,39 +1099,45 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			comboBox.setValue(null);
 		}
 		// Handle default value
-		final boolean hasDefaultValue = fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty();
+		final boolean hasDefaultValue =
+				fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty();
 		if (hasDefaultValue) {
 			// For String ComboBox, try to match default value exactly
 			if (items.contains(fieldInfo.getDefaultValue())) {
 				comboBox.setValue(fieldInfo.getDefaultValue());
-				LOGGER.debug("Set String ComboBox default value for field '{}': '{}'", fieldInfo.getFieldName(), fieldInfo.getDefaultValue());
+				LOGGER.debug("Set String ComboBox default value for field '{}': '{}'", fieldInfo.getFieldName(),
+						fieldInfo.getDefaultValue());
 			} else {
-				LOGGER.warn("Default value '{}' not found in items for String field '{}'", fieldInfo.getDefaultValue(), fieldInfo.getFieldName());
+				LOGGER.warn("Default value '{}' not found in items for String field '{}'", fieldInfo.getDefaultValue(),
+						fieldInfo.getFieldName());
 			}
 		} else if (fieldInfo.isAutoSelectFirst() && !items.isEmpty()) {
 			// Auto-select first item if configured
 			comboBox.setValue(items.get(0));
-			LOGGER.debug("Auto-selected first string item for field '{}': '{}'", fieldInfo.getFieldName(), items.get(0));
+			LOGGER.debug("Auto-selected first string item for field '{}': '{}'", fieldInfo.getFieldName(),
+					items.get(0));
 		}
 		// Bind to field
 		safeBindComponent(binder, comboBox, fieldInfo.getFieldName(), "String ComboBox");
 		return comboBox;
 	}
 
-	private static Component createStringComboBox(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder)
-			throws Exception {
+	private static Component createStringComboBox(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binder) throws Exception {
 		Check.notNull(fieldInfo, "Field for String ComboBox creation");
 		final List<?> rawItems = dataProviderResolver.resolveDataList(contentOwner, fieldInfo);
-		if (rawItems == null || rawItems.isEmpty() || rawItems.stream().allMatch(item -> item == null || item instanceof String)) {
-			return createPlainStringComboBox(fieldInfo, binder,
-					rawItems == null ? List.of() : rawItems.stream().filter(String.class::isInstance).map(String.class::cast).toList());
+		if (rawItems == null || rawItems.isEmpty()
+				|| rawItems.stream().allMatch(item -> item == null || item instanceof String)) {
+			return createPlainStringComboBox(fieldInfo, binder, rawItems == null ? List.of()
+					: rawItems.stream().filter(String.class::isInstance).map(String.class::cast).toList());
 		}
 		if (rawItems.stream().allMatch(CComboBoxOption.class::isInstance)) {
-			return createColorAwareStringComboBox(fieldInfo, binder, rawItems.stream().map(CComboBoxOption.class::cast).toList());
+			return createColorAwareStringComboBox(fieldInfo, binder,
+					rawItems.stream().map(CComboBoxOption.class::cast).toList());
 		}
 		final String sampleType = rawItems.get(0) == null ? "null" : rawItems.get(0).getClass().getName();
-		throw new IllegalArgumentException(
-				"Unsupported string ComboBox data provider result for field '%s': %s".formatted(fieldInfo.getFieldName(), sampleType));
+		throw new IllegalArgumentException("Unsupported string ComboBox data provider result for field '%s': %s"
+				.formatted(fieldInfo.getFieldName(), sampleType));
 	}
 
 	private static TextArea createTextArea(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
@@ -1089,8 +1151,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			try {
 				item.setValue(fieldInfo.getDefaultValue());
 			} catch (final Exception e) {
-				LOGGER.error("Failed to set default value '{}' for text area '{}': {}", fieldInfo.getDefaultValue(), fieldInfo.getFieldName(),
-						e.getMessage());
+				LOGGER.error("Failed to set default value '{}' for text area '{}': {}", fieldInfo.getDefaultValue(),
+						fieldInfo.getFieldName(), e.getMessage());
 			}
 		}
 		try {
@@ -1115,8 +1177,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			try {
 				item.setValue(fieldInfo.getDefaultValue());
 			} catch (final Exception e) {
-				LOGGER.error("Failed to set default value '{}' for text field '{}': {}", fieldInfo.getDefaultValue(), fieldInfo.getFieldName(),
-						e.getMessage());
+				LOGGER.error("Failed to set default value '{}' for text field '{}': {}", fieldInfo.getDefaultValue(),
+						fieldInfo.getFieldName(), e.getMessage());
 			}
 		}
 		try {
@@ -1210,17 +1272,6 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		// && !"none".equalsIgnoreCase(dataProviderBean.trim());
 	}
 
-	private static boolean shouldUseSelectionDataProvider(final EntityFieldInfo fieldInfo, final Class<?> fieldType) {
-		if (!hasValidDataProvider(fieldInfo.getDataProviderBean())) {
-			return false;
-		}
-		if (!fieldInfo.isAutoCalculate()) {
-			return true;
-		}
-		// autoCalculate scalar fields are populated by entity post-load flow and should render as normal scalar inputs.
-		return Collection.class.isAssignableFrom(fieldType) || CEntityDB.class.isAssignableFrom(fieldType);
-	}
-
 	private static boolean isBooleanField(final EntityFieldInfo fieldInfo, final Component component) {
 		if (component instanceof Checkbox) {
 			return true;
@@ -1237,7 +1288,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			return false;
 		}
 		final Class<?> fieldType = fieldInfo.getFieldTypeClass();
-		return fieldType == LocalDate.class || fieldType == LocalDateTime.class || fieldType == LocalTime.class || fieldType == Instant.class;
+		return fieldType == LocalDate.class || fieldType == LocalDateTime.class || fieldType == LocalTime.class
+				|| fieldType == Instant.class;
 	}
 
 	private static boolean isDecimalField(final EntityFieldInfo fieldInfo) {
@@ -1245,8 +1297,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			return false;
 		}
 		final Class<?> fieldType = fieldInfo.getFieldTypeClass();
-		return fieldType == BigDecimal.class || fieldType == Double.class || fieldType == double.class || fieldType == Float.class
-				|| fieldType == float.class;
+		return fieldType == BigDecimal.class || fieldType == Double.class || fieldType == double.class
+				|| fieldType == Float.class || fieldType == float.class;
 	}
 
 	private static boolean isIntegerField(final EntityFieldInfo fieldInfo) {
@@ -1254,8 +1306,9 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			return false;
 		}
 		final Class<?> fieldType = fieldInfo.getFieldTypeClass();
-		return fieldType == Integer.class || fieldType == int.class || fieldType == Long.class || fieldType == long.class || fieldType == Short.class
-				|| fieldType == short.class || fieldType == Byte.class || fieldType == byte.class;
+		return fieldType == Integer.class || fieldType == int.class || fieldType == Long.class
+				|| fieldType == long.class || fieldType == Short.class || fieldType == short.class
+				|| fieldType == Byte.class || fieldType == byte.class;
 	}
 
 	private static boolean isMultiItemSelectionField(final EntityFieldInfo fieldInfo, final Component component) {
@@ -1266,7 +1319,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			return false;
 		}
 		final Class<?> fieldType = fieldInfo.getFieldTypeClass();
-		return Set.class.isAssignableFrom(fieldType) || List.class.isAssignableFrom(fieldType) || Collection.class.isAssignableFrom(fieldType);
+		return Set.class.isAssignableFrom(fieldType) || List.class.isAssignableFrom(fieldType)
+				|| Collection.class.isAssignableFrom(fieldType);
 	}
 
 	private static boolean isTextAreaField(final EntityFieldInfo fieldInfo, final Component component) {
@@ -1276,22 +1330,35 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		if (fieldInfo == null) {
 			return false;
 		}
-		return fieldInfo.getFieldTypeClass() == String.class && fieldInfo.getMaxLength() >= CEntityConstants.MAX_LENGTH_DESCRIPTION;
+		return fieldInfo.getFieldTypeClass() == String.class
+				&& fieldInfo.getMaxLength() >= CEntityConstants.MAX_LENGTH_DESCRIPTION;
 	}
 
 	private static boolean looksLikeConstantReference(final String rawWidth, final String constantName) {
 		return rawWidth.startsWith("CUIConstants.") || constantName.matches("[A-Z][A-Z0-9_]*");
 	}
 
-	public static <EntityClass> Component processField(final IContentOwner contentOwner, final CEnhancedBinder<EntityClass> binder,
-			final VerticalLayout formLayout, final Map<String, CHorizontalLayout> mapHorizontalLayouts, final EntityFieldInfo fieldInfo,
+	private static String prettifyColumnHeader(final String rawKey) {
+		if (rawKey == null || rawKey.isBlank()) {
+			return "";
+		}
+		final String spaced = rawKey.replaceAll("([a-z])([A-Z])", "$1 $2").replace('_', ' ').trim();
+		return Arrays.stream(spaced.split("\\s+")).filter(token -> !token.isBlank())
+				.map(token -> token.substring(0, 1).toUpperCase() + token.substring(1))
+				.collect(Collectors.joining(" "));
+	}
+
+	public static <EntityClass> Component processField(final IContentOwner contentOwner,
+			final CEnhancedBinder<EntityClass> binder, final VerticalLayout formLayout,
+			final Map<String, CHorizontalLayout> mapHorizontalLayouts, final EntityFieldInfo fieldInfo,
 			final Map<String, Component> mapComponents) throws Exception {
 		try {
 			Check.notNull(fieldInfo, "field");
 			final Component component = createComponentForField(contentOwner, fieldInfo, binder);
 			// Allow null components for fields that should be skipped (e.g., collection fields handled separately)
 			if (component == null) {
-				LOGGER.debug("Skipping field '{}' - component creation returned null (handled separately)", fieldInfo.getFieldName());
+				LOGGER.debug("Skipping field '{}' - component creation returned null (handled separately)",
+						fieldInfo.getFieldName());
 				return null;
 			}
 			assignDeterministicComponentId(component, fieldInfo, binder);
@@ -1348,13 +1415,14 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	@SuppressWarnings ("unchecked")
 	private static void resetComboBoxesRecursively(final HasComponents container) {
 		// Get the component from the element
-		container.getElement().getChildren().filter(element -> element.getComponent().isPresent()).map(element -> element.getComponent().get())
-				.forEach(component -> {
+		container.getElement().getChildren().filter(element -> element.getComponent().isPresent())
+				.map(element -> element.getComponent().get()).forEach(component -> {
 					if (component instanceof ComboBox) {
 						final ComboBox<Object> comboBox = (ComboBox<Object>) component;
 						try {
 							// Get the first item from the ComboBox data provider
-							final Optional<Object> firstItem = comboBox.getDataProvider().fetch(new Query<>()).findFirst();
+							final Optional<Object> firstItem =
+									comboBox.getDataProvider().fetch(new Query<>()).findFirst();
 							if (firstItem.isPresent()) {
 								comboBox.setValue(firstItem.get());
 								LOGGER.debug("Reset ComboBox to first item: {}", firstItem.get());
@@ -1399,7 +1467,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 					return resolvedValue.trim();
 				}
 			}
-			LOGGER.warn("Width constant '{}' resolved to empty value. Using configured value '{}'.", constantName, trimmedWidth);
+			LOGGER.warn("Width constant '{}' resolved to empty value. Using configured value '{}'.", constantName,
+					trimmedWidth);
 			return trimmedWidth;
 		} catch (final Exception e) {
 			LOGGER.warn("Unknown width constant '{}'. Using configured value '{}'.", constantName, trimmedWidth);
@@ -1407,32 +1476,33 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		}
 	}
 
-	private static void safeBindComponent(final CEnhancedBinder<?> binder, final HasValueAndElement<?, ?> component, final String fieldName,
-			final String componentType) {
+	private static void safeBindComponent(final CEnhancedBinder<?> binder, final HasValueAndElement<?, ?> component,
+			final String fieldName, final String componentType) {
 		try {
 			if (binder == null) {
-				LOGGER.warn("Binder is null, wont bind component of type '{}' for field '{}'", componentType, fieldName);
+				LOGGER.warn("Binder is null, wont bind component of type '{}' for field '{}'", componentType,
+						fieldName);
 				return;
 			}
 			Check.notNull(component, "Component for safe binding");
 			Check.notNull(fieldName, "Field name for safe binding");
 			binder.bind(component, fieldName);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to bind {}:{} for field '{}': {} - this may cause incomplete bindings", componentType, component, fieldName,
-					e.getMessage());
+			LOGGER.error("Failed to bind {}:{} for field '{}': {} - this may cause incomplete bindings", componentType,
+					component, fieldName, e.getMessage());
 			throw e;
 		}
 	}
 
-	private static void setComponentWidth(final EntityFieldInfo fieldInfo, final Component component, final String width) {
+	private static void setComponentWidth(final EntityFieldInfo fieldInfo, final Component component,
+			final String width) {
 		try {
 			Check.notNull(width, "Width for component width setting");
 			Check.isTrue(!width.trim().isEmpty() || width.trim().isEmpty(), "Width format for component width setting");
 			Check.notNull(component, "Component for width setting");
-			if (!(component instanceof HasSize)) {
+			if (!(component instanceof final HasSize hasSize)) {
 				return;
 			}
-			final HasSize hasSize = (HasSize) component;
 			final String trimmedWidth = resolveWidthValue(width).trim();
 			if (trimmedWidth.isEmpty()) {
 				hasSize.setWidth(getDefaultFixedWidth(fieldInfo, component));
@@ -1450,8 +1520,19 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		((HasValueAndElement<?, ?>) field).setRequiredIndicatorVisible(fieldInfo.isRequired());
 	}
 
-	private static void updateSelectedOptionDisplay(final ComboBox<CComboBoxOption> comboBox, final EntityFieldInfo fieldInfo,
-			final CComboBoxOption selected) {
+	private static boolean shouldUseSelectionDataProvider(final EntityFieldInfo fieldInfo, final Class<?> fieldType) {
+		if (!hasValidDataProvider(fieldInfo.getDataProviderBean())) {
+			return false;
+		}
+		if (!fieldInfo.isAutoCalculate()) {
+			return true;
+		}
+		// autoCalculate scalar fields are populated by entity post-load flow and should render as normal scalar inputs.
+		return Collection.class.isAssignableFrom(fieldType) || CEntityDB.class.isAssignableFrom(fieldType);
+	}
+
+	private static void updateSelectedOptionDisplay(final ComboBox<CComboBoxOption> comboBox,
+			final EntityFieldInfo fieldInfo, final CComboBoxOption selected) {
 		if (selected == null) {
 			comboBox.setPrefixComponent(null);
 			return;
@@ -1493,17 +1574,19 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		this(contentOwner, entityClass, createEnhancedBinder(entityClass), List.of());
 	}
 
-	public CFormBuilder(final IContentOwner contentOwner, final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder) throws Exception {
+	public CFormBuilder(final IContentOwner contentOwner, final Class<?> entityClass,
+			final CEnhancedBinder<EntityClass> binder) throws Exception {
 		this(contentOwner, entityClass, binder, List.of());
 	}
 
-	public CFormBuilder(final IContentOwner contentOwner, final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
-			final List<String> entityFields) throws Exception {
+	public CFormBuilder(final IContentOwner contentOwner, final Class<?> entityClass,
+			final CEnhancedBinder<EntityClass> binder, final List<String> entityFields) throws Exception {
 		componentMap = new HashMap<>();
 		horizontalLayoutMap = new HashMap<>();
 		formLayout = new CVerticalLayoutTop(false, false, false);
 		this.binder = binder;
-		CFormBuilder.buildForm(entityClass, binder, entityFields, getComponentMap(), horizontalLayoutMap, formLayout, contentOwner);
+		CFormBuilder.buildForm(entityClass, binder, entityFields, getComponentMap(), horizontalLayoutMap, formLayout,
+				contentOwner);
 	}
 
 	/** Constructor that accepts an external component map for centralized component management.
@@ -1512,30 +1595,32 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	 * @param binder               the enhanced binder
 	 * @param externalComponentMap the external component map to use instead of creating a new one
 	 * @throws Exception if form building fails */
-	public CFormBuilder(final IContentOwner contentOwner, final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
-			final Map<String, Component> externalComponentMap) throws Exception {
+	public CFormBuilder(final IContentOwner contentOwner, final Class<?> entityClass,
+			final CEnhancedBinder<EntityClass> binder, final Map<String, Component> externalComponentMap)
+			throws Exception {
 		// Delegate to the centralized constructor with an empty layout map if none provided
 		this(contentOwner, entityClass, binder, externalComponentMap, new HashMap<>());
 	}
 
-	/** Constructor that accepts external component and horizontal layout maps for centralized management.
-	 * CRITICAL: Used when multiple panels (like CPanelDetails) contribute to a single logical form.
-	 * Using centralized maps allows cross-panel lookup in CPageService.bind(). */
-	public CFormBuilder(final IContentOwner contentOwner, final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
-			final Map<String, Component> externalComponentMap, final Map<String, CHorizontalLayout> externalHorizontalLayoutMap) throws Exception {
+	/** Constructor that accepts external component and horizontal layout maps for centralized management. CRITICAL: Used when multiple panels (like
+	 * CPanelDetails) contribute to a single logical form. Using centralized maps allows cross-panel lookup in CPageService.bind(). */
+	public CFormBuilder(final IContentOwner contentOwner, final Class<?> entityClass,
+			final CEnhancedBinder<EntityClass> binder, final Map<String, Component> externalComponentMap,
+			final Map<String, CHorizontalLayout> externalHorizontalLayoutMap) throws Exception {
 		Check.notNull(entityClass, "Entity class must be specified for CFormBuilder to resolve metadata");
 		Check.notNull(binder, "Binder is mandatory for CFormBuilder to perform automated UI-to-Entity binding");
-		Check.notNull(externalComponentMap, "Centralized component map is mandatory for CFormBuilder initialized via centralized constructor to ensure all fields are globally accessible");
-		Check.notNull(externalHorizontalLayoutMap, "Centralized horizontal layout map is mandatory for CFormBuilder initialized via centralized constructor to support cross-panel layout adjustments");
-		
+		Check.notNull(externalComponentMap,
+				"Centralized component map is mandatory for CFormBuilder initialized via centralized constructor to ensure all fields are globally accessible");
+		Check.notNull(externalHorizontalLayoutMap,
+				"Centralized horizontal layout map is mandatory for CFormBuilder initialized via centralized constructor to support cross-panel layout adjustments");
 		// Assign centralized maps from CDetailsBuilder
 		componentMap = externalComponentMap;
 		horizontalLayoutMap = externalHorizontalLayoutMap;
 		formLayout = new CVerticalLayoutTop(false, false, false);
 		this.binder = binder;
-		
 		// Build the form with no initial fields - fields will be added later via addFieldLine or buildForm(entityFields)
-		CFormBuilder.buildForm(entityClass, binder, List.of(), getComponentMap(), horizontalLayoutMap, formLayout, contentOwner);
+		CFormBuilder.buildForm(entityClass, binder, List.of(), getComponentMap(), horizontalLayoutMap, formLayout,
+				contentOwner);
 	}
 
 	/** Adds a single field line to the form using metadata.
@@ -1548,25 +1633,24 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	}
 
 	/** Adds a field line with centralized map support. Used primarily by CPanelDetails during multi-section screen building.
-	 * @param contentOwner context for data providers
-	 * @param screenClassType the entity class string representation
-	 * @param line the detail line definition
-	 * @param layout the layout to add the field to
-	 * @param componentMap2 centralized component map
+	 * @param contentOwner         context for data providers
+	 * @param screenClassType      the entity class string representation
+	 * @param line                 the detail line definition
+	 * @param layout               the layout to add the field to
+	 * @param componentMap2        centralized component map
 	 * @param horizontalLayoutMap2 centralized horizontal layout map
 	 * @return the created component or null if skipped
 	 * @throws Exception if field processing fails */
-	public Component addFieldLine(final IContentOwner contentOwner, final String screenClassType, final CDetailLines line,
-			final VerticalLayout layout, final Map<String, Component> componentMap2, final Map<String, CHorizontalLayout> horizontalLayoutMap2)
-			throws Exception {
+	public Component addFieldLine(final IContentOwner contentOwner, final String screenClassType,
+			final CDetailLines line, final VerticalLayout layout, final Map<String, Component> componentMap2,
+			final Map<String, CHorizontalLayout> horizontalLayoutMap2) throws Exception {
 		Check.notNull(line, "CDetailLines definition is required to add a field line");
 		Check.notNull(layout, "Target layout must not be null when adding a field line");
-		
 		final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(screenClassType, line);
 		if (fieldInfo == null) {
-			throw new IllegalArgumentException("Failed to create EntityFieldInfo for detail line: " + line.getFieldCaption() + " in screen " + screenClassType);
+			throw new IllegalArgumentException("Failed to create EntityFieldInfo for detail line: "
+					+ line.getFieldCaption() + " in screen " + screenClassType);
 		}
-		
 		// Profile-based filtering
 		if (!fieldInfo.getAllowedProfiles().isEmpty()) {
 			if (CSpringContext.isBabProfile() && !fieldInfo.getAllowedProfiles().contains("bab")) {
@@ -1578,22 +1662,22 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				return null;
 			}
 		}
-		
 		// Use the provided maps (usually centralized ones from CDetailsBuilder) to support cross-panel lookups
 		return CFormBuilder.processField(contentOwner, binder, layout, horizontalLayoutMap2, fieldInfo, componentMap2);
 	}
 
 	/** Builds the form for the given fields.
-	 * @param entityClass the entity class
-	 * @param ebinder the binder to use
+	 * @param entityClass  the entity class
+	 * @param ebinder      the binder to use
 	 * @param entityFields the list of field names to include (null for all)
 	 * @return the form layout
 	 * @throws Exception if form building fails */
-	public CVerticalLayoutTop build(final Class<?> entityClass, final CEnhancedBinder<EntityClass> ebinder, final List<String> entityFields)
-			throws Exception {
+	public CVerticalLayoutTop build(final Class<?> entityClass, final CEnhancedBinder<EntityClass> ebinder,
+			final List<String> entityFields) throws Exception {
 		Check.notNull(entityClass, "Entity class is required for form build");
 		Check.notNull(ebinder, "Binder is required for form build");
-		return CFormBuilder.buildForm(entityClass, ebinder, entityFields, getComponentMap(), horizontalLayoutMap, formLayout);
+		return CFormBuilder.buildForm(entityClass, ebinder, entityFields, getComponentMap(), horizontalLayoutMap,
+				formLayout);
 	}
 
 	/** Gets the internal binder for this form builder.
@@ -1611,35 +1695,41 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 
 	public CVerticalLayoutTop getFormLayout() { return formLayout; }
 
-	/** Retrieves the horizontal layout for a field.
-	 * CRITICAL: This lookup works across multiple panels because horizontalLayoutMap
-	 * is centralized in CDetailsBuilder and shared with all child sections. */
+	/** Retrieves the horizontal layout for a field. CRITICAL: This lookup works across multiple panels because horizontalLayoutMap is centralized in
+	 * CDetailsBuilder and shared with all child sections. */
 	public CHorizontalLayout getHorizontalLayout(final String fieldName) {
 		Check.notNull(fieldName, "Field name for horizontal layout retrieval");
 		final CHorizontalLayout layout = horizontalLayoutMap.get(fieldName);
-		Check.notNull(layout, "HorizontalLayout for field " + fieldName + " not found in form builder map. Ensure the field is present in the CDetailSection configuration.");
+		Check.notNull(layout, "HorizontalLayout for field " + fieldName
+				+ " not found in form builder map. Ensure the field is present in the CDetailSection configuration.");
 		return layout;
 	}
 
 	/** Clears the form by setting the binder bean to null. */
 	public void populateForm() {
 		// go through all components and call populate if available
-		getComponentMap().values().stream().filter(component -> component instanceof IContentOwner).forEach(component -> {
-			try {
-				((IContentOwner) component).populateForm();
-			} catch (final LazyInitializationException e) {
-				LOGGER.error("LazyInitializationException populating form component {}: {} reason={}", component.getClass().getSimpleName(), e.getMessage(), e.getMessage());
-				// Show notification to user
-				UI.getCurrent().access(() -> CNotificationService
-						.showError("Failed to load " + component.getClass().getSimpleName() + ": Data not available in current session"));
-				throw new RuntimeException("LazyInitializationException in " + component.getClass().getSimpleName(), e);
-			} catch (final Exception e) {
-				LOGGER.error("Error populating form component {}: {} reason={}", component.getClass().getSimpleName(), e.getMessage(), e.getMessage());
-				// Show notification to user
-				UI.getCurrent().access(() -> CNotificationService.showError("Error loading " + component.getClass().getSimpleName()));
-				throw new RuntimeException("Error populating form component " + component.getClass().getSimpleName(), e);
-			}
-		});
+		getComponentMap().values().stream().filter(component -> component instanceof IContentOwner)
+				.forEach(component -> {
+					try {
+						((IContentOwner) component).populateForm();
+					} catch (final LazyInitializationException e) {
+						LOGGER.error("LazyInitializationException populating form component {}: {} reason={}",
+								component.getClass().getSimpleName(), e.getMessage(), e.getMessage());
+						// Show notification to user
+						UI.getCurrent().access(() -> CNotificationService.showError("Failed to load "
+								+ component.getClass().getSimpleName() + ": Data not available in current session"));
+						throw new RuntimeException(
+								"LazyInitializationException in " + component.getClass().getSimpleName(), e);
+					} catch (final Exception e) {
+						LOGGER.error("Error populating form component {}: {} reason={}",
+								component.getClass().getSimpleName(), e.getMessage(), e.getMessage());
+						// Show notification to user
+						UI.getCurrent().access(() -> CNotificationService
+								.showError("Error loading " + component.getClass().getSimpleName()));
+						throw new RuntimeException(
+								"Error populating form component " + component.getClass().getSimpleName(), e);
+					}
+				});
 	}
 
 	/** Populates the form with entity data using the internal binder.
@@ -1650,23 +1740,29 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		Check.notNull(binder, "Binder for form population");
 		LOGGER.debug("Populating form with entity: {}", entity);
 		((CEnhancedBinder<Object>) binder).setBean(entity);
-		getComponentMap().values().stream().filter(component -> component instanceof IContentOwner).forEach(component -> {
-			try {
-				((IContentOwner) component).setValue(entity);
-				((IContentOwner) component).populateForm();
-			} catch (final org.hibernate.LazyInitializationException e) {
-				LOGGER.error("LazyInitializationException populating form component {}: {} reason={}", component.getClass().getSimpleName(), e.getMessage(), e.getMessage());
-				// Show notification to user
-				UI.getCurrent().access(() -> CNotificationService
-						.showError("Failed to load " + component.getClass().getSimpleName() + ": Data not available in current session"));
-				throw new RuntimeException("LazyInitializationException in " + component.getClass().getSimpleName(), e);
-			} catch (final Exception e) {
-				LOGGER.error("Error populating form component {}: {} reason={}", component.getClass().getSimpleName(), e.getMessage(), e.getMessage());
-				// Show notification to user
-				UI.getCurrent().access(() -> CNotificationService.showError("Error loading " + component.getClass().getSimpleName()));
-				throw new RuntimeException("Error populating form component " + component.getClass().getSimpleName(), e);
-			}
-		});
+		getComponentMap().values().stream().filter(component -> component instanceof IContentOwner)
+				.forEach(component -> {
+					try {
+						((IContentOwner) component).setValue(entity);
+						((IContentOwner) component).populateForm();
+					} catch (final org.hibernate.LazyInitializationException e) {
+						LOGGER.error("LazyInitializationException populating form component {}: {} reason={}",
+								component.getClass().getSimpleName(), e.getMessage(), e.getMessage());
+						// Show notification to user
+						UI.getCurrent().access(() -> CNotificationService.showError("Failed to load "
+								+ component.getClass().getSimpleName() + ": Data not available in current session"));
+						throw new RuntimeException(
+								"LazyInitializationException in " + component.getClass().getSimpleName(), e);
+					} catch (final Exception e) {
+						LOGGER.error("Error populating form component {}: {} reason={}",
+								component.getClass().getSimpleName(), e.getMessage(), e.getMessage());
+						// Show notification to user
+						UI.getCurrent().access(() -> CNotificationService
+								.showError("Error loading " + component.getClass().getSimpleName()));
+						throw new RuntimeException(
+								"Error populating form component " + component.getClass().getSimpleName(), e);
+					}
+				});
 	}
 
 	/** Sets the application context and initializes the data provider resolver. This method is called automatically by Spring.
@@ -1676,27 +1772,34 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		try {
 			CFormBuilder.dataProviderResolver = context.getBean(CDataProviderResolver.class);
 		} catch (final Exception e) {
-			LOGGER.warn("Failed to initialize CDataProviderResolver - annotation-based providers will not work: {}", e.getMessage());
+			LOGGER.warn("Failed to initialize CDataProviderResolver - annotation-based providers will not work: {}",
+					e.getMessage());
 			CFormBuilder.dataProviderResolver = null;
 		}
 	}
 
 	public void setValue(final CEntityDB<?> entity) {
-		getComponentMap().values().stream().filter(component -> component instanceof IContentOwner).forEach(component -> {
-			try {
-				((IContentOwner) component).setValue(entity);
-			} catch (final org.hibernate.LazyInitializationException e) {
-				LOGGER.error("LazyInitializationException populating form component {}: {} reason={}", component.getClass().getSimpleName(), e.getMessage(), e.getMessage());
-				// Show notification to user
-				UI.getCurrent().access(() -> CNotificationService
-						.showError("Failed to load " + component.getClass().getSimpleName() + ": Data not available in current session"));
-				throw new RuntimeException("LazyInitializationException in " + component.getClass().getSimpleName(), e);
-			} catch (final Exception e) {
-				LOGGER.error("Error populating form component {}: {} reason={}", component.getClass().getSimpleName(), e.getMessage(), e.getMessage());
-				// Show notification to user
-				UI.getCurrent().access(() -> CNotificationService.showError("Error loading " + component.getClass().getSimpleName()));
-				throw new RuntimeException("Error populating form component " + component.getClass().getSimpleName(), e);
-			}
-		});
+		getComponentMap().values().stream().filter(component -> component instanceof IContentOwner)
+				.forEach(component -> {
+					try {
+						((IContentOwner) component).setValue(entity);
+					} catch (final org.hibernate.LazyInitializationException e) {
+						LOGGER.error("LazyInitializationException populating form component {}: {} reason={}",
+								component.getClass().getSimpleName(), e.getMessage(), e.getMessage());
+						// Show notification to user
+						UI.getCurrent().access(() -> CNotificationService.showError("Failed to load "
+								+ component.getClass().getSimpleName() + ": Data not available in current session"));
+						throw new RuntimeException(
+								"LazyInitializationException in " + component.getClass().getSimpleName(), e);
+					} catch (final Exception e) {
+						LOGGER.error("Error populating form component {}: {} reason={}",
+								component.getClass().getSimpleName(), e.getMessage(), e.getMessage());
+						// Show notification to user
+						UI.getCurrent().access(() -> CNotificationService
+								.showError("Error loading " + component.getClass().getSimpleName()));
+						throw new RuntimeException(
+								"Error populating form component " + component.getClass().getSimpleName(), e);
+					}
+				});
 	}
 }
