@@ -45,8 +45,8 @@ import tech.derbent.api.ui.component.enhanced.CContextActionDefinition;
 import tech.derbent.api.ui.component.filter.CAbstractFilterToolbar;
 import tech.derbent.api.ui.component.filter.CKanbanSearchFilter;
 import tech.derbent.api.ui.component.filter.CKanbanSprintMembershipFilter;
+import tech.derbent.api.ui.component.filter.CKanbanSprintScopeFilter;
 import tech.derbent.api.ui.component.filter.CResponsibleUserFilter;
-import tech.derbent.api.ui.component.filter.CSprintFilter;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.plm.kanban.kanbanline.domain.EKanbanViewMode;
 import tech.derbent.api.utils.Check;
@@ -91,6 +91,8 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	private final CDynamicPageRouter currentEntityPageRouter;
 	private EKanbanViewMode currentMode = EKanbanViewMode.SPRINT_BOARD;
 	private CSprint currentSprint;
+	private boolean statusOnlyMode;
+	private boolean allSprintsMode = true;
 	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragStartEvent>> dragStartListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragDropEvent>> dropListeners = new HashSet<>();
@@ -171,16 +173,21 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		final CKanbanLine currentLine = getValue();
 		Check.notNull(currentLine, "Kanban line must be set before applying filters");
 		final CAbstractFilterToolbar.FilterCriteria<CSprintItem> criteria = filterToolbar.getCurrentCriteria();
-		final CSprint sprint = criteria.getValue(CSprintFilter.FILTER_KEY);
-		final boolean sprintChanged = !isSameSprint(sprint);
+		final CKanbanSprintScopeFilter.CSprintScope scope = criteria.getValue(CKanbanSprintScopeFilter.FILTER_KEY);
+		final boolean newStatusOnlyMode = scope != null && scope.mode() == CKanbanSprintScopeFilter.EScopeMode.STATUS_ONLY;
+		final boolean newAllSprintsMode = scope == null || scope.mode() == CKanbanSprintScopeFilter.EScopeMode.ALL_SPRINTS;
+		final CSprint selectedSprint = scope != null && scope.mode() == CKanbanSprintScopeFilter.EScopeMode.SPRINT ? scope.sprint() : null;
+		final boolean sprintChanged = !isSameSprint(selectedSprint);
+		final boolean modeChanged = newStatusOnlyMode != statusOnlyMode || newAllSprintsMode != allSprintsMode;
 		boolean dataReloaded = false;
-		if (sprintChanged) {
-			currentSprint = sprint;
+		if (modeChanged || sprintChanged) {
+			statusOnlyMode = newStatusOnlyMode;
+			allSprintsMode = newAllSprintsMode;
+			currentSprint = selectedSprint;
 			final CProject<?> project = sessionService.getActiveProject().orElse(null);
 			if (currentSprint != null && currentSprint.getId() != null) {
 				loadSprintItemsForSprint(currentSprint);
 			} else if (project != null) {
-				// "All sprints" mode: show every project item (in sprint + backlog)
 				loadAllProjectItems(project);
 			} else {
 				allSprintItems = new ArrayList<>();
@@ -188,9 +195,14 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			}
 			dataReloaded = true;
 		}
-		final List<CSprintItem> newFilteredItems = filterSprintItems(criteria);
+		List<CSprintItem> newFilteredItems = filterSprintItems(criteria);
+		// In "All sprints" mode the backlog column already shows sprint=null items.
+		// Exclude them from status columns to avoid double-counting (and mismatched totals vs per-sprint view).
+		if (allSprintsMode && !statusOnlyMode) {
+			newFilteredItems = newFilteredItems.stream().filter(item -> item != null && item.getSprint() != null).toList();
+		}
 		final boolean itemsChanged = !newFilteredItems.equals(sprintItems);
-		if (dataReloaded || itemsChanged) {
+		if (modeChanged || dataReloaded || itemsChanged) {
 			LOGGER.info("[Performance] Items changed, refreshing component");
 			sprintItems = newFilteredItems;
 			refreshComponent();
@@ -201,7 +213,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 
 	/** Returns the current board view mode. */
 	public EKanbanViewMode getCurrentMode() {
-		return currentMode != null ? currentMode : EKanbanViewMode.SPRINT_BOARD;
+		return EKanbanViewMode.SPRINT_BOARD;
 	}
 
 	/** Loads all project items for Status Board mode. */
@@ -245,6 +257,10 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			}
 			// Get item's current status and map to column
 			final ISprintableItem sprintableItem = sprintItem.getParentItem();
+			if (sprintableItem == null || sprintableItem.getStatus() == null || sprintableItem.getStatus().getId() == null) {
+				LOGGER.warn("Skipping sprint item {} during kanban mapping - missing parent/status", sprintItem.getId());
+				continue;
+			}
 			final Long statusId = sprintableItem.getStatus().getId();
 			// Lookup: try explicit status mapping first, fall back to default column
 			
@@ -531,7 +547,11 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			availableSprints.sort(sprintRecencyComparator.reversed());
 			final CSprint defaultSprint = resolveDefaultSprint(availableSprints);
 			filterToolbar.setAvailableSprints(availableSprints, defaultSprint);
-			currentSprint = filterToolbar.getCurrentCriteria().getValue(CSprintFilter.FILTER_KEY);
+			final CKanbanSprintScopeFilter.CSprintScope scope =
+					filterToolbar.getCurrentCriteria().getValue(CKanbanSprintScopeFilter.FILTER_KEY);
+			statusOnlyMode = scope != null && scope.mode() == CKanbanSprintScopeFilter.EScopeMode.STATUS_ONLY;
+			allSprintsMode = scope == null || scope.mode() == CKanbanSprintScopeFilter.EScopeMode.ALL_SPRINTS;
+			currentSprint = scope != null && scope.mode() == CKanbanSprintScopeFilter.EScopeMode.SPRINT ? scope.sprint() : null;
 			if (currentSprint != null && currentSprint.getId() != null) {
 				loadSprintItemsForSprint(currentSprint);
 			} else {
@@ -743,6 +763,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		final CProject<?> project = sessionService.getActiveProject().orElse(currentSprint != null ? currentSprint.getProject() : null);
 		if (project != null) {
 			backlogColumn = createBacklogColumn(project);
+			backlogColumn.setStatusOnlyMode(statusOnlyMode);
 			layoutColumns.add(backlogColumn);
 		}
 		// Create regular kanban columns from the kanban line configuration
@@ -788,8 +809,13 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 
 	/** Reloads sprint items from database to reflect persisted changes. Mode-aware: reloads from sprint or all project items depending on view mode. */
 	public void reloadSprintItems() {
-		LOGGER.info("[DragDrop] reloadSprintItems called, mode={}", currentMode);
+		LOGGER.info("[DragDrop] reloadSprintItems called");
 		final CAbstractFilterToolbar.FilterCriteria<CSprintItem> criteria = filterToolbar.getCurrentCriteria();
+		final CKanbanSprintScopeFilter.CSprintScope scope = criteria.getValue(CKanbanSprintScopeFilter.FILTER_KEY);
+		statusOnlyMode = scope != null && scope.mode() == CKanbanSprintScopeFilter.EScopeMode.STATUS_ONLY;
+		allSprintsMode = scope == null || scope.mode() == CKanbanSprintScopeFilter.EScopeMode.ALL_SPRINTS;
+		currentSprint = scope != null && scope.mode() == CKanbanSprintScopeFilter.EScopeMode.SPRINT ? scope.sprint() : null;
+
 		final CProject<?> project = sessionService.getActiveProject().orElse(null);
 		if (currentSprint != null && currentSprint.getId() != null) {
 			loadSprintItemsForSprint(currentSprint);
@@ -799,8 +825,15 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			allSprintItems = new ArrayList<>();
 			filterToolbar.setAvailableItems(allSprintItems);
 		}
-		sprintItems = filterSprintItems(criteria);
+		List<CSprintItem> filtered = filterSprintItems(criteria);
+		if (allSprintsMode && !statusOnlyMode) {
+			filtered = filtered.stream().filter(item -> item != null && item.getSprint() != null).toList();
+		}
+		sprintItems = filtered;
 		LOGGER.info("[DragDrop] After filterSprintItems - sprintItems size: {}", sprintItems != null ? sprintItems.size() : "null");
+		if (backlogColumn != null) {
+			backlogColumn.setStatusOnlyMode(statusOnlyMode);
+		}
 	}
 
 	/** Picks the newest sprint as default. */

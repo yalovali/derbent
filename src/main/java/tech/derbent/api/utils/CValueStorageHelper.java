@@ -222,7 +222,7 @@ public class CValueStorageHelper {
 		// Add attach listener to restore value when component is added to UI
 		vaadinComponent.addAttachListener(event -> {
 			LOGGER.info("[ValuePersistence] CValueStorageHelper: Component attached for storage ID '{}', restoring value", storageId);
-			valuePersist_restoreValue(component, storageId, converter, sessionService);
+			valuePersist_restoreValue(component, storageId, serializer, converter, sessionService);
 		});
 		// Add detach listener to clean up (optional - could be removed if values should
 		// persist)
@@ -233,7 +233,7 @@ public class CValueStorageHelper {
 		if (vaadinComponent.isAttached()) {
 			LOGGER.info("[ValuePersistence] CValueStorageHelper: Component already attached for storage ID '{}', restoring value immediately",
 					storageId);
-			valuePersist_restoreValue(component, storageId, converter, sessionService);
+			valuePersist_restoreValue(component, storageId, serializer, converter, sessionService);
 		}
 		LOGGER.info("[ValuePersistence] CValueStorageHelper: Enabled auto-persistence for component with storage ID: {}", storageId);
 	}
@@ -273,7 +273,8 @@ public class CValueStorageHelper {
 	 * @param storageId      The storage identifier
 	 * @param converter      Function to convert storage string back to component value
 	 * @param sessionService The session service for retrieving stored values */
-	private static <T> void valuePersist_restoreValue(final HasValue<?, T> component, final String storageId, final ValueConverter<T> converter,
+	private static <T> void valuePersist_restoreValue(final HasValue<?, T> component, final String storageId, final ValueSerializer<T> serializer,
+			final ValueConverter<T> converter,
 			final ISessionService sessionService) {
 		try {
 			final Optional<String> storedValue = sessionService.getSessionValue(storageId);
@@ -299,7 +300,7 @@ public class CValueStorageHelper {
 				LOGGER.info("[ValuePersistence] CValueStorageHelper: No stored value for storage ID '{}', current value: {}", storageId,
 						currentValue);
 				if (currentValue != null) {
-					final String serialized = currentValue.toString();
+					final String serialized = serializer.toString(currentValue);
 					if (serialized != null && !serialized.isBlank()) {
 						sessionService.setSessionValue(storageId, serialized);
 						LOGGER.info("[ValuePersistence] CValueStorageHelper: Saved initial value '{}' as default for storage ID: {}", serialized,

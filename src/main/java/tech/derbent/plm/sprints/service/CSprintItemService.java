@@ -99,6 +99,7 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 		// after loading from database for the composition pattern to work correctly
 		final IActivityRepository activityRepo = CSpringContext.getBean(IActivityRepository.class);
 		final IMeetingRepository meetingRepo = CSpringContext.getBean(IMeetingRepository.class);
+		final IIssueRepository issueRepo = CSpringContext.getBean(IIssueRepository.class);
 		for (final CSprintItem sprintItem : items) {
 			if (sprintItem.getId() != null) {
 				try {
@@ -110,7 +111,13 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 					}
 					// If not an activity, try meeting
 					final Optional<CMeeting> meeting = meetingRepo.findBySprintItemId(sprintItem.getId());
-					meeting.ifPresent(sprintItem::setParentItem);
+					if (meeting.isPresent()) {
+						sprintItem.setParentItem(meeting.get());
+						continue;
+					}
+					// If not a meeting, try issue
+					final Optional<CIssue> issue = issueRepo.findBySprintItemId(sprintItem.getId());
+					issue.ifPresent(sprintItem::setParentItem);
 				} catch (final Exception e) {
 					LOGGER.error("[DragDrop] Failed to load parent item for sprint item {} reason={}", sprintItem.getId(), e.getMessage());
 				}

@@ -3,8 +3,8 @@ package tech.derbent.plm.kanban.kanbanline.view;
 import java.util.List;
 import java.util.Objects;
 import tech.derbent.api.ui.component.filter.CKanbanSearchFilter;
+import tech.derbent.api.ui.component.filter.CKanbanSprintScopeFilter;
 import tech.derbent.api.ui.component.filter.CResponsibleUserFilter;
-import tech.derbent.api.ui.component.filter.CSprintFilter;
 import tech.derbent.api.ui.component.filter.CUniversalFilterToolbar;
 import tech.derbent.plm.kanban.kanbanline.domain.EKanbanViewMode;
 import tech.derbent.plm.sprints.domain.CSprint;
@@ -17,7 +17,7 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 public class CComponentKanbanBoardFilterToolbar extends CUniversalFilterToolbar<CSprintItem> {
 
 	private static final long serialVersionUID = 1L;
-	private final CSprintFilter sprintFilter;
+	private final CKanbanSprintScopeFilter sprintFilter;
 	private final CResponsibleUserFilter responsibleUserFilter;
 	private final CKanbanSearchFilter searchFilter;
 
@@ -25,7 +25,7 @@ public class CComponentKanbanBoardFilterToolbar extends CUniversalFilterToolbar<
 	public CComponentKanbanBoardFilterToolbar() {
 		super();
 		setId("kanbanBoardFilterToolbar");
-		sprintFilter = new CSprintFilter();
+		sprintFilter = new CKanbanSprintScopeFilter();
 		responsibleUserFilter = new CResponsibleUserFilter();
 		searchFilter = new CKanbanSearchFilter();
 		// Order: sprint → responsible → search
@@ -44,7 +44,7 @@ public class CComponentKanbanBoardFilterToolbar extends CUniversalFilterToolbar<
 
 	public CKanbanSearchFilter getSearchFilter() { return searchFilter; }
 
-	public CSprintFilter getSprintFilter() { return sprintFilter; }
+	public CKanbanSprintScopeFilter getSprintFilter() { return sprintFilter; }
 
 	public void setAvailableItems(final List<CSprintItem> items) {
 		Objects.requireNonNull(items, "Sprint items list cannot be null");

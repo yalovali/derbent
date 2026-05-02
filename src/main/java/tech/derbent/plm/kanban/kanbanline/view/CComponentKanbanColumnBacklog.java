@@ -61,6 +61,9 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
  * @see CPageServiceKanbanLine Handles drag-drop events and sprint management */
 public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 
+	private boolean statusOnlyMode;
+	private boolean lastCompact;
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentKanbanColumnBacklog.class);
 	private static final long serialVersionUID = 1L;
 	/** Backlog component embedded in this column */
@@ -149,6 +152,12 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 
 	/** Refreshes story point total for backlog items. */
 	private void refreshBacklogStoryPointTotal() {
+		if (statusOnlyMode) {
+			itemCountLabel.setText("0");
+			storyPointTotalLabel.setText("0 SP");
+			storyPointTotalLabel.setVisible(true);
+			return;
+		}
 		if (backlogComponent == null || backlogComponent.getGrid() == null) {
 			return;
 		}
@@ -184,15 +193,36 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 
 	@Override
 	protected void onCompactViewChanged(final boolean compact) {
+		lastCompact = compact;
 		super.onCompactViewChanged(compact);
 		if (internalCompactUpdate) {
 			return;
 		}
 		internalCompactUpdate = true;
 		try {
-			backlogComponent.setVisible(!compact);
+			backlogComponent.setVisible(!compact && !statusOnlyMode);
 		} finally {
 			internalCompactUpdate = false;
+		}
+	}
+
+	public void setStatusOnlyMode(final boolean statusOnlyMode) {
+		this.statusOnlyMode = statusOnlyMode;
+		if (statusOnlyMode) {
+			setCompactView(true);
+			backlogComponent.setVisible(false);
+			if (backlogDropTarget != null) {
+				backlogDropTarget.setActive(false);
+			}
+			itemCountLabel.setText("0");
+			storyPointTotalLabel.setText("0 SP");
+			storyPointTotalLabel.setVisible(true);
+		} else {
+			if (backlogDropTarget != null) {
+				backlogDropTarget.setActive(true);
+			}
+			backlogComponent.setVisible(!lastCompact);
+			refreshBacklogStoryPointTotal();
 		}
 	}
 
