@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import tech.derbent.api.config.CSpringContext;
@@ -37,6 +38,7 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
+import tech.derbent.api.ui.component.basic.CTabSheet;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.basic.IHasMultiValuePersistence;
 import tech.derbent.api.ui.component.enhanced.CComponentBacklog;
@@ -89,6 +91,12 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	private List<CSprint> availableSprints;
 	private CComponentKanbanColumnBacklog backlogColumn;
 	private final CDynamicPageRouter currentEntityPageRouter;
+	private final CTabSheet detailTabs;
+	private final CVerticalLayout tabBacklogLayout;
+	private final CVerticalLayout tabSprintFeaturesLayout;
+	private final CVerticalLayout tabSprintSummaryLayout;
+	private final com.vaadin.flow.component.tabs.Tab tabDetails;
+	private CComponentBacklog backlogNavigator;
 	private EKanbanViewMode currentMode = EKanbanViewMode.SPRINT_BOARD;
 	private CSprint currentSprint;
 	private boolean statusOnlyMode;
@@ -156,7 +164,38 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		final CDetailSectionService detailSectionService = CSpringContext.getBean(CDetailSectionService.class);
 		pageEntityService = CSpringContext.getBean(CPageEntityService.class);
 		currentEntityPageRouter = new CDynamicPageRouter(pageEntityService, sessionService, detailSectionService, null);
-		layoutDetails.add(currentEntityPageRouter);
+
+		detailTabs = new CTabSheet();
+		tabBacklogLayout = new CVerticalLayout();
+		tabBacklogLayout.setPadding(false);
+		tabBacklogLayout.setSpacing(false);
+		tabBacklogLayout.setSizeFull();
+
+		final CVerticalLayout tabDetailsLayout = new CVerticalLayout();
+		tabDetailsLayout.setPadding(false);
+		tabDetailsLayout.setSpacing(false);
+		tabDetailsLayout.setSizeFull();
+		tabDetailsLayout.add(currentEntityPageRouter);
+
+		tabSprintFeaturesLayout = new CVerticalLayout();
+		tabSprintFeaturesLayout.setPadding(true);
+		tabSprintFeaturesLayout.setSpacing(true);
+		tabSprintFeaturesLayout.setSizeFull();
+		tabSprintFeaturesLayout.add(new Span("Sprint features (due dates, status, etc.) — TODO"));
+
+		tabSprintSummaryLayout = new CVerticalLayout();
+		tabSprintSummaryLayout.setPadding(true);
+		tabSprintSummaryLayout.setSpacing(true);
+		tabSprintSummaryLayout.setSizeFull();
+		tabSprintSummaryLayout.add(new Span("Sprint summary (distribution, totals, etc.) — TODO"));
+
+		detailTabs.add("Backlog", tabBacklogLayout);
+		tabDetails = detailTabs.add("Details", tabDetailsLayout);
+		detailTabs.add("Sprint features", tabSprintFeaturesLayout);
+		detailTabs.add("Sprint summary", tabSprintSummaryLayout);
+
+		layoutDetails.removeAll();
+		layoutDetails.add(detailTabs);
 		// splitLayout.setFlexGrow(1, layoutColumns);
 		add(filterToolbar, splitLayout);
 		expand(splitLayout);
@@ -284,16 +323,25 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	 * board and displays items from the project that are not assigned to any sprint.
 	 * @param project The project whose backlog items should be displayed
 	 * @return Configured backlog column component */
-	private CComponentKanbanColumnBacklog createBacklogColumn(final CProject<?> project) {
-		LOGGER.debug("Creating backlog column for project: {}", project.getName());
-		final CComponentKanbanColumnBacklog column = new CComponentKanbanColumnBacklog(project);
-		// Enable drag-drop for backlog items
-		column.drag_setDragEnabled(true);
-		column.drag_setDropEnabled(true);
-		// Set up event forwarding for selection and drag-drop
-		setupSelectionNotification(column);
-		setupChildDragDropForwarding(column);
-		return column;
+	private void ensureBacklogNavigator() {
+		if (backlogNavigator != null) {
+			return;
+		}
+		final CProject<?> project = sessionService.getActiveProject().orElse(null);
+		if (project == null) {
+			return;
+		}
+		try {
+			backlogNavigator = new CComponentBacklog(project, true);
+			backlogNavigator.setFixedGridHeight("100%");
+			setupSelectionNotification(backlogNavigator);
+			tabBacklogLayout.removeAll();
+			tabBacklogLayout.add(backlogNavigator);
+			tabBacklogLayout.expand(backlogNavigator);
+			backlogNavigator.setVisible(!statusOnlyMode);
+		} catch (final Exception e) {
+			LOGGER.error("Failed to create backlog navigator for kanban board reason={}", e.getMessage());
+		}
 	}
 
 	private List<CContextActionDefinition<CComponentKanbanPostit>> buildPostitContextActions() {
@@ -601,6 +649,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		}
 		// Display the selected backlog item in the details view
 		CDynamicPageRouter.displayEntityInDynamicOnepager(selectedItem, currentEntityPageRouter, sessionService, this);
+		detailTabs.setSelectedTab(tabDetails);
 	}
 
 	/** Updates selection state and details area. */
@@ -618,6 +667,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			return;
 		}
 		selectedPostit.setSelected(true);
+		detailTabs.setSelectedTab(tabDetails);
 		final ISprintableItem sprintableEntity = postit.resolveSprintableItem();
 		Check.instanceOf(sprintableEntity, CProjectItem.class, "Sprintable item must be a CEntityDB for Kanban board details display");
 		CDynamicPageRouter.displayEntityInDynamicOnepager((CProjectItem<?, ?>) sprintableEntity, currentEntityPageRouter, sessionService, this);
@@ -760,12 +810,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			return;
 		}
 		layoutColumns.removeClassName("kanban-status-board-mode");
-		final CProject<?> project = sessionService.getActiveProject().orElse(currentSprint != null ? currentSprint.getProject() : null);
-		if (project != null) {
-			backlogColumn = createBacklogColumn(project);
-			backlogColumn.setStatusOnlyMode(statusOnlyMode);
-			layoutColumns.add(backlogColumn);
-		}
+		ensureBacklogNavigator();
 		// Create regular kanban columns from the kanban line configuration
 		final List<CKanbanColumn> columns = new ArrayList<>(currentLine.getKanbanColumns());
 		columns.sort(Comparator.comparing(CKanbanColumn::getItemOrder, Comparator.nullsLast(Integer::compareTo)));
@@ -831,8 +876,9 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		}
 		sprintItems = filtered;
 		LOGGER.info("[DragDrop] After filterSprintItems - sprintItems size: {}", sprintItems != null ? sprintItems.size() : "null");
-		if (backlogColumn != null) {
-			backlogColumn.setStatusOnlyMode(statusOnlyMode);
+		ensureBacklogNavigator();
+		if (backlogNavigator != null) {
+			backlogNavigator.setVisible(!statusOnlyMode);
 		}
 	}
 
