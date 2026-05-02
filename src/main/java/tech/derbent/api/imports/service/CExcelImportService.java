@@ -3,8 +3,10 @@ package tech.derbent.api.imports.service;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.time.ZoneId;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -167,21 +169,44 @@ public class CExcelImportService {
      * Matching is case-insensitive; whitespace is stripped.
      * Handler aliases are checked first; then the header is lower-cased and whitespace collapsed.
      */
+    private static String normalizeHeaderKey(final String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.trim().toLowerCase().replaceAll("\\s+", "");
+    }
+
     private Map<Integer, String> buildColumnMapping(final Row headerRow, final IEntityImportHandler<?> handler,
             final FormulaEvaluator evaluator) {
         final Map<Integer, String> mapping = new LinkedHashMap<>();
-        if (headerRow == null) return mapping;
+        if (headerRow == null) {
+            return mapping;
+        }
         final Map<String, String> aliases = handler.getColumnAliases();
-        for (int col = headerRow.getFirstCellNum(); col < headerRow.getLastCellNum(); col++) {
+        final int firstCell = headerRow.getFirstCellNum();
+        if (firstCell < 0) {
+            return mapping;
+        }
+        for (int col = firstCell; col < headerRow.getLastCellNum(); col++) {
             final Cell cell = headerRow.getCell(col);
-            if (cell == null) continue;
+            if (cell == null) {
+                continue;
+            }
             final String header = getCellStringValue(cell, evaluator).trim();
-            if (header.isBlank()) continue;
-            final String canonical = aliases.entrySet().stream()
-                    .filter(e -> e.getKey().equalsIgnoreCase(header))
-                    .map(Map.Entry::getValue)
-                    .findFirst()
-                    .orElse(header.toLowerCase().replaceAll("\\s+", ""));
+            if (header.isBlank()) {
+                continue;
+            }
+            final String normalizedHeader = normalizeHeaderKey(header);
+            String canonical = null;
+            for (final Map.Entry<String, String> entry : aliases.entrySet()) {
+                if (normalizeHeaderKey(entry.getKey()).equals(normalizedHeader)) {
+                    canonical = entry.getValue();
+                    break;
+                }
+            }
+            if (canonical == null) {
+                canonical = normalizedHeader;
+            }
             mapping.put(col, canonical);
         }
         return mapping;
@@ -200,12 +225,21 @@ public class CExcelImportService {
 
     /** Reads cell value as String, evaluating formula cells when evaluator is provided. */
     public static String getCellStringValue(final Cell cell, final FormulaEvaluator evaluator) {
-        if (cell == null) return "";
+        if (cell == null) {
+            return "";
+        }
         final Cell resolved = evaluator != null && cell.getCellType() == CellType.FORMULA
                 ? evaluator.evaluateInCell(cell) : cell;
         return switch (resolved.getCellType()) {
             case STRING -> resolved.getStringCellValue();
             case NUMERIC -> {
+                if (DateUtil.isCellDateFormatted(resolved)) {
+                    final var date = resolved.getDateCellValue();
+                    if (date == null) {
+                        yield "";
+                    }
+                    yield date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().toString();
+                }
                 final double d = resolved.getNumericCellValue();
                 // Avoid ".0" suffix for whole numbers
                 yield d == Math.floor(d) ? String.valueOf((long) d) : String.valueOf(d);
@@ -217,13 +251,23 @@ public class CExcelImportService {
     }
 
     private boolean isCommentRow(final Row row, final FormulaEvaluator evaluator) {
-        final Cell first = row.getCell(row.getFirstCellNum());
-        if (first == null) return false;
+        final int firstCell = row.getFirstCellNum();
+        if (firstCell < 0) {
+            return false;
+        }
+        final Cell first = row.getCell(firstCell);
+        if (first == null) {
+            return false;
+        }
         return getCellStringValue(first, evaluator).startsWith("#");
     }
 
     private boolean isBlankRow(final Row row, final FormulaEvaluator evaluator) {
-        for (int col = row.getFirstCellNum(); col < row.getLastCellNum(); col++) {
+        final int firstCell = row.getFirstCellNum();
+        if (firstCell < 0) {
+            return true;
+        }
+        for (int col = firstCell; col < row.getLastCellNum(); col++) {
             final Cell cell = row.getCell(col);
             if (cell != null && !getCellStringValue(cell, evaluator).isBlank()) {
                 return false;
