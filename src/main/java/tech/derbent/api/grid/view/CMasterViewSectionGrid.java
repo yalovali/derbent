@@ -45,6 +45,8 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 
 	private void addContextMenu(final CGrid<EntityClass> grid) {
 		final GridContextMenu<EntityClass> contextMenu = grid.addContextMenu();
+		// "Edit" just selects the row; the single-select value-change listener fires and
+		// the master-detail page automatically shows the item in the detail form.
 		contextMenu.addItem("Edit", event -> event.getItem().ifPresent(this::select));
 		contextMenu.addItem("New", event -> page.actionCreate());
 		contextMenu.addItem("Delete", event -> event.getItem().ifPresent(item -> {

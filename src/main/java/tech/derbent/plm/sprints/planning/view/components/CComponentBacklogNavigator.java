@@ -274,6 +274,7 @@ public class CComponentBacklogNavigator extends CVerticalLayout implements IHasS
 	/** Sets whether closed (final-status) items are shown in the backlog. Default is false (closed items hidden).
 	 * @param showClosed true to show closed items, false to hide them */
 	public void setShowClosed(final boolean showClosed) {
+		// Change-guard: rebuildBacklogData() is expensive; skip when value is unchanged.
 		if (this.showClosed != showClosed) {
 			this.showClosed = showClosed;
 			rebuildBacklogData();

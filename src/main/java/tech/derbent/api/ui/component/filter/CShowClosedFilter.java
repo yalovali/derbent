@@ -45,6 +45,8 @@ public class CShowClosedFilter extends CAbstractFilterComponent<Boolean> {
 
 	@Override
 	public void valuePersist_enable(final String storageId) {
+		// Namespace the storage key per board (e.g. "kanbanBoard_showClosed") so each board
+		// remembers its own setting independently in browser local storage.
 		checkbox.enablePersistence(storageId + "_" + FILTER_KEY);
 	}
 }

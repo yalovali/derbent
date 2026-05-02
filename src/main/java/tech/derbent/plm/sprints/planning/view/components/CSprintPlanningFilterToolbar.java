@@ -365,6 +365,8 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		if (sprint == null) {
 			return false;
 		}
+		// showClosed is intentionally NOT applied here: users need closed sprints selectable in the
+		// sprint combobox to review historical sprint data even when closed items are hidden.
 		final String requiredStatus = comboBoxSprintStatus.getValue();
 		if (requiredStatus != null && !requiredStatus.isBlank()) {
 			final String sprintStatus = sprint.getStatus() != null ? sprint.getStatus().getName() : null;

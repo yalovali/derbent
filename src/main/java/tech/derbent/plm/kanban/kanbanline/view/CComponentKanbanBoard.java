@@ -525,6 +525,9 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 
 	@SuppressWarnings ("unchecked")
 	private void saveSprintableItem(final CProjectItem<?, ?> item) {
+		// ProxyUtils strips Hibernate/CGLIB proxies so the registry lookup finds the real entity class.
+		// CEntityRegistry is needed because the kanban board handles heterogeneous entity types
+		// (Activity, Issue, Meeting, etc.) each registered with a different service class.
 		final Class<?> entityClass = org.springframework.data.util.ProxyUtils.getUserClass(item.getClass());
 		final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
 		if (serviceClass == null) {
@@ -612,6 +615,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			}
 			if (!showClosed) {
 				final ISprintableItem parentItem = sprintItem.getParentItem();
+				// ISprintableItem has no getStatus(); downcast to CProjectItem to reach the status field.
 				if (parentItem instanceof final CProjectItem<?, ?> pi && pi.getStatus() != null
 						&& Boolean.TRUE.equals(pi.getStatus().getFinalStatus())) {
 					continue;

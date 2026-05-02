@@ -329,7 +329,8 @@ public class CGnntTimelineService {
 		if (entity == null) {
 			return true;
 		}
-		// Always apply showClosed filter: hide final-status items unless showClosed=true
+		// Must run BEFORE hasAnyFilter() — hiding closed items is a default behavior even when
+		// no other filters are active; if placed after, showClosed=false would be ignored on empty criteria.
 		if (filterCriteria != null && !filterCriteria.isShowClosed()) {
 			final var status = entity.getStatus();
 			if (status != null && Boolean.TRUE.equals(status.getFinalStatus())) {
