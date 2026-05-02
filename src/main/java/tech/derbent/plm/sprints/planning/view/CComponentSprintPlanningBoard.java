@@ -48,6 +48,7 @@ import tech.derbent.plm.sprints.domain.CSprint;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 import tech.derbent.plm.sprints.planning.domain.CSprintPlanningViewEntity;
 import tech.derbent.plm.sprints.planning.domain.ESprintPlanningScope;
+import tech.derbent.plm.sprints.planning.view.components.CBacklogNavigatorHierarchyBuilder;
 import tech.derbent.plm.sprints.planning.view.components.CDialogAddBacklogItemToSprint;
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningBacklogBrowser;
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningDragContext;
@@ -72,20 +73,6 @@ import tech.derbent.plm.sprints.service.CSprintService;
  */
 public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlanningViewEntity> {
 
-	private static final class CVisibleNode {
-
-		private final List<CVisibleNode> children;
-		private final CGnntItem item;
-
-		private CVisibleNode(final CGnntItem item, final List<CVisibleNode> children) {
-			this.item = item;
-			this.children = children;
-		}
-	}
-
-	private record CBacklogData(CGnntHierarchyResult parentHierarchy, CGnntHierarchyResult leafHierarchy) {}
-
-	private record CBacklogBuildResult(CVisibleNode node, boolean hasVisibleLeafDescendant) {}
 
 	private static final double DEFAULT_SPLITTER_POSITION = 60.0;
 	public static final String ID_BOARD = "custom-sprint-planning-board-v2";
@@ -216,52 +203,17 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		}
 	}
 
-	private CBacklogData buildBacklogData(final Map<String, CProjectItem<?, ?>> hierarchyItemsByKey) {
+	private CBacklogNavigatorHierarchyBuilder.CBacklogData buildBacklogData(final Map<String, CProjectItem<?, ?>> hierarchyItemsByKey) {
 		final ESprintPlanningScope scope = filterToolbar.getScope();
 		if (scope == ESprintPlanningScope.SPRINT) {
 			// In sprint scope we keep backlog empty to focus on the sprint tree.
 			final CGnntHierarchyResult empty = new CGnntHierarchyResult(List.of(), Map.of(), List.of());
-			return new CBacklogData(empty, empty);
+			return new CBacklogNavigatorHierarchyBuilder.CBacklogData(empty, empty);
 		}
-		final Map<String, List<CProjectItem<?, ?>>> childrenByParentKey = new HashMap<>();
-		final List<CProjectItem<?, ?>> roots = new ArrayList<>();
-		for (final CProjectItem<?, ?> item : hierarchyItemsByKey.values()) {
-			final String key = CHierarchyNavigationService.buildEntityKey(item);
-			if (key == null) {
-				continue;
-			}
-			final String parentKey = CHierarchyNavigationService.buildParentKey(item);
-			if (parentKey == null || !hierarchyItemsByKey.containsKey(parentKey)) {
-				roots.add(item);
-			} else {
-				childrenByParentKey.computeIfAbsent(parentKey, ignored -> new ArrayList<>()).add(item);
-			}
-		}
-		// Jira-like ordering: backlog is primarily rank-ordered.
-		roots.sort(Comparator.comparingInt((final CProjectItem<?, ?> item) -> resolveItemOrder(item))
-				.thenComparing(CProjectItem::getName, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)));
-		for (final List<CProjectItem<?, ?>> children : childrenByParentKey.values()) {
-			children.sort(Comparator.comparingInt((final CProjectItem<?, ?> item) -> resolveItemOrder(item))
-					.thenComparing(CProjectItem::getName, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)));
-		}
-		final List<CVisibleNode> visibleParentRoots = new ArrayList<>();
-		final List<CGnntItem> visibleLeafItems = new ArrayList<>();
-		final long[] uniqueId = new long[] {
-				1
-		};
-		for (final CProjectItem<?, ?> root : roots) {
-			final CBacklogBuildResult result =
-					buildVisibleBacklogParentNode(root, 0, scope, childrenByParentKey, visibleLeafItems, uniqueId);
-			if (result.node() != null) {
-				visibleParentRoots.add(result.node());
-			}
-		}
-		visibleLeafItems.sort(Comparator.<CGnntItem>comparingInt(item -> resolveItemOrder(item.getEntity()))
-				.thenComparing(CGnntItem::getName, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)));
-		final CGnntHierarchyResult parentHierarchy = flattenVisibleNodes(visibleParentRoots);
-		final CGnntHierarchyResult leafHierarchy =
-				new CGnntHierarchyResult(visibleLeafItems, Map.of(), visibleLeafItems);
-		return new CBacklogData(parentHierarchy, leafHierarchy);
+		return CBacklogNavigatorHierarchyBuilder.buildBacklogData(hierarchyItemsByKey, scope,
+				filterToolbar::shouldIncludeBacklogParentItem,
+				filterToolbar::shouldIncludeBacklogItem,
+				CComponentSprintPlanningBoard::resolveItemOrder);
 	}
 
 	private List<CContextActionDefinition<CGnntItem>> buildLeafQuickActions() {
@@ -403,43 +355,6 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		return new CGnntHierarchyResult(rootItems, childrenByParentKey, flatItems);
 	}
 
-	private CBacklogBuildResult buildVisibleBacklogParentNode(final CProjectItem<?, ?> entity, final int hierarchyLevel,
-			final ESprintPlanningScope scope, final Map<String, List<CProjectItem<?, ?>>> childrenByParentKey,
-			final List<CGnntItem> visibleLeafItems, final long[] uniqueId) {
-		final String entityKey = CHierarchyNavigationService.buildEntityKey(entity);
-		if (entityKey == null) {
-			return new CBacklogBuildResult(null, false);
-		}
-		if (isLeafItem(entity)) {
-			// The leaf pane is the sprint-assignment workbench, so only sprintable level -1 items belong here.
-			// Parent browsing still exposes the wider hierarchy on the left.
-			final boolean leafVisible = entity instanceof ISprintableItem && isBacklogCandidate(entity, scope)
-					&& filterToolbar.shouldIncludeBacklogItem(entity);
-			if (leafVisible) {
-				// Leaf items are rendered in a separate flat grid, so they don't need hierarchy indentation here.
-				visibleLeafItems.add(new CGnntItem(entity, uniqueId[0]++, 0));
-			}
-			return new CBacklogBuildResult(null, leafVisible);
-		}
-		final List<CVisibleNode> visibleChildren = new ArrayList<>();
-		boolean hasVisibleLeaf = false;
-		for (final CProjectItem<?, ?> child : childrenByParentKey.getOrDefault(entityKey, List.of())) {
-			final CBacklogBuildResult visibleChild = buildVisibleBacklogParentNode(child, hierarchyLevel + 1, scope,
-					childrenByParentKey, visibleLeafItems, uniqueId);
-			if (visibleChild.node() != null) {
-				visibleChildren.add(visibleChild.node());
-			}
-			hasVisibleLeaf = hasVisibleLeaf || visibleChild.hasVisibleLeafDescendant();
-		}
-		final boolean matchesFilters =
-				isBacklogCandidate(entity, scope) && filterToolbar.shouldIncludeBacklogParentItem(entity);
-		if (!matchesFilters && visibleChildren.isEmpty() && !hasVisibleLeaf) {
-			return new CBacklogBuildResult(null, false);
-		}
-		final CGnntItem item = new CGnntItem(entity, uniqueId[0]++, hierarchyLevel);
-		item.setHasChildren(!visibleChildren.isEmpty());
-		return new CBacklogBuildResult(new CVisibleNode(item, visibleChildren), hasVisibleLeaf);
-	}
 
 	private boolean canAddExistingChild(final CGnntItem context) {
 		return resolveParentContextEntity(context) != null
@@ -598,31 +513,6 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		return sprintableItemsByKey;
 	}
 
-	private void flattenVisibleNode(final CVisibleNode node, final List<CGnntItem> flatItems,
-			final Map<String, List<CGnntItem>> childrenByParentKey) {
-		flatItems.add(node.item);
-		if (node.children == null || node.children.isEmpty()) {
-			return;
-		}
-		final String key = node.item.getEntityKey();
-		final List<CGnntItem> childItems = new ArrayList<>();
-		node.children.forEach((final CVisibleNode child) -> {
-			childItems.add(child.item);
-			flattenVisibleNode(child, flatItems, childrenByParentKey);
-		});
-		childrenByParentKey.put(key, childItems);
-	}
-
-	private CGnntHierarchyResult flattenVisibleNodes(final List<CVisibleNode> rootNodes) {
-		final List<CGnntItem> flatItems = new ArrayList<>();
-		final List<CGnntItem> rootItems = new ArrayList<>();
-		final Map<String, List<CGnntItem>> childrenByParentKey = new HashMap<>();
-		rootNodes.forEach((final CVisibleNode rootNode) -> {
-			rootItems.add(rootNode.item);
-			flattenVisibleNode(rootNode, flatItems, childrenByParentKey);
-		});
-		return new CGnntHierarchyResult(rootItems, childrenByParentKey, flatItems);
-	}
 
 	private CGnntItem getSelectedLeafActionContext() { return backlogBrowser.getSelectedLeafItem(); }
 
@@ -1126,7 +1016,7 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 				allItems.add(new CGnntItem(projectItem, entityTypeSequence++, 0));
 			}
 			filterToolbar.setAvailableEntityTypes(allItems);
-			final CBacklogData backlogData = buildBacklogData(hierarchyItemsByKey);
+			final CBacklogNavigatorHierarchyBuilder.CBacklogData backlogData = buildBacklogData(hierarchyItemsByKey);
 			final CGnntHierarchyResult sprints = buildSprintHierarchy(view, sprintableItemsByKey);
 			updateBacklogMetrics(hierarchyItemsByKey);
 			final CGanttTimelineRange range =
