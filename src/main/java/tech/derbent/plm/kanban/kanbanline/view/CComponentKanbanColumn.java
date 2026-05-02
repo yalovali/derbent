@@ -8,9 +8,11 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dnd.DropEffect;
 import com.vaadin.flow.component.dnd.DropEvent;
 import com.vaadin.flow.component.dnd.DropTarget;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.binder.Binder;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.interfaces.CSelectEvent;
@@ -20,6 +22,7 @@ import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
+import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CH4;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
@@ -49,6 +52,8 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	private final Set<ComponentEventListener<CDragDropEvent>> dragDropListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragStartEvent>> dragStartListeners = new HashSet<>();
+	private boolean compactView;
+	private final CButton buttonToggleCompact;
 	private DropTarget<CVerticalLayout> dropTarget;
 	protected final CHorizontalLayout headerLayout;
 	private final CVerticalLayout itemsLayout;
@@ -56,6 +61,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new HashSet<>();
 	private List<CSprintItem> sprintItems = List.of();
 	protected final CLabelEntity statusesLabel;
+	protected final CSpan itemCountLabel;
 	protected final CSpan storyPointTotalLabel;
 	protected final CH4 title;
 
@@ -64,7 +70,9 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		setPadding(true);
 		setSpacing(true);
 		getStyle().set("gap", CUIConstants.GAP_TINY);
-		setWidth("280px");
+		getStyle().set("flex", "1 1 0");
+		getStyle().set("min-width", "220px");
+		setWidth("0");
 		setMinHeight("500px");
 		setHeight(null);
 		setDefaultHorizontalComponentAlignment(Alignment.STRETCH);
@@ -76,10 +84,19 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		headerLayout.setAlignItems(Alignment.CENTER);
 		title = new CH4("");
 		title.getStyle().set("margin", "0").set("flex-grow", "1");
+		itemCountLabel = new CSpan();
+		itemCountLabel.getStyle().set("background-color", "#E3F2FD").set("color", "#1565C0").set("padding", "4px 8px")
+				.set("border-radius", "6px").set("font-size", "12px").set("font-weight", "700").set("white-space", "nowrap");
 		storyPointTotalLabel = new CSpan();
 		storyPointTotalLabel.getStyle().set("background-color", "#E8F5E9").set("color", "#2E7D32").set("padding", "4px 8px")
 				.set("border-radius", "6px").set("font-size", "12px").set("font-weight", "700").set("white-space", "nowrap");
-		headerLayout.add(title);
+		buttonToggleCompact = new CButton(VaadinIcon.ANGLE_LEFT.create());
+		buttonToggleCompact.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_SMALL);
+		buttonToggleCompact.getStyle().set("padding", "var(--lumo-space-xs)");
+		buttonToggleCompact.getElement().setAttribute("aria-label", "Toggle column width");
+		buttonToggleCompact.getElement().setAttribute("title", "Toggle column width");
+		buttonToggleCompact.addClickListener(event -> setCompactView(!compactView));
+		headerLayout.add(title, itemCountLabel, storyPointTotalLabel, buttonToggleCompact);
 		add(headerLayout);
 		statusesLabel = new CLabelEntity();
 		statusesLabel.getStyle().set("font-size", "11px").set("color", "#666").set("margin-bottom", "0px").set("padding", "0px 0px");
@@ -315,6 +332,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	private void refreshHeader() {
 		final CKanbanColumn column = getValue();
 		title.setText(column != null ? column.getName() : "");
+		itemCountLabel.setText(getFilteredItems().size() + "");
 		// Calculate and display total story points
 		refreshStoryPointTotal();
 	}
@@ -323,6 +341,9 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	private void refreshItems() {
 		LOGGER.debug("Refreshing items for kanban column {}", getValue() != null ? getValue().getName() : "null");
 		itemsLayout.removeAll();
+		if (compactView) {
+			return;
+		}
 		for (final CSprintItem item : getFilteredItems()) { // Use cached filtered items
 			final CComponentKanbanPostit postit = new CComponentKanbanPostit(item);
 			postit.setStatusBoardMode(statusBoardMode);
@@ -367,9 +388,6 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		}
 		// Always show story point total (even if 0)
 		storyPointTotalLabel.setText(totalStoryPoints + " SP");
-		if (!headerLayout.getChildren().anyMatch(component -> component == storyPointTotalLabel)) {
-			headerLayout.add(storyPointTotalLabel);
-		}
 		storyPointTotalLabel.setVisible(true);
 	}
 
@@ -414,6 +432,23 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 			refreshStatuses();
 			refreshItems();
 		}
+	}
+
+	protected void onCompactViewChanged(final boolean compact) {
+		statusesLabel.setVisible(!compact);
+		itemsLayout.setVisible(!compact);
+	}
+
+	public void setCompactView(final boolean compact) {
+		compactView = compact;
+		if (compact) {
+			addClassName("kanban-column-compact");
+			buttonToggleCompact.setIcon(VaadinIcon.ANGLE_RIGHT.create());
+		} else {
+			removeClassName("kanban-column-compact");
+			buttonToggleCompact.setIcon(VaadinIcon.ANGLE_LEFT.create());
+		}
+		onCompactViewChanged(compact);
 	}
 
 	public void setPostitContextActions(final List<CContextActionDefinition<CComponentKanbanPostit>> actions) {

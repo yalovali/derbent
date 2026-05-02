@@ -1,18 +1,16 @@
 package tech.derbent.api.ui.component.enhanced;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.ComboBoxVariant;
 import com.vaadin.flow.component.html.Span;
-import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
@@ -24,12 +22,15 @@ import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
+import tech.derbent.api.parentrelation.service.CHierarchyNavigationService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.services.pageservice.CPageService;
+import tech.derbent.api.ui.component.basic.CComboBox;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.activities.service.CActivityService;
+import tech.derbent.plm.agile.view.CAgileToolbarSupport;
 import tech.derbent.plm.issues.issue.domain.CIssue;
 import tech.derbent.plm.issues.issue.service.CIssueService;
 import tech.derbent.plm.meetings.domain.CMeeting;
@@ -60,6 +61,11 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?,
 		return entityTypes;
 	}
 
+	private static List<EntityTypeConfig<?>> createCompactEntityTypes() {
+		final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
+		return List.of(new EntityTypeConfig<>("All", CActivity.class, activityService));
+	}
+
 	/** Creates the items provider that loads all project items ordered by sprint order.
 	 * @param project the project to load backlog items for
 	 * @return provider for loading items */
@@ -75,6 +81,19 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?,
 				final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
 				final CMeetingService meetingService = CSpringContext.getBean(CMeetingService.class);
 				final CIssueService issueService = CSpringContext.getBean(CIssueService.class);
+
+				if (config != null && "All".equalsIgnoreCase(config.getDisplayName())) {
+					final List<CProjectItem<?, ?>> combined = new ArrayList<>();
+					combined.addAll((List<CProjectItem<?, ?>>) (List<?>) activityService.listForProjectBacklog(project));
+					combined.addAll((List<CProjectItem<?, ?>>) (List<?>) meetingService.listForProjectBacklog(project));
+					combined.addAll((List<CProjectItem<?, ?>>) (List<?>) issueService.listForProjectBacklog(project));
+					combined.sort(Comparator
+							.comparing((CProjectItem<?, ?> item) -> item instanceof ISprintableItem sprintable ? sprintable.getSprintOrder() : Integer.MAX_VALUE,
+									Comparator.nullsLast(Integer::compareTo))
+							.thenComparing(item -> item.getId() != null ? item.getId() : -1L, Comparator.reverseOrder()));
+					return combined;
+				}
+
 				// Load items ordered by sprintOrder for proper backlog display
 				if (config.getEntityClass() == CActivity.class) {
 					return (List<CProjectItem<?, ?>>) (List<?>) activityService.listForProjectBacklog(project);
@@ -85,8 +104,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?,
 				}
 				return new ArrayList<>();
 			} catch (final Exception e) {
-				LOGGER.error("Error loading backlog items for entity type: {} reason={}", config.getDisplayName(),
-						e.getMessage());
+				LOGGER.error("Error loading backlog items for entity type: {} reason={}", config.getDisplayName(), e.getMessage());
 				return new ArrayList<>();
 			}
 		};
@@ -99,16 +117,18 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?,
 	}
 
 	private final boolean compactMode;
+	private final CHierarchyNavigationService hierarchyNavigationService;
+	private final CProject<?> project;
 	/** Currently selected backlog item for detail display */
 	private CProjectItem<?, ?> selectedBacklogItem;
 	/** Selection listeners for notification pattern */
 	private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new HashSet<>();
-	/** Reference to the toolbar so the parent filter can be added after setup */
+	/** Reference to the toolbar so the hierarchy filters can be added after setup */
 	private CComponentFilterToolbar backlogToolbar;
-	/** ComboBox for filtering backlog items by their parent (only in compact mode) */
-	private ComboBox<CProjectItem<?, ?>> parentFilterComboBox;
-	/** Guard flag to prevent re-entrant refreshGrid() calls when updating parent filter options */
-	private boolean inParentFilterUpdate = false;
+	private CComboBox<CProjectItem<?, ?>> filterLevel0;
+	private CComboBox<CProjectItem<?, ?>> filterLevel1;
+	private CComboBox<CProjectItem<?, ?>> filterLevel2;
+	private boolean internalHierarchyUpdate;
 
 	/** Constructor for backlog component.
 	 * @param project project to load backlog items for (required) */
@@ -120,16 +140,18 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?,
 	 * @param project     project to load backlog items for (required)
 	 * @param compactMode true for compact display (only name column in grid, only type selector in toolbar), false for full display */
 	public CComponentBacklog(final CProject<?> project, final boolean compactMode) {
-		super(createEntityTypes(), createItemsProvider(project), createSelectionHandler(), false, null,
+		super(compactMode ? createCompactEntityTypes() : createEntityTypes(), createItemsProvider(project), createSelectionHandler(), false, null,
 				AlreadySelectedMode.HIDE_ALREADY_SELECTED, false);
 		Check.notNull(project, "Project cannot be null");
+		this.project = project;
 		this.compactMode = compactMode;
+		hierarchyNavigationService = CSpringContext.getBean(CHierarchyNavigationService.class);
 		CSpringContext.getBean(CActivityService.class);
 		CSpringContext.getBean(CMeetingService.class);
 		CSpringContext.getBean(CIssueService.class);
 		setupComponent();
 		if (compactMode) {
-			setupParentFilter();
+			setupHierarchyFilters();
 		}
 		setDynamicHeight("600px");
 		// CRITICAL: Select first entity type BEFORE enabling persistence
@@ -206,8 +228,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?,
 	protected CComponentFilterToolbar create_gridSearchToolbar() {
 		final CComponentGridSearchToolbar.ToolbarConfig config = new CComponentGridSearchToolbar.ToolbarConfig();
 		if (compactMode) {
-			config.setIdFilter(false).setNameFilter(false).setDescriptionFilter(false).setStatusFilter(false)
-					.setClearButton(false);
+			config.setIdFilter(false).setNameFilter(false).setDescriptionFilter(false).setStatusFilter(false).setClearButton(false);
 		} else {
 			config.showAll();
 		}
@@ -215,74 +236,160 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?,
 		return backlogToolbar;
 	}
 
-	/** Applies the parent filter to the current list data view. Called after applyFilters() sets items. */
-	private void applyParentFilter() {
-		if (parentFilterComboBox == null || getGrid() == null) {
+
+	private static Long parseEntityId(final String serialized) {
+		if (serialized == null || serialized.isBlank()) {
+			return null;
+		}
+		final int idIndex = serialized.indexOf("id=");
+		if (idIndex < 0) {
+			return null;
+		}
+		final int start = idIndex + 3;
+		final int end = serialized.indexOf('}', start);
+		final String idRaw = end > start ? serialized.substring(start, end) : serialized.substring(start);
+		try {
+			return Long.parseLong(idRaw);
+		} catch (final NumberFormatException e) {
+			return null;
+		}
+	}
+
+	private void applyHierarchyFilters() {
+		if (!compactMode || getGrid() == null) {
 			return;
 		}
-		final CProjectItem<?, ?> selectedParent = parentFilterComboBox.getValue();
-		if (selectedParent == null || selectedParent.getId() == null) {
-			return;
-		}
-		getGrid().getListDataView().addFilter(item -> {
-			if (!(item instanceof final IHasParentRelation iHasParent)) {
+		final CProjectItem<?, ?> l0 = filterLevel0 != null ? filterLevel0.getValue() : null;
+		final CProjectItem<?, ?> l1 = filterLevel1 != null ? filterLevel1.getValue() : null;
+		final CProjectItem<?, ?> l2 = filterLevel2 != null ? filterLevel2.getValue() : null;
+		getGrid().getListDataView().setFilter(item -> {
+			if (item == null) {
 				return false;
 			}
-			final CProjectItem<?, ?> parent = iHasParent.getParentItem();
-			return parent != null && selectedParent.getId().equals(parent.getId());
+			if (l2 != null && !CAgileToolbarSupport.isSameEntity(CHierarchyNavigationService.resolveAncestorAtLevel(item, 2), l2)) {
+				return false;
+			}
+			if (l1 != null && !CAgileToolbarSupport.isSameEntity(CHierarchyNavigationService.resolveAncestorAtLevel(item, 1), l1)) {
+				return false;
+			}
+			if (l0 != null && !CAgileToolbarSupport.isSameEntity(CHierarchyNavigationService.resolveAncestorAtLevel(item, 0), l0)) {
+				return false;
+			}
+			return true;
 		});
 	}
 
-	/** Updates the parent filter ComboBox options from the currently visible grid items. */
-	private void updateParentFilterOptions() {
-		if (parentFilterComboBox == null || getGrid() == null) {
+	private void refreshHierarchyOptions() {
+		if (!compactMode) {
 			return;
 		}
-		inParentFilterUpdate = true;
+		final List<CProjectItem<?, ?>> level0Items = hierarchyNavigationService != null ? hierarchyNavigationService.listItemsAtLevel(project, 0) : List.of();
+		final List<CProjectItem<?, ?>> level1ItemsRaw = hierarchyNavigationService != null ? hierarchyNavigationService.listItemsAtLevel(project, 1) : List.of();
+		final List<CProjectItem<?, ?>> level2ItemsRaw = hierarchyNavigationService != null ? hierarchyNavigationService.listItemsAtLevel(project, 2) : List.of();
+
+		internalHierarchyUpdate = true;
 		try {
-			final List<CProjectItem<?, ?>> parents = getGrid().getListDataView().getItems()
-					.filter(item -> item instanceof IHasParentRelation)
-					.map(item -> ((IHasParentRelation) item).getParentItem()).filter(Objects::nonNull)
-					.filter(p -> p.getId() != null).distinct().collect(Collectors.toList());
-			final CProjectItem<?, ?> savedValue = parentFilterComboBox.getValue();
-			parentFilterComboBox.setItems(parents);
-			if (savedValue != null
-					&& parents.stream().anyMatch(p -> p.getId().equals(savedValue.getId()))) {
-				parentFilterComboBox.setValue(savedValue);
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error updating parent filter options reason={}", e.getMessage());
+			final CProjectItem<?, ?> currentL0 = filterLevel0.getValue();
+			filterLevel0.setItems(level0Items);
+			filterLevel0.setValue(preserveHierarchySelection(currentL0, level0Items));
+
+			final List<CProjectItem<?, ?>> level1Items = CAgileToolbarSupport.filterByAncestorLevel(level1ItemsRaw, 0, filterLevel0.getValue());
+			final CProjectItem<?, ?> currentL1 = filterLevel1.getValue();
+			filterLevel1.setItems(level1Items);
+			filterLevel1.setValue(preserveHierarchySelection(currentL1, level1Items));
+
+			List<CProjectItem<?, ?>> level2Items = CAgileToolbarSupport.filterByAncestorLevel(level2ItemsRaw, 0, filterLevel0.getValue());
+			level2Items = CAgileToolbarSupport.filterByAncestorLevel(level2Items, 1, filterLevel1.getValue());
+			final CProjectItem<?, ?> currentL2 = filterLevel2.getValue();
+			filterLevel2.setItems(level2Items);
+			filterLevel2.setValue(preserveHierarchySelection(currentL2, level2Items));
 		} finally {
-			inParentFilterUpdate = false;
+			internalHierarchyUpdate = false;
 		}
 	}
 
-	/** Sets up the parent filter ComboBox in the compact toolbar. Called once after setupComponent(). */
-	private void setupParentFilter() {
+	private static CProjectItem<?, ?> preserveHierarchySelection(final CProjectItem<?, ?> selectedValue, final List<CProjectItem<?, ?>> availableValues) {
+		if (selectedValue == null || selectedValue.getId() == null || availableValues == null) {
+			return null;
+		}
+		return availableValues.stream().filter(candidate -> CAgileToolbarSupport.isSameEntity(candidate, selectedValue)).findFirst().orElse(null);
+	}
+
+	private void setupHierarchyFilters() {
 		if (backlogToolbar == null) {
 			return;
 		}
-		parentFilterComboBox = new ComboBox<>();
-		parentFilterComboBox.setPlaceholder("Parent");
-		parentFilterComboBox.setItemLabelGenerator(item -> item != null ? item.getName() : "");
-		parentFilterComboBox.setClearButtonVisible(true);
-		parentFilterComboBox.setWidth("130px");
-		backlogToolbar.addFilterComponent(parentFilterComboBox);
-		parentFilterComboBox.addValueChangeListener(e -> {
-			if (!inParentFilterUpdate) {
-				refreshGrid();
+		// Hide the entity-type selector (compact backlog always shows all item types).
+		backlogToolbar.getChildren().findFirst().ifPresent(component -> component.setVisible(false));
+		filterLevel0 = createHierarchyComboBox("L0", "backlogHierarchy_" + project.getId() + "_l0");
+		filterLevel1 = createHierarchyComboBox("L1", "backlogHierarchy_" + project.getId() + "_l1");
+		filterLevel2 = createHierarchyComboBox("L2", "backlogHierarchy_" + project.getId() + "_l2");
+		backlogToolbar.addFilterComponents(filterLevel0, filterLevel1, filterLevel2);
+
+		filterLevel0.addValueChangeListener(event -> {
+			if (internalHierarchyUpdate) {
+				return;
 			}
+			refreshHierarchyOptions();
+			refreshGrid();
 		});
-		// Second listener fires after the base class applyFilters() listener
-		backlogToolbar.addFilterChangeListener(event -> applyParentFilter());
+		filterLevel1.addValueChangeListener(event -> {
+			if (internalHierarchyUpdate) {
+				return;
+			}
+			internalHierarchyUpdate = true;
+			try {
+				filterLevel0.setValue(CAgileToolbarSupport.resolveEpic(filterLevel1.getValue()));
+			} finally {
+				internalHierarchyUpdate = false;
+			}
+			refreshHierarchyOptions();
+			refreshGrid();
+		});
+		filterLevel2.addValueChangeListener(event -> {
+			if (internalHierarchyUpdate) {
+				return;
+			}
+			internalHierarchyUpdate = true;
+			try {
+				filterLevel1.setValue(CAgileToolbarSupport.resolveFeature(filterLevel2.getValue()));
+				filterLevel0.setValue(CAgileToolbarSupport.resolveEpic(filterLevel2.getValue()));
+			} finally {
+				internalHierarchyUpdate = false;
+			}
+			refreshHierarchyOptions();
+			refreshGrid();
+		});
+
+		refreshHierarchyOptions();
+		applyHierarchyFilters();
 	}
 
-	/** Overrides to update parent filter options and re-apply parent filter after items are reloaded. */
+	private CComboBox<CProjectItem<?, ?>> createHierarchyComboBox(final String placeholder, final String persistenceKey) {
+		final CComboBox<CProjectItem<?, ?>> comboBox = new CComboBox<>();
+		comboBox.setPlaceholder(placeholder);
+		comboBox.setClearButtonVisible(true);
+		comboBox.setWidth("130px");
+		comboBox.getStyle().set("min-width", "0");
+		comboBox.addThemeVariants(ComboBoxVariant.LUMO_SMALL);
+		comboBox.setItemLabelGenerator(item -> item != null ? item.getName() : "");
+		comboBox.enablePersistence(persistenceKey, stored -> {
+			final Long id = parseEntityId(stored);
+			if (id == null) {
+				return null;
+			}
+			return comboBox.getListDataView().getItems().filter(candidate -> candidate != null && id.equals(candidate.getId())).findFirst().orElse(null);
+		});
+		return comboBox;
+	}
+
 	@Override
-	protected void on_comboBoxEntityType_selectionChanged(final EntityTypeConfig<?> config) {
-		super.on_comboBoxEntityType_selectionChanged(config);
-		updateParentFilterOptions();
-		applyParentFilter();
+	public void refreshGrid() {
+		super.refreshGrid();
+		if (compactMode) {
+			refreshHierarchyOptions();
+			applyHierarchyFilters();
+		}
 	}
 
 	@Override

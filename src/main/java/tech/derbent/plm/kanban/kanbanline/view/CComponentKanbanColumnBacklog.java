@@ -69,6 +69,7 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 	private DropTarget<CVerticalLayout> backlogDropTarget;
 	/** The project context for loading backlog items */
 	private final CProject<?> project;
+	private boolean internalCompactUpdate;
 
 	/** Creates a backlog kanban column for the specified project. The backlog component is always created in compact mode for narrow display.
 	 * @param project The project whose backlog items should be displayed (required)
@@ -152,8 +153,8 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 			return;
 		}
 		try {
-			final List<?> items =
-					backlogComponent.getGrid().getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
+			final List<?> items = backlogComponent.getGrid().getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
+			itemCountLabel.setText(String.valueOf(items.size()));
 			long totalStoryPoints = 0;
 			for (final Object item : items) {
 				if (item instanceof final ISprintableItem sprintableItem) {
@@ -163,15 +164,8 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 					}
 				}
 			}
-			if (totalStoryPoints > 0) {
-				storyPointTotalLabel.setText(totalStoryPoints + " SP");
-				if (!headerLayout.getChildren().anyMatch(c -> c == storyPointTotalLabel)) {
-					headerLayout.add(storyPointTotalLabel);
-				}
-				storyPointTotalLabel.setVisible(true);
-			} else {
-				storyPointTotalLabel.setVisible(false);
-			}
+			storyPointTotalLabel.setText(totalStoryPoints + " SP");
+			storyPointTotalLabel.setVisible(true);
 		} catch (final Exception e) {
 			LOGGER.error("Error calculating backlog story points reason={}", e.getMessage());
 		}
@@ -186,6 +180,20 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 		LOGGER.debug("Refreshing backlog column component");
 		backlogComponent.refreshComponent();
 		refreshBacklogStoryPointTotal();
+	}
+
+	@Override
+	protected void onCompactViewChanged(final boolean compact) {
+		super.onCompactViewChanged(compact);
+		if (internalCompactUpdate) {
+			return;
+		}
+		internalCompactUpdate = true;
+		try {
+			backlogComponent.setVisible(!compact);
+		} finally {
+			internalCompactUpdate = false;
+		}
 	}
 
 	/** Override to prevent story point total display in backlog column. */

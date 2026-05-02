@@ -3,6 +3,19 @@
     gap: var(--lumo-space-m);
 }
 
+/* Equal-width columns by default (flexbox - HorizontalLayout uses display:flex). */
+.kanban-board-columns > * {
+    flex: 1 1 0;
+    min-width: 220px;
+}
+
+/* Compact column: fixed narrow width, header-only summary view. */
+.kanban-column.kanban-column-compact {
+    flex: 0 0 140px;
+    min-width: 140px;
+    max-width: 140px;
+}
+
 .kanban-column {
     height: auto;
 }

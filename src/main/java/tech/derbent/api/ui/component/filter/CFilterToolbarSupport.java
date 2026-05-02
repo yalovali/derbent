@@ -3,6 +3,7 @@ package tech.derbent.api.ui.component.filter;
 import java.util.function.Consumer;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import tech.derbent.api.ui.component.basic.CTextField;
 import tech.derbent.api.utils.Check;
@@ -31,6 +32,8 @@ public final class CFilterToolbarSupport {
 	public static CTextField createSearchField(final String label, final String placeholder, final VaadinIcon prefixIcon, final String width,
 			final ValueChangeMode valueChangeMode, final int timeoutMs, final Consumer<String> onChange) {
 		final CTextField field = label != null ? new CTextField(label) : new CTextField();
+		field.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+		field.getStyle().set("min-width", "0");
 		field.setPlaceholder(placeholder);
 		if (prefixIcon != null) {
 			field.setPrefixComponent(prefixIcon.create());
