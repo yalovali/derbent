@@ -167,7 +167,9 @@ check_entity_constants() {
 
   local missing=0
   for f in "${entity_files[@]}"; do
-    if rg -q "public class C" "$f"; then
+    # WHY: /domain/ contains both JPA entities and non-entity DTO/config classes (e.g. import options).
+    # We only enforce entity constants for actual JPA domain entities.
+    if rg -q "public class C" "$f" && rg -q "@Entity|@MappedSuperclass" "$f"; then
       for c in DEFAULT_COLOR DEFAULT_ICON ENTITY_TITLE_SINGULAR ENTITY_TITLE_PLURAL VIEW_NAME; do
         if ! rg -q "$c" "$f"; then
           echo "Missing $c: $f"

@@ -39,6 +39,7 @@ import tech.derbent.api.imports.service.CDataImportService;
 import tech.derbent.api.imports.service.CExcelImportService;
 import tech.derbent.api.imports.service.CImportHandlerRegistry;
 import tech.derbent.api.imports.service.CSampleImportExcelGenerator;
+import tech.derbent.api.imports.service.CSystemInitExcelGenerator;
 import tech.derbent.api.menu.MyMenu;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.session.service.ISessionService;
@@ -73,6 +74,7 @@ public final class CViewImport extends CAbstractPage {
     private Checkbox dryRunCheckbox;
     private Checkbox rollbackOnErrorCheckbox;
     private Checkbox skipUnknownSheetsCheckbox;
+    private Checkbox autoCreateLookupsCheckbox;
 
     // Results area
     private Div resultsContainer;
@@ -176,7 +178,12 @@ public final class CViewImport extends CAbstractPage {
         final Anchor templateAnchor = new Anchor(createTemplateResource(), "Download sample template");
         templateAnchor.getElement().setAttribute("download", true);
         templateAnchor.addClassNames(LumoUtility.FontSize.SMALL);
-        section.add(upload, templateAnchor);
+
+        final Anchor systemInitAnchor = new Anchor(createSystemInitTemplateResource(), "Download system init template");
+        systemInitAnchor.getElement().setAttribute("download", true);
+        systemInitAnchor.addClassNames(LumoUtility.FontSize.SMALL);
+
+        section.add(upload, templateAnchor, systemInitAnchor);
         return section;
     }
 
@@ -188,6 +195,19 @@ public final class CViewImport extends CAbstractPage {
                 return new java.io.ByteArrayInputStream(baos.toByteArray());
             } catch (final Exception e) {
                 LOGGER.error("Failed to generate template reason={}", e.getMessage());
+                return new java.io.ByteArrayInputStream(new byte[0]);
+            }
+        });
+    }
+
+    private StreamResource createSystemInitTemplateResource() {
+        return new StreamResource("system_init_template.xlsx", () -> {
+            try {
+                final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                CSystemInitExcelGenerator.writeSystemInitWorkbook(baos);
+                return new java.io.ByteArrayInputStream(baos.toByteArray());
+            } catch (final Exception e) {
+                LOGGER.error("Failed to generate system init template reason={}", e.getMessage());
                 return new java.io.ByteArrayInputStream(new byte[0]);
             }
         });
@@ -206,7 +226,12 @@ public final class CViewImport extends CAbstractPage {
         rollbackOnErrorCheckbox.setValue(false);
         skipUnknownSheetsCheckbox = new Checkbox("Skip unrecognized sheet names");
         skipUnknownSheetsCheckbox.setValue(true);
-        final HorizontalLayout opts = new HorizontalLayout(dryRunCheckbox, rollbackOnErrorCheckbox, skipUnknownSheetsCheckbox);
+        autoCreateLookupsCheckbox = new Checkbox("Auto-create missing types/statuses (opt-in)");
+        autoCreateLookupsCheckbox.setValue(false);
+        autoCreateLookupsCheckbox.getElement().setProperty("title",
+                "When enabled, import handlers may create missing reference data (e.g. Status/Type) instead of failing the row.");
+        final HorizontalLayout opts = new HorizontalLayout(dryRunCheckbox, rollbackOnErrorCheckbox, skipUnknownSheetsCheckbox,
+                autoCreateLookupsCheckbox);
         opts.setSpacing(true);
         section.add(optTitle, opts);
         return section;
@@ -239,6 +264,7 @@ public final class CViewImport extends CAbstractPage {
         options.setDryRun(dryRunCheckbox.getValue());
         options.setRollbackOnError(rollbackOnErrorCheckbox.getValue());
         options.setSkipUnknownSheets(skipUnknownSheetsCheckbox.getValue());
+        options.setAutoCreateLookups(autoCreateLookupsCheckbox.getValue());
         importButton.setEnabled(false);
         importButton.setText("Importing…");
         try {

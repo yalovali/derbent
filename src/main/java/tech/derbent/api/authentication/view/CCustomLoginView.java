@@ -1,5 +1,7 @@
 package tech.derbent.api.authentication.view;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -34,6 +36,10 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.companies.service.CCompanyService;
 import tech.derbent.api.config.CDataInitializer;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.imports.domain.CImportOptions;
+import tech.derbent.api.imports.domain.CImportResult;
+import tech.derbent.api.imports.service.CExcelImportService;
+import tech.derbent.api.imports.service.CSystemInitExcelGenerator;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CColorAwareComboBox;
@@ -78,19 +84,23 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	private final CCompanyService companyService;
 	private final Environment environment;
 	private final Div errorMessage = new Div();
+	private final CExcelImportService excelImportService;
 	private final Button loginButton = new CButton("Login", CColorUtils.createStyledIcon("vaadin:sign-in", CColorUtils.CRUD_SAVE_COLOR));
 	private final PasswordField passwordField = new PasswordField();
 	private final Button resetDbButton = new CButton("DB Full", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
 	private final Button resetDbMinimalButton = new CButton("DB Min", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
+	private final Button resetDbExcelButton = new CButton("DB Excel", CColorUtils.createStyledIcon("vaadin:file-table", CColorUtils.CRUD_UPDATE_COLOR));
 	private final CComboBox<String> schemaSelector = new CComboBox<>();
 	private final ISessionService sessionService;
 	private final TextField usernameField = new TextField();
 
 	/** Constructor sets up the custom login form with basic Vaadin components. */
-	public CCustomLoginView(ISessionService sessionService, CCompanyService companyService, Environment environment) {
+	public CCustomLoginView(final ISessionService sessionService, final CCompanyService companyService, final Environment environment,
+			final CExcelImportService excelImportService) {
 		this.sessionService = sessionService;
 		this.companyService = companyService;
 		this.environment = environment;
+		this.excelImportService = excelImportService;
 		addClassNames("custom-login-view");
 		setSizeFull();
 		setupForm();
@@ -156,7 +166,86 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		}
 	}
 
-	private void on_login_clicked() {
+	/**
+	 * Reset DB then import a generated multi-sheet Excel workbook.
+	 * WHY: this lets us exercise (and grow) the Excel bootstrap path without removing the existing initializer yet.
+	 */
+	private void on_buttonResetDbExcel_clicked() {
+		try {
+			LOGGER.info("🔄 Showing DB Excel reset confirmation dialog...");
+			CNotificationService.showConfirmationDialog(
+					"Veritabanı SIFIRLANACAK ve Excel'den örnek veriler yüklenecek. Devam edilsin mi?",
+					"Evet, sıfırla", () -> runDatabaseResetWithExcelImport(false));
+		} catch (final Exception e) {
+			CNotificationService.showException("Error showing confirmation dialog", e);
+		}
+	}
+
+	private void runDatabaseResetWithExcelImport(final boolean minimal) {
+		final UI ui = getUI().orElse(null);
+		Check.notNull(ui, "UI must be available to run database reset");
+		final VaadinSession session = ui.getSession();
+		Check.notNull(session, "Vaadin session must not be null");
+		final String schemaSelection = schemaSelector.getValue();
+		final CDialogProgress progressDialog = CNotificationService.showProgressDialog("Database Reset", "Veritabanı ve Excel örnek verisi hazırlanıyor...");
+		CompletableFuture.runAsync(() -> {
+			Exception failure = null;
+			CImportResult importResult = null;
+			try {
+				importResult = runDatabaseResetWithExcelImportInSession(session, ui, minimal, schemaSelection);
+			} catch (final Exception ex) {
+				failure = ex;
+				LOGGER.error("❌ DB Excel reset failed", ex);
+			} finally {
+				final Exception capturedFailure = failure;
+				final CImportResult capturedImport = importResult;
+				ui.access(() -> {
+					progressDialog.close();
+					if (capturedFailure != null) {
+						CNotificationService.showException("Hata", capturedFailure);
+						return;
+					}
+					final String summary = capturedImport != null
+							? "Excel import: " + capturedImport.getTotalSuccess() + " ok, " + capturedImport.getTotalErrors() + " errors"
+							: "Excel import skipped";
+					CNotificationService.showSuccess("DB reset + Excel import completed.");
+					CNotificationService.showInfoDialog("Information", summary);
+					populateForm();
+				});
+			}
+		});
+	}
+
+	private CImportResult runDatabaseResetWithExcelImportInSession(final VaadinSession session, final UI ui, final boolean minimal,
+			final String schemaSelection) throws Exception {
+		// Step 1: perform the normal reset flow (this method handles its own VaadinSession lock).
+		runDatabaseResetInSession(session, ui, minimal, schemaSelection);
+		if (environment.acceptsProfiles(Profiles.of("bab"))) {
+			// WHY: BAB profile bootstrapping has additional domain constraints; keep Excel init incremental.
+			return null;
+		}
+		// Step 2: import the generated workbook under a VaadinSession lock so session-scoped services work.
+		session.lock();
+		try {
+			VaadinSession.setCurrent(session);
+			UI.setCurrent(ui);
+			final var project = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project after reset"));
+			final CImportOptions options = CImportOptions.defaults();
+			options.setDryRun(false);
+			options.setRollbackOnError(true);
+			options.setSkipUnknownSheets(true);
+			options.setAutoCreateLookups(true);
+			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			CSystemInitExcelGenerator.writeSystemInitWorkbook(baos);
+			return excelImportService.importExcel(new ByteArrayInputStream(baos.toByteArray()), options, project);
+		} finally {
+			UI.setCurrent(null);
+			VaadinSession.setCurrent(null);
+			session.unlock();
+		}
+	}
+
+	private void on_login_clicked() { 
 		try {
 			String username = usernameField.getValue();
 			final String password = passwordField.getValue();
@@ -365,6 +454,8 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		resetDbButton.setId("cbutton-db-full");
 		resetDbMinimalButton.addClickListener(event -> on_buttonResetDbMinimal_clicked());
 		resetDbMinimalButton.setId("cbutton-db-min");
+		resetDbExcelButton.addClickListener(event -> on_buttonResetDbExcel_clicked());
+		resetDbExcelButton.setId("cbutton-db-excel");
 		// Chart test button setup
 		// chartTestButton.addClickListener(e -> { getUI().ifPresent(ui -> ui.navigate("chart"));});
 		// chartTestButton.setMinWidth("120px");
@@ -427,7 +518,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		if (showSchemaSelector) {
 			buttonsLayout.add(schemaSelector);
 		}
-		buttonsLayout.add(new CDiv(), resetDbMinimalButton, resetDbButton/* , chartTestButton */);
+		buttonsLayout.add(new CDiv(), resetDbMinimalButton, resetDbExcelButton, resetDbButton/* , chartTestButton */);
 		final HorizontalLayout loginButtonLayout = new CHorizontalLayout();
 		loginButtonLayout.setAlignItems(Alignment.END);
 		loginButtonLayout.add(passwordHint, new CDiv(), loginButton);

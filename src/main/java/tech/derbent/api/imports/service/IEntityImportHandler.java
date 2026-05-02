@@ -2,6 +2,7 @@ package tech.derbent.api.imports.service;
 
 import java.util.Map;
 import java.util.Set;
+import tech.derbent.api.imports.domain.CImportOptions;
 import tech.derbent.api.imports.domain.CImportRowResult;
 import tech.derbent.api.projects.domain.CProject;
 
@@ -45,8 +46,8 @@ public interface IEntityImportHandler<T> {
      * @param rowData  map of canonicalFieldToken → cellStringValue (already normalised by import engine)
      * @param project  the currently active project
      * @param rowNumber 1-based sheet row number for error messages
-     * @param dryRun   when true, validate and resolve relations but do NOT persist
+     * @param options import options (dry-run, auto-create lookups, rollback policy, etc.)
      * @return per-row result; never null
      */
-    CImportRowResult importRow(Map<String, String> rowData, CProject<?> project, int rowNumber, boolean dryRun);
+    CImportRowResult importRow(Map<String, String> rowData, CProject<?> project, int rowNumber, CImportOptions options);
 }

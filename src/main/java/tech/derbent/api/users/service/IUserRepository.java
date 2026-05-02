@@ -84,6 +84,16 @@ public interface IUserRepository extends IEntityOfCompanyRepository<CUser>, ICom
 			WHERE u.login = :username and u.company.id = :CompanyId
 				""")
 	Optional<CUser> findByUsername(@Param ("CompanyId") Long company_id, @Param ("username") String username);
+
+	/**
+	 * Case-insensitive user lookup by login within a company.
+	 * WHY: Excel imports typically use login strings, but human-authored workbooks often vary casing.
+	 */
+	@Query ("""
+			SELECT u FROM #{#entityName} u
+			WHERE LOWER(u.login) = LOWER(:username) and u.company.id = :CompanyId
+			""")
+	Optional<CUser> findByUsernameIgnoreCase(@Param ("CompanyId") Long company_id, @Param ("username") String username);
 	/** Find all users that are not assigned to a specific company using generic pattern */
 	@Query ("SELECT u FROM #{#entityName} u WHERE u.company.id != :company_id OR u.company IS NULL")
 	List<CUser> findNotAssignedToCompany(@Param ("company_id") Long company_id);

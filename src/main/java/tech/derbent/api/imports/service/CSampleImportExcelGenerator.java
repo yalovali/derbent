@@ -38,7 +38,7 @@ public final class CSampleImportExcelGenerator {
         }
     }
 
-    private static CellStyle createHeaderStyle(final Workbook wb) {
+    static CellStyle createHeaderStyle(final Workbook wb) {
         final CellStyle style = wb.createCellStyle();
         final Font font = wb.createFont();
         font.setBold(true);
@@ -50,7 +50,7 @@ public final class CSampleImportExcelGenerator {
         return style;
     }
 
-    private static CellStyle createCommentStyle(final Workbook wb) {
+    static CellStyle createCommentStyle(final Workbook wb) {
         final CellStyle style = wb.createCellStyle();
         final Font font = wb.createFont();
         font.setItalic(true);
@@ -59,14 +59,14 @@ public final class CSampleImportExcelGenerator {
         return style;
     }
 
-    private static CellStyle createDateStyle(final Workbook wb) {
+    static CellStyle createDateStyle(final Workbook wb) {
         final CellStyle style = wb.createCellStyle();
         final DataFormat format = wb.createDataFormat();
         style.setDataFormat(format.getFormat("yyyy-mm-dd"));
         return style;
     }
 
-    private static void createActivitySheet(final Workbook wb) {
+    static void createActivitySheet(final Workbook wb) {
         final Sheet sheet = wb.createSheet("Activity");
         final CellStyle headerStyle = createHeaderStyle(wb);
         final CellStyle commentStyle = createCommentStyle(wb);
@@ -129,7 +129,7 @@ public final class CSampleImportExcelGenerator {
         }
     }
 
-    private static void createIssueSheet(final Workbook wb) {
+    static void createIssueSheet(final Workbook wb) {
         final Sheet sheet = wb.createSheet("Issue");
         final CellStyle headerStyle = createHeaderStyle(wb);
         final CellStyle commentStyle = createCommentStyle(wb);
@@ -170,7 +170,7 @@ public final class CSampleImportExcelGenerator {
         }
     }
 
-    private static void addRow(final Sheet sheet, final int rowIndex, final CellStyle style, final String... values) {
+    static void addRow(final Sheet sheet, final int rowIndex, final CellStyle style, final String... values) {
         final Row row = sheet.createRow(rowIndex);
         for (int i = 0; i < values.length; i++) {
             final var cell = row.createCell(i);

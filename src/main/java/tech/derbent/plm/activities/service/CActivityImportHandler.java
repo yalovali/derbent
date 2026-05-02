@@ -12,11 +12,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
+import tech.derbent.api.imports.domain.CImportOptions;
 import tech.derbent.api.imports.domain.CImportRowResult;
 import tech.derbent.api.imports.service.IEntityImportHandler;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
+import tech.derbent.api.users.service.IUserRepository;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.plm.activities.domain.CActivity;
+import tech.derbent.plm.activities.domain.CActivityType;
 
 /**
  * Handles import of CActivity rows from Excel.
@@ -41,13 +45,16 @@ public class CActivityImportHandler implements IEntityImportHandler<CActivity> {
     private final CActivityService activityService;
     private final CActivityTypeService activityTypeService;
     private final CProjectItemStatusService statusService;
+    private final IUserRepository userRepository;
 
     public CActivityImportHandler(final CActivityService activityService,
             final CActivityTypeService activityTypeService,
-            final CProjectItemStatusService statusService) {
+            final CProjectItemStatusService statusService,
+            final IUserRepository userRepository) {
         this.activityService = activityService;
         this.activityTypeService = activityTypeService;
         this.statusService = statusService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -88,7 +95,7 @@ public class CActivityImportHandler implements IEntityImportHandler<CActivity> {
 
     @Override
     public CImportRowResult importRow(final Map<String, String> rowData, final CProject<?> project,
-            final int rowNumber, final boolean dryRun) {
+            final int rowNumber, final CImportOptions options) {
         final String name = rowData.getOrDefault("name", "").trim();
         if (name.isBlank()) {
             return CImportRowResult.error(rowNumber, "Name is required", rowData);
@@ -98,21 +105,42 @@ public class CActivityImportHandler implements IEntityImportHandler<CActivity> {
         final String statusName = rowData.getOrDefault("status", "").trim();
         if (!statusName.isBlank()) {
             final var statusOpt = statusService.findByNameAndCompany(statusName, project.getCompany());
-            if (statusOpt.isEmpty()) {
+            if (statusOpt.isPresent()) {
+                activity.setStatus(statusOpt.get());
+            } else if (options.isAutoCreateLookups() && !options.isDryRun()) {
+                // WHY: bootstrapping workbooks are easier to maintain if they can declare new lookup values inline.
+                final CProjectItemStatus created = statusService.save(new CProjectItemStatus(statusName, project.getCompany()));
+                activity.setStatus(created);
+            } else {
                 return CImportRowResult.error(rowNumber,
-                        "Status '" + statusName + "' not found. Create it before importing.", rowData);
+                        "Status '" + statusName + "' not found. Create it before importing (or enable auto-create lookups).", rowData);
             }
-            activity.setStatus(statusOpt.get());
         }
         // Resolve optional activity type by name
         final String typeName = rowData.getOrDefault("entitytype", "").trim();
         if (!typeName.isBlank()) {
             final var typeOpt = activityTypeService.findByNameAndCompany(typeName, project.getCompany());
-            if (typeOpt.isEmpty()) {
+            if (typeOpt.isPresent()) {
+                activity.setEntityType(typeOpt.get());
+            } else if (options.isAutoCreateLookups() && !options.isDryRun()) {
+                // WHY: types are reference data; creating them during import keeps the workbook self-contained.
+                final CActivityType created = activityTypeService.save(new CActivityType(typeName, project.getCompany()));
+                activity.setEntityType(created);
+            } else {
                 return CImportRowResult.error(rowNumber,
-                        "Activity Type '" + typeName + "' not found. Create it before importing.", rowData);
+                        "Activity Type '" + typeName + "' not found. Create it before importing (or enable auto-create lookups).", rowData);
             }
-            activity.setEntityType(typeOpt.get());
+        }
+        // Resolve optional assignee by login
+        final String assignedToLogin = rowData.getOrDefault("assignedto", "").trim();
+        if (!assignedToLogin.isBlank()) {
+            // WHY: we resolve by login (not display name) because logins are stable and unique within a company.
+            final var userOpt = userRepository.findByUsernameIgnoreCase(project.getCompany().getId(), assignedToLogin);
+            if (userOpt.isEmpty()) {
+                return CImportRowResult.error(rowNumber,
+                        "Assigned To user '" + assignedToLogin + "' not found in company.", rowData);
+            }
+            activity.setAssignedTo(userOpt.get());
         }
         // Optional description
         final String description = rowData.getOrDefault("description", "").trim();
@@ -139,7 +167,7 @@ public class CActivityImportHandler implements IEntityImportHandler<CActivity> {
                         "Cannot parse estimated hours '" + hoursStr + "'. Use a decimal number.", rowData);
             }
         }
-        if (!dryRun) {
+        if (!options.isDryRun()) {
             try {
                 activityService.save(activity);
             } catch (final Exception e) {

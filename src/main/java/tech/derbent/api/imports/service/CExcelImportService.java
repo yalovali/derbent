@@ -147,7 +147,7 @@ public class CExcelImportService {
                 sheetResult.addRowResult(CImportRowResult.error(r + 1, "Required column missing or blank: " + missingCol, rowData));
                 continue;
             }
-            final CImportRowResult rowResult = handler.importRow(rowData, project, r + 1, options.isDryRun());
+            final CImportRowResult rowResult = handler.importRow(rowData, project, r + 1, options);
             sheetResult.addRowResult(rowResult);
         }
         return sheetResult;

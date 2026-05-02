@@ -83,12 +83,22 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		return listByProject(project);
 	}
 
+	/**
+	 * Normalizes user-provided names for lookups.
+	 * WHY: Excel imports and copy/paste often introduce leading/trailing or repeated whitespace; without normalization
+	 * we get false "not found" results even though the entity exists (case-insensitive lookup already exists).
+	 */
+	private static String normalizeNameForLookup(final String name) {
+		return name == null ? "" : name.trim().replaceAll("\\s+", " ");
+	}
+
 	@Transactional (readOnly = true)
 	public Optional<EntityClass> findByNameAndProject(final String name, final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
-		Check.notBlank(name, "Entity name cannot be null or empty");
+		final String normalizedName = normalizeNameForLookup(name);
+		Check.notBlank(normalizedName, "Entity name cannot be null or empty");
 		try {
-			return ((IEntityOfProjectRepository<EntityClass>) repository).findByNameAndProject(name, project);
+			return ((IEntityOfProjectRepository<EntityClass>) repository).findByNameAndProject(normalizedName, project);
 		} catch (final Exception e) {
 			LOGGER.error("Error finding entities by project '{}' in {}: {}", project.getName(), getClass().getSimpleName(), e.getMessage());
 			throw e;
