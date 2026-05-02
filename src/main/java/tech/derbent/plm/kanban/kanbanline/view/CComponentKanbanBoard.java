@@ -334,9 +334,12 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		}
 		try {
 			backlogNavigator = new CComponentBacklogNavigator();
+			backlogNavigator.setId("kanban-backlog-navigator");
 			backlogNavigator.setProject(project);
 			backlogNavigator.setScope(ESprintPlanningScope.BACKLOG);
+			backlogNavigator.drag_setDropEnabled(true);
 			setupSelectionNotification(backlogNavigator);
+			setupChildDragDropForwarding(backlogNavigator);
 			tabBacklogLayout.removeAll();
 			tabBacklogLayout.add(backlogNavigator);
 			tabBacklogLayout.expand(backlogNavigator);
@@ -494,6 +497,8 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	/** Gets the backlog column component if it exists.
 	 * @return The backlog column or null if not yet created */
 	public CComponentKanbanColumnBacklog getBacklogColumn() { return backlogColumn; }
+
+	public CComponentBacklogNavigator getBacklogNavigator() { return backlogNavigator; }
 
 	@Override
 	public String getComponentName() { return "kanbanBoard"; }
@@ -805,6 +810,9 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	public void refreshComponent() {
 		LOGGER.info("[DragDrop] refreshComponent called - sprintItems size: {}", sprintItems != null ? sprintItems.size() : "null");
 		layoutColumns.removeAll();
+		if (backlogNavigator != null) {
+			backlogNavigator.refreshData();
+		}
 		selectedPostit = null;
 		final CKanbanLine currentLine = resolveLineForDisplay(getValue());
 		if (currentLine == null) {

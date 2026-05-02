@@ -56,6 +56,14 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 			final Consumer<CSprintPlanningDropRequest> backlogDropListener,
 			final BiConsumer<CGnntItem, CGnntItem> parentDropListener,
 			final List<Component> parentBrowserFilters) {
+		this(dragContext, leafSelectionListener, backlogDropListener, parentDropListener, parentBrowserFilters, null);
+	}
+
+	public CSprintPlanningBacklogBrowser(final CSprintPlanningDragContext dragContext, final Consumer<CGnntItem> leafSelectionListener,
+			final Consumer<CSprintPlanningDropRequest> backlogDropListener,
+			final BiConsumer<CGnntItem, CGnntItem> parentDropListener,
+			final List<Component> parentBrowserFilters,
+			final Consumer<CGnntItem> leafDragStartListener) {
 
 		setId(ID_BROWSER);
 		setPadding(false);
@@ -70,7 +78,8 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 				dragContext,
 				this::onParentSelected,
 				this::onParentDrop);
-		gridLeaves = new CSprintPlanningFlatGrid(CSprintPlanningFlatGrid.ID_GRID, dragContext, leafSelectionListener, backlogDropListener);
+		gridLeaves = new CSprintPlanningFlatGrid(CSprintPlanningFlatGrid.ID_GRID, dragContext, leafSelectionListener,
+				backlogDropListener, leafDragStartListener);
 
 		// Backlog metrics are shown on the backlog panels (not on the main sprint header) so sprint selection stays focused.
 		spanBacklogParentMetrics = createBacklogMetricsSpan(ID_METRICS_PARENT);
@@ -112,6 +121,10 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 
 		add(splitLayout);
 		setFlexGrow(1, splitLayout);
+	}
+
+	public com.vaadin.flow.component.grid.Grid<CGnntItem> getLeavesGridComponent() {
+		return gridLeaves.getGridComponent();
 	}
 
 	public CQuickAccessPanel getLeafQuickAccessPanel() {

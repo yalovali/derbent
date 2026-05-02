@@ -36,16 +36,26 @@ public class CSprintPlanningFlatGrid extends CAbstractGnntGridBase {
 
 	private final CSprintPlanningDragContext dragContext;
 	private final Consumer<CSprintPlanningDropRequest> dropListener;
+	private final Consumer<CGnntItem> dragStartListener;
 	private final String gridId;
 	// Cached by-key map so the board can restore selection after cross-grid refreshes.
 	private Map<String, CGnntItem> itemByKey = Map.of();
 
-	public CSprintPlanningFlatGrid(final String gridId, final CSprintPlanningDragContext dragContext, final Consumer<CGnntItem> selectionListener,
+	public CSprintPlanningFlatGrid(final String gridId, final CSprintPlanningDragContext dragContext,
+			final Consumer<CGnntItem> selectionListener,
 			final Consumer<CSprintPlanningDropRequest> dropListener) {
+		this(gridId, dragContext, selectionListener, dropListener, null);
+	}
+
+	public CSprintPlanningFlatGrid(final String gridId, final CSprintPlanningDragContext dragContext,
+			final Consumer<CGnntItem> selectionListener,
+			final Consumer<CSprintPlanningDropRequest> dropListener,
+			final Consumer<CGnntItem> dragStartListener) {
 		super(new CGrid<>(CGnntItem.class), gridId, selectionListener);
 		this.gridId = gridId;
 		this.dragContext = dragContext;
 		this.dropListener = dropListener;
+		this.dragStartListener = dragStartListener;
 
 		// Backlog leaf actions belong into the shared header quick-access slot (keeps the split layout compact).
 		setQuickAccessPanel(new CQuickAccessPanel(gridId + "-quick-access"));
@@ -175,33 +185,44 @@ public class CSprintPlanningFlatGrid extends CAbstractGnntGridBase {
 		return map;
 	}
 
+	public com.vaadin.flow.component.grid.Grid<CGnntItem> getGridComponent() {
+		return getGrid();
+	}
+
 	public void setContextActions(final List<CContextActionDefinition<CGnntItem>> actions) {
 		setItemContextActions(actions);
 	}
 
 	private void configureDragAndDrop() {
 		grid.setRowsDraggable(true);
-		grid.setDropMode(GridDropMode.BETWEEN);
+		if (dropListener != null) {
+			grid.setDropMode(GridDropMode.BETWEEN);
+		}
 
 		grid.addDragStartListener(event -> {
 			final CGnntItem dragged = event.getDraggedItems().stream().findFirst().orElse(null);
 			if (dragContext != null) {
 				dragContext.setDraggedItem(dragged, gridId);
 			}
-		});
-		grid.addDropListener(event -> {
-			final CGnntItem dropSource = dragContext != null ? dragContext.getDraggedItem() : null;
-			if (dragContext != null) {
-				// Clear only after the target has had a chance to read the shared drag state for cross-grid moves.
-				dragContext.clear();
+			if (dragStartListener != null) {
+				dragStartListener.accept(dragged);
 			}
-			if (dropSource == null || dropListener == null) {
-				return;
-			}
-			final CGnntItem targetItem = event.getDropTargetItem().orElse(null);
-			// Target can be null when dropping on empty space; we still treat it as "drop on backlog".
-			final GridDropLocation dropLocation = event.getDropLocation() != null ? event.getDropLocation() : GridDropLocation.EMPTY;
-			dropListener.accept(new CSprintPlanningDropRequest(dropSource, targetItem, dropLocation, gridId));
 		});
+		if (dropListener != null) {
+			grid.addDropListener(event -> {
+				final CGnntItem dropSource = dragContext != null ? dragContext.getDraggedItem() : null;
+				if (dragContext != null) {
+					// Clear only after the target has had a chance to read the shared drag state for cross-grid moves.
+					dragContext.clear();
+				}
+				if (dropSource == null) {
+					return;
+				}
+				final CGnntItem targetItem = event.getDropTargetItem().orElse(null);
+				// Target can be null when dropping on empty space; we still treat it as "drop on backlog".
+				final GridDropLocation dropLocation = event.getDropLocation() != null ? event.getDropLocation() : GridDropLocation.EMPTY;
+				dropListener.accept(new CSprintPlanningDropRequest(dropSource, targetItem, dropLocation, gridId));
+			});
+		}
 	}
 }

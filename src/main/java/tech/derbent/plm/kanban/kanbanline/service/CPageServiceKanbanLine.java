@@ -33,6 +33,8 @@ import tech.derbent.plm.kanban.kanbanline.view.CComponentKanbanColumnBacklog;
 import tech.derbent.plm.kanban.kanbanline.view.CComponentKanbanPostit;
 import tech.derbent.plm.kanban.kanbanline.view.CComponentListKanbanColumns;
 import tech.derbent.plm.kanban.kanbanline.view.CDialogKanbanStatusSelection;
+import tech.derbent.plm.sprints.planning.view.components.CComponentBacklogNavigator;
+import tech.derbent.plm.sprints.service.CSprintItemWorkflowStatusSupport;
 import tech.derbent.plm.sprints.domain.CSprint;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 import tech.derbent.plm.sprints.service.CSprintItemService;
@@ -259,9 +261,9 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 					// Refresh both board and backlog
 					componentKanbanBoard.reloadSprintItems();
 					componentKanbanBoard.refreshComponent();
-					final CComponentKanbanColumnBacklog backlogColumn = componentKanbanBoard.getBacklogColumn();
-					if (backlogColumn != null) {
-						backlogColumn.refreshComponent();
+					final var backlogNavigator = componentKanbanBoard.getBacklogNavigator();
+					if (backlogNavigator != null) {
+						backlogNavigator.refreshData();
 					}
 					// Get current status safely (might be null for backlog items)
 					final CProjectItemStatus currentStatus = ((ISprintableItem) projectItem).getStatus();
@@ -291,9 +293,9 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 					// Refresh both board and backlog
 					componentKanbanBoard.reloadSprintItems();
 					componentKanbanBoard.refreshComponent();
-					final CComponentKanbanColumnBacklog backlogColumn = componentKanbanBoard.getBacklogColumn();
-					if (backlogColumn != null) {
-						backlogColumn.refreshComponent();
+					final var backlogNavigator = componentKanbanBoard.getBacklogNavigator();
+					if (backlogNavigator != null) {
+						backlogNavigator.refreshData();
 					}
 					CNotificationService.showSuccess("Item added to sprint with status '" + newStatus.getName() + "'");
 				}));
@@ -345,17 +347,12 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			// Reset status to the workflow's initial status ("To Do") so backlog items
 			// never carry sprint-phase statuses like "Blocked" or "In Progress".
 			// An item in the backlog isn't being actively worked on, so sprint statuses are meaningless there.
-			final IHasStatusAndWorkflow<?, ?> statusItem = (IHasStatusAndWorkflow<?, ?>) item;
-			final CWorkflowEntity workflow = statusItem.getWorkflow();
-			CProjectItemStatus resetStatus = null;
-			if (workflow != null) {
-				final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
-				resetStatus = statusService.getInitialStatusFromWorkflow(workflow);
-				if (resetStatus != null) {
-					item.setStatus(resetStatus);
-					item.saveProjectItem();
-					LOGGER.info("[BacklogDrop] Reset status of item {} to '{}' (workflow initial status)", item.getId(), resetStatus.getName());
-				}
+			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
+			final CProjectItemStatus resetStatus =
+					CSprintItemWorkflowStatusSupport.applyWorkflowInitialStatus((IHasStatusAndWorkflow<?, ?>) item, statusService);
+			if (resetStatus != null) {
+				item.saveProjectItem();
+				LOGGER.info("[BacklogDrop] Reset status of item {} to '{}' (workflow initial status)", item.getId(), resetStatus.getName());
 			}
 			final String resetStatusName = resetStatus != null ? resetStatus.getName() : "unchanged";
 			// CRITICAL: Defer UI refresh until after Vaadin drop event completes
@@ -363,9 +360,9 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 				// Refresh both board and backlog
 				componentKanbanBoard.reloadSprintItems();
 				componentKanbanBoard.refreshComponent();
-				final CComponentKanbanColumnBacklog backlogColumn = componentKanbanBoard.getBacklogColumn();
-				if (backlogColumn != null) {
-					backlogColumn.refreshComponent();
+				final var backlogNavigator = componentKanbanBoard.getBacklogNavigator();
+				if (backlogNavigator != null) {
+					backlogNavigator.refreshData();
 				}
 				CNotificationService.showSuccess("Item returned to backlog with status '" + resetStatusName + "'");
 				LOGGER.info("Successfully returned sprint item {} to backlog (status reset to '{}')", sprintItem.getId(), resetStatusName);
@@ -427,12 +424,14 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	 * @param event The drop event to check
 	 * @return true if dropping on backlog column, false otherwise */
 	private boolean isDropOnBacklog(final CDragDropEvent event) {
-		// Check if drop target is the backlog column component
-		if (event.getDropTarget() instanceof CComponentKanbanColumnBacklog) {
+		// Check if drop target is the backlog component
+		if (event.getDropTarget() instanceof CComponentKanbanColumnBacklog
+				|| event.getDropTarget() instanceof CComponentBacklogNavigator) {
 			return true;
 		}
-		// Check if target item is the backlog column
-		if (event.getTargetItem() instanceof CComponentKanbanColumnBacklog) {
+		// Check if target item is the backlog component
+		if (event.getTargetItem() instanceof CComponentKanbanColumnBacklog
+				|| event.getTargetItem() instanceof CComponentBacklogNavigator) {
 			return true;
 		}
 		return false;
@@ -587,9 +586,9 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 						// Refresh both board and backlog
 						componentKanbanBoard.reloadSprintItems();
 						componentKanbanBoard.refreshComponent();
-						final CComponentKanbanColumnBacklog backlogColumn = componentKanbanBoard.getBacklogColumn();
-						if (backlogColumn != null) {
-							backlogColumn.refreshComponent();
+						final var backlogNavigator = componentKanbanBoard.getBacklogNavigator();
+						if (backlogNavigator != null) {
+							backlogNavigator.refreshData();
 						}
 						CNotificationService.showSuccess("Item added to sprint with status '" + selectedStatus.getName() + "'");
 					}));
@@ -605,9 +604,9 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 					// Refresh both board and backlog
 					componentKanbanBoard.reloadSprintItems();
 					componentKanbanBoard.refreshComponent();
-					final CComponentKanbanColumnBacklog backlogColumn = componentKanbanBoard.getBacklogColumn();
-					if (backlogColumn != null) {
-						backlogColumn.refreshComponent();
+					final var backlogNavigator = componentKanbanBoard.getBacklogNavigator();
+					if (backlogNavigator != null) {
+						backlogNavigator.refreshData();
 					}
 					CNotificationService.showInfo("Item added to sprint in '" + targetColumn.getName() + "' column, status remained '"
 							+ ((ISprintableItem) projectItem).getStatus().getName() + "'.");

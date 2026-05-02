@@ -50,6 +50,7 @@ import tech.derbent.plm.sprints.planning.domain.CSprintPlanningViewEntity;
 import tech.derbent.plm.sprints.planning.domain.ESprintPlanningScope;
 import tech.derbent.plm.sprints.planning.view.components.CBacklogNavigatorHierarchyBuilder;
 import tech.derbent.plm.sprints.planning.view.components.CDialogAddBacklogItemToSprint;
+import tech.derbent.plm.sprints.service.CSprintItemWorkflowStatusSupport;
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningBacklogBrowser;
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningDragContext;
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningDropRequest;
@@ -622,6 +623,15 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 			}
 			final CSprintItem anchorItem = resolveBacklogAnchorItem();
 			sprintableItem.moveSprintItemToBacklog(anchorItem, anchorItem != null);
+			final CProjectItem<?, ?> item = context != null && context.getEntity() instanceof CProjectItem<?, ?>
+					? (CProjectItem<?, ?>) context.getEntity() : null;
+			if (item instanceof final IHasStatusAndWorkflow<?, ?> statusItem) {
+				final CProjectItemStatus resetStatus =
+						CSprintItemWorkflowStatusSupport.applyWorkflowInitialStatus(statusItem, projectItemStatusService);
+				if (resetStatus != null && item instanceof final ISprintableItem sprintableToSave) {
+					sprintableToSave.saveProjectItem();
+				}
+			}
 			refreshComponent();
 			CNotificationService.showSuccess("Moved '%s' to backlog".formatted(context.getName()));
 		} catch (final Exception e) {
@@ -654,6 +664,13 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 					default -> false;
 					};
 			sprintableItem.moveSprintItemToBacklog(anchorItem, insertAfter);
+			if (sprintableItem instanceof final IHasStatusAndWorkflow<?, ?> statusItem) {
+				final CProjectItemStatus resetStatus =
+						CSprintItemWorkflowStatusSupport.applyWorkflowInitialStatus(statusItem, projectItemStatusService);
+				if (resetStatus != null) {
+					sprintableItem.saveProjectItem();
+				}
+			}
 			refreshComponent();
 			CNotificationService.showSuccess("Moved '%s' to backlog".formatted(draggedItem.getName()));
 		} catch (final Exception e) {

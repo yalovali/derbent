@@ -12,11 +12,21 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.dnd.DropEffect;
+import com.vaadin.flow.component.dnd.DropTarget;
+import com.vaadin.flow.component.dnd.DropEvent;
+import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.data.value.ValueChangeMode;
+
+import tech.derbent.api.interfaces.drag.CDragDropEvent;
+import tech.derbent.api.interfaces.drag.CDragEndEvent;
+import tech.derbent.api.interfaces.drag.CDragStartEvent;
+import tech.derbent.api.interfaces.drag.CEvent;
 
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.CSelectEvent;
+import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.IHasSelectionNotification;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.parentrelation.service.CHierarchyNavigationService;
@@ -37,13 +47,18 @@ import tech.derbent.plm.sprints.planning.domain.ESprintPlanningScope;
  * should wire additional handlers externally.
  * </p>
  */
-public class CComponentBacklogNavigator extends CVerticalLayout implements IHasSelectionNotification {
+public class CComponentBacklogNavigator extends CVerticalLayout implements IHasSelectionNotification, IHasDragControl {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentBacklogNavigator.class);
 	private static final long serialVersionUID = 1L;
 
 	private final CSprintPlanningDragContext dragContext = new CSprintPlanningDragContext();
 	private final CSprintPlanningBacklogBrowser backlogBrowser;
+	private DropTarget<com.vaadin.flow.component.Component> dropTarget;
+
+	private final java.util.Set<ComponentEventListener<CDragStartEvent>> dragStartListeners = new java.util.HashSet<>();
+	private final java.util.Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new java.util.HashSet<>();
+	private final java.util.Set<ComponentEventListener<CDragDropEvent>> dropListeners = new java.util.HashSet<>();
 	private final CTextField parentSearchField;
 	private final CTextField leafSearchField;
 	private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new java.util.HashSet<>();
@@ -67,18 +82,18 @@ public class CComponentBacklogNavigator extends CVerticalLayout implements IHasS
 		leafSearchField.setLabel("");
 		leafSearchField.getStyle().set("min-width", "0");
 
-		final Consumer<CSprintPlanningDropRequest> noopBacklogDrop = ignored -> {
-			// Navigation-only component.
-		};
+		final Consumer<CSprintPlanningDropRequest> noopBacklogDrop = null;
 		final java.util.function.BiConsumer<CGnntItem, CGnntItem> noopParentDrop = (ignored, ignored2) -> {
 			// Navigation-only component.
 		};
 
 		backlogBrowser = new CSprintPlanningBacklogBrowser(dragContext, this::onLeafSelected, noopBacklogDrop,
-				noopParentDrop, List.of(parentSearchField));
+				noopParentDrop, List.of(parentSearchField), this::onLeafDragStart);
 		backlogBrowser.getLeafQuickAccessPanel().addCustomComponent(leafSearchField);
 		add(backlogBrowser);
 		expand(backlogBrowser);
+
+		drag_setDropEnabled(true);
 	}
 
 	public void setProject(final CProject<?> project) {
@@ -133,6 +148,67 @@ public class CComponentBacklogNavigator extends CVerticalLayout implements IHasS
 
 	private void onLeafSelected(final CGnntItem leaf) {
 		select_notifyEvents(new CSelectEvent(this, true));
+	}
+
+	private void onLeafDragStart(final CGnntItem dragged) {
+		final Object entity = dragged != null ? dragged.getEntity() : null;
+		if (entity == null) {
+			return;
+		}
+		on_dragStart(new CDragStartEvent(this, java.util.List.of(entity), true));
+	}
+
+	@Override
+	public void drag_checkEventAfterPass(final CEvent event) {
+		// No-op.
+	}
+
+	@Override
+	public void drag_checkEventBeforePass(final CEvent event) {
+		// No-op.
+	}
+
+	@Override
+	public java.util.Set<ComponentEventListener<CDragEndEvent>> drag_getDragEndListeners() {
+		return dragEndListeners;
+	}
+
+	@Override
+	public java.util.Set<ComponentEventListener<CDragStartEvent>> drag_getDragStartListeners() {
+		return dragStartListeners;
+	}
+
+	@Override
+	public java.util.Set<ComponentEventListener<CDragDropEvent>> drag_getDropListeners() {
+		return dropListeners;
+	}
+
+	@Override
+	public boolean drag_isDropAllowed(final CDragStartEvent event) {
+		return true;
+	}
+
+	@Override
+	public void drag_setDragEnabled(final boolean enabled) {
+		// Grid-level drag is always enabled by the sprint-planning grids.
+	}
+
+	@Override
+	public void drag_setDropEnabled(final boolean enabled) {
+		if (!enabled) {
+			dropTarget = null;
+			return;
+		}
+		dropTarget = DropTarget.create(backlogBrowser.getLeavesGridComponent());
+		dropTarget.setDropEffect(DropEffect.MOVE);
+		dropTarget.addDropListener((final DropEvent<com.vaadin.flow.component.Component> event) -> {
+			on_dragDrop(new CDragDropEvent(getId().orElse("backlog-navigator"), this, null, GridDropLocation.ON_TOP, true));
+		});
+		dropTarget.setActive(true);
+	}
+
+	public void refreshData() {
+		reloadHierarchy();
 	}
 
 	private void reloadHierarchy() {
