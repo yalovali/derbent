@@ -27,6 +27,7 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.ui.component.basic.CComboBox;
 import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.api.utils.CValueStorageHelper;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.activities.service.CActivityService;
@@ -146,6 +147,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?,
 		this.project = project;
 		this.compactMode = compactMode;
 		hierarchyNavigationService = CSpringContext.getBean(CHierarchyNavigationService.class);
+		setId("backlog_" + project.getId());
 		CSpringContext.getBean(CActivityService.class);
 		CSpringContext.getBean(CMeetingService.class);
 		CSpringContext.getBean(CIssueService.class);
@@ -157,10 +159,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?,
 		// CRITICAL: Select first entity type BEFORE enabling persistence
 		// This ensures it's the "initial default" that gets saved on first load
 		selectFirstEntityTypeIfNoneSelected();
-		// Set component ID before enabling value persistence
-		final String componentId = "backlog_" + project.getId();
-		setId(componentId);
-		// LOGGER.info("[ValuePersistence] CComponentBacklog: Setting component ID to '{}' for project {}", componentId, project.getId());
+		final String componentId = getId().orElse("backlog_" + project.getId());
 		// Enable value persistence for entity type selection in backlog
 		// The persistence system will save the current value (first item) as initial default
 		// On subsequent loads, it will restore the user's last selection
@@ -237,22 +236,9 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?,
 	}
 
 
-	private static Long parseEntityId(final String serialized) {
-		if (serialized == null || serialized.isBlank()) {
-			return null;
-		}
-		final int idIndex = serialized.indexOf("id=");
-		if (idIndex < 0) {
-			return null;
-		}
-		final int start = idIndex + 3;
-		final int end = serialized.indexOf('}', start);
-		final String idRaw = end > start ? serialized.substring(start, end) : serialized.substring(start);
-		try {
-			return Long.parseLong(idRaw);
-		} catch (final NumberFormatException e) {
-			return null;
-		}
+	private String buildHierarchyStorageId(final String key) {
+		final String prefix = getId().orElse("backlog");
+		return prefix + "_hierarchy_" + key;
 	}
 
 	private void applyHierarchyFilters() {
@@ -321,9 +307,9 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?,
 		}
 		// Hide the entity-type selector (compact backlog always shows all item types).
 		backlogToolbar.getChildren().findFirst().ifPresent(component -> component.setVisible(false));
-		filterLevel0 = createHierarchyComboBox("L0", "backlogHierarchy_" + project.getId() + "_l0");
-		filterLevel1 = createHierarchyComboBox("L1", "backlogHierarchy_" + project.getId() + "_l1");
-		filterLevel2 = createHierarchyComboBox("L2", "backlogHierarchy_" + project.getId() + "_l2");
+		filterLevel0 = createHierarchyComboBox("L0", buildHierarchyStorageId("l0"));
+		filterLevel1 = createHierarchyComboBox("L1", buildHierarchyStorageId("l1"));
+		filterLevel2 = createHierarchyComboBox("L2", buildHierarchyStorageId("l2"));
 		backlogToolbar.addFilterComponents(filterLevel0, filterLevel1, filterLevel2);
 
 		filterLevel0.addValueChangeListener(event -> {
@@ -365,7 +351,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?,
 		applyHierarchyFilters();
 	}
 
-	private CComboBox<CProjectItem<?, ?>> createHierarchyComboBox(final String placeholder, final String persistenceKey) {
+	private CComboBox<CProjectItem<?, ?>> createHierarchyComboBox(final String placeholder, final String storageId) {
 		final CComboBox<CProjectItem<?, ?>> comboBox = new CComboBox<>();
 		comboBox.setPlaceholder(placeholder);
 		comboBox.setClearButtonVisible(true);
@@ -373,13 +359,11 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?,
 		comboBox.getStyle().set("min-width", "0");
 		comboBox.addThemeVariants(ComboBoxVariant.LUMO_SMALL);
 		comboBox.setItemLabelGenerator(item -> item != null ? item.getName() : "");
-		comboBox.enablePersistence(persistenceKey, stored -> {
-			final Long id = parseEntityId(stored);
-			if (id == null) {
-				return null;
-			}
-			return comboBox.getListDataView().getItems().filter(candidate -> candidate != null && id.equals(candidate.getId())).findFirst().orElse(null);
-		});
+		CValueStorageHelper.valuePersist_enable(comboBox, storageId,
+				item -> CHierarchyNavigationService.buildEntityKey(item),
+				storedKey -> hierarchyNavigationService.listHierarchyItems(project).stream()
+						.filter(candidate -> storedKey != null && storedKey.equals(CHierarchyNavigationService.buildEntityKey(candidate)))
+						.findFirst().orElse(null));
 		return comboBox;
 	}
 
