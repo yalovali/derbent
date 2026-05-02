@@ -1613,7 +1613,7 @@ public abstract class CBaseUITest {
 		if (options.count() == 0) {
 			options = page.locator("vaadin-combo-box-item");
 		}
-		boolean condition = options.count() == 0 && input.count() > 0;
+		final boolean condition = options.count() == 0 && input.count() > 0;
 		if (condition) {
 			try {
 				input.first().fill("a");

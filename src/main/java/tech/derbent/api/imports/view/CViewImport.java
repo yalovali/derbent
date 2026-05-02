@@ -42,6 +42,7 @@ import tech.derbent.api.imports.service.CSampleImportExcelGenerator;
 import tech.derbent.api.menu.MyMenu;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.users.domain.CUser;
 
 /** CViewImport - Single-page Excel import view.
  * Lets users upload a multi-sheet Excel file and import entities project-wide.
@@ -260,7 +261,7 @@ public final class CViewImport extends CAbstractPage {
         }
         try {
             final String username = sessionService.getActiveUser()
-                    .map(u -> u.getUsername()).orElse("unknown");
+                    .map(CUser::getUsername).orElse("unknown");
             dataImportService.saveImportResult(result, project.getCompany(), uploadedFileName, username);
         } catch (final Exception e) {
             LOGGER.error("Failed to persist import history reason={}", e.getMessage());
@@ -331,7 +332,7 @@ public final class CViewImport extends CAbstractPage {
     private Accordion buildSheetAccordion(final List<CImportSheetResult> sheets) {
         final Accordion accordion = new Accordion();
         accordion.setWidthFull();
-        for (final CImportSheetResult sheet : sheets) {
+        sheets.forEach((final CImportSheetResult sheet) -> {
             final VerticalLayout content = new VerticalLayout();
             content.setPadding(false);
             content.setSpacing(true);
@@ -347,7 +348,7 @@ public final class CViewImport extends CAbstractPage {
             }
             final String panelTitle = buildSheetPanelTitle(sheet);
             accordion.add(panelTitle, content);
-        }
+        });
         return accordion;
     }
 
@@ -385,7 +386,7 @@ public final class CViewImport extends CAbstractPage {
         grid.setItems(sheet.getRowResults().stream()
             .filter(r -> !r.isSkipped())
             .toList());
-        grid.setClassNameGenerator(r -> r.isError() ? "import-row-error" : r.isSuccess() ? "import-row-ok" : "");
+        grid.setPartNameGenerator(r -> r.isError() ? "import-row-error" : r.isSuccess() ? "import-row-ok" : null);
         return grid;
     }
 

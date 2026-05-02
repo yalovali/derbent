@@ -84,8 +84,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?,
 				final CIssueService issueService = CSpringContext.getBean(CIssueService.class);
 
 				if (config != null && "All".equalsIgnoreCase(config.getDisplayName())) {
-					final List<CProjectItem<?, ?>> combined = new ArrayList<>();
-					combined.addAll((List<CProjectItem<?, ?>>) (List<?>) activityService.listForProjectBacklog(project));
+					final List<CProjectItem<?, ?>> combined = new ArrayList<>((List<CProjectItem<?, ?>>) (List<?>) activityService.listForProjectBacklog(project));
 					combined.addAll((List<CProjectItem<?, ?>>) (List<?>) meetingService.listForProjectBacklog(project));
 					combined.addAll((List<CProjectItem<?, ?>>) (List<?>) issueService.listForProjectBacklog(project));
 					combined.sort(Comparator
@@ -159,14 +158,11 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?,
 		// CRITICAL: Select first entity type BEFORE enabling persistence
 		// This ensures it's the "initial default" that gets saved on first load
 		selectFirstEntityTypeIfNoneSelected();
-		final String componentId = getId().orElse("backlog_" + project.getId());
 		// Enable value persistence for entity type selection in backlog
 		// The persistence system will save the current value (first item) as initial default
 		// On subsequent loads, it will restore the user's last selection
 		try {
-			// LOGGER.info("[ValuePersistence] CComponentBacklog: Enabling value persistence for backlog with ID '{}'", componentId);
 			enableValuePersistence();
-			// LOGGER.info("[ValuePersistence] CComponentBacklog: Value persistence enabled successfully for backlog with ID '{}'", componentId);
 		} catch (final Exception e) {
 			LOGGER.error("[ValuePersistence] CComponentBacklog: Failed to enable value persistence for backlog: {}",
 					e.getMessage());
@@ -360,7 +356,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?,
 		comboBox.addThemeVariants(ComboBoxVariant.LUMO_SMALL);
 		comboBox.setItemLabelGenerator(item -> item != null ? item.getName() : "");
 		CValueStorageHelper.valuePersist_enable(comboBox, storageId,
-				item -> CHierarchyNavigationService.buildEntityKey(item),
+				CHierarchyNavigationService::buildEntityKey,
 				storedKey -> hierarchyNavigationService.listHierarchyItems(project).stream()
 						.filter(candidate -> storedKey != null && storedKey.equals(CHierarchyNavigationService.buildEntityKey(candidate)))
 						.findFirst().orElse(null));
@@ -370,10 +366,11 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?,
 	@Override
 	public void refreshGrid() {
 		super.refreshGrid();
-		if (compactMode) {
-			refreshHierarchyOptions();
-			applyHierarchyFilters();
+		if (!compactMode) {
+			return;
 		}
+		refreshHierarchyOptions();
+		applyHierarchyFilters();
 	}
 
 	@Override
