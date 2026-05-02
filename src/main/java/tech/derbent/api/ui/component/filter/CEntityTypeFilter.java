@@ -1,5 +1,6 @@
 package tech.derbent.api.ui.component.filter;
 
+import java.lang.reflect.Modifier;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.combobox.ComboBoxVariant;
+import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CComboBox;
 
@@ -81,6 +83,7 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 	private final TypeOption allTypesOption;
 	private final CComboBox<TypeOption> comboBox;
 	private final boolean includeAllTypesOption;
+	private boolean suppressEvents = false;
 
 	/** Creates an entity type filter in FILTER MODE (with "All types" option).
 	 * <p>
@@ -122,8 +125,10 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 		});
 		// Notify listeners on value change
 		comboBox.addValueChangeListener(event -> {
-			final TypeOption option = event.getValue();
-			notifyChangeListeners(option != null ? option.entityClass() : null);
+			if (!suppressEvents) {
+				final TypeOption option = event.getValue();
+				notifyChangeListeners(option != null ? option.entityClass() : null);
+			}
 		});
 	}
 
@@ -221,10 +226,11 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 		}
 	}
 
-	/** Refreshes the type options list from the provided items. Also ensures Activity and Meeting types are always included.
+	/** Refreshes the type options list from the provided items.
+	 * Also ensures all registered ISprintableItem types are always included so sprint-capable types remain filterable
+	 * even when the current item list is empty or doesn't contain all types.
 	 * @param items List of entities to analyze */
 	private void updateTypeOptions(final List<?> items) {
-		// Discover unique entity types from items
 		final Map<Class<?>, TypeOption> options = new LinkedHashMap<>();
 		for (final Object item : items) {
 			if (item == null) {
@@ -233,19 +239,14 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 			final Class<?> entityClass = item.getClass();
 			options.putIfAbsent(entityClass, new TypeOption(resolveEntityTypeLabel(entityClass), entityClass));
 		}
-		// CRITICAL: Always include Activity and Meeting types even if not present in items
-		// This ensures these core types are always available in kanban board filters
-		try {
-			final Class<?> activityClass = Class.forName("tech.derbent.plm.activities.domain.CActivity");
-			options.putIfAbsent(activityClass, new TypeOption(resolveEntityTypeLabel(activityClass), activityClass));
-		} catch (final ClassNotFoundException e) {
-			// Activity class not available - skip
-		}
-		try {
-			final Class<?> meetingClass = Class.forName("tech.derbent.plm.meetings.domain.CMeeting");
-			options.putIfAbsent(meetingClass, new TypeOption(resolveEntityTypeLabel(meetingClass), meetingClass));
-		} catch (final ClassNotFoundException e) {
-			// Meeting class not available - skip
+		// Always include all registered concrete ISprintableItem types (Activity, Meeting, Issue, Epic, Feature, UserStory, …)
+		// so filter options remain stable as items are added/removed from the view.
+		for (final String key : CEntityRegistry.getAllRegisteredEntityKeys()) {
+			final Class<?> entityClass = CEntityRegistry.getEntityClass(key);
+			if (entityClass != null && !entityClass.isInterface() && !Modifier.isAbstract(entityClass.getModifiers())
+					&& ISprintableItem.class.isAssignableFrom(entityClass)) {
+				options.putIfAbsent(entityClass, new TypeOption(resolveEntityTypeLabel(entityClass), entityClass));
+			}
 		}
 		updateTypeOptionsFromMap(options);
 	}
@@ -253,36 +254,30 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 	/** Updates the combobox with type options from a map.
 	 * @param options Map of entity class to TypeOption */
 	private void updateTypeOptionsFromMap(final Map<Class<?>, TypeOption> options) {
-		// Build sorted list
 		final List<TypeOption> typeOptions =
 				options.values().stream().sorted(Comparator.comparing(option -> option.getLabel().toLowerCase())).collect(Collectors.toList());
-		// Add "All types" option at the beginning if in filter mode
 		if (includeAllTypesOption && allTypesOption != null) {
 			typeOptions.add(0, allTypesOption);
 		}
-		// Capture current value BEFORE setItems() to check if it's still valid afterwards
 		final TypeOption oldValue = comboBox.getValue();
-		// Update ComboBox items (this clears the current value temporarily)
-		comboBox.setItems(typeOptions);
-		// Check if old value is still valid in new options - if not, clear and select default
-		// Value persistence will restore the saved value automatically if it's still in the list
-		if (oldValue != null && !typeOptions.contains(oldValue)) {
-			// Old value no longer valid - clear it
-			comboBox.clear();
-			notifyChangeListeners(null);
-		}
-		// If no value is currently set, select default
-		if (comboBox.getValue() == null) {
-			if (includeAllTypesOption && allTypesOption != null) {
-				comboBox.setValue(allTypesOption);
-				notifyChangeListeners(null);
-			} else if (!typeOptions.isEmpty()) {
-				// In selection mode, auto-select first item if nothing is selected
-				comboBox.setValue(typeOptions.get(0));
-				notifyChangeListeners(typeOptions.get(0).entityClass());
+		suppressEvents = true;
+		try {
+			comboBox.setItems(typeOptions);
+			if (oldValue != null && !typeOptions.contains(oldValue)) {
+				comboBox.clear();
 			}
+			if (comboBox.getValue() == null) {
+				if (includeAllTypesOption && allTypesOption != null) {
+					comboBox.setValue(allTypesOption);
+				} else if (!typeOptions.isEmpty()) {
+					comboBox.setValue(typeOptions.get(0));
+				}
+			}
+		} finally {
+			suppressEvents = false;
 		}
-		// Value persistence will restore saved value after this method completes
+		final TypeOption finalValue = comboBox.getValue();
+		notifyChangeListeners(finalValue != null ? finalValue.entityClass() : null);
 	}
 
 	@Override

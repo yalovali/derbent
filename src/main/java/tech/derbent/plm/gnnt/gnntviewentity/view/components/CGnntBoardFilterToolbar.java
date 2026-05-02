@@ -16,6 +16,7 @@ import tech.derbent.api.parentrelation.service.CHierarchyNavigationService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.component.basic.CCheckbox;
 import tech.derbent.api.ui.component.basic.CComboBox;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CTextField;
@@ -40,6 +41,7 @@ public class CGnntBoardFilterToolbar extends CHorizontalLayout {
 	private static final long serialVersionUID = 1L;
 
 	private final CButton buttonClear;
+	private final CCheckbox showClosedCheckbox;
 	private final CComboBox<CProjectItem<?, ?>> comboBoxEpic;
 	private final CComboBox<Class<?>> comboBoxEntityType;
 	private final CComboBox<CProjectItem<?, ?>> comboBoxFeature;
@@ -111,7 +113,13 @@ public class CGnntBoardFilterToolbar extends CHorizontalLayout {
 		buttonClear.setId("custom-gnnt-clear-filters-button");
 		buttonClear.setIcon(VaadinIcon.CLOSE_SMALL.create());
 		buttonClear.addThemeVariants(ButtonVariant.LUMO_SMALL);
-		add(searchField, comboBoxEntityType, comboBoxEpic, comboBoxFeature, comboBoxUserStory, comboBoxResponsible, comboBoxSprint, buttonClear);
+
+		showClosedCheckbox = new CCheckbox("Show closed");
+		showClosedCheckbox.setId("custom-gnnt-show-closed-checkbox");
+		showClosedCheckbox.enablePersistence("gnntBoard_showClosed");
+		showClosedCheckbox.addValueChangeListener(event -> notifyFilterChangeListeners());
+		add(searchField, comboBoxEntityType, comboBoxEpic, comboBoxFeature, comboBoxUserStory, comboBoxResponsible, comboBoxSprint,
+				showClosedCheckbox, buttonClear);
 	}
 
 	public void addFilterChangeListener(final Consumer<CGnntBoardFilterCriteria> listener) {
@@ -130,6 +138,7 @@ public class CGnntBoardFilterToolbar extends CHorizontalLayout {
 			comboBoxUserStory.clear();
 			comboBoxResponsible.clear();
 			comboBoxSprint.clear();
+			showClosedCheckbox.setValue(false);
 			refreshFeatureOptions();
 			refreshUserStoryOptions();
 		} finally {
@@ -146,7 +155,7 @@ public class CGnntBoardFilterToolbar extends CHorizontalLayout {
 	 */
 	public List<Component> extractQuickControlsForQuickAccess() {
 		final List<Component> controls = List.of(searchField, comboBoxEntityType, comboBoxEpic, comboBoxFeature, comboBoxUserStory,
-				comboBoxResponsible, comboBoxSprint, buttonClear);
+				comboBoxResponsible, comboBoxSprint, showClosedCheckbox, buttonClear);
 		controls.forEach(control -> control.getElement().removeFromParent());
 
 		prepareForQuickAccessControls();
@@ -220,6 +229,7 @@ public class CGnntBoardFilterToolbar extends CHorizontalLayout {
 		criteria.setUserStory(comboBoxUserStory.getValue());
 		criteria.setResponsible(comboBoxResponsible.getValue());
 		criteria.setSprint(comboBoxSprint.getValue());
+		criteria.setShowClosed(Boolean.TRUE.equals(showClosedCheckbox.getValue()));
 		return criteria;
 	}
 

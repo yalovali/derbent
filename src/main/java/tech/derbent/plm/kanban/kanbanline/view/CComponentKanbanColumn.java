@@ -436,9 +436,52 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		}
 	}
 
+	public boolean isCompactView() { return compactView; }
+
 	protected void onCompactViewChanged(final boolean compact) {
 		statusesLabel.setVisible(!compact);
 		itemsLayout.setVisible(!compact);
+		if (compact) {
+			// Narrow column: fixed 72px wide, header items stacked vertically
+			getStyle()
+					.set("min-width", "72px")
+					.set("max-width", "72px")
+					.set("flex", "0 0 72px");
+			headerLayout.getStyle()
+					.set("flex-direction", "column")
+					.set("align-items", "stretch")
+					.set("gap", "3px");
+			title.getStyle()
+					.set("font-size", "11px")
+					.set("overflow", "hidden")
+					.set("text-overflow", "ellipsis")
+					.set("white-space", "nowrap")
+					.set("margin", "0");
+			itemCountLabel.getStyle().set("text-align", "center");
+			storyPointTotalLabel.getStyle().set("text-align", "center");
+		} else {
+			// Restore normal column width and horizontal header
+			getStyle()
+					.remove("min-width")
+					.remove("max-width")
+					.remove("flex");
+			getStyle()
+					.set("flex", "1 1 0")
+					.set("min-width", "220px");
+			headerLayout.getStyle()
+					.remove("flex-direction")
+					.remove("align-items")
+					.remove("gap");
+			headerLayout.getStyle().set("gap", CUIConstants.GAP_TINY);
+			title.getStyle()
+					.remove("font-size")
+					.remove("overflow")
+					.remove("text-overflow")
+					.remove("white-space")
+					.remove("margin");
+			itemCountLabel.getStyle().remove("text-align");
+			storyPointTotalLabel.getStyle().remove("text-align");
+		}
 	}
 
 	public void setCompactView(final boolean compact) {

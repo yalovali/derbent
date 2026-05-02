@@ -33,7 +33,7 @@ public class CKanbanLineInitializerService extends CEntityOfCompanyInitializerSe
 	private static final String menuTitle = MenuTitle_SETUP + ".Kanban Lines";
 	private static final String pageDescription = "Kanban line definitions and their columns";
 	private static final String pageTitle = "Kanban Lines";
-	private static final boolean showInQuickToolbar = true;
+	private static final boolean showInQuickToolbar = false;
 
 	/** Builds the standard detail view for kanban lines. */
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
@@ -121,7 +121,7 @@ public class CKanbanLineInitializerService extends CEntityOfCompanyInitializerSe
 		kanbanGrid.setName("Kanban Board Grid");
 		kanbanGrid.setAttributeNone(true); // dont show grid
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, kanbanDetailSection,
-				kanbanGrid, menuTitle + "Sprint Board", "Sprint Board", "Sprint Board", true, menuOrder + ".1",
+				kanbanGrid, menuTitle + "Kanban Board", "Kanban Board", "Kanban Board", true, menuOrder + ".1",
 				page -> page.setAttributeHideTopCrudtoolbar(true));
 	}
 

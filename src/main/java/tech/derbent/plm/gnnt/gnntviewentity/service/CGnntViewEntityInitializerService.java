@@ -25,11 +25,10 @@ public class CGnntViewEntityInitializerService extends CEntityOfProjectInitializ
 	private static final String MENU_TITLE = MenuTitle_PROJECT + "." + CGnntViewEntity.ENTITY_TITLE_PLURAL;
 	private static final String PAGE_DESCRIPTION = "Project Gannt view definitions and dedicated timeline boards";
 	private static final String PAGE_TITLE = CGnntViewEntity.ENTITY_TITLE_PLURAL;
-	private static final boolean SHOW_IN_QUICK_TOOLBAR = true;
+	private static final boolean SHOW_IN_QUICK_TOOLBAR = false;
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection detailSection = CEntityOfProjectInitializerService.createBasicView(project, clazz);
-		
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "gridType"));
 		detailSection.addScreenLine(CDetailLinesService.createSection("Gnnt Board"));
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "gnntBoard"));

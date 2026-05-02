@@ -19,6 +19,7 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.component.basic.CCheckbox;
 import tech.derbent.api.ui.component.basic.CComboBox;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CTextField;
@@ -46,20 +47,9 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 	public static final String ID_COMBOBOX_SPRINT_STATUS = "custom-sprint-planning-sprint-status-filter-combobox";
 	private static final long serialVersionUID = 1L;
 
-	private enum EStateFilter {
-		ALL,
-		ACTIVE,
-		CLOSED
-	}
-
 	private final CButton buttonAddToSprint;
-	private final CButton buttonBacklogAll;
-	private final CButton buttonBacklogClosed;
-	private final CButton buttonBacklogOpen;
 	private final CButton buttonClear;
-	private final CButton buttonSprintsAll;
-	private final CButton buttonSprintsClosed;
-	private final CButton buttonSprintsOpen;
+	private final CCheckbox showClosedCheckbox;
 	private final CComboBox<CSprint> comboBoxSprint;
 	private final CComboBox<String> comboBoxSprintStatus;
 	private final Span spanSelectedSprintMetrics;
@@ -68,8 +58,6 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 	private final CTextField sprintSearchField;
 	private CProject<?> currentProject;
 	private boolean internalUpdate;
-	private EStateFilter backlogStateFilter = EStateFilter.ALL;
-	private EStateFilter sprintStateFilter = EStateFilter.ALL;
 	private final List<Consumer<Void>> changeListeners = new ArrayList<>();
 	private final CSprintService sprintService;
 	private final CProjectItemStatusService projectItemStatusService;
@@ -111,15 +99,10 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		comboBoxSprintStatus.setWidth("200px");
 		comboBoxSprintStatus.addValueChangeListener(event -> notifyChangeListeners());
 
-		// Quick filters: backlog state (active/closed).
-		buttonBacklogOpen = createStateButton("Backlog: Active", () -> setBacklogStateFilter(EStateFilter.ACTIVE));
-		buttonBacklogClosed = createStateButton("Backlog: Closed", () -> setBacklogStateFilter(EStateFilter.CLOSED));
-		buttonBacklogAll = createStateButton("Backlog: All", () -> setBacklogStateFilter(EStateFilter.ALL));
-
-		// Quick filters: sprint state.
-		buttonSprintsOpen = createStateButton("Sprints: Active", () -> setSprintStateFilter(EStateFilter.ACTIVE));
-		buttonSprintsClosed = createStateButton("Sprints: Closed", () -> setSprintStateFilter(EStateFilter.CLOSED));
-		buttonSprintsAll = createStateButton("Sprints: All", () -> setSprintStateFilter(EStateFilter.ALL));
+		showClosedCheckbox = new CCheckbox("Show closed");
+		showClosedCheckbox.setId("custom-sprint-planning-show-closed-checkbox");
+		showClosedCheckbox.enablePersistence("sprintPlanning_showClosed");
+		showClosedCheckbox.addValueChangeListener(event -> notifyChangeListeners());
 
 		spanSelectedSprintMetrics = new Span("Sprint: - | 0/0 tasks, 0/0 SP");
 		spanSelectedSprintMetrics.setId(ID_SELECTED_SPRINT_METRICS);
@@ -138,9 +121,6 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		buttonClear.setId(ID_BUTTON_CLEAR);
 		buttonClear.setIcon(VaadinIcon.CLOSE_SMALL.create());
 		buttonClear.addThemeVariants(ButtonVariant.LUMO_SMALL);
-
-		// Default state button visuals.
-		updateStateButtonStyles();
 
 		// Main toolbar stays compact (Jira-like): sprint selection + core actions.
 		// Backlog search belongs next to the backlog parent browser (folder-browser UX).
@@ -162,8 +142,8 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 	 */
 	public List<Component> extractQuickControlsForQuickAccess() {
 		// Sprint planning controls belong in the Gnnt header quick-access panel (compact, aligned).
-		final List<Component> controls = List.of(comboBoxSprint, comboBoxSprintStatus, sprintSearchField, buttonAddToSprint, buttonClear,
-				spanSelectedSprintMetrics);
+		final List<Component> controls = List.of(comboBoxSprint, comboBoxSprintStatus, sprintSearchField, buttonAddToSprint, showClosedCheckbox,
+				buttonClear, spanSelectedSprintMetrics);
 		controls.forEach(control -> control.getElement().removeFromParent());
 
 		prepareForQuickAccessControls();
@@ -217,10 +197,8 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 			comboBoxSprint.clear();
 			comboBoxSprintStatus.clear();
 			comboBoxSprint.setEnabled(true);
-			backlogStateFilter = EStateFilter.ALL;
-			sprintStateFilter = EStateFilter.ALL;
+			showClosedCheckbox.setValue(false);
 			spanSelectedSprintMetrics.setText("Sprint: - | 0/0 tasks, 0/0 SP");
-			updateStateButtonStyles();
 		} finally {
 			internalUpdate = false;
 		}
@@ -340,61 +318,22 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		spanSelectedSprintMetrics.getStyle().set("color", overloaded ? "var(--lumo-error-text-color)" : "var(--lumo-secondary-text-color)");
 	}
 
-	private CButton createStateButton(final String label, final Runnable onClick) {
-		final CButton button = CButton.createTertiary(label, null, event -> {
-			if (onClick != null) {
-				onClick.run();
-			}
-		});
-		button.addThemeVariants(ButtonVariant.LUMO_SMALL);
-		return button;
-	}
-
-	private void setBacklogStateFilter(final EStateFilter filter) {
-		backlogStateFilter = filter != null ? filter : EStateFilter.ALL;
-		updateStateButtonStyles();
-		notifyChangeListeners();
-	}
-
-	private void setSprintStateFilter(final EStateFilter filter) {
-		sprintStateFilter = filter != null ? filter : EStateFilter.ALL;
-		updateStateButtonStyles();
-		notifyChangeListeners();
-	}
-
-	private void updateStateButtonStyles() {
-		applyActiveStyle(buttonBacklogOpen, backlogStateFilter == EStateFilter.ACTIVE);
-		applyActiveStyle(buttonBacklogClosed, backlogStateFilter == EStateFilter.CLOSED);
-		applyActiveStyle(buttonBacklogAll, backlogStateFilter == EStateFilter.ALL);
-
-		applyActiveStyle(buttonSprintsOpen, sprintStateFilter == EStateFilter.ACTIVE);
-		applyActiveStyle(buttonSprintsClosed, sprintStateFilter == EStateFilter.CLOSED);
-		applyActiveStyle(buttonSprintsAll, sprintStateFilter == EStateFilter.ALL);
-	}
-
-	private void applyActiveStyle(final CButton button, final boolean active) {
-		if (button == null) {
-			return;
-		}
-		if (active) {
-			button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		} else {
-			button.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		}
-	}
-
 	private boolean isClosed(final CProjectItem<?, ?> item) {
 		final CProjectItemStatus status = item != null ? item.getStatus() : null;
 		return status != null && Boolean.TRUE.equals(status.getFinalStatus());
 	}
 
-	private boolean isClosed(final CSprint sprint) {
-		final CProjectItemStatus status = sprint != null ? sprint.getStatus() : null;
-		return status != null && Boolean.TRUE.equals(status.getFinalStatus());
+	/** Returns whether closed (final-status) items should be shown. */
+	public boolean isShowClosed() {
+		return Boolean.TRUE.equals(showClosedCheckbox.getValue());
 	}
 
 	public boolean shouldIncludeItem(final CProjectItem<?, ?> item) {
 		if (item == null) {
+			return false;
+		}
+		// Hide closed sprint items unless "Show closed" is checked
+		if (!isShowClosed() && isClosed(item)) {
 			return false;
 		}
 		// Sprint search must not reuse backlog search fields; keep grids independent.
@@ -402,26 +341,24 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 	}
 
 	public boolean shouldIncludeBacklogItem(final CProjectItem<?, ?> item) {
-		// Leaf backlog grid uses its own search input; do not reuse sprint/parent searches.
-		if (item == null || !CSearchTextFilterSupport.matches(getBacklogLeafSearchText(), item.getName(), item.getDescription())) {
+		if (item == null) {
 			return false;
 		}
-		if (backlogStateFilter == EStateFilter.ALL) {
-			return true;
+		// Hide closed backlog items unless "Show closed" is checked
+		if (!isShowClosed() && isClosed(item)) {
+			return false;
 		}
-		final boolean closed = isClosed(item);
-		return backlogStateFilter == EStateFilter.CLOSED ? closed : !closed;
+		return CSearchTextFilterSupport.matches(getBacklogLeafSearchText(), item.getName(), item.getDescription());
 	}
 
 	public boolean shouldIncludeBacklogParentItem(final CProjectItem<?, ?> item) {
-		if (item == null || !CSearchTextFilterSupport.matches(getBacklogParentSearchText(), item.getName(), item.getDescription())) {
+		if (item == null) {
 			return false;
 		}
-		if (backlogStateFilter == EStateFilter.ALL) {
-			return true;
+		if (!isShowClosed() && isClosed(item)) {
+			return false;
 		}
-		final boolean closed = isClosed(item);
-		return backlogStateFilter == EStateFilter.CLOSED ? closed : !closed;
+		return CSearchTextFilterSupport.matches(getBacklogParentSearchText(), item.getName(), item.getDescription());
 	}
 
 	public boolean shouldIncludeSprint(final CSprint sprint) {
@@ -435,10 +372,6 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 				return false;
 			}
 		}
-		if (sprintStateFilter == EStateFilter.ALL) {
-			return true;
-		}
-		final boolean closed = isClosed(sprint);
-		return sprintStateFilter == EStateFilter.CLOSED ? closed : !closed;
+		return true;
 	}
 }

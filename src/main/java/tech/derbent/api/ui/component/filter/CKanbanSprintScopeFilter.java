@@ -43,6 +43,7 @@ public class CKanbanSprintScopeFilter extends CAbstractFilterComponent<CKanbanSp
 
 	private final CComboBox<CSprintScope> comboBox;
 	private List<CSprint> availableSprints = List.of();
+	private boolean suppressEvents = false;
 
 	public CKanbanSprintScopeFilter() {
 		super(FILTER_KEY);
@@ -52,7 +53,7 @@ public class CKanbanSprintScopeFilter extends CAbstractFilterComponent<CKanbanSp
 		comboBox.addThemeVariants(ComboBoxVariant.LUMO_SMALL);
 		comboBox.setAllowCustomValue(false);
 		comboBox.setItemLabelGenerator(scope -> scope != null ? scope.getLabel() : "All sprints");
-		comboBox.addValueChangeListener(event -> notifyChangeListeners(event.getValue()));
+		comboBox.addValueChangeListener(event -> { if (!suppressEvents) notifyChangeListeners(event.getValue()); });
 	}
 
 	public void setAvailableSprints(final List<CSprint> sprints, final CSprint defaultSprint) {
@@ -64,22 +65,24 @@ public class CKanbanSprintScopeFilter extends CAbstractFilterComponent<CKanbanSp
 		for (final CSprint sprint : availableSprints) {
 			options.add(CSprintScope.sprint(sprint));
 		}
-		comboBox.setItems(options);
-
-		final CSprintScope current = comboBox.getValue();
-		if (current != null && current.mode() == EScopeMode.SPRINT && current.sprint() != null
-				&& availableSprints.stream().noneMatch(s -> s != null && s.getId() != null && s.getId().equals(current.sprint().getId()))) {
-			comboBox.setValue(CSprintScope.allSprints());
-			return;
-		}
-
-		if (current == null) {
-			if (defaultSprint != null && defaultSprint.getId() != null) {
-				comboBox.setValue(CSprintScope.sprint(defaultSprint));
-			} else {
+		suppressEvents = true;
+		try {
+			comboBox.setItems(options);
+			final CSprintScope current = comboBox.getValue();
+			if (current != null && current.mode() == EScopeMode.SPRINT && current.sprint() != null
+					&& availableSprints.stream().noneMatch(s -> s != null && s.getId() != null && s.getId().equals(current.sprint().getId()))) {
 				comboBox.setValue(CSprintScope.allSprints());
+			} else if (current == null) {
+				if (defaultSprint != null && defaultSprint.getId() != null) {
+					comboBox.setValue(CSprintScope.sprint(defaultSprint));
+				} else {
+					comboBox.setValue(CSprintScope.allSprints());
+				}
 			}
+		} finally {
+			suppressEvents = false;
 		}
+		notifyChangeListeners(comboBox.getValue());
 	}
 
 	@Override

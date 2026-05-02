@@ -23,6 +23,7 @@ public class CGnntBoardFilterCriteria {
 	private CProjectItem<?, ?> feature;
 	private CUser responsible;
 	private String searchText;
+	private boolean showClosed = false;
 	private CSprint sprint;
 	private CProjectItem<?, ?> userStory;
 
@@ -44,6 +45,10 @@ public class CGnntBoardFilterCriteria {
 		return epic != null || feature != null || userStory != null || responsible != null || sprint != null || entityType != null
 				|| (searchText != null && !searchText.isBlank());
 	}
+
+	public boolean isShowClosed() { return showClosed; }
+
+	public void setShowClosed(final boolean showClosed) { this.showClosed = showClosed; }
 
 	public void setEpic(final CProjectItem<?, ?> epic) { this.epic = epic; }
 

@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import tech.derbent.api.entity.domain.CEntityDB;
@@ -38,7 +39,19 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 		grid = new CGrid<>(entityClass);
 		grid.asSingleSelect().addValueChangeListener(this::onSelectionChange);
 		page.createGridForEntity(grid);
+		addContextMenu(grid);
 		add(grid);
+	}
+
+	private void addContextMenu(final CGrid<EntityClass> grid) {
+		final GridContextMenu<EntityClass> contextMenu = grid.addContextMenu();
+		contextMenu.addItem("Edit", event -> event.getItem().ifPresent(this::select));
+		contextMenu.addItem("New", event -> page.actionCreate());
+		contextMenu.addItem("Delete", event -> event.getItem().ifPresent(item -> {
+			select(item);
+			page.actionDelete();
+		}));
+		contextMenu.addItem("Refresh", event -> page.actionRefresh());
 	}
 
 	private Optional<EntityClass> fetchIndex(final int index) {

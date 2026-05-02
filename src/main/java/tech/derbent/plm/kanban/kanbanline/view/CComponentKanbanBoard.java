@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -21,7 +22,10 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.interfaces.CSelectEvent;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IHasDragControl;
@@ -42,6 +46,10 @@ import tech.derbent.api.ui.component.basic.CTabSheet;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.basic.IHasMultiValuePersistence;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
+import tech.derbent.api.ui.component.enhanced.CComponentEntitySelection.EntityTypeConfig;
+import tech.derbent.api.ui.dialogs.CDialogEntitySelection;
+import tech.derbent.api.users.service.CUserService;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.plm.sprints.planning.domain.ESprintPlanningScope;
 import tech.derbent.plm.sprints.planning.view.components.CComponentBacklogNavigator;
 import tech.derbent.api.ui.component.enhanced.CContextActionDefinition;
@@ -50,6 +58,7 @@ import tech.derbent.api.ui.component.filter.CKanbanSearchFilter;
 import tech.derbent.api.ui.component.filter.CKanbanSprintMembershipFilter;
 import tech.derbent.api.ui.component.filter.CKanbanSprintScopeFilter;
 import tech.derbent.api.ui.component.filter.CResponsibleUserFilter;
+import tech.derbent.api.ui.component.filter.CShowClosedFilter;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.plm.kanban.kanbanline.domain.EKanbanViewMode;
 import tech.derbent.api.utils.Check;
@@ -98,7 +107,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	private final CVerticalLayout tabSprintSummaryLayout;
 	private final com.vaadin.flow.component.tabs.Tab tabDetails;
 	private CComponentBacklogNavigator backlogNavigator;
-	private EKanbanViewMode currentMode = EKanbanViewMode.SPRINT_BOARD;
+	private final EKanbanViewMode currentMode = EKanbanViewMode.SPRINT_BOARD;
 	private CSprint currentSprint;
 	private boolean statusOnlyMode;
 	private boolean allSprintsMode = true;
@@ -106,7 +115,8 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	private final Set<ComponentEventListener<CDragStartEvent>> dragStartListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragDropEvent>> dropListeners = new HashSet<>();
 	private final CComponentKanbanBoardFilterToolbar filterToolbar;
-	private boolean isRestoring = false; // Flag to prevent save during restore
+	private boolean isRestoring = false;
+	private boolean suppressFilterEvents = false;
 	private final CKanbanLineService kanbanLineService;
 	private final CHorizontalLayout layoutColumns;
 	final CVerticalLayout layoutDetails = new CVerticalLayout();
@@ -122,6 +132,8 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	private final CSprintItemService sprintItemService;
 	private final Comparator<CSprint> sprintRecencyComparator;
 	private final CSprintService sprintService;
+	private final CUserService userService;
+	private final CProjectItemStatusService projectItemStatusService;
 
 	/** Creates the kanban board and initializes filters and layout. */
 	
@@ -131,6 +143,8 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		kanbanLineService = CSpringContext.getBean(CKanbanLineService.class);
 		sprintItemService = CSpringContext.getBean(CSprintItemService.class);
 		sprintService = CSpringContext.getBean(CSprintService.class);
+		userService = CSpringContext.getBean(CUserService.class);
+		projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
 		Check.notNull(sessionService, "Session service cannot be null for Kanban board");
 		Check.notNull(kanbanLineService, "Kanban line service cannot be null for Kanban board");
 		Check.notNull(sprintItemService, "Sprint item service cannot be null for Kanban board");
@@ -142,7 +156,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		layoutColumns.setWidthFull();
 		layoutColumns.setHeight(null);
 		layoutColumns.setSpacing(true);
-		layoutColumns.setAlignItems(Alignment.START);
+		layoutColumns.setAlignItems(Alignment.STRETCH);
 		layoutColumns.addClassName("kanban-board-columns");
 		sprintRecencyComparator =
 				Comparator.<CSprint, LocalDateTime>comparing(CSprint::getLastModifiedDate, Comparator.nullsLast(LocalDateTime::compareTo))
@@ -150,7 +164,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 						.thenComparing(CSprint::getCreatedDate, Comparator.nullsLast(LocalDateTime::compareTo))
 						.thenComparing(CSprint::getId, Comparator.nullsLast(Long::compareTo));
 		filterToolbar = new CComponentKanbanBoardFilterToolbar();
-		filterToolbar.addFilterChangeListener(event -> applyFilters());
+		filterToolbar.addFilterChangeListener(event -> { if (!suppressFilterEvents) applyFilters(); });
 		// Value persistence is automatically enabled in build() method
 		setSizeFull();
 		setPadding(false);
@@ -234,6 +248,11 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 				filterToolbar.setAvailableItems(allSprintItems);
 			}
 			dataReloaded = true;
+		}
+		// Propagate showClosed to the backlog navigator if it exists
+		final boolean showClosed = Boolean.TRUE.equals(criteria.getValue(CShowClosedFilter.FILTER_KEY));
+		if (backlogNavigator != null) {
+			backlogNavigator.setShowClosed(showClosed);
 		}
 		List<CSprintItem> newFilteredItems = filterSprintItems(criteria);
 		// In "All sprints" mode the backlog column already shows sprint=null items.
@@ -335,6 +354,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		try {
 			backlogNavigator = new CComponentBacklogNavigator();
 			backlogNavigator.setId("kanban-backlog-navigator");
+			backlogNavigator.setShowParentTaskRollup(true);
 			backlogNavigator.setProject(project);
 			backlogNavigator.setScope(ESprintPlanningScope.BACKLOG);
 			backlogNavigator.drag_setDropEnabled(true);
@@ -357,8 +377,164 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 				CContextActionDefinition.of("open-page", "Open page", VaadinIcon.EDIT,
 						postit -> postit != null && postit.resolveSprintableItem() instanceof CEntityDB<?>,
 						postit -> postit != null && postit.resolveSprintableItem() instanceof CEntityDB<?>, this::openPostitPage),
+				CContextActionDefinition.of("set-status", "Set status...", VaadinIcon.CLIPBOARD_CHECK,
+						postit -> postit != null && postit.resolveSprintableItem() instanceof IHasStatusAndWorkflow,
+						postit -> postit != null && postit.resolveSprintableItem() instanceof IHasStatusAndWorkflow,
+						this::openPostitStatusDialog),
+				CContextActionDefinition.of("assign-to-me", "Assign to me", VaadinIcon.USER_CHECK,
+						postit -> postit != null && postit.resolveSprintableItem() instanceof CProjectItem<?, ?>,
+						postit -> postit != null && postit.resolveSprintableItem() instanceof CProjectItem<?, ?>,
+						this::assignPostitToMe),
+				CContextActionDefinition.of("assign-to", "Assign to...", VaadinIcon.USER,
+						postit -> postit != null && postit.resolveSprintableItem() instanceof CProjectItem<?, ?>,
+						postit -> postit != null && postit.resolveSprintableItem() instanceof CProjectItem<?, ?>,
+						this::openPostitAssignToDialog),
+				CContextActionDefinition.of("remove-from-sprint", "Remove from sprint", VaadinIcon.MINUS_CIRCLE,
+						postit -> postit != null && postit.getEntity() != null && postit.getEntity().getSprint() != null,
+						postit -> postit != null && postit.getEntity() != null && postit.getEntity().getSprint() != null,
+						this::removePostitFromSprint),
 				CContextActionDefinition.of("refresh-board", "Refresh board", VaadinIcon.REFRESH, postit -> true, postit -> true,
 						postit -> refreshGridSafely()));
+	}
+
+	private void openPostitStatusDialog(final CComponentKanbanPostit postit) {
+		final ISprintableItem sprintable = postit != null ? postit.resolveSprintableItem() : null;
+		if (!(sprintable instanceof final CProjectItem<?, ?> item)) {
+			CNotificationService.showWarning("Select an item first");
+			return;
+		}
+		if (item.getId() == null) {
+			CNotificationService.showWarning("Save the item first");
+			return;
+		}
+		if (!(item instanceof IHasStatusAndWorkflow)) {
+			CNotificationService.showWarning("Item does not support workflow/status");
+			return;
+		}
+		try {
+			final List<CProjectItemStatus> statuses = projectItemStatusService.getValidNextStatuses((IHasStatusAndWorkflow<?, ?>) item);
+			if (statuses == null || statuses.isEmpty()) {
+				CNotificationService.showWarning("No valid next statuses available");
+				return;
+			}
+			if (statuses.size() == 1) {
+				applyPostitStatus(item, statuses.get(0));
+				return;
+			}
+			final CDialogKanbanStatusSelection dialog = new CDialogKanbanStatusSelection("Set Status", statuses,
+					selectedStatus -> {
+						if (selectedStatus == null) {
+							return;
+						}
+						applyPostitStatus(item, selectedStatus);
+					});
+			dialog.open();
+		} catch (final Exception e) {
+			LOGGER.error("Failed to open status dialog: {}", e.getMessage(), e);
+			CNotificationService.showException("Unable to set status", e);
+		}
+	}
+
+	@SuppressWarnings ("unchecked")
+	private void applyPostitStatus(final CProjectItem<?, ?> item, final CProjectItemStatus status) {
+		try {
+			((IHasStatusAndWorkflow<?, ?>) item).setStatus(status);
+			saveSprintableItem(item);
+			refreshGridSafely();
+			CNotificationService.showSuccess("Set status of '%s' to '%s'".formatted(item.getName(), status.getName()));
+		} catch (final Exception e) {
+			LOGGER.error("Failed to set status: {}", e.getMessage(), e);
+			CNotificationService.showException("Unable to set status", e);
+		}
+	}
+
+	private void assignPostitToMe(final CComponentKanbanPostit postit) {
+		final ISprintableItem sprintable = postit != null ? postit.resolveSprintableItem() : null;
+		if (!(sprintable instanceof final CProjectItem<?, ?> item)) {
+			CNotificationService.showWarning("Select an item first");
+			return;
+		}
+		final CUser currentUser = sessionService.getActiveUser().orElse(null);
+		if (currentUser == null) {
+			CNotificationService.showWarning("No active user in session");
+			return;
+		}
+		try {
+			item.setAssignedTo(currentUser);
+			saveSprintableItem(item);
+			refreshGridSafely();
+			CNotificationService.showSuccess("Assigned '%s' to you".formatted(item.getName()));
+		} catch (final Exception e) {
+			LOGGER.error("Failed to assign item to current user: {}", e.getMessage(), e);
+			CNotificationService.showException("Unable to assign item", e);
+		}
+	}
+
+	private void openPostitAssignToDialog(final CComponentKanbanPostit postit) {
+		final ISprintableItem sprintable = postit != null ? postit.resolveSprintableItem() : null;
+		if (!(sprintable instanceof final CProjectItem<?, ?> item)) {
+			CNotificationService.showWarning("Select an item first");
+			return;
+		}
+		final CProject<?> project = sessionService.getActiveProject().orElse(null);
+		if (project == null) {
+			CNotificationService.showWarning("No active project");
+			return;
+		}
+		try {
+			final List<EntityTypeConfig<?>> types = List.of(EntityTypeConfig.createWithRegistryName(CUser.class, userService));
+			final CDialogEntitySelection<CUser> dialog = new CDialogEntitySelection<>("Assign To", types,
+					config -> userService.listByProject(project), selected -> {
+						final CUser selectedUser = selected != null && !selected.isEmpty() ? selected.get(0) : null;
+						if (selectedUser == null) {
+							return;
+						}
+						try {
+							item.setAssignedTo(selectedUser);
+							saveSprintableItem(item);
+							refreshGridSafely();
+							CNotificationService.showSuccess("Assigned '%s' to %s".formatted(item.getName(), selectedUser.getName()));
+						} catch (final Exception ex) {
+							LOGGER.error("Failed to assign item: {}", ex.getMessage(), ex);
+							CNotificationService.showException("Unable to assign item", ex);
+						}
+					}, false);
+			dialog.open();
+		} catch (final Exception e) {
+			LOGGER.error("Failed to open assign dialog: {}", e.getMessage(), e);
+			CNotificationService.showException("Unable to open assign dialog", e);
+		}
+	}
+
+	private void removePostitFromSprint(final CComponentKanbanPostit postit) {
+		final CSprintItem sprintItem = postit != null ? postit.getEntity() : null;
+		if (sprintItem == null || sprintItem.getSprint() == null) {
+			CNotificationService.showWarning("Item is not in a sprint");
+			return;
+		}
+		try {
+			sprintItem.setSprint(null);
+			sprintItemService.save(sprintItem);
+			refreshGridSafely();
+			CNotificationService.showSuccess("Moved item back to backlog");
+		} catch (final Exception e) {
+			LOGGER.error("Failed to remove item from sprint: {}", e.getMessage(), e);
+			CNotificationService.showException("Unable to remove from sprint", e);
+		}
+	}
+
+	@SuppressWarnings ("unchecked")
+	private void saveSprintableItem(final CProjectItem<?, ?> item) {
+		final Class<?> entityClass = org.springframework.data.util.ProxyUtils.getUserClass(item.getClass());
+		final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
+		if (serviceClass == null) {
+			throw new IllegalStateException("No service registered for: " + entityClass.getSimpleName());
+		}
+		final Object serviceBean = CSpringContext.getBean(serviceClass);
+		if (!(serviceBean instanceof final CAbstractService service)) {
+			throw new IllegalStateException("Registered service is not CAbstractService: " + serviceClass.getSimpleName());
+		}
+		service.save(item);
 	}
 
 	/** Kanban board does not support creating entities here. */
@@ -414,11 +590,12 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	/** Enables persistence for this kanban board with project context. Should be called after project is set.
 	 * @param project The project context for persistence namespace */
 	public void enablePersistenceForProject(final CProject<?> project) {
-		if (project != null && project.getId() != null) {
-			final String namespace = "kanbanBoard_project" + project.getId();
-			persist_enableMultiValue(namespace);
-			LOGGER.info("[Persistence] Enabled for namespace: {}", namespace);
+		if (!(project != null && project.getId() != null)) {
+			return;
 		}
+		final String namespace = "kanbanBoard_project" + project.getId();
+		persist_enableMultiValue(namespace);
+		LOGGER.info("[Persistence] Enabled for namespace: {}", namespace);
 	}
 
 	/** Filters sprint items based on the provided criteria. */
@@ -428,9 +605,17 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		final CResponsibleUserFilter.ResponsibleFilterMode responsibleMode = criteria.getValue(CResponsibleUserFilter.FILTER_KEY);
 		final String searchQuery = criteria.getValue(CKanbanSearchFilter.FILTER_KEY);
 		final CKanbanSprintMembershipFilter.MembershipMode membershipMode = CKanbanSprintMembershipFilter.MembershipMode.ALL;
+		final boolean showClosed = Boolean.TRUE.equals(criteria.getValue(CShowClosedFilter.FILTER_KEY));
 		for (final CSprintItem sprintItem : allSprintItems) {
 			if (sprintItem == null || sprintItem.getParentItem() == null) {
 				continue;
+			}
+			if (!showClosed) {
+				final ISprintableItem parentItem = sprintItem.getParentItem();
+				if (parentItem instanceof final CProjectItem<?, ?> pi && pi.getStatus() != null
+						&& Boolean.TRUE.equals(pi.getStatus().getFinalStatus())) {
+					continue;
+				}
 			}
 			if (!matchesTypeFilter(sprintItem, entityType)) {
 				continue;
@@ -517,6 +702,9 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	 * @return The current sprint or null if no sprint selected */
 	public CSprint getCurrentSprint() { return currentSprint; }
 
+	/** Returns true when the board is in status-only mode (no sprint context, backlog hidden). */
+	public boolean isStatusOnlyMode() { return statusOnlyMode; }
+
 	/** Kanban board does not expose a direct entity service. */
 	@Override
 	public CAbstractService<?> getEntityService() { return null; }
@@ -524,11 +712,8 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	List<CComponentKanbanColumn> getKanbanColumns() {
 		final List<CComponentKanbanColumn> columns = new ArrayList<>();
 		final List<Component> columnComponents = layoutColumns.getChildren().toList();
-		for (final Component component : columnComponents) {
-			if (component instanceof CComponentKanbanColumn) {
-				columns.add((CComponentKanbanColumn) component);
-			}
-		}
+		columnComponents.stream().filter((final Component component) -> component instanceof CComponentKanbanColumn)
+				.forEach((final Component component) -> columns.add((CComponentKanbanColumn) component));
 		return columns;
 	}
 
@@ -595,24 +780,23 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			enablePersistenceForProject(project);
 		}
 		try {
-			// Keep sprint selection constrained to the active project and preselect the
-			// newest sprint
-			// so the board always opens with the freshest work.
 			availableSprints = sprintService.listByProject(project);
 			availableSprints.sort(sprintRecencyComparator.reversed());
 			final CSprint defaultSprint = resolveDefaultSprint(availableSprints);
+			// Suppress filter change events during programmatic sprint list update to
+			// prevent triggering applyFilters() prematurely
+			suppressFilterEvents = true;
 			filterToolbar.setAvailableSprints(availableSprints, defaultSprint);
-			final CKanbanSprintScopeFilter.CSprintScope scope =
-					filterToolbar.getCurrentCriteria().getValue(CKanbanSprintScopeFilter.FILTER_KEY);
-			statusOnlyMode = scope != null && scope.mode() == CKanbanSprintScopeFilter.EScopeMode.STATUS_ONLY;
-			allSprintsMode = scope == null || scope.mode() == CKanbanSprintScopeFilter.EScopeMode.ALL_SPRINTS;
-			currentSprint = scope != null && scope.mode() == CKanbanSprintScopeFilter.EScopeMode.SPRINT ? scope.sprint() : null;
-			if (currentSprint != null && currentSprint.getId() != null) {
-				loadSprintItemsForSprint(currentSprint);
-			} else {
-				loadAllProjectItems(project);
-			}
+			suppressFilterEvents = false;
+			// Reset mode state so applyFilters() detects a "change" and loads data on first load
+			statusOnlyMode = false;
+			allSprintsMode = false;
+			currentSprint = null;
+			allSprintItems = new ArrayList<>();
+			sprintItems = new ArrayList<>();
+			applyFilters();
 		} catch (final Exception e) {
+			suppressFilterEvents = false;
 			LOGGER.error("Failed to load sprints for Kanban board reason={}", e.getMessage());
 			filterToolbar.setAvailableSprints(List.of(), null);
 			filterToolbar.setAvailableItems(List.of());
@@ -629,36 +813,26 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		if (mode == null || mode == CResponsibleUserFilter.ResponsibleFilterMode.ALL) {
 			return true;
 		}
-		if (mode == CResponsibleUserFilter.ResponsibleFilterMode.CURRENT_USER) {
-			final CUser activeUser = sessionService.getActiveUser().orElse(null);
-			Check.notNull(activeUser, "Active user not available for Kanban board filtering");
-			return matchesResponsibleUser(sprintItem, activeUser);
+		if (mode != CResponsibleUserFilter.ResponsibleFilterMode.CURRENT_USER) {
+			return true;
 		}
-		return true;
+		final CUser activeUser = sessionService.getActiveUser().orElse(null);
+		Check.notNull(activeUser, "Active user not available for Kanban board filtering");
+		return matchesResponsibleUser(sprintItem, activeUser);
 	}
 
-	/** Handles selection of backlog items to display details in the entity view. Similar to postit selection but for items selected from the backlog
-	 * grid. */
+	/** Handles selection of backlog items. Does NOT switch to the details tab or load the detail view, intentionally — loading full entity details on
+	 * every backlog click is expensive and the user did not request it. Details are shown only when a kanban postit is explicitly selected. */
 	private void on_backlog_item_selected(final CSelectEvent selectEvent) {
-		final Object source = selectEvent.getSource();
-		final CProjectItem<?, ?> selectedItem;
-		if (!(source instanceof final CComponentBacklogNavigator navigator)) {
+		if (!(selectEvent.getSource() instanceof CComponentBacklogNavigator)) {
 			return;
 		}
-		selectedItem = navigator.getSelectedBacklogItem();
-		LOGGER.debug("Kanban board backlog item selection changed to {}", selectedItem != null ? selectedItem.getId() : "null");
 		// Clear postit selection when backlog item is selected
 		if (selectedPostit != null) {
 			selectedPostit.setSelected(false);
 			selectedPostit = null;
 		}
-		if (selectedItem == null) {
-			CDynamicPageRouter.displayEntityInDynamicOnepager(null, currentEntityPageRouter, sessionService, this);
-			return;
-		}
-		// Display the selected backlog item in the details view
-		CDynamicPageRouter.displayEntityInDynamicOnepager(selectedItem, currentEntityPageRouter, sessionService, this);
-		detailTabs.setSelectedTab(tabDetails);
+		// Intentionally not loading entity details or switching tabs here
 	}
 
 	/** Updates selection state and details area. */
@@ -681,10 +855,11 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		Check.instanceOf(sprintableEntity, CProjectItem.class, "Sprintable item must be a CEntityDB for Kanban board details display");
 		CDynamicPageRouter.displayEntityInDynamicOnepager((CProjectItem<?, ?>) sprintableEntity, currentEntityPageRouter, sessionService, this);
 		// Persist selected item ID (only if not restoring)
-		if (!isRestoring && persist_isEnabled()) {
-			persistValue("selectedSprintItemId", postit.getEntity().getId());
-			LOGGER.debug("Persisted selected sprint item ID: {}", postit.getEntity().getId());
+		if (!(!isRestoring && persist_isEnabled())) {
+			return;
 		}
+		persistValue("selectedSprintItemId", postit.getEntity().getId());
+		LOGGER.debug("Persisted selected sprint item ID: {}", postit.getEntity().getId());
 	}
 
 	private void openPostitPage(final CComponentKanbanPostit postit) {
@@ -734,10 +909,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 				findPostitBySprintItemId(sprintItemId).ifPresentOrElse(postit -> {
 					LOGGER.info("[Persistence] Found postit for sprint item {}, selecting it", sprintItemId);
 					on_postit_selected(postit);
-				}, () -> {
-					LOGGER.warn("[Persistence] No postit found for persisted sprint item ID: {}", sprintItemId);
-					return;
-				});
+				}, () -> LOGGER.warn("[Persistence] No postit found for persisted sprint item ID: {}", sprintItemId));
 			} catch (final Exception e) {
 				LOGGER.error("[Persistence] Error restoring selected sprint item reason={}", e.getMessage());
 			} finally {
@@ -809,6 +981,13 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	@Override
 	public void refreshComponent() {
 		LOGGER.info("[DragDrop] refreshComponent called - sprintItems size: {}", sprintItems != null ? sprintItems.size() : "null");
+		// Save compact states before destroying existing columns
+		final Map<Long, Boolean> compactStates = new HashMap<>();
+		for (final CComponentKanbanColumn col : getKanbanColumns()) {
+			if (col.getValue() != null && col.getValue().getId() != null && col.isCompactView()) {
+				compactStates.put(col.getValue().getId(), Boolean.TRUE);
+			}
+		}
 		layoutColumns.removeAll();
 		if (backlogNavigator != null) {
 			backlogNavigator.refreshData();
@@ -823,11 +1002,10 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		}
 		layoutColumns.removeClassName("kanban-status-board-mode");
 		ensureBacklogNavigator();
-		// Create regular kanban columns from the kanban line configuration
 		final List<CKanbanColumn> columns = new ArrayList<>(currentLine.getKanbanColumns());
 		columns.sort(Comparator.comparing(CKanbanColumn::getItemOrder, Comparator.nullsLast(Integer::compareTo)));
 		assignKanbanColumns(sprintItems, columns);
-		for (final CKanbanColumn column : columns) {
+		columns.forEach((final CKanbanColumn column) -> {
 			final CComponentKanbanColumn columnComponent = new CComponentKanbanColumn();
 			columnComponent.drag_setDragEnabled(true);
 			columnComponent.drag_setDropEnabled(true);
@@ -835,12 +1013,15 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			columnComponent.setStatusBoardMode(false);
 			setupSelectionNotification(columnComponent);
 			setupChildDragDropForwarding(columnComponent);
-			// ONE REFRESH ONLY: Set value BEFORE items to avoid double refresh
 			columnComponent.setValue(column);
+			// Restore compact state BEFORE setItems so postits are skipped when compact
+			if (Boolean.TRUE.equals(compactStates.get(column.getId()))) {
+				columnComponent.setCompactView(true);
+			}
 			LOGGER.info("[DragDrop] Setting {} items to column {}", sprintItems != null ? sprintItems.size() : "null", column.getName());
 			columnComponent.setItems(sprintItems);
 			layoutColumns.add(columnComponent);
-		}
+		});
 	}
 
 	/** Implements IContentOwner.refreshGrid() to refresh the kanban board when entity changes occur. This method is called by child components (e.g.,

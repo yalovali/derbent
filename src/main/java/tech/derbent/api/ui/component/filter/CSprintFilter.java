@@ -18,6 +18,7 @@ public class CSprintFilter extends CAbstractFilterComponent<CSprint> {
 	public static final String FILTER_KEY = "sprint";
 	private final CColorAwareComboBox<CSprint> comboBox;
 	private CSprint defaultSprint;
+	private boolean suppressEvents = false;
 
 	/** Creates a sprint filter.
 	 * <p>
@@ -33,7 +34,7 @@ public class CSprintFilter extends CAbstractFilterComponent<CSprint> {
 		comboBox.addThemeVariants(ComboBoxVariant.LUMO_SMALL);
 		comboBox.setClearButtonVisible(true);
 		comboBox.setPlaceholder("All sprints");
-		comboBox.addValueChangeListener(event -> notifyChangeListeners(event.getValue()));
+		comboBox.addValueChangeListener(event -> { if (!suppressEvents) notifyChangeListeners(event.getValue()); });
 	}
 
 	@Override
@@ -55,15 +56,17 @@ public class CSprintFilter extends CAbstractFilterComponent<CSprint> {
 	 * @throws IllegalArgumentException if sprints is null */
 	public void setAvailableSprints(final List<CSprint> sprints, final CSprint defaultSprint) {
 		Objects.requireNonNull(sprints, "Sprints list cannot be null");
-		comboBox.setItems(sprints);
-		this.defaultSprint = defaultSprint;
-		if (comboBox.getValue() != null && !sprints.contains(comboBox.getValue())) {
-			comboBox.clear();
-			notifyChangeListeners(null);
+		suppressEvents = true;
+		try {
+			comboBox.setItems(sprints);
+			this.defaultSprint = defaultSprint;
+			if (comboBox.getValue() != null && !sprints.contains(comboBox.getValue())) {
+				comboBox.clear();
+			}
+		} finally {
+			suppressEvents = false;
 		}
-		// Keep null as a valid "All sprints" selection; do not auto-select a sprint programmatically.
-
-
+		notifyChangeListeners(comboBox.getValue());
 	}
 
 	/** Shows or hides this filter based on the current board mode. */

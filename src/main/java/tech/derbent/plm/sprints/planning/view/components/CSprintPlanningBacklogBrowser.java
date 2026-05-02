@@ -170,6 +170,10 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 		gridParents.setContextActions(actions);
 	}
 
+	public void setShowParentTaskRollup(final boolean show) {
+		gridParents.setShowTaskRollup(show);
+	}
+
 	public void setBacklogMetrics(final CSprintPlanningSprintMetrics metrics) {
 		final CSprintPlanningSprintMetrics safeMetrics = metrics != null
 				? metrics

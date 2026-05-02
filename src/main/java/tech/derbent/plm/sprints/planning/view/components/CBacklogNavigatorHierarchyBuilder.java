@@ -1,5 +1,6 @@
 package tech.derbent.plm.sprints.planning.view.components;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.parentrelation.service.CHierarchyNavigationService;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntHierarchyResult;
+import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTimelineHeader.CGanttTimelineRange;
 import tech.derbent.plm.sprints.domain.CSprint;
 import tech.derbent.plm.sprints.planning.domain.ESprintPlanningScope;
 
@@ -177,6 +179,119 @@ public final class CBacklogNavigatorHierarchyBuilder {
 		return entity != null && CHierarchyNavigationService.getEntityLevel(entity) == -1;
 	}
 
+	/** Computes backlog-level metrics (done/total items and story points) from a list of leaf items.
+	 * @param leafItems Flat list of leaf CGnntItems already filtered for display
+	 * @return Metrics record with done/total counts and story points */
+	public static CSprintPlanningSprintMetrics computeBacklogMetrics(final List<CGnntItem> leafItems) {
+		if (leafItems == null || leafItems.isEmpty()) {
+			return new CSprintPlanningSprintMetrics(0, 0, 0, 0);
+		}
+		int total = 0;
+		int done = 0;
+		long spTotal = 0;
+		long spDone = 0;
+		for (final CGnntItem gnntItem : leafItems) {
+			final CProjectItem<?, ?> entity = gnntItem != null ? gnntItem.getEntity() : null;
+			if (entity == null) {
+				continue;
+			}
+			total++;
+			final boolean isDone = entity.getStatus() != null
+					&& Boolean.TRUE.equals(entity.getStatus().getFinalStatus());
+			if (isDone) {
+				done++;
+			}
+			if (entity instanceof final ISprintableItem si && si.getSprintItem() != null
+					&& si.getSprintItem().getStoryPoint() != null) {
+				final long points = si.getSprintItem().getStoryPoint();
+				spTotal += points;
+				if (isDone) {
+					spDone += points;
+				}
+			}
+		}
+		return new CSprintPlanningSprintMetrics(done, total, spDone, spTotal);
+	}
+
+	/** Computes per-parent rollup metrics by walking up the hierarchy from each leaf item.
+	 * @param leafItems         Flat list of visible leaf CGnntItems
+	 * @param hierarchyItemsByKey Full hierarchy map keyed by entity key
+	 * @return Map of parent entity key → rollup metrics */
+	public static Map<String, CSprintPlanningSprintMetrics> computeParentRollups(final List<CGnntItem> leafItems,
+			final Map<String, CProjectItem<?, ?>> hierarchyItemsByKey) {
+		if (leafItems == null || leafItems.isEmpty() || hierarchyItemsByKey == null || hierarchyItemsByKey.isEmpty()) {
+			return Map.of();
+		}
+		final Map<String, CSprintPlanningSprintMetrics> rollups = new HashMap<>();
+		for (final CGnntItem gnntItem : leafItems) {
+			final CProjectItem<?, ?> leaf = gnntItem != null ? gnntItem.getEntity() : null;
+			if (leaf == null) {
+				continue;
+			}
+			final boolean isDone = leaf.getStatus() != null && Boolean.TRUE.equals(leaf.getStatus().getFinalStatus());
+			long points = 0;
+			if (leaf instanceof final ISprintableItem si && si.getSprintItem() != null
+					&& si.getSprintItem().getStoryPoint() != null) {
+				points = si.getSprintItem().getStoryPoint();
+			}
+			String parentKey = CHierarchyNavigationService.buildParentKey(leaf);
+			while (parentKey != null) {
+				final CProjectItem<?, ?> parent = hierarchyItemsByKey.get(parentKey);
+				if (parent == null) {
+					break;
+				}
+				final CSprintPlanningSprintMetrics cur =
+						rollups.getOrDefault(parentKey, new CSprintPlanningSprintMetrics(0, 0, 0, 0));
+				rollups.put(parentKey, new CSprintPlanningSprintMetrics(cur.itemDoneCount() + (isDone ? 1 : 0),
+						cur.itemTotalCount() + 1, cur.storyPointsDone() + (isDone ? points : 0),
+						cur.storyPointsTotal() + points));
+				parentKey = CHierarchyNavigationService.buildParentKey(parent);
+			}
+		}
+		return rollups.isEmpty() ? Map.of() : Map.copyOf(rollups);
+	}
+
+	/** Computes per-parent rollup metrics from the FULL item hierarchy (backlog + sprint-assigned).
+	 * <p>Use this for kanban/backlog views that need to show total/done/active counts across all leaf items,
+	 * not just the items visible in the backlog panel.</p>
+	 * @param allItemsByKey Full hierarchy map keyed by entity key (all project items)
+	 * @return Map of parent entity key → rollup metrics with inSprintCount populated */
+	public static Map<String, CSprintPlanningSprintMetrics> computeParentRollupsAll(
+			final Map<String, CProjectItem<?, ?>> allItemsByKey) {
+		if (allItemsByKey == null || allItemsByKey.isEmpty()) {
+			return Map.of();
+		}
+		final Map<String, CSprintPlanningSprintMetrics> rollups = new HashMap<>();
+		for (final CProjectItem<?, ?> leaf : allItemsByKey.values()) {
+			if (CHierarchyNavigationService.getEntityLevel(leaf) != -1) {
+				continue;
+			}
+			final boolean isDone = leaf.getStatus() != null && Boolean.TRUE.equals(leaf.getStatus().getFinalStatus());
+			final boolean isInSprint = leaf instanceof final ISprintableItem si && si.getSprintItem() != null
+					&& si.getSprintItem().getSprint() != null;
+			long points = 0;
+			if (leaf instanceof final ISprintableItem si && si.getSprintItem() != null
+					&& si.getSprintItem().getStoryPoint() != null) {
+				points = si.getSprintItem().getStoryPoint();
+			}
+			String parentKey = CHierarchyNavigationService.buildParentKey(leaf);
+			while (parentKey != null) {
+				final CProjectItem<?, ?> parent = allItemsByKey.get(parentKey);
+				if (parent == null) {
+					break;
+				}
+				final CSprintPlanningSprintMetrics cur =
+						rollups.getOrDefault(parentKey, new CSprintPlanningSprintMetrics(0, 0, 0, 0));
+				rollups.put(parentKey,
+						new CSprintPlanningSprintMetrics(cur.itemDoneCount() + (isDone ? 1 : 0),
+								cur.itemTotalCount() + 1, cur.storyPointsDone() + (isDone ? points : 0),
+								cur.storyPointsTotal() + points, cur.inSprintCount() + (isInSprint ? 1 : 0)));
+				parentKey = CHierarchyNavigationService.buildParentKey(parent);
+			}
+		}
+		return rollups.isEmpty() ? Map.of() : Map.copyOf(rollups);
+	}
+
 	private static boolean isBacklogCandidate(final CProjectItem<?, ?> entity, final ESprintPlanningScope scope) {
 		if (scope == ESprintPlanningScope.ALL_ITEMS) {
 			return true;
@@ -186,5 +301,37 @@ public final class CBacklogNavigatorHierarchyBuilder {
 		}
 		final CSprint sprint = sprintableItem.getSprintItem() != null ? sprintableItem.getSprintItem().getSprint() : null;
 		return sprint == null;
+	}
+
+	/** Computes a timeline range that spans all provided item date ranges.
+	 * Falls back to today ±30 days when no items have dates.
+	 * @param itemGroups One or more item lists to consider (varargs for backlog + sprint items)
+	 * @return A timeline range wide enough to show all items */
+	@SafeVarargs
+	public static CGanttTimelineRange resolveTimelineRange(final List<CGnntItem>... itemGroups) {
+		LocalDate min = null;
+		LocalDate max = null;
+		for (final List<CGnntItem> items : itemGroups) {
+			if (items == null) {
+				continue;
+			}
+			for (final CGnntItem item : items) {
+				final LocalDate start = item.getStartDate();
+				final LocalDate end = item.getEndDate();
+				if (start != null && (min == null || start.isBefore(min))) {
+					min = start;
+				}
+				if (end != null && (max == null || end.isAfter(max))) {
+					max = end;
+				}
+			}
+		}
+		if (min == null) {
+			min = LocalDate.now().minusDays(30);
+		}
+		if (max == null || !max.isAfter(min)) {
+			max = min.plusDays(60);
+		}
+		return new CGanttTimelineRange(min, max);
 	}
 }

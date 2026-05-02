@@ -326,7 +326,17 @@ public class CGnntTimelineService {
 	}
 
 	private boolean matchesFilters(final CProjectItem<?, ?> entity, final CGnntBoardFilterCriteria filterCriteria) {
-		if (entity == null || filterCriteria == null || !filterCriteria.hasAnyFilter()) {
+		if (entity == null) {
+			return true;
+		}
+		// Always apply showClosed filter: hide final-status items unless showClosed=true
+		if (filterCriteria != null && !filterCriteria.isShowClosed()) {
+			final var status = entity.getStatus();
+			if (status != null && Boolean.TRUE.equals(status.getFinalStatus())) {
+				return false;
+			}
+		}
+		if (filterCriteria == null || !filterCriteria.hasAnyFilter()) {
 			return true;
 		}
 		if (filterCriteria.getEntityType() != null && !filterCriteria.getEntityType().equals(ProxyUtils.getUserClass(entity.getClass()))) {

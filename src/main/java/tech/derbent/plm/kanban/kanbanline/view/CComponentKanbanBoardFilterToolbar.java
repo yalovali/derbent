@@ -5,6 +5,7 @@ import java.util.Objects;
 import tech.derbent.api.ui.component.filter.CKanbanSearchFilter;
 import tech.derbent.api.ui.component.filter.CKanbanSprintScopeFilter;
 import tech.derbent.api.ui.component.filter.CResponsibleUserFilter;
+import tech.derbent.api.ui.component.filter.CShowClosedFilter;
 import tech.derbent.api.ui.component.filter.CUniversalFilterToolbar;
 import tech.derbent.plm.kanban.kanbanline.domain.EKanbanViewMode;
 import tech.derbent.plm.sprints.domain.CSprint;
@@ -20,6 +21,7 @@ public class CComponentKanbanBoardFilterToolbar extends CUniversalFilterToolbar<
 	private final CKanbanSprintScopeFilter sprintFilter;
 	private final CResponsibleUserFilter responsibleUserFilter;
 	private final CKanbanSearchFilter searchFilter;
+	private final CShowClosedFilter showClosedFilter;
 
 	/** Builds the filter toolbar and its components using composition. */
 	public CComponentKanbanBoardFilterToolbar() {
@@ -28,10 +30,12 @@ public class CComponentKanbanBoardFilterToolbar extends CUniversalFilterToolbar<
 		sprintFilter = new CKanbanSprintScopeFilter();
 		responsibleUserFilter = new CResponsibleUserFilter();
 		searchFilter = new CKanbanSearchFilter();
-		// Order: sprint → responsible → search
+		showClosedFilter = new CShowClosedFilter();
+		// Order: sprint → responsible → search → show closed
 		addFilterComponent(sprintFilter);
 		addFilterComponent(responsibleUserFilter);
 		addFilterComponent(searchFilter);
+		addFilterComponent(showClosedFilter);
 		build();
 	}
 
@@ -43,6 +47,8 @@ public class CComponentKanbanBoardFilterToolbar extends CUniversalFilterToolbar<
 	public CResponsibleUserFilter getResponsibleUserFilter() { return responsibleUserFilter; }
 
 	public CKanbanSearchFilter getSearchFilter() { return searchFilter; }
+
+	public CShowClosedFilter getShowClosedFilter() { return showClosedFilter; }
 
 	public CKanbanSprintScopeFilter getSprintFilter() { return sprintFilter; }
 

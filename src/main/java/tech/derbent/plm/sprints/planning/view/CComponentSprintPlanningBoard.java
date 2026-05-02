@@ -206,15 +206,15 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 
 	private CBacklogNavigatorHierarchyBuilder.CBacklogData buildBacklogData(final Map<String, CProjectItem<?, ?>> hierarchyItemsByKey) {
 		final ESprintPlanningScope scope = filterToolbar.getScope();
-		if (scope == ESprintPlanningScope.SPRINT) {
-			// In sprint scope we keep backlog empty to focus on the sprint tree.
-			final CGnntHierarchyResult empty = new CGnntHierarchyResult(List.of(), Map.of(), List.of());
-			return new CBacklogNavigatorHierarchyBuilder.CBacklogData(empty, empty);
+		if (scope != ESprintPlanningScope.SPRINT) {
+			return CBacklogNavigatorHierarchyBuilder.buildBacklogData(hierarchyItemsByKey, scope,
+					filterToolbar::shouldIncludeBacklogParentItem,
+					filterToolbar::shouldIncludeBacklogItem,
+					CComponentSprintPlanningBoard::resolveItemOrder);
 		}
-		return CBacklogNavigatorHierarchyBuilder.buildBacklogData(hierarchyItemsByKey, scope,
-				filterToolbar::shouldIncludeBacklogParentItem,
-				filterToolbar::shouldIncludeBacklogItem,
-				CComponentSprintPlanningBoard::resolveItemOrder);
+		// In sprint scope we keep backlog empty to focus on the sprint tree.
+		final CGnntHierarchyResult empty = new CGnntHierarchyResult(List.of(), Map.of(), List.of());
+		return new CBacklogNavigatorHierarchyBuilder.CBacklogData(empty, empty);
 	}
 
 	private List<CContextActionDefinition<CGnntItem>> buildLeafQuickActions() {
@@ -599,20 +599,6 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 			}
 		}
 		return itemsByKey;
-	}
-
-	private LocalDate maxDate(final LocalDate current, final LocalDate candidate) {
-		if (candidate == null) {
-			return current;
-		}
-		return current == null || candidate.isAfter(current) ? candidate : current;
-	}
-
-	private LocalDate minDate(final LocalDate current, final LocalDate candidate) {
-		if (candidate == null) {
-			return current;
-		}
-		return current == null || candidate.isBefore(current) ? candidate : current;
 	}
 
 	private void moveSprintItemToBacklog(final CGnntItem context) {
@@ -1007,7 +993,7 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 			final CSprintPlanningViewEntity view = getValue();
 			if (view == null || view.getProject() == null) {
 				final CGnntHierarchyResult emptyHierarchy = new CGnntHierarchyResult(List.of(), Map.of(), List.of());
-				final CGanttTimelineRange emptyRange = new CGanttTimelineRange(LocalDate.now(), LocalDate.now());
+				final CGanttTimelineRange emptyRange = CBacklogNavigatorHierarchyBuilder.resolveTimelineRange(List.of());
 				backlogBrowser.setBacklogData(emptyHierarchy, emptyHierarchy, Map.of(), emptyRange);
 				backlogBrowser.setParentRollupSummaries(Map.of());
 				gridSprints.setHierarchy(emptyHierarchy, emptyRange);
@@ -1157,23 +1143,7 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 
 	private CGanttTimelineRange resolveTimelineRange(final List<CGnntItem> backlogItems,
 			final List<CGnntItem> sprintItems) {
-		LocalDate min = null;
-		LocalDate max = null;
-		for (final CGnntItem item : backlogItems) {
-			min = minDate(min, item.getStartDate());
-			max = maxDate(max, item.getEndDate());
-		}
-		for (final CGnntItem item : sprintItems) {
-			min = minDate(min, item.getStartDate());
-			max = maxDate(max, item.getEndDate());
-		}
-		if (min == null) {
-			min = LocalDate.now().minusDays(7);
-		}
-		if (max == null) {
-			max = LocalDate.now().plusDays(14);
-		}
-		return new CGanttTimelineRange(min, max);
+		return CBacklogNavigatorHierarchyBuilder.resolveTimelineRange(backlogItems, sprintItems);
 	}
 
 	private void restoreSelectionAfterRefresh(final CEntityDB<?> savedEntity) {

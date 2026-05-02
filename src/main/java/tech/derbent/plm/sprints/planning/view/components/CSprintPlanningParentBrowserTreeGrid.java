@@ -24,8 +24,8 @@ import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTimelineHeader.
 public final class CSprintPlanningParentBrowserTreeGrid
 		extends CAbstractSprintPlanningTreeGridBase {
 
-	private Map<String, CSprintPlanningSprintMetrics> rollupMetricsByEntityKey =
-			Map.of();
+	private Map<String, CSprintPlanningSprintMetrics> rollupMetricsByEntityKey = Map.of();
+	private boolean showTaskRollup = false;
 	// Cached by-key map so the board can restore selection after saving entities.
 	private Map<String, CGnntItem> itemByKey = Map.of();
 
@@ -86,10 +86,11 @@ public final class CSprintPlanningParentBrowserTreeGrid
 				item.getColorCode());
 		layout.add(iconComponent, name);
 
-		final CSprintPlanningSprintMetrics rollup = item != null
-				? rollupMetricsByEntityKey.get(item.getEntityKey()) : null;
+		final CSprintPlanningSprintMetrics rollup =
+				item != null ? rollupMetricsByEntityKey.get(item.getEntityKey()) : null;
 		if (rollup != null) {
-			final Span summary = new Span("  " + rollup.formatRollup());
+			final String text = showTaskRollup ? rollup.formatTaskRollup() : "  " + rollup.formatRollup();
+			final Span summary = new Span(text);
 			summary.getStyle().set("font-size", "var(--lumo-font-size-xs)")
 					.set("color", "var(--lumo-secondary-text-color)")
 					.set("white-space", "nowrap");
@@ -145,6 +146,12 @@ public final class CSprintPlanningParentBrowserTreeGrid
 				rollupMetricsByEntityKey != null ? rollupMetricsByEntityKey : Map.of();
 		// Metrics are rendered in component columns, so a provider refresh is enough.
 		getTreeGrid().getDataProvider().refreshAll();
+	}
+
+	/** Configures whether parent names show [done/total Tasks] rollup instead of the full SP rollup.
+	 * @param show true for [X/Y Tasks] format; false (default) for full "X/Y tasks, Z/W SP" format */
+	public void setShowTaskRollup(final boolean show) {
+		this.showTaskRollup = show;
 	}
 
 	@Override
