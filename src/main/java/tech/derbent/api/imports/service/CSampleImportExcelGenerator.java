@@ -88,7 +88,7 @@ public final class CSampleImportExcelGenerator {
         addActivityRow(sheet, 5, dateStyle,
                 "Design login screen",
                 "Create wireframes for the login page\n- include MFA enrollment\n- validate error states",
-                "Open",
+                "To Do",
                 "Design",
                 LocalDate.of(2025, 6, 15),
                 "8",
@@ -108,7 +108,7 @@ public final class CSampleImportExcelGenerator {
         addActivityRow(sheet, 7, dateStyle,
                 "Write unit tests",
                 "Cover authentication service with tests; include edge cases (Safari, iOS)",
-                "Open",
+                "To Do",
                 "Testing",
                 LocalDate.of(2025, 6, 25),
                 "4.5",
@@ -147,21 +147,21 @@ public final class CSampleImportExcelGenerator {
         addIssueRow(sheet, 4, dateStyle,
                 "Login button broken on Safari",
                 "Login button does not respond on Safari 16\nRepro: iPhone 15 Pro / iOS 19",
-                "Open",
+                "To Do",
                 "Bug",
                 LocalDate.of(2025, 6, 10));
 
         addIssueRow(sheet, 5, dateStyle,
                 "Improve dashboard load time",
                 "Dashboard takes > 5s to load with 100+ projects",
-                "Open",
+                "To Do",
                 "Improvement",
                 LocalDate.of(2025, 6, 30));
 
         addIssueRow(sheet, 6, dateStyle,
                 "Missing export button in reports",
                 "Add CSV export to all report pages",
-                "Open",
+                "To Do",
                 "Feature Request",
                 LocalDate.of(2025, 7, 5));
 
