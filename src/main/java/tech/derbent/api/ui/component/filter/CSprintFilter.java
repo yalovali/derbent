@@ -31,6 +31,8 @@ public class CSprintFilter extends CAbstractFilterComponent<CSprint> {
 		comboBox.setWidth("160px");
 		comboBox.getStyle().set("min-width", "0");
 		comboBox.addThemeVariants(ComboBoxVariant.LUMO_SMALL);
+		comboBox.setClearButtonVisible(true);
+		comboBox.setPlaceholder("All sprints");
 		comboBox.addValueChangeListener(event -> notifyChangeListeners(event.getValue()));
 	}
 
@@ -55,17 +57,13 @@ public class CSprintFilter extends CAbstractFilterComponent<CSprint> {
 		Objects.requireNonNull(sprints, "Sprints list cannot be null");
 		comboBox.setItems(sprints);
 		this.defaultSprint = defaultSprint;
-		if (defaultSprint != null && sprints.contains(defaultSprint)) {
-			comboBox.setValue(defaultSprint);
-			notifyChangeListeners(defaultSprint);
-		} else if (comboBox.getValue() != null && !sprints.contains(comboBox.getValue())) {
+		if (comboBox.getValue() != null && !sprints.contains(comboBox.getValue())) {
 			comboBox.clear();
 			notifyChangeListeners(null);
 		}
-		if (comboBox.getValue() == null && !sprints.isEmpty()) {
-			comboBox.setValue(sprints.get(0));
-			notifyChangeListeners(sprints.get(0));
-		}
+		// Keep null as a valid "All sprints" selection; do not auto-select a sprint programmatically.
+
+
 	}
 
 	/** Shows or hides this filter based on the current board mode. */
@@ -80,18 +78,20 @@ public class CSprintFilter extends CAbstractFilterComponent<CSprint> {
 
 	@Override
 	public void valuePersist_enable(final String storageId) {
-		// Enable persistence for Sprint ComboBox
-		CValueStorageHelper.valuePersist_enable(comboBox, storageId + "_" + FILTER_KEY, sprint -> {
-			// Converter: find sprint by ID
-			if (sprint == null || sprint.isBlank()) {
-				return null;
-			}
-			try {
-				final Long sprintId = Long.parseLong(sprint);
-				return comboBox.getListDataView().getItems().filter(s -> s.getId() != null && s.getId().equals(sprintId)).findFirst().orElse(null);
-			} catch (final NumberFormatException e) {
-				return null;
-			}
-		});
+		CValueStorageHelper.valuePersist_enable(comboBox, storageId + "_" + FILTER_KEY,
+				value -> value != null && value.getId() != null ? value.getId().toString() : "ALL",
+				stored -> {
+					if (stored == null || stored.isBlank() || "ALL".equalsIgnoreCase(stored)) {
+						return null;
+					}
+					try {
+						final Long sprintId = Long.parseLong(stored);
+						return comboBox.getListDataView().getItems()
+								.filter(s -> s != null && s.getId() != null && s.getId().equals(sprintId))
+								.findFirst().orElse(null);
+					} catch (final NumberFormatException e) {
+						return null;
+					}
+				});
 	}
 }

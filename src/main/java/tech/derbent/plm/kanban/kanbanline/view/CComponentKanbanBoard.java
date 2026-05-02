@@ -43,7 +43,6 @@ import tech.derbent.api.ui.component.enhanced.CComponentBacklog;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
 import tech.derbent.api.ui.component.enhanced.CContextActionDefinition;
 import tech.derbent.api.ui.component.filter.CAbstractFilterToolbar;
-import tech.derbent.api.ui.component.filter.CEntityTypeFilter;
 import tech.derbent.api.ui.component.filter.CKanbanSearchFilter;
 import tech.derbent.api.ui.component.filter.CKanbanSprintMembershipFilter;
 import tech.derbent.api.ui.component.filter.CResponsibleUserFilter;
@@ -172,37 +171,26 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		final CKanbanLine currentLine = getValue();
 		Check.notNull(currentLine, "Kanban line must be set before applying filters");
 		final CAbstractFilterToolbar.FilterCriteria<CSprintItem> criteria = filterToolbar.getCurrentCriteria();
-		final EKanbanViewMode newMode = filterToolbar.getCurrentMode();
-		final boolean modeChanged = newMode != currentMode;
-		if (modeChanged) {
-			currentMode = newMode;
-		}
+		final CSprint sprint = criteria.getValue(CSprintFilter.FILTER_KEY);
+		final boolean sprintChanged = !isSameSprint(sprint);
 		boolean dataReloaded = false;
-		if (newMode == EKanbanViewMode.STATUS_BOARD) {
-			if (modeChanged) {
-				final CProject<?> project = sessionService.getActiveProject().orElse(null);
-				if (project != null) {
-					loadAllProjectItems(project);
-				} else {
-					allSprintItems = new ArrayList<>();
-					filterToolbar.setAvailableItems(allSprintItems);
-				}
-				dataReloaded = true;
-			}
-		} else {
-			// SPRINT_BOARD mode
-			final CSprint sprint = criteria.getValue(CSprintFilter.FILTER_KEY);
-			final boolean sprintChanged = modeChanged || !isSameSprint(sprint);
-			if (sprintChanged) {
-				LOGGER.info("[Performance] Sprint changed, reloading items from database");
-				currentSprint = sprint;
+		if (sprintChanged) {
+			currentSprint = sprint;
+			final CProject<?> project = sessionService.getActiveProject().orElse(null);
+			if (currentSprint != null && currentSprint.getId() != null) {
 				loadSprintItemsForSprint(currentSprint);
-				dataReloaded = true;
+			} else if (project != null) {
+				// "All sprints" mode: show every project item (in sprint + backlog)
+				loadAllProjectItems(project);
+			} else {
+				allSprintItems = new ArrayList<>();
+				filterToolbar.setAvailableItems(allSprintItems);
 			}
+			dataReloaded = true;
 		}
 		final List<CSprintItem> newFilteredItems = filterSprintItems(criteria);
 		final boolean itemsChanged = !newFilteredItems.equals(sprintItems);
-		if (modeChanged || dataReloaded || itemsChanged) {
+		if (dataReloaded || itemsChanged) {
 			LOGGER.info("[Performance] Items changed, refreshing component");
 			sprintItems = newFilteredItems;
 			refreshComponent();
@@ -367,10 +355,10 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	/** Filters sprint items based on the provided criteria. */
 	private List<CSprintItem> filterSprintItems(final CAbstractFilterToolbar.FilterCriteria<CSprintItem> criteria) {
 		final List<CSprintItem> filtered = new ArrayList<>();
-		final Class<?> entityType = criteria.getValue(CEntityTypeFilter.FILTER_KEY);
+		final Class<?> entityType = null;
 		final CResponsibleUserFilter.ResponsibleFilterMode responsibleMode = criteria.getValue(CResponsibleUserFilter.FILTER_KEY);
 		final String searchQuery = criteria.getValue(CKanbanSearchFilter.FILTER_KEY);
-		final CKanbanSprintMembershipFilter.MembershipMode membershipMode = criteria.getValue(CKanbanSprintMembershipFilter.FILTER_KEY);
+		final CKanbanSprintMembershipFilter.MembershipMode membershipMode = CKanbanSprintMembershipFilter.MembershipMode.ALL;
 		for (final CSprintItem sprintItem : allSprintItems) {
 			if (sprintItem == null || sprintItem.getParentItem() == null) {
 				continue;
@@ -544,7 +532,11 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			final CSprint defaultSprint = resolveDefaultSprint(availableSprints);
 			filterToolbar.setAvailableSprints(availableSprints, defaultSprint);
 			currentSprint = filterToolbar.getCurrentCriteria().getValue(CSprintFilter.FILTER_KEY);
-			loadSprintItemsForSprint(currentSprint);
+			if (currentSprint != null && currentSprint.getId() != null) {
+				loadSprintItemsForSprint(currentSprint);
+			} else {
+				loadAllProjectItems(project);
+			}
 		} catch (final Exception e) {
 			LOGGER.error("Failed to load sprints for Kanban board reason={}", e.getMessage());
 			filterToolbar.setAvailableSprints(List.of(), null);
@@ -747,15 +739,10 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			layoutColumns.add(div);
 			return;
 		}
-		final boolean isStatusBoard = getCurrentMode() == EKanbanViewMode.STATUS_BOARD;
-		if (isStatusBoard) {
-			layoutColumns.addClassName("kanban-status-board-mode");
-		} else {
-			layoutColumns.removeClassName("kanban-status-board-mode");
-		}
-		// Backlog column only in Sprint Board mode
-		if (!isStatusBoard && currentSprint != null && currentSprint.getProject() != null) {
-			backlogColumn = createBacklogColumn(currentSprint.getProject());
+		layoutColumns.removeClassName("kanban-status-board-mode");
+		final CProject<?> project = sessionService.getActiveProject().orElse(currentSprint != null ? currentSprint.getProject() : null);
+		if (project != null) {
+			backlogColumn = createBacklogColumn(project);
 			layoutColumns.add(backlogColumn);
 		}
 		// Create regular kanban columns from the kanban line configuration
@@ -767,7 +754,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			columnComponent.drag_setDragEnabled(true);
 			columnComponent.drag_setDropEnabled(true);
 			columnComponent.setPostitContextActions(buildPostitContextActions());
-			columnComponent.setStatusBoardMode(isStatusBoard);
+			columnComponent.setStatusBoardMode(false);
 			setupSelectionNotification(columnComponent);
 			setupChildDragDropForwarding(columnComponent);
 			// ONE REFRESH ONLY: Set value BEFORE items to avoid double refresh
@@ -803,21 +790,17 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	public void reloadSprintItems() {
 		LOGGER.info("[DragDrop] reloadSprintItems called, mode={}", currentMode);
 		final CAbstractFilterToolbar.FilterCriteria<CSprintItem> criteria = filterToolbar.getCurrentCriteria();
-		if (getCurrentMode() == EKanbanViewMode.STATUS_BOARD) {
-			final CProject<?> project = sessionService.getActiveProject().orElse(null);
-			if (project != null) {
-				loadAllProjectItems(project);
-			}
-			sprintItems = filterSprintItems(criteria);
+		final CProject<?> project = sessionService.getActiveProject().orElse(null);
+		if (currentSprint != null && currentSprint.getId() != null) {
+			loadSprintItemsForSprint(currentSprint);
+		} else if (project != null) {
+			loadAllProjectItems(project);
 		} else {
-			if (currentSprint != null && currentSprint.getId() != null) {
-				loadSprintItemsForSprint(currentSprint);
-				sprintItems = filterSprintItems(criteria);
-				LOGGER.info("[DragDrop] After filterSprintItems - sprintItems size: {}", sprintItems != null ? sprintItems.size() : "null");
-			} else {
-				LOGGER.warn("[DragDrop] reloadSprintItems called but currentSprint is null or has no ID");
-			}
+			allSprintItems = new ArrayList<>();
+			filterToolbar.setAvailableItems(allSprintItems);
 		}
+		sprintItems = filterSprintItems(criteria);
+		LOGGER.info("[DragDrop] After filterSprintItems - sprintItems size: {}", sprintItems != null ? sprintItems.size() : "null");
 	}
 
 	/** Picks the newest sprint as default. */

@@ -218,9 +218,11 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			Check.notNull(targetColumn, "Target column cannot be resolved for backlog to column drop");
 			LOGGER.info("[DragDrop] Target column resolved: {} (id: {})", targetColumn.getName(), targetColumn.getId());
 			// Get current sprint from board
-			final @Nonnull CSprint currentSprint = componentKanbanBoard != null ? componentKanbanBoard.getCurrentSprint() : null;
-			Check.notNull(currentSprint, "No sprint selected - cannot add backlog item to sprint");
-			Check.notNull(currentSprint.getId(), "Current sprint must be persisted");
+			final CSprint currentSprint = componentKanbanBoard != null ? componentKanbanBoard.getCurrentSprint() : null;
+			if (currentSprint == null || currentSprint.getId() == null) {
+				CNotificationService.showInfo("Select a sprint to add backlog items to a sprint");
+				return;
+			}
 			LOGGER.info("[DragDrop] Current sprint: {} (id: {})", currentSprint.getName(), currentSprint.getId());
 			// Update the existing sprint item owned by the parent (Activity/Meeting)
 			final CSprintItemService sprintItemService = CSpringContext.getBean(CSprintItemService.class);
