@@ -53,8 +53,8 @@ public class CSystemInitExcelBootstrapService {
 	private static final String SEED_COMPANY_NAME = "Of Teknoloji Çözümleri";
 	private static final String SEED_COMPANY_NAME_SECOND = "Derbent Consulting";
 	// Keep these aligned with src/main/resources/excel/system_init.xlsx company/project tokens.
-	private static final List<String> SEED_PROJECT_NAMES = List.of("Derbent PM Demo", "Derbent API Platform",
-			"BAB Integration Program");
+	private static final List<String> SEED_PROJECT_NAMES =
+			List.of("Derbent PM Demo", "Derbent API Platform", "BAB Integration Program");
 	private static final String SEED_PROJECT_TYPE_NAME = "Default Project Type";
 	private static final String SEED_STATUS_FROM_NAME = "Seed Start";
 	private static final String SEED_STATUS_TO_NAME = "Open";
@@ -115,8 +115,8 @@ public class CSystemInitExcelBootstrapService {
 		final byte[] workbookBytes = loadTemplateBytes(minimal);
 		final CImportOptions options = CImportOptions.defaults();
 		options.setDryRun(false);
-		options.setRollbackOnError(true);
-		options.setSkipUnknownSheets(true);
+		options.setRollbackOnError(false);
+		options.setSkipUnknownSheets(false);
 		int companiesProcessed = 0;
 		int projectsProcessed = 0;
 		int totalSuccess = 0;

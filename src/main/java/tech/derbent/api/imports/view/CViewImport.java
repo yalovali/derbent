@@ -118,7 +118,7 @@ public final class CViewImport extends CAbstractPage {
 		rollbackOnErrorCheckbox = new Checkbox("Roll back all on any error");
 		rollbackOnErrorCheckbox.setValue(false);
 		skipUnknownSheetsCheckbox = new Checkbox("Skip unrecognized sheet names");
-		skipUnknownSheetsCheckbox.setValue(true);
+		skipUnknownSheetsCheckbox.setValue(false);
 		final HorizontalLayout opts =
 				new HorizontalLayout(dryRunCheckbox, rollbackOnErrorCheckbox, skipUnknownSheetsCheckbox);
 		opts.setSpacing(true);
