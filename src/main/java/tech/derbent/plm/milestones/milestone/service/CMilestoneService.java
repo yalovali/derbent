@@ -21,7 +21,7 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.milestones.milestone.domain.CMilestone;
 import tech.derbent.plm.milestones.milestonetype.service.CMilestoneTypeService;
 
-@Profile({"derbent", "default"})
+@Profile({"derbent", "bab", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll

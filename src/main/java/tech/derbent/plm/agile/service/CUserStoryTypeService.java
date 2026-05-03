@@ -21,7 +21,7 @@ import tech.derbent.plm.agile.domain.CUserStoryType;
  * <p>User-story types default to leaf semantics, so validation explicitly guards against turning a
  * leaf type into a parent-capable type without also changing its hierarchy level.</p>
  */
-@Profile({"derbent", "default"})
+@Profile({"derbent", "bab", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)

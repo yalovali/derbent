@@ -38,7 +38,12 @@ public final class CSystemInitExcelGenerator {
         createIssueTypeSheet(wb);
         createMeetingTypeSheet(wb);
         createDecisionTypeSheet(wb);
+        createEpicTypeSheet(wb);
+        createFeatureTypeSheet(wb);
         createUserStoryTypeSheet(wb);
+        createRequirementTypeSheet(wb);
+        createMilestoneTypeSheet(wb);
+        createDeliverableTypeSheet(wb);
         createSprintTypeSheet(wb);
         createTicketPrioritySheet(wb);
         createTicketTypeSheet(wb);
@@ -51,7 +56,12 @@ public final class CSystemInitExcelGenerator {
             // Project items (owners/parents for later child/relationship sheets).
             CSampleImportExcelGenerator.createActivitySheet(wb);
             CSampleImportExcelGenerator.createIssueSheet(wb);
+            createEpicSheet(wb);
+            createFeatureSheet(wb);
             createUserStorySheet(wb);
+            createRequirementSheet(wb);
+            createMilestoneSheet(wb);
+            createDeliverableSheet(wb);
             createSprintSheet(wb);
             createMeetingSheet(wb);
             createDecisionSheet(wb);
@@ -292,6 +302,99 @@ public final class CSystemInitExcelGenerator {
         }
     }
 
+    private static void createEpicTypeSheet(final Workbook wb) {
+        final Sheet sheet = wb.createSheet("Epic Type");
+        final CellStyle headerStyle = CSampleImportExcelGenerator.createHeaderStyle(wb);
+        final CellStyle commentStyle = CSampleImportExcelGenerator.createCommentStyle(wb);
+
+        CSampleImportExcelGenerator.addRow(sheet, 0, commentStyle, "# Epic Types");
+        CSampleImportExcelGenerator.addRow(sheet, 1, commentStyle,
+                "# Columns: Name (required), Color, Sort Order, Level, Can Have Children, Non Deletable, Workflow");
+        CSampleImportExcelGenerator.addRow(sheet, 2, headerStyle,
+                "Name", "Color", "Sort Order", "Level", "Can Have Children", "Non Deletable", "Workflow");
+
+        CSampleImportExcelGenerator.addRow(sheet, 3, null, "Feature Epic", "#6F42C1", "10", "0", "true", "false", "Agile Item Workflow");
+        CSampleImportExcelGenerator.addRow(sheet, 4, null, "Technical Epic", "#007BFF", "20", "0", "true", "false", "Agile Item Workflow");
+
+        for (int col = 0; col <= 6; col++) {
+            sheet.autoSizeColumn(col);
+        }
+    }
+
+    private static void createFeatureTypeSheet(final Workbook wb) {
+        final Sheet sheet = wb.createSheet("Feature Type");
+        final CellStyle headerStyle = CSampleImportExcelGenerator.createHeaderStyle(wb);
+        final CellStyle commentStyle = CSampleImportExcelGenerator.createCommentStyle(wb);
+
+        CSampleImportExcelGenerator.addRow(sheet, 0, commentStyle, "# Feature Types");
+        CSampleImportExcelGenerator.addRow(sheet, 1, commentStyle,
+                "# Columns: Name (required), Color, Sort Order, Level, Can Have Children, Non Deletable, Workflow");
+        CSampleImportExcelGenerator.addRow(sheet, 2, headerStyle,
+                "Name", "Color", "Sort Order", "Level", "Can Have Children", "Non Deletable", "Workflow");
+
+        CSampleImportExcelGenerator.addRow(sheet, 3, null, "UI Feature", "#28A745", "10", "1", "true", "false", "Agile Item Workflow");
+        CSampleImportExcelGenerator.addRow(sheet, 4, null, "Backend Feature", "#007BFF", "20", "1", "true", "false", "Agile Item Workflow");
+
+        for (int col = 0; col <= 6; col++) {
+            sheet.autoSizeColumn(col);
+        }
+    }
+
+    private static void createRequirementTypeSheet(final Workbook wb) {
+        final Sheet sheet = wb.createSheet("Requirement Type");
+        final CellStyle headerStyle = CSampleImportExcelGenerator.createHeaderStyle(wb);
+        final CellStyle commentStyle = CSampleImportExcelGenerator.createCommentStyle(wb);
+
+        CSampleImportExcelGenerator.addRow(sheet, 0, commentStyle, "# Requirement Types");
+        CSampleImportExcelGenerator.addRow(sheet, 1, commentStyle,
+                "# Columns: Name (required), Color, Sort Order, Level, Can Have Children, Non Deletable, Workflow");
+        CSampleImportExcelGenerator.addRow(sheet, 2, headerStyle,
+                "Name", "Color", "Sort Order", "Level", "Can Have Children", "Non Deletable", "Workflow");
+
+        CSampleImportExcelGenerator.addRow(sheet, 3, null, "Business Requirement", "#7B5EA7", "10", "-1", "false", "false", "Default Workflow");
+        CSampleImportExcelGenerator.addRow(sheet, 4, null, "Technical Requirement", "#007BFF", "20", "-1", "false", "false", "Default Workflow");
+
+        for (int col = 0; col <= 6; col++) {
+            sheet.autoSizeColumn(col);
+        }
+    }
+
+    private static void createMilestoneTypeSheet(final Workbook wb) {
+        final Sheet sheet = wb.createSheet("Milestone Type");
+        final CellStyle headerStyle = CSampleImportExcelGenerator.createHeaderStyle(wb);
+        final CellStyle commentStyle = CSampleImportExcelGenerator.createCommentStyle(wb);
+
+        CSampleImportExcelGenerator.addRow(sheet, 0, commentStyle, "# Milestone Types");
+        CSampleImportExcelGenerator.addRow(sheet, 1, commentStyle,
+                "# Columns: Name (required), Color, Sort Order, Level, Can Have Children, Non Deletable, Workflow");
+        CSampleImportExcelGenerator.addRow(sheet, 2, headerStyle,
+                "Name", "Color", "Sort Order", "Level", "Can Have Children", "Non Deletable", "Workflow");
+
+        CSampleImportExcelGenerator.addRow(sheet, 3, null, "Release Milestone", "#4B4382", "10", "-1", "false", "false", "Default Workflow");
+
+        for (int col = 0; col <= 6; col++) {
+            sheet.autoSizeColumn(col);
+        }
+    }
+
+    private static void createDeliverableTypeSheet(final Workbook wb) {
+        final Sheet sheet = wb.createSheet("Deliverable Type");
+        final CellStyle headerStyle = CSampleImportExcelGenerator.createHeaderStyle(wb);
+        final CellStyle commentStyle = CSampleImportExcelGenerator.createCommentStyle(wb);
+
+        CSampleImportExcelGenerator.addRow(sheet, 0, commentStyle, "# Deliverable Types");
+        CSampleImportExcelGenerator.addRow(sheet, 1, commentStyle,
+                "# Columns: Name (required), Color, Sort Order, Level, Can Have Children, Non Deletable, Workflow");
+        CSampleImportExcelGenerator.addRow(sheet, 2, headerStyle,
+                "Name", "Color", "Sort Order", "Level", "Can Have Children", "Non Deletable", "Workflow");
+
+        CSampleImportExcelGenerator.addRow(sheet, 3, null, "Document", "#BC8F8F", "10", "-1", "false", "false", "Default Workflow");
+
+        for (int col = 0; col <= 6; col++) {
+            sheet.autoSizeColumn(col);
+        }
+    }
+
     private static void createUserStoryTypeSheet(final Workbook wb) {
         final Sheet sheet = wb.createSheet("User Story Type");
         final CellStyle headerStyle = CSampleImportExcelGenerator.createHeaderStyle(wb);
@@ -364,6 +467,143 @@ public final class CSystemInitExcelGenerator {
         CSampleImportExcelGenerator.addRow(sheet, 4, null, "Bug", "#D32F2F", "20", "-1", "false", "false", "Agile Item Workflow");
 
         for (int col = 0; col <= 6; col++) {
+            sheet.autoSizeColumn(col);
+        }
+    }
+
+    private static void createEpicSheet(final Workbook wb) {
+        final Sheet sheet = wb.createSheet("Epic");
+        final CellStyle headerStyle = CSampleImportExcelGenerator.createHeaderStyle(wb);
+        final CellStyle commentStyle = CSampleImportExcelGenerator.createCommentStyle(wb);
+
+        CSampleImportExcelGenerator.addRow(sheet, 0, commentStyle, "# Epic import sheet (agile hierarchy root)");
+        CSampleImportExcelGenerator.addRow(sheet, 1, commentStyle,
+                "# Columns: Name (required), Description, Status, Epic Type, Start Date, Due Date, Completion Date, Progress %, Story Points, Assigned To, Acceptance Criteria, Notes, Results");
+        CSampleImportExcelGenerator.addRow(sheet, 2, headerStyle,
+                "Name", "Description", "Status", "Epic Type", "Start Date", "Due Date", "Completion Date", "Progress %",
+                "Story Points", "Assigned To", "Acceptance Criteria", "Notes", "Results");
+
+        CSampleImportExcelGenerator.addRow(sheet, 3, null,
+                "Project Management Core",
+                "Deliver a complete PM suite: agile boards + requirements + milestones + deliverables.",
+                "In Progress",
+                "Feature Epic",
+                "2025-06-01",
+                "2025-07-31",
+                "",
+                "35",
+                "34",
+                "admin",
+                "All core entity types importable; screens and workflows configured; metrics visible",
+                "",
+                "");
+
+        for (int col = 0; col <= 12; col++) {
+            sheet.autoSizeColumn(col);
+        }
+    }
+
+    private static void createFeatureSheet(final Workbook wb) {
+        final Sheet sheet = wb.createSheet("Feature");
+        final CellStyle headerStyle = CSampleImportExcelGenerator.createHeaderStyle(wb);
+        final CellStyle commentStyle = CSampleImportExcelGenerator.createCommentStyle(wb);
+
+        CSampleImportExcelGenerator.addRow(sheet, 0, commentStyle, "# Feature import sheet (agile hierarchy mid-level)");
+        CSampleImportExcelGenerator.addRow(sheet, 1, commentStyle,
+                "# Columns: Name (required), Description, Status, Feature Type, Start Date, Due Date, Completion Date, Progress %, Story Points, Assigned To, Acceptance Criteria, Notes, Results");
+        CSampleImportExcelGenerator.addRow(sheet, 2, headerStyle,
+                "Name", "Description", "Status", "Feature Type", "Start Date", "Due Date", "Completion Date", "Progress %",
+                "Story Points", "Assigned To", "Acceptance Criteria", "Notes", "Results");
+
+        CSampleImportExcelGenerator.addRow(sheet, 3, null,
+                "Excel import for all project items",
+                "Import types first, then items; support re-runnable upserts by name.",
+                "In Progress",
+                "Backend Feature",
+                "2025-06-01",
+                "2025-06-30",
+                "",
+                "50",
+                "13",
+                "admin",
+                "All sample sheets import without FK errors; dry-run shows per-row results",
+                "",
+                "");
+
+        for (int col = 0; col <= 12; col++) {
+            sheet.autoSizeColumn(col);
+        }
+    }
+
+    private static void createRequirementSheet(final Workbook wb) {
+        final Sheet sheet = wb.createSheet("Requirement");
+        final CellStyle headerStyle = CSampleImportExcelGenerator.createHeaderStyle(wb);
+        final CellStyle commentStyle = CSampleImportExcelGenerator.createCommentStyle(wb);
+
+        CSampleImportExcelGenerator.addRow(sheet, 0, commentStyle, "# Requirement import sheet (project items)");
+        CSampleImportExcelGenerator.addRow(sheet, 1, commentStyle,
+                "# Columns: Name (required), Description, Status, Requirement Type, Start Date, Due Date, Source, Acceptance Criteria, Assigned To");
+        CSampleImportExcelGenerator.addRow(sheet, 2, headerStyle,
+                "Name", "Description", "Status", "Requirement Type", "Start Date", "Due Date", "Source", "Acceptance Criteria", "Assigned To");
+
+        CSampleImportExcelGenerator.addRow(sheet, 3, null,
+                "System must support export",
+                "Users can export project data to Excel.",
+                "To Do",
+                "Business Requirement",
+                "2025-06-15",
+                "2025-07-15",
+                "Stakeholder request",
+                "Export respects filters and includes visible columns.",
+                "admin");
+
+        for (int col = 0; col <= 8; col++) {
+            sheet.autoSizeColumn(col);
+        }
+    }
+
+    private static void createMilestoneSheet(final Workbook wb) {
+        final Sheet sheet = wb.createSheet("Milestone");
+        final CellStyle headerStyle = CSampleImportExcelGenerator.createHeaderStyle(wb);
+        final CellStyle commentStyle = CSampleImportExcelGenerator.createCommentStyle(wb);
+
+        CSampleImportExcelGenerator.addRow(sheet, 0, commentStyle, "# Milestone import sheet (project items)");
+        CSampleImportExcelGenerator.addRow(sheet, 1, commentStyle,
+                "# Columns: Name (required), Description, Status, Milestone Type, Assigned To");
+        CSampleImportExcelGenerator.addRow(sheet, 2, headerStyle,
+                "Name", "Description", "Status", "Milestone Type", "Assigned To");
+
+        CSampleImportExcelGenerator.addRow(sheet, 3, null,
+                "MVP ready",
+                "All core entities are usable end-to-end and importable via Excel.",
+                "To Do",
+                "Release Milestone",
+                "admin");
+
+        for (int col = 0; col <= 4; col++) {
+            sheet.autoSizeColumn(col);
+        }
+    }
+
+    private static void createDeliverableSheet(final Workbook wb) {
+        final Sheet sheet = wb.createSheet("Deliverable");
+        final CellStyle headerStyle = CSampleImportExcelGenerator.createHeaderStyle(wb);
+        final CellStyle commentStyle = CSampleImportExcelGenerator.createCommentStyle(wb);
+
+        CSampleImportExcelGenerator.addRow(sheet, 0, commentStyle, "# Deliverable import sheet (project items)");
+        CSampleImportExcelGenerator.addRow(sheet, 1, commentStyle,
+                "# Columns: Name (required), Description, Status, Deliverable Type, Assigned To");
+        CSampleImportExcelGenerator.addRow(sheet, 2, headerStyle,
+                "Name", "Description", "Status", "Deliverable Type", "Assigned To");
+
+        CSampleImportExcelGenerator.addRow(sheet, 3, null,
+                "Release notes",
+                "Release notes for the first MVP.",
+                "To Do",
+                "Document",
+                "admin");
+
+        for (int col = 0; col <= 4; col++) {
             sheet.autoSizeColumn(col);
         }
     }

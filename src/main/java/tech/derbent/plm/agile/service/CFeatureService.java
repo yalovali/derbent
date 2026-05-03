@@ -22,7 +22,7 @@ import tech.derbent.plm.agile.domain.CFeatureType;
  * <p>It mainly binds the feature repository and feature-type service into the shared agile item
  * workflow so hierarchy rules stay centralized.</p>
  */
-@Profile({"derbent", "default"})
+@Profile({"derbent", "bab", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CFeatureService extends CAgileEntityService<CFeature, CFeatureType> implements IEntityRegistrable, IEntityWithView {

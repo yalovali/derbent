@@ -16,7 +16,7 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.deliverables.deliverable.service.IDeliverableRepository;
 import tech.derbent.plm.deliverables.deliverabletype.domain.CDeliverableType;
 
-@Profile({"derbent", "default"})
+@Profile({"derbent", "bab", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)

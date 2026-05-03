@@ -136,6 +136,9 @@ public final class CSampleImportExcelGenerator {
         createEpicTypeSheet(wb);
         createFeatureTypeSheet(wb);
         createUserStoryTypeSheet(wb);
+        createRequirementTypeSheet(wb);
+        createMilestoneTypeSheet(wb);
+        createDeliverableTypeSheet(wb);
         createTicketTypeSheet(wb);
         createTicketPrioritySheet(wb);
     }
@@ -145,6 +148,9 @@ public final class CSampleImportExcelGenerator {
         createPlmEpicSheet(wb);
         createPlmFeatureSheet(wb);
         createPlmUserStorySheet(wb);
+        createRequirementSheet(wb);
+        createMilestoneSheet(wb);
+        createDeliverableSheet(wb);
     }
 
     private static void addBabAgileSheets(final Workbook wb) {
@@ -152,6 +158,9 @@ public final class CSampleImportExcelGenerator {
         createBabEpicSheet(wb);
         createBabFeatureSheet(wb);
         createBabUserStorySheet(wb);
+        createRequirementSheet(wb);
+        createMilestoneSheet(wb);
+        createDeliverableSheet(wb);
     }
 
     // ── reference data sheets (shared by both project types) ─────────────────
@@ -282,6 +291,33 @@ public final class CSampleImportExcelGenerator {
         row(sheet, 3, "Non-Functional Story", "#6C757D", "20", "Agile Sprint Workflow");
         row(sheet, 4, "Spike",               "#FD7E14", "30", "Agile Sprint Workflow");
         autoSize(sheet, 4);
+    }
+
+    private static void createRequirementTypeSheet(final Workbook wb) {
+        final Sheet sheet = newSheet(wb, "Requirement Type");
+        comment(sheet, 0, "# Requirement types (generic hierarchy-aware project items)");
+        header(wb, sheet, 1, "Name", "Color", "Sort Order", "Level", "Can Have Children", "Non Deletable", "Workflow");
+        row(sheet, 2, "Business Requirement", "#7B5EA7", "10", "-1", "false", "false", "Default Workflow");
+        row(sheet, 3, "Technical Requirement", "#007BFF", "20", "-1", "false", "false", "Default Workflow");
+        autoSize(sheet, 7);
+    }
+
+    private static void createMilestoneTypeSheet(final Workbook wb) {
+        final Sheet sheet = newSheet(wb, "Milestone Type");
+        comment(sheet, 0, "# Milestone types");
+        header(wb, sheet, 1, "Name", "Color", "Sort Order", "Level", "Can Have Children", "Non Deletable", "Workflow");
+        row(sheet, 2, "Release Milestone", "#4B4382", "10", "-1", "false", "false", "Default Workflow");
+        row(sheet, 3, "Internal Milestone", "#6F42C1", "20", "-1", "false", "false", "Default Workflow");
+        autoSize(sheet, 7);
+    }
+
+    private static void createDeliverableTypeSheet(final Workbook wb) {
+        final Sheet sheet = newSheet(wb, "Deliverable Type");
+        comment(sheet, 0, "# Deliverable types");
+        header(wb, sheet, 1, "Name", "Color", "Sort Order", "Level", "Can Have Children", "Non Deletable", "Workflow");
+        row(sheet, 2, "Document", "#BC8F8F", "10", "-1", "false", "false", "Default Workflow");
+        row(sheet, 3, "Software Release", "#28A745", "20", "-1", "false", "false", "Default Workflow");
+        autoSize(sheet, 7);
     }
 
     private static void createTicketTypeSheet(final Workbook wb) {
@@ -493,6 +529,45 @@ public final class CSampleImportExcelGenerator {
                 "JMeter baseline: p95 < 500ms with 500 rows and 5 concurrent users",
                 "");
         autoSize(sheet, 11);
+    }
+
+    private static void createRequirementSheet(final Workbook wb) {
+        final Sheet sheet = newSheet(wb, "Requirement");
+        comment(sheet, 0, "# Requirements — hierarchy-aware project items. Dates: yyyy-MM-dd");
+        header(wb, sheet, 1,
+                "Name", "Description", "Status", "Requirement Type", "Start Date", "Due Date",
+                "Source", "Acceptance Criteria", "Assigned To");
+        row(sheet, 2,
+                "Login must support MFA",
+                "The system shall support MFA (TOTP) for all user accounts.",
+                "In Progress", "Technical Requirement", "2026-01-08", "2026-01-31",
+                "Security policy", "MFA enrolment and login flows are implemented and tested.",
+                "admin");
+        row(sheet, 3,
+                "Export project status report",
+                "The system shall export project items (activities/issues/stories) to Excel.",
+                "To Do", "Business Requirement", "2026-02-10", "2026-02-28",
+                "Stakeholder request", "Export includes current filters and visible columns.",
+                "");
+        autoSize(sheet, 9);
+    }
+
+    private static void createMilestoneSheet(final Workbook wb) {
+        final Sheet sheet = newSheet(wb, "Milestone");
+        comment(sheet, 0, "# Milestones — key dates/achievements. (Dates are typically derived from linked work items.)");
+        header(wb, sheet, 1, "Name", "Description", "Status", "Milestone Type", "Assigned To");
+        row(sheet, 2, "MVP released", "First usable end-to-end release deployed to staging.", "To Do", "Release Milestone", "admin");
+        row(sheet, 3, "Security review complete", "OWASP checklist + pen-test completed.", "To Do", "Internal Milestone", "");
+        autoSize(sheet, 5);
+    }
+
+    private static void createDeliverableSheet(final Workbook wb) {
+        final Sheet sheet = newSheet(wb, "Deliverable");
+        comment(sheet, 0, "# Deliverables — artefacts produced by the project.");
+        header(wb, sheet, 1, "Name", "Description", "Status", "Deliverable Type", "Assigned To");
+        row(sheet, 2, "Architecture document", "System architecture, data model, and service boundaries.", "In Progress", "Document", "admin");
+        row(sheet, 3, "Release v1.0", "Packaged build + release notes.", "To Do", "Software Release", "");
+        autoSize(sheet, 5);
     }
 
     // ── PLM flat project item sheets ──────────────────────────────────────────

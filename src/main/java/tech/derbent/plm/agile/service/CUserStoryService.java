@@ -22,7 +22,7 @@ import tech.derbent.plm.agile.domain.CUserStoryType;
  * <p>User stories inherit most behavior from the shared agile service stack, so this class only
  * supplies the concrete repository and type service bindings.</p>
  */
-@Profile({"derbent", "default"})
+@Profile({"derbent", "bab", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CUserStoryService extends CAgileEntityService<CUserStory, CUserStoryType> implements IEntityRegistrable, IEntityWithView {

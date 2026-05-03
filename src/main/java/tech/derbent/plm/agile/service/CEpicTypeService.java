@@ -21,7 +21,7 @@ import tech.derbent.plm.agile.domain.CEpicType;
  * <p>Delete checks stay local because epics reference their own type table, while hierarchy
  * validation keeps level and child-capability settings internally consistent.</p>
  */
-@Profile({"derbent", "default"})
+@Profile({"derbent", "bab", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)

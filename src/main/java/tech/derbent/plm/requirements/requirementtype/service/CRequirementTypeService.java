@@ -26,7 +26,7 @@ import tech.derbent.plm.requirements.requirementtype.domain.CRequirementType;
  */
 @Service
 @Profile ({
-		"derbent", "default"
+		"derbent", "bab", "default"
 })
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)

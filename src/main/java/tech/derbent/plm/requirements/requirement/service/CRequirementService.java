@@ -25,7 +25,7 @@ import tech.derbent.plm.requirements.requirementtype.service.CRequirementTypeSer
 
 @Service
 @Profile ({
-		"derbent", "default"
+		"derbent", "bab", "default"
 })
 @PreAuthorize ("isAuthenticated()")
 public class CRequirementService extends CProjectItemService<CRequirement, CRequirementType> implements IEntityRegistrable, IEntityWithView {

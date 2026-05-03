@@ -21,7 +21,7 @@ import tech.derbent.plm.agile.domain.CFeatureType;
  * <p>Features usually stay parent-capable, but validation still blocks impossible leaf-plus-children
  * combinations when teams customize the generic level model.</p>
  */
-@Profile({"derbent", "default"})
+@Profile({"derbent", "bab", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)

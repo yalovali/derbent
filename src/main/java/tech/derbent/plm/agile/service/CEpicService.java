@@ -22,7 +22,7 @@ import tech.derbent.plm.agile.domain.CEpicType;
  * <p>The implementation stays thin because hierarchy, workflow, and project-item defaults are
  * already centralized in the shared agile base services.</p>
  */
-@Profile({"derbent", "default"})
+@Profile({"derbent", "bab", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CEpicService extends CAgileEntityService<CEpic, CEpicType> implements IEntityRegistrable, IEntityWithView {
