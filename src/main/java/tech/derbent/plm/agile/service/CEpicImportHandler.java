@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.imports.service.CAgileEntityImportHandler;
+import tech.derbent.api.imports.service.CImportProjectResolver;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.users.service.IUserRepository;
 import tech.derbent.plm.agile.domain.CEpic;
@@ -13,42 +14,45 @@ import tech.derbent.plm.agile.domain.CEpicType;
 
 /** Imports {@link CEpic} rows from Excel into the active project. */
 @Service
-@Profile({"derbent", "bab", "default"})
+@Profile ({
+		"derbent", "bab", "default"
+})
 public class CEpicImportHandler extends CAgileEntityImportHandler<CEpic, CEpicType> {
 
-    private final CEpicService epicService;
-    private final CEpicTypeService typeService;
+	private final CEpicService epicService;
+	private final CEpicTypeService typeService;
 
-    public CEpicImportHandler(final CEpicService epicService, final CEpicTypeService typeService,
-            final CProjectItemStatusService statusService, final IUserRepository userRepository) {
-        super(statusService, userRepository);
-        this.epicService = epicService;
-        this.typeService = typeService;
-    }
+	public CEpicImportHandler(final CEpicService epicService, final CEpicTypeService typeService,
+			final CProjectItemStatusService statusService, final IUserRepository userRepository,
+			final CImportProjectResolver projectResolver) {
+		super(statusService, userRepository, projectResolver);
+		this.epicService = epicService;
+		this.typeService = typeService;
+	}
 
-    @Override
-    public Class<CEpic> getEntityClass() { return CEpic.class; }
+	@Override
+	protected CEpic createNew(final String name, final CProject<?> project) {
+		return new CEpic(name, project);
+	}
 
-    @Override
-    protected Class<CEpicType> getTypeClass() { return CEpicType.class; }
+	@Override
+	protected Optional<CEpic> findByNameAndProject(final String name, final CProject<?> project) {
+		return epicService.findByNameAndProject(name, project);
+	}
 
-    @Override
-    protected Optional<CEpic> findByNameAndProject(final String name, final CProject<?> project) {
-        return epicService.findByNameAndProject(name, project);
-    }
+	@Override
+	protected Optional<CEpicType> findTypeByNameAndCompany(final String name, final CCompany company) {
+		return typeService.findByNameAndCompany(name, company);
+	}
 
-    @Override
-    protected CEpic createNew(final String name, final CProject<?> project) {
-        return new CEpic(name, project);
-    }
+	@Override
+	public Class<CEpic> getEntityClass() { return CEpic.class; }
 
-    @Override
-    protected void save(final CEpic entity) {
-        epicService.save(entity);
-    }
+	@Override
+	protected Class<CEpicType> getTypeClass() { return CEpicType.class; }
 
-    @Override
-    protected Optional<CEpicType> findTypeByNameAndCompany(final String name, final CCompany company) {
-        return typeService.findByNameAndCompany(name, company);
-    }
+	@Override
+	protected void save(final CEpic entity) {
+		epicService.save(entity);
+	}
 }

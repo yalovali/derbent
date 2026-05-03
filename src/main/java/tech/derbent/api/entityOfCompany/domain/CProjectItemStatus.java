@@ -44,10 +44,7 @@ public class CProjectItemStatus extends CStatus<CProjectItemStatus> {
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof CProjectItemStatus)) {
-			return false;
-		}
-		return super.equals(o);
+		return !(o instanceof CProjectItemStatus) ? false : super.equals(o);
 	}
 
 	public Boolean getFinalStatus() { return finalStatus; }

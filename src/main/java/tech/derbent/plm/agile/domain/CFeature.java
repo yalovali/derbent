@@ -1,6 +1,5 @@
 package tech.derbent.plm.agile.domain;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;

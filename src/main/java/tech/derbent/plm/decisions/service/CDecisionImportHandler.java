@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.imports.service.CExcelRow;
+import tech.derbent.api.imports.service.CImportProjectResolver;
 import tech.derbent.api.imports.service.CProjectItemImportHandler;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.users.service.IUserRepository;
@@ -27,8 +28,8 @@ public class CDecisionImportHandler extends CProjectItemImportHandler<CDecision,
 
 	public CDecisionImportHandler(final CDecisionService decisionService,
 			final CDecisionTypeService decisionTypeService, final CProjectItemStatusService statusService,
-			final IUserRepository userRepository) {
-		super(statusService, userRepository);
+			final IUserRepository userRepository, final CImportProjectResolver projectResolver) {
+		super(statusService, userRepository, projectResolver);
 		this.decisionService = decisionService;
 		this.decisionTypeService = decisionTypeService;
 	}

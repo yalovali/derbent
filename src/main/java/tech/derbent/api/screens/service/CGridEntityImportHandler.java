@@ -36,7 +36,20 @@ public class CGridEntityImportHandler extends CEntityOfProjectImportHandler<CGri
 	@Override
 	protected Map<String, String> getAdditionalColumnAliases() {
 		return Map.of("Name", "name", "Data Service Bean", "dataservicebeanname", "Column Fields", "columnfields",
-				"Editable Column Fields", "editablecolumnfields", "None Grid", "attributenone");
+				"Editable Column Fields", "editablecolumnfields", "None Grid", "attributenone", "Company", "company",
+				"Project", "project");
+	}
+
+	private java.util.Optional<CProject<?>> resolveProjectByNameAndCompany(final CProject<?> sessionProject,
+			final String companyName, final String projectName) {
+		var company = sessionProject.getCompany();
+		if (company != null && companyName != null && !companyName.isBlank()) {
+			company = projectResolver.findCompanyByName(companyName).orElse(null);
+		}
+		if (company == null) {
+			return java.util.Optional.empty();
+		}
+		return projectResolver.findProjectByNameAndCompany(projectName, company);
 	}
 
 	@Override
@@ -74,10 +87,14 @@ public class CGridEntityImportHandler extends CEntityOfProjectImportHandler<CGri
 			return nameError.get();
 		}
 		// Resolve effective project from "project" column if present; otherwise use session project.
-		final var resolvedProject = resolveProjectFromRow(row, project, projectResolver);
+		final String projectName = row.string("project");
+		final String companyName = row.string("company");
+		final var resolvedProject = projectName.isBlank() || (project.getName() != null && projectName.equalsIgnoreCase(project.getName()))
+				? java.util.Optional.of(project)
+				: resolveProjectByNameAndCompany(project, companyName, projectName);
 		if (resolvedProject.isEmpty()) {
 			return CImportRowResult.error(rowNumber,
-					"Project '" + row.string("project") + "' not found. Create it before importing.", rowData);
+					"Project '" + projectName + "' not found. Create it before importing.", rowData);
 		}
 		final CProject<?> effectiveProject = resolvedProject.get();
 		final var companyError = validateProjectHasCompany(effectiveProject, rowNumber, rowData);

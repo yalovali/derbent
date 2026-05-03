@@ -25,29 +25,15 @@ public class CPageEntityImportHandler extends CProjectItemImportHandler<CPageEnt
 	private final CGridEntityService gridEntityService;
 	private final CPageEntityService pageEntityService;
 	private final CPageEntityTypeService typeService;
-	private final CImportProjectResolver projectResolver;
 
 	public CPageEntityImportHandler(final CPageEntityService pageEntityService,
 			final CPageEntityTypeService typeService, final CGridEntityService gridEntityService,
 			final CProjectItemStatusService statusService, final IUserRepository userRepository,
 			final CImportProjectResolver projectResolver) {
-		super(statusService, userRepository);
+		super(statusService, userRepository, projectResolver);
 		this.pageEntityService = pageEntityService;
 		this.typeService = typeService;
 		this.gridEntityService = gridEntityService;
-		this.projectResolver = projectResolver;
-	}
-
-	@Override
-	protected CProject<?> resolveProjectForRow(final CExcelRow row, final CProject<?> sessionProject) {
-		final String projectName = row.string("project");
-		if (projectName.isBlank()) {
-			return sessionProject;
-		}
-		if (sessionProject.getCompany() == null) {
-			return null;
-		}
-		return projectResolver.findProjectByNameAndCompany(projectName, sessionProject.getCompany()).orElse(null);
 	}
 
 	@Override
@@ -90,9 +76,11 @@ public class CPageEntityImportHandler extends CProjectItemImportHandler<CPageEnt
 
 	@Override
 	protected Map<String, String> getAdditionalColumnAliases() {
-		return Map.of("Name", "name", "Menu Title", "menutitle", "Menu Order", "menuorder", "Page Title", "pagetitle",
-				"Page Service", "pageservice", "Icon", "icon", "Requires Authentication", "requiresauthentication",
-				"Grid Entity", "gridentity", "Content", "content");
+		return Map.ofEntries(Map.entry("Name", "name"), Map.entry("Menu Title", "menutitle"),
+				Map.entry("Menu Order", "menuorder"), Map.entry("Page Title", "pagetitle"),
+				Map.entry("Page Service", "pageservice"), Map.entry("Icon", "icon"),
+				Map.entry("Requires Authentication", "requiresauthentication"), Map.entry("Grid Entity", "gridentity"),
+				Map.entry("Content", "content"), Map.entry("Company", "company"), Map.entry("Project", "project"));
 	}
 
 	@Override

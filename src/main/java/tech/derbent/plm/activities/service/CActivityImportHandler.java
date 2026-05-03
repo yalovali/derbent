@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.imports.service.CExcelRow;
+import tech.derbent.api.imports.service.CImportProjectResolver;
 import tech.derbent.api.imports.service.CProjectItemImportHandler;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.users.service.IUserRepository;
@@ -28,8 +29,9 @@ public class CActivityImportHandler extends CProjectItemImportHandler<CActivity,
 
 	public CActivityImportHandler(final CActivityService activityService,
 			final CActivityTypeService activityTypeService, final CActivityPriorityService priorityService,
-			final CProjectItemStatusService statusService, final IUserRepository userRepository) {
-		super(statusService, userRepository);
+			final CProjectItemStatusService statusService, final IUserRepository userRepository,
+			final CImportProjectResolver projectResolver) {
+		super(statusService, userRepository, projectResolver);
 		this.activityService = activityService;
 		this.activityTypeService = activityTypeService;
 		this.priorityService = priorityService;

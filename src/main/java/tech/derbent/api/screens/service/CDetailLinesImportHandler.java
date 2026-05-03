@@ -35,17 +35,19 @@ public class CDetailLinesImportHandler extends CAbstractExcelImportHandler<CDeta
 
 	@Override
 	protected Map<String, String> getAdditionalColumnAliases() {
-		return Map.of(
-				"Detail Section", "detailsection",
-				"Entity Property", "entityproperty",
-				"Field Caption", "fieldcaption",
-				"Relation Field Name", "relationfieldname",
-				"Item Order", "itemorder",
-				"Is Hidden", "ishidden",
-				"Is Readonly", "isreadonly",
-				"Is Required", "isrequired",
-				"Have Next One On Same Line", "havenextoneonsameline",
-				"Section As Tab", "sectionastab");
+		return Map.ofEntries(
+				Map.entry("Detail Section", "detailsection"),
+				Map.entry("Entity Property", "entityproperty"),
+				Map.entry("Field Caption", "fieldcaption"),
+				Map.entry("Relation Field Name", "relationfieldname"),
+				Map.entry("Item Order", "itemorder"),
+				Map.entry("Is Hidden", "ishidden"),
+				Map.entry("Is Readonly", "isreadonly"),
+				Map.entry("Is Required", "isrequired"),
+				Map.entry("Have Next One On Same Line", "havenextoneonsameline"),
+				Map.entry("Section As Tab", "sectionastab"),
+				Map.entry("Company", "company"),
+				Map.entry("Project", "project"));
 	}
 
 	@Override
@@ -72,14 +74,19 @@ public class CDetailLinesImportHandler extends CAbstractExcelImportHandler<CDeta
 		final var row = row(rowData);
 		// Resolve effective project from "project" column if present; otherwise use session project.
 		final String projectName = row.string("project");
+		final String companyName = row.string("company");
 		final CProject<?> effectiveProject;
-		if (projectName.isBlank()) {
+		if (projectName.isBlank() || (project.getName() != null && projectName.equalsIgnoreCase(project.getName()))) {
 			effectiveProject = project;
 		} else {
-			if (project.getCompany() == null) {
+			var company = project.getCompany();
+			if (company != null && companyName != null && !companyName.isBlank()) {
+				company = projectResolver.findCompanyByName(companyName).orElse(null);
+			}
+			if (company == null) {
 				return CImportRowResult.error(rowNumber, "Project company context is required", rowData);
 			}
-			final var resolved = projectResolver.findProjectByNameAndCompany(projectName, project.getCompany());
+			final var resolved = projectResolver.findProjectByNameAndCompany(projectName, company);
 			if (resolved.isEmpty()) {
 				return CImportRowResult.error(rowNumber,
 						"Project '" + projectName + "' not found. Create it before importing.", rowData);

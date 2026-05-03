@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.imports.service.CExcelRow;
+import tech.derbent.api.imports.service.CImportProjectResolver;
 import tech.derbent.api.imports.service.CProjectItemImportHandler;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.users.service.IUserRepository;
@@ -18,36 +19,38 @@ import tech.derbent.plm.tickets.tickettype.service.CTicketTypeService;
 
 /** Imports {@link CTicket} rows from Excel into the active project. */
 @Service
-@Profile({"derbent", "default"})
+@Profile ({
+		"derbent", "default"
+})
 public class CTicketImportHandler extends CProjectItemImportHandler<CTicket, CTicketType> {
 
+	private final CTicketPriorityService priorityService;
 	private final CTicketService ticketService;
 	private final CTicketTypeService typeService;
-	private final CTicketPriorityService priorityService;
 
 	public CTicketImportHandler(final CTicketService ticketService, final CTicketTypeService typeService,
 			final CTicketPriorityService priorityService, final CProjectItemStatusService statusService,
-			final IUserRepository userRepository) {
-		super(statusService, userRepository);
+			final IUserRepository userRepository, final CImportProjectResolver projectResolver) {
+		super(statusService, userRepository, projectResolver);
 		this.ticketService = ticketService;
 		this.typeService = typeService;
 		this.priorityService = priorityService;
 	}
 
 	@Override
-	public Class<CTicket> getEntityClass() { return CTicket.class; }
-
-	@Override
-	protected Map<String, String> getAdditionalColumnAliases() {
-		return Map.of("Type", "entitytype");
-	}
-
-	@Override
-	protected Class<CTicketType> getTypeClass() { return CTicketType.class; }
-
-	@Override
-	protected Optional<CTicket> findByNameAndProject(final String name, final CProject<?> project) {
-		return ticketService.findByNameAndProject(name, project);
+	protected void applyExtraFields(final CTicket entity, final CExcelRow row, final CProject<?> project,
+			final int rowNumber, final Map<String, String> rowData) {
+		applyMetaFieldsDeclaredOn(entity, row, CTicket.class);
+		final String priorityName = row.string("priority");
+		if (priorityName.isBlank()) {
+			return;
+		}
+		final CTicketPriority priority =
+				priorityService.findByNameAndCompany(priorityName, project.getCompany()).orElse(null);
+		if (priority == null) {
+			throw new IllegalArgumentException("Ticket Priority '" + priorityName + "' not found");
+		}
+		entity.setPriority(priority);
 	}
 
 	@Override
@@ -56,8 +59,8 @@ public class CTicketImportHandler extends CProjectItemImportHandler<CTicket, CTi
 	}
 
 	@Override
-	protected void save(final CTicket entity) {
-		ticketService.save(entity);
+	protected Optional<CTicket> findByNameAndProject(final String name, final CProject<?> project) {
+		return ticketService.findByNameAndProject(name, project);
 	}
 
 	@Override
@@ -66,18 +69,16 @@ public class CTicketImportHandler extends CProjectItemImportHandler<CTicket, CTi
 	}
 
 	@Override
-	protected void applyExtraFields(final CTicket entity, final CExcelRow row, final CProject<?> project, final int rowNumber,
-			final Map<String, String> rowData) {
-		applyMetaFieldsDeclaredOn(entity, row, CTicket.class);
+	protected Map<String, String> getAdditionalColumnAliases() { return Map.of("Type", "entitytype"); }
 
-		final String priorityName = row.string("priority");
-		if (priorityName.isBlank()) {
-			return;
-		}
-		final CTicketPriority priority = priorityService.findByNameAndCompany(priorityName, project.getCompany()).orElse(null);
-		if (priority == null) {
-			throw new IllegalArgumentException("Ticket Priority '" + priorityName + "' not found");
-		}
-		entity.setPriority(priority);
+	@Override
+	public Class<CTicket> getEntityClass() { return CTicket.class; }
+
+	@Override
+	protected Class<CTicketType> getTypeClass() { return CTicketType.class; }
+
+	@Override
+	protected void save(final CTicket entity) {
+		ticketService.save(entity);
 	}
 }

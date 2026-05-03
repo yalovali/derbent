@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.imports.service.CExcelRow;
+import tech.derbent.api.imports.service.CImportProjectResolver;
 import tech.derbent.api.imports.service.CProjectItemImportHandler;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.users.service.IUserRepository;
@@ -29,8 +30,8 @@ public class CIssueImportHandler extends CProjectItemImportHandler<CIssue, CIssu
 
 	public CIssueImportHandler(final CIssueService issueService, final CIssueTypeService issueTypeService,
 			final CProjectItemStatusService statusService, final CActivityService activityService,
-			final IUserRepository userRepository) {
-		super(statusService, userRepository);
+			final IUserRepository userRepository, final CImportProjectResolver projectResolver) {
+		super(statusService, userRepository, projectResolver);
 		this.issueService = issueService;
 		this.issueTypeService = issueTypeService;
 		this.activityService = activityService;
@@ -41,13 +42,14 @@ public class CIssueImportHandler extends CProjectItemImportHandler<CIssue, CIssu
 			final int rowNumber, final Map<String, String> rowData) {
 		applyMetaFieldsDeclaredOn(entity, row, CIssue.class);
 		final String linkedActivityName = row.string("linkedactivity");
-		if (!linkedActivityName.isBlank()) {
-			final var act = activityService.findByNameAndProject(linkedActivityName, project).orElse(null);
-			if (act == null) {
-				throw new IllegalArgumentException("Linked Activity '" + linkedActivityName + "' not found");
-			}
-			entity.setLinkedActivity(act);
+		if (linkedActivityName.isBlank()) {
+			return;
 		}
+		final var act = activityService.findByNameAndProject(linkedActivityName, project).orElse(null);
+		if (act == null) {
+			throw new IllegalArgumentException("Linked Activity '" + linkedActivityName + "' not found");
+		}
+		entity.setLinkedActivity(act);
 	}
 
 	@Override

@@ -35,7 +35,9 @@ public class CDetailSectionImportHandler extends CEntityOfProjectImportHandler<C
 				"Screen Title", "screentitle",
 				"Header Text", "headertext",
 				"Default Section", "defaultsection",
-				"Non Deletable", "attributenondeletable");
+				"Non Deletable", "attributenondeletable",
+				"Company", "company",
+				"Project", "project");
 	}
 
 	@Override
@@ -73,12 +75,17 @@ public class CDetailSectionImportHandler extends CEntityOfProjectImportHandler<C
 			return nameError.get();
 		}
 		// Resolve effective project from "project" column if present; otherwise use session project.
-		final var resolvedProject = resolveProjectFromRow(row, project, projectResolver);
+		final String projectName = row.string("project");
+		final String companyName = row.string("company");
+		final var resolvedProject = projectName.isBlank() || (project.getName() != null && projectName.equalsIgnoreCase(project.getName()))
+				? java.util.Optional.of(project)
+				: resolveProjectByNameAndCompany(project, companyName, projectName);
 		if (resolvedProject.isEmpty()) {
 			return CImportRowResult.error(rowNumber,
-					"Project '" + row.string("project") + "' not found. Create it before importing.", rowData);
+					"Project '" + projectName + "' not found. Create it before importing.", rowData);
 		}
 		final CProject<?> effectiveProject = resolvedProject.get();
+		
 		final var companyError = validateProjectHasCompany(effectiveProject, rowNumber, rowData);
 		if (companyError.isPresent()) {
 			return companyError.get();
@@ -106,5 +113,17 @@ public class CDetailSectionImportHandler extends CEntityOfProjectImportHandler<C
 			detailSectionService.save(entity);
 		}
 		return CImportRowResult.success(rowNumber, name);
+	}
+
+	private java.util.Optional<CProject<?>> resolveProjectByNameAndCompany(final CProject<?> sessionProject,
+			final String companyName, final String projectName) {
+		var company = sessionProject.getCompany();
+		if (company != null && companyName != null && !companyName.isBlank()) {
+			company = projectResolver.findCompanyByName(companyName).orElse(null);
+		}
+		if (company == null) {
+			return java.util.Optional.empty();
+		}
+		return projectResolver.findProjectByNameAndCompany(projectName, company);
 	}
 }

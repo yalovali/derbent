@@ -29,11 +29,13 @@ import tech.derbent.api.users.service.IUserRepository;
 public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>, TType extends CTypeEntity<TType>>
 		extends CEntityOfProjectImportHandler<T> {
 
+	private final CImportProjectResolver projectResolver;
 	protected final CProjectItemStatusService statusService;
 
 	protected CProjectItemImportHandler(final CProjectItemStatusService statusService,
-			final IUserRepository userRepository) {
+			final IUserRepository userRepository, final CImportProjectResolver projectResolver) {
 		super(userRepository);
+		this.projectResolver = projectResolver;
 		this.statusService = statusService;
 	}
 
@@ -57,14 +59,6 @@ public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>
 
 	protected abstract Class<TType> getTypeClass();
 
-	/**
-	 * Hook for subclasses to resolve the effective project from row data.
-	 * Default: return sessionProject unchanged. Override in handlers that read a "project" column.
-	 */
-	protected CProject<?> resolveProjectForRow(final CExcelRow row, final CProject<?> sessionProject) {
-		return sessionProject;
-	}
-
 	@Override
 	@Transactional
 	public CImportRowResult importRow(final Map<String, String> rowData, final CProject<?> project, final int rowNumber,
@@ -78,7 +72,8 @@ public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>
 		final CProject<?> effectiveProject = resolveProjectForRow(row, project);
 		if (effectiveProject == null) {
 			return CImportRowResult.error(rowNumber,
-					"Project '" + row.string("project") + "' not found in company. Create it before importing.", rowData);
+					"Project '" + row.string("project") + "' not found in company. Create it before importing.",
+					rowData);
 		}
 		final var companyError = validateProjectHasCompany(effectiveProject, rowNumber, rowData);
 		if (companyError.isPresent()) {
@@ -87,7 +82,8 @@ public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>
 		final String name = row.string("name");
 		final CCompany company = effectiveProject.getCompany();
 		// WHY: system_init.xlsx and sample workbooks are intended to be re-runnable.
-		final T entity = findByNameAndProject(name, effectiveProject).orElseGet(() -> createNew(name, effectiveProject));
+		final T entity =
+				findByNameAndProject(name, effectiveProject).orElseGet(() -> createNew(name, effectiveProject));
 		final var projectFieldsError = applyEntityOfProjectFields(entity, row, effectiveProject, rowNumber, rowData);
 		if (projectFieldsError.isPresent()) {
 			return projectFieldsError.get();
@@ -123,15 +119,18 @@ public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>
 			} catch (final CValidationException e) {
 				// WHY: during large bootstraps we sometimes create/flush base records in earlier steps; if the upsert lookup
 				// misses and we attempt an insert, we get a duplicate-name-in-project validation. Treat this as an upsert retry.
-				if (entity.getId() == null && e.getMessage() != null && e.getMessage().toLowerCase().contains("already exists in this project")) {
+				if (entity.getId() == null && e.getMessage() != null
+						&& e.getMessage().toLowerCase().contains("already exists in this project")) {
 					final T existing = findByNameAndProject(name, effectiveProject).orElse(null);
 					if (existing != null) {
-						final var retryProjectFieldsError = applyEntityOfProjectFields(existing, row, effectiveProject, rowNumber, rowData);
+						final var retryProjectFieldsError =
+								applyEntityOfProjectFields(existing, row, effectiveProject, rowNumber, rowData);
 						if (retryProjectFieldsError.isPresent()) {
 							return retryProjectFieldsError.get();
 						}
 						if (!statusName.isBlank()) {
-							final CProjectItemStatus status = statusService.findByNameAndCompany(statusName, company).orElse(null);
+							final CProjectItemStatus status =
+									statusService.findByNameAndCompany(statusName, company).orElse(null);
 							if (status == null) {
 								return CImportRowResult.error(rowNumber,
 										"Status '" + statusName + "' not found. Create it before importing.", rowData);
@@ -142,8 +141,8 @@ public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>
 							final TType type = findTypeByNameAndCompany(typeName, company).orElse(null);
 							if (type == null) {
 								return CImportRowResult.error(rowNumber,
-										getTypeClass().getSimpleName().replaceFirst("^C", "").replace("Type", " Type") + " '" + typeName
-												+ "' not found. Create it before importing.",
+										getTypeClass().getSimpleName().replaceFirst("^C", "").replace("Type", " Type")
+												+ " '" + typeName + "' not found. Create it before importing.",
 										rowData);
 							}
 							existing.setEntityType(type);
@@ -151,7 +150,7 @@ public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>
 						applyExtraFields(existing, row, effectiveProject, rowNumber, rowData);
 						save(existing);
 					} else {
-						return CImportRowResult.error(rowNumber, e.getMessage(), rowData);
+						throw e;
 					}
 				} else {
 					throw e;
@@ -162,6 +161,27 @@ public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>
 	}
 
 	protected boolean isTypeRequired() { return false; }
+
+	/** Hook for subclasses to resolve the effective project from row data. Default: return sessionProject unchanged. Override in handlers that read a
+	 * "project" column. */
+	protected final CProject<?> resolveProjectForRow(final CExcelRow row, final CProject<?> sessionProject) {
+		final String projectName = row.string("project");
+		if (projectName.isBlank()) {
+			return sessionProject;
+		}
+		if (sessionProject.getName() != null && projectName.equalsIgnoreCase(sessionProject.getName())) {
+			return sessionProject;
+		}
+		CCompany company = sessionProject.getCompany();
+		final String companyName = row.string("company");
+		if (!companyName.isBlank() && !isWildcard(companyName)) {
+			company = projectResolver.findCompanyByName(companyName).orElse(null);
+		}
+		if (company == null) {
+			return null;
+		}
+		return projectResolver.findProjectByNameAndCompany(projectName, company).orElse(null);
+	}
 
 	protected abstract void save(T entity);
 }

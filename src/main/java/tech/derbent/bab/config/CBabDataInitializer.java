@@ -107,9 +107,7 @@ public class CBabDataInitializer {
 					if (!tableNames.isEmpty()) {
 						jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY FALSE");
 						try {
-							for (final String tableName : tableNames) {
-								jdbcTemplate.execute("DELETE FROM \"" + tableName + "\"");
-							}
+							tableNames.forEach((final String tableName) -> jdbcTemplate.execute("DELETE FROM \"" + tableName + "\""));
 						} finally {
 							jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY TRUE");
 						}

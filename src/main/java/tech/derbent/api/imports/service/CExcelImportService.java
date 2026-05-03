@@ -61,7 +61,7 @@ public class CExcelImportService {
 
 	private static boolean isWildcard(final String token) {
 		final String v = token == null ? "" : token.trim().toLowerCase();
-		return v.equals("*") || v.equals("all") || v.equals("any");
+		return "*".equals(v) || v.equals("all") || v.equals("any");
 	}
 
 	/** Maps header cell values to canonical field tokens. Matching is case-insensitive; whitespace is stripped. Handler aliases are checked first; then

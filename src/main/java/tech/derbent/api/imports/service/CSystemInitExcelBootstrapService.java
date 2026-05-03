@@ -51,6 +51,7 @@ public class CSystemInitExcelBootstrapService {
 	private static final String SEED_ADMIN_LOGIN = "admin";
 	private static final String SEED_ADMIN_PASSWORD = "test123";
 	private static final String SEED_COMPANY_NAME = "Of Teknoloji Çözümleri";
+	private static final String SEED_COMPANY_NAME_SECOND = "Derbent Consulting";
 	// Keep these aligned with src/main/resources/excel/system_init.xlsx company/project tokens.
 	private static final List<String> SEED_PROJECT_NAMES = List.of("Derbent PM Demo", "Derbent API Platform",
 			"BAB Integration Program");
@@ -165,12 +166,10 @@ public class CSystemInitExcelBootstrapService {
 		options.setDryRun(false);
 		options.setRollbackOnError(false);
 		options.setSkipUnknownSheets(true);
-		// WHY: screens_init.xlsx carries a "project" column and handlers resolve the effective project per row.
-		// Do not pre-filter rows by the session project (we import once per company).
-		options.setSkipMismatchedProjectTokens(false);
-		// WHY: screens_init.xlsx rows carry an explicit "project" column so the workbook is imported once per
-		// company; the handlers resolve the target project from each row. Importing per-project (as before)
-		// would create duplicate entities because every row would be processed N times.
+		// WHY: screens_init.xlsx rows carry explicit parent columns (company/project). Import per-project and
+		// let the engine skip mismatched rows; this keeps the sessionProject context correct and avoids
+		// cross-project inserts when resolving relations.
+		options.setSkipMismatchedProjectTokens(true);
 		for (final CCompany company : companyService.findActiveCompanies()) {
 			final List<? extends CProject<?>> projects = projectService.listByCompany(company);
 			if (projects.isEmpty()) {
@@ -184,21 +183,12 @@ public class CSystemInitExcelBootstrapService {
 				continue;
 			}
 			sessionService.setActiveUser(user);
-			// Use first project as fallback context; individual rows override via the "project" column.
-			final CProject<?> fallbackProject = projects.get(0);
-			sessionService.setActiveProject(fallbackProject);
-			try {
+			for (final CProject<?> project : projects) {
+				sessionService.setActiveProject(project);
 				final CImportResult result =
-						excelImportService.importExcel(new ByteArrayInputStream(workbookBytes), options, fallbackProject);
-				LOGGER.info("Screens Excel imported for company {} (ok={}, errors={})", company.getName(),
-						result.getTotalSuccess(), result.getTotalErrors());
-			} catch (final org.springframework.transaction.UnexpectedRollbackException e) {
-				// WHY: screen init is best-effort; duplicate/constraint issues in large config workbooks must not break DB reset.
-				LOGGER.warn("Screens Excel import rolled back for company {}: {}; continuing without Excel screens", company.getName(),
-						e.getMessage());
-			} catch (final RuntimeException e) {
-				LOGGER.warn("Screens Excel import failed for company {}: {}; continuing without Excel screens", company.getName(),
-						e.getMessage());
+						excelImportService.importExcel(new ByteArrayInputStream(workbookBytes), options, project);
+				LOGGER.info("Screens Excel imported for company {} project {} (ok={}, errors={})", company.getName(),
+						project.getName(), result.getTotalSuccess(), result.getTotalErrors());
 			}
 		}
 	}
@@ -217,9 +207,9 @@ public class CSystemInitExcelBootstrapService {
 	private void ensureSeedData(final boolean minimal) {
 		final List<CCompany> active = companyService.findActiveCompanies();
 		if (active.isEmpty()) {
-			LOGGER.info("No companies found; creating minimal seed company/project/user for Excel bootstrap");
-			final CCompany seed = new CCompany(SEED_COMPANY_NAME);
-			companyService.save(seed);
+			LOGGER.info("No companies found; creating minimal seed companies for Excel bootstrap");
+			companyService.save(new CCompany(SEED_COMPANY_NAME));
+			companyService.save(new CCompany(SEED_COMPANY_NAME_SECOND));
 		}
 		for (final CCompany company : companyService.findActiveCompanies()) {
 			ensureSeedDataForCompany(company, minimal);
