@@ -60,6 +60,8 @@ public class CExcelImportService {
         Check.notNull(inputStream, "Input stream cannot be null");
         Check.notNull(options, "Import options cannot be null");
         Check.notNull(project, "Project cannot be null");
+        LOGGER.info("Excel import started (project={}, dryRun={}, rollbackOnError={})",
+                project.getName(), options.isDryRun(), options.isRollbackOnError());
         final CImportResult result = new CImportResult(options.isDryRun());
         processWorkbook(inputStream, options, project, result);
         // Apply rollback policy after all rows have been processed
@@ -73,11 +75,12 @@ public class CExcelImportService {
     private void processWorkbook(final InputStream inputStream, final CImportOptions options,
             final CProject<?> project, final CImportResult result) {
         try (final Workbook workbook = new XSSFWorkbook(inputStream)) {
+            final int totalSheets = workbook.getNumberOfSheets();
+            LOGGER.info("Excel import: workbook opened (sheets={}, project={})", totalSheets, project.getName());
             final FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
-            for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+            for (int i = 0; i < totalSheets; i++) {
                 final Sheet sheet = workbook.getSheetAt(i);
                 final String sheetName = sheet.getSheetName();
-                LOGGER.debug("Processing sheet: {}", sheetName);
                 final var handlerOpt = handlerRegistry.findHandler(sheetName);
                 if (handlerOpt.isEmpty()) {
                     if (!options.isSkipUnknownSheets()) {
@@ -88,6 +91,8 @@ public class CExcelImportService {
                     continue;
                 }
                 final IEntityImportHandler<?> handler = handlerOpt.get();
+                LOGGER.info("Excel import: sheet {}/{} '{}' (handler={})", i + 1, totalSheets, sheetName,
+                        handler.getClass().getSimpleName());
                 final CImportSheetResult sheetResult = processSheet(sheet, handler, project, options, evaluator);
                 result.addSheetResult(sheetResult);
 
@@ -129,8 +134,17 @@ public class CExcelImportService {
             return sheetResult;
         }
         LOGGER.debug("Sheet '{}' column mapping: {}", sheet.getSheetName(), columnMapping);
+        final int totalCandidateRows = Math.max(0, sheet.getLastRowNum() - headerRowIndex);
+        final boolean logRowProgress = totalCandidateRows > 500;
         // Process data rows
         for (int r = headerRowIndex + 1; r <= sheet.getLastRowNum(); r++) {
+            if (logRowProgress) {
+                final int processed = r - headerRowIndex;
+                if (processed % 200 == 0) {
+                    LOGGER.info("Excel import: sheet '{}' progress {}/{}", sheet.getSheetName(), processed,
+                            totalCandidateRows);
+                }
+            }
             final Row row = sheet.getRow(r);
             if (row == null) {
                 sheetResult.addRowResult(CImportRowResult.skipped(r + 1));
@@ -172,6 +186,8 @@ public class CExcelImportService {
             }
             sheetResult.addRowResult(rowResult);
         }
+        LOGGER.info("Excel import: sheet '{}' done (ok={}, skipped={}, errors={})", sheet.getSheetName(),
+                sheetResult.getSuccessCount(), sheetResult.getSkippedCount(), sheetResult.getErrorCount());
         return sheetResult;
     }
 

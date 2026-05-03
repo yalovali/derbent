@@ -8,6 +8,7 @@ import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.imports.domain.CImportOptions;
 import tech.derbent.api.imports.domain.CImportRowResult;
 import tech.derbent.api.projects.domain.CProject;
@@ -117,7 +118,45 @@ public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>
 		}
 		applyExtraFields(entity, row, effectiveProject, rowNumber, rowData);
 		if (!options.isDryRun()) {
-			save(entity);
+			try {
+				save(entity);
+			} catch (final CValidationException e) {
+				// WHY: during large bootstraps we sometimes create/flush base records in earlier steps; if the upsert lookup
+				// misses and we attempt an insert, we get a duplicate-name-in-project validation. Treat this as an upsert retry.
+				if (entity.getId() == null && e.getMessage() != null && e.getMessage().toLowerCase().contains("already exists in this project")) {
+					final T existing = findByNameAndProject(name, effectiveProject).orElse(null);
+					if (existing != null) {
+						final var retryProjectFieldsError = applyEntityOfProjectFields(existing, row, effectiveProject, rowNumber, rowData);
+						if (retryProjectFieldsError.isPresent()) {
+							return retryProjectFieldsError.get();
+						}
+						if (!statusName.isBlank()) {
+							final CProjectItemStatus status = statusService.findByNameAndCompany(statusName, company).orElse(null);
+							if (status == null) {
+								return CImportRowResult.error(rowNumber,
+										"Status '" + statusName + "' not found. Create it before importing.", rowData);
+							}
+							existing.setStatus(status);
+						}
+						if (!typeName.isBlank()) {
+							final TType type = findTypeByNameAndCompany(typeName, company).orElse(null);
+							if (type == null) {
+								return CImportRowResult.error(rowNumber,
+										getTypeClass().getSimpleName().replaceFirst("^C", "").replace("Type", " Type") + " '" + typeName
+												+ "' not found. Create it before importing.",
+										rowData);
+							}
+							existing.setEntityType(type);
+						}
+						applyExtraFields(existing, row, effectiveProject, rowNumber, rowData);
+						save(existing);
+					} else {
+						throw e;
+					}
+				} else {
+					throw e;
+				}
+			}
 		}
 		return CImportRowResult.success(rowNumber, name);
 	}
