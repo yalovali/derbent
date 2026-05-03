@@ -55,8 +55,8 @@ public class CSystemInitExcelBootstrapService {
 		this.excelTemplateService = excelTemplateService;
 	}
 
-	public CBootstrapSummary bootstrapAllProjects(final boolean minimal) {
-		final byte[] workbookBytes = loadTemplateBytes(minimal);
+	public CBootstrapSummary bootstrapAllProjects() {
+		final byte[] workbookBytes = loadTemplateBytes();
 		final CImportOptions options = CImportOptions.defaults();
 		options.setDryRun(false);
 		options.setRollbackOnError(true);
@@ -88,8 +88,8 @@ public class CSystemInitExcelBootstrapService {
 		return new CBootstrapSummary(companiesProcessed, projectsProcessed, totalSuccess, totalErrors);
 	}
 
-	private byte[] loadTemplateBytes(final boolean minimal) {
-		try (final InputStream in = excelTemplateService.openSystemInitTemplate(minimal)) {
+	private byte[] loadTemplateBytes() {
+		try (final InputStream in = excelTemplateService.openSystemInitTemplate()) {
 			final byte[] bytes = in.readAllBytes();
 			Check.isTrue(bytes.length > 0, "Empty system init workbook");
 			return bytes;

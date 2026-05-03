@@ -19,7 +19,6 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
 import automated_tests.tech.derbent.ui.automation.CBaseUITest;
 import tech.derbent.Application;
-import tech.derbent.api.imports.service.CSampleImportExcelGenerator;
 import tech.derbent.api.imports.service.CExcelTemplateService;
 
 // KEYWORDS: Import, Excel, Samples, Playwright
@@ -115,7 +114,8 @@ public class CImportDataExcelPlaywrightTest extends CBaseUITest {
 
 	private static Path writeComplexImportWorkbook() throws Exception {
 		final Path file = Files.createTempFile("import-complex-", ".xlsx");
-		try (Workbook wb = CSampleImportExcelGenerator.createSampleWorkbook()) {
+		final Path template = Path.of("src/main/resources/" + CExcelTemplateService.SYSTEM_INIT_TEMPLATE_RESOURCE_PATH);
+		try (Workbook wb = org.apache.poi.ss.usermodel.WorkbookFactory.create(Files.newInputStream(template))) {
 			addErrorRows(wb);
 			try (var out = Files.newOutputStream(file)) {
 				wb.write(out);
