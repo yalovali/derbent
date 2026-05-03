@@ -56,6 +56,14 @@ public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>
 
 	protected abstract Class<TType> getTypeClass();
 
+	/**
+	 * Hook for subclasses to resolve the effective project from row data.
+	 * Default: return sessionProject unchanged. Override in handlers that read a "project" column.
+	 */
+	protected CProject<?> resolveProjectForRow(final CExcelRow row, final CProject<?> sessionProject) {
+		return sessionProject;
+	}
+
 	@Override
 	@Transactional
 	public CImportRowResult importRow(final Map<String, String> rowData, final CProject<?> project, final int rowNumber,
@@ -65,15 +73,21 @@ public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>
 		if (nameError.isPresent()) {
 			return nameError.get();
 		}
-		final var companyError = validateProjectHasCompany(project, rowNumber, rowData);
+		// Allow subclasses to resolve project from the "project" column in the row.
+		final CProject<?> effectiveProject = resolveProjectForRow(row, project);
+		if (effectiveProject == null) {
+			return CImportRowResult.error(rowNumber,
+					"Project '" + row.string("project") + "' not found in company. Create it before importing.", rowData);
+		}
+		final var companyError = validateProjectHasCompany(effectiveProject, rowNumber, rowData);
 		if (companyError.isPresent()) {
 			return companyError.get();
 		}
 		final String name = row.string("name");
-		final CCompany company = project.getCompany();
+		final CCompany company = effectiveProject.getCompany();
 		// WHY: system_init.xlsx and sample workbooks are intended to be re-runnable.
-		final T entity = findByNameAndProject(name, project).orElseGet(() -> createNew(name, project));
-		final var projectFieldsError = applyEntityOfProjectFields(entity, row, project, rowNumber, rowData);
+		final T entity = findByNameAndProject(name, effectiveProject).orElseGet(() -> createNew(name, effectiveProject));
+		final var projectFieldsError = applyEntityOfProjectFields(entity, row, effectiveProject, rowNumber, rowData);
 		if (projectFieldsError.isPresent()) {
 			return projectFieldsError.get();
 		}
@@ -101,7 +115,7 @@ public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>
 					getTypeClass().getSimpleName().replaceFirst("^C", "").replace("Type", " Type") + " is required",
 					rowData);
 		}
-		applyExtraFields(entity, row, project, rowNumber, rowData);
+		applyExtraFields(entity, row, effectiveProject, rowNumber, rowData);
 		if (!options.isDryRun()) {
 			save(entity);
 		}

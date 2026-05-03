@@ -1,8 +1,6 @@
 package tech.derbent.api.screens.service;
 
-import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.stereotype.Service;
@@ -12,49 +10,50 @@ import tech.derbent.api.imports.service.CEntityOfProjectImportHandler;
 import tech.derbent.api.imports.service.CImportProjectResolver;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
-import tech.derbent.api.screens.domain.CGridEntity;
+import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.users.service.IUserRepository;
 
-/** Imports CGridEntity rows from Excel (project-scoped "view" configuration). */
+/** Imports CDetailSection rows from Excel (project-scoped form/detail view configuration). */
 @Service
-public class CGridEntityImportHandler extends CEntityOfProjectImportHandler<CGridEntity> {
+public class CDetailSectionImportHandler extends CEntityOfProjectImportHandler<CDetailSection> {
 
-	private static List<String> splitCsv(final String csv) {
-		return Arrays.stream(csv.split(",")).map(String::trim).filter(s -> !s.isBlank()).distinct().toList();
-	}
-
-	private final CGridEntityService gridEntityService;
+	private final CDetailSectionService detailSectionService;
 	private final CImportProjectResolver projectResolver;
 
-	public CGridEntityImportHandler(final CGridEntityService gridEntityService, final IUserRepository userRepository,
-			final CImportProjectResolver projectResolver) {
+	public CDetailSectionImportHandler(final CDetailSectionService detailSectionService,
+			final IUserRepository userRepository, final CImportProjectResolver projectResolver) {
 		super(userRepository);
-		this.gridEntityService = gridEntityService;
+		this.detailSectionService = detailSectionService;
 		this.projectResolver = projectResolver;
 	}
 
 	@Override
 	protected Map<String, String> getAdditionalColumnAliases() {
-		return Map.of("Name", "name", "Data Service Bean", "dataservicebeanname", "Column Fields", "columnfields",
-				"Editable Column Fields", "editablecolumnfields", "None Grid", "attributenone");
+		return Map.of(
+				"Name", "name",
+				"Entity Type", "entitytype",
+				"Screen Title", "screentitle",
+				"Header Text", "headertext",
+				"Default Section", "defaultsection",
+				"Non Deletable", "attributenondeletable");
 	}
 
 	@Override
-	public Class<CGridEntity> getEntityClass() { return CGridEntity.class; }
+	public Class<CDetailSection> getEntityClass() { return CDetailSection.class; }
 
 	@Override
-	public Set<String> getRequiredColumns() { return Set.of("name", "dataservicebeanname"); }
+	public Set<String> getRequiredColumns() { return Set.of("name", "entitytype"); }
 
 	@Override
 	public Set<String> getSupportedSheetNames() {
 		final Set<String> names = new LinkedHashSet<>();
-		names.add("CGridEntity");
-		names.add("GridEntity");
-		names.add("Grid Entity");
-		names.add("Grid Entities");
+		names.add("CDetailSection");
+		names.add("DetailSection");
+		names.add("Detail Section");
+		names.add("Detail Sections");
 		try {
-			final String singular = CEntityRegistry.getEntityTitleSingular(CGridEntity.class);
-			final String plural = CEntityRegistry.getEntityTitlePlural(CGridEntity.class);
+			final String singular = CEntityRegistry.getEntityTitleSingular(CDetailSection.class);
+			final String plural = CEntityRegistry.getEntityTitlePlural(CDetailSection.class);
 			if (singular != null && !singular.isBlank()) {
 				names.add(singular);
 			}
@@ -85,23 +84,26 @@ public class CGridEntityImportHandler extends CEntityOfProjectImportHandler<CGri
 			return companyError.get();
 		}
 		final String name = row.string("name");
-		final String beanName = row.string("dataservicebeanname");
-		if (beanName.isBlank()) {
-			return CImportRowResult.error(rowNumber, "Data Service Bean is required", rowData);
+		final String entityType = row.string("entitytype");
+		if (entityType.isBlank()) {
+			return CImportRowResult.error(rowNumber, "Entity Type is required", rowData);
 		}
-		// WHY: view configuration should be re-runnable; we upsert by name to avoid duplicate bootstrap runs failing.
-		final CGridEntity entity = gridEntityService.findByNameAndProject(name, effectiveProject)
-				.orElseGet(() -> new CGridEntity(name, effectiveProject));
+		// WHY: screen configuration must be re-runnable; upsert by name avoids duplicate bootstrap runs failing.
+		CDetailSection entity = detailSectionService.findByNameAndProject(effectiveProject, name);
+		if (entity == null) {
+			entity = new CDetailSection(name, effectiveProject);
+		}
 		final var projectFieldsError = applyEntityOfProjectFields(entity, row, effectiveProject, rowNumber, rowData);
 		if (projectFieldsError.isPresent()) {
 			return projectFieldsError.get();
 		}
-		entity.setDataServiceBeanName(beanName);
-		row.optionalString("columnfields").ifPresent(v -> entity.setColumnFields(splitCsv(v)));
-		row.optionalString("editablecolumnfields").ifPresent(v -> entity.setEditableColumnFields(splitCsv(v)));
-		row.optionalBoolean("attributenone").ifPresent(entity::setAttributeNone);
+		entity.setEntityType(entityType);
+		row.optionalString("screentitle").ifPresent(entity::setScreenTitle);
+		row.optionalString("headertext").ifPresent(entity::setHeaderText);
+		row.optionalBoolean("defaultsection").ifPresent(entity::setDefaultSection);
+		row.optionalBoolean("attributenondeletable").ifPresent(entity::setAttributeNonDeletable);
 		if (!options.isDryRun()) {
-			gridEntityService.save(entity);
+			detailSectionService.save(entity);
 		}
 		return CImportRowResult.success(rowNumber, name);
 	}

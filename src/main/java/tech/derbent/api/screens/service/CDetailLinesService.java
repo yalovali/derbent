@@ -108,6 +108,13 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 		return getTypedRepository().countByMaster(master);
 	}
 
+	/** Find a detail line by parent section and entity property (used for upsert during Excel import). */
+	@Transactional (readOnly = true)
+	public java.util.Optional<CDetailLines> findBySectionAndEntityProperty(final CDetailSection section,
+			final String entityProperty) {
+		return getTypedRepository().findBySectionAndEntityProperty(section, entityProperty);
+	}
+
 	/** Find all lines by master section, ordered by itemOrder.
 	 * @param master the detail section
 	 * @return list of lines ordered by itemOrder */

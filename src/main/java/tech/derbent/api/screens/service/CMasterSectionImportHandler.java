@@ -1,8 +1,6 @@
 package tech.derbent.api.screens.service;
 
-import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.stereotype.Service;
@@ -12,49 +10,47 @@ import tech.derbent.api.imports.service.CEntityOfProjectImportHandler;
 import tech.derbent.api.imports.service.CImportProjectResolver;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
-import tech.derbent.api.screens.domain.CGridEntity;
+import tech.derbent.api.screens.domain.CMasterSection;
 import tech.derbent.api.users.service.IUserRepository;
 
-/** Imports CGridEntity rows from Excel (project-scoped "view" configuration). */
+/** Imports CMasterSection rows from Excel (project-scoped master view template configuration). */
 @Service
-public class CGridEntityImportHandler extends CEntityOfProjectImportHandler<CGridEntity> {
+public class CMasterSectionImportHandler extends CEntityOfProjectImportHandler<CMasterSection> {
 
-	private static List<String> splitCsv(final String csv) {
-		return Arrays.stream(csv.split(",")).map(String::trim).filter(s -> !s.isBlank()).distinct().toList();
-	}
-
-	private final CGridEntityService gridEntityService;
+	private final CMasterSectionService masterSectionService;
 	private final CImportProjectResolver projectResolver;
 
-	public CGridEntityImportHandler(final CGridEntityService gridEntityService, final IUserRepository userRepository,
-			final CImportProjectResolver projectResolver) {
+	public CMasterSectionImportHandler(final CMasterSectionService masterSectionService,
+			final IUserRepository userRepository, final CImportProjectResolver projectResolver) {
 		super(userRepository);
-		this.gridEntityService = gridEntityService;
+		this.masterSectionService = masterSectionService;
 		this.projectResolver = projectResolver;
 	}
 
 	@Override
 	protected Map<String, String> getAdditionalColumnAliases() {
-		return Map.of("Name", "name", "Data Service Bean", "dataservicebeanname", "Column Fields", "columnfields",
-				"Editable Column Fields", "editablecolumnfields", "None Grid", "attributenone");
+		return Map.of(
+				"Name", "name",
+				"Section Type", "sectiontype",
+				"Section DB Name", "sectiondbname");
 	}
 
 	@Override
-	public Class<CGridEntity> getEntityClass() { return CGridEntity.class; }
+	public Class<CMasterSection> getEntityClass() { return CMasterSection.class; }
 
 	@Override
-	public Set<String> getRequiredColumns() { return Set.of("name", "dataservicebeanname"); }
+	public Set<String> getRequiredColumns() { return Set.of("name", "sectiontype"); }
 
 	@Override
 	public Set<String> getSupportedSheetNames() {
 		final Set<String> names = new LinkedHashSet<>();
-		names.add("CGridEntity");
-		names.add("GridEntity");
-		names.add("Grid Entity");
-		names.add("Grid Entities");
+		names.add("CMasterSection");
+		names.add("MasterSection");
+		names.add("Master Section");
+		names.add("Master Sections");
 		try {
-			final String singular = CEntityRegistry.getEntityTitleSingular(CGridEntity.class);
-			final String plural = CEntityRegistry.getEntityTitlePlural(CGridEntity.class);
+			final String singular = CEntityRegistry.getEntityTitleSingular(CMasterSection.class);
+			final String plural = CEntityRegistry.getEntityTitlePlural(CMasterSection.class);
 			if (singular != null && !singular.isBlank()) {
 				names.add(singular);
 			}
@@ -85,23 +81,21 @@ public class CGridEntityImportHandler extends CEntityOfProjectImportHandler<CGri
 			return companyError.get();
 		}
 		final String name = row.string("name");
-		final String beanName = row.string("dataservicebeanname");
-		if (beanName.isBlank()) {
-			return CImportRowResult.error(rowNumber, "Data Service Bean is required", rowData);
+		final String sectionType = row.string("sectiontype");
+		if (sectionType.isBlank()) {
+			return CImportRowResult.error(rowNumber, "Section Type is required", rowData);
 		}
-		// WHY: view configuration should be re-runnable; we upsert by name to avoid duplicate bootstrap runs failing.
-		final CGridEntity entity = gridEntityService.findByNameAndProject(name, effectiveProject)
-				.orElseGet(() -> new CGridEntity(name, effectiveProject));
+		// WHY: screen configuration must be re-runnable; upsert by name avoids duplicate bootstrap runs failing.
+		final CMasterSection entity = masterSectionService.findByNameAndProject(name, effectiveProject)
+				.orElseGet(() -> new CMasterSection(name, effectiveProject));
 		final var projectFieldsError = applyEntityOfProjectFields(entity, row, effectiveProject, rowNumber, rowData);
 		if (projectFieldsError.isPresent()) {
 			return projectFieldsError.get();
 		}
-		entity.setDataServiceBeanName(beanName);
-		row.optionalString("columnfields").ifPresent(v -> entity.setColumnFields(splitCsv(v)));
-		row.optionalString("editablecolumnfields").ifPresent(v -> entity.setEditableColumnFields(splitCsv(v)));
-		row.optionalBoolean("attributenone").ifPresent(entity::setAttributeNone);
+		entity.setSectionType(sectionType);
+		row.optionalString("sectiondbname").ifPresent(entity::setSectionDBName);
 		if (!options.isDryRun()) {
-			gridEntityService.save(entity);
+			masterSectionService.save(entity);
 		}
 		return CImportRowResult.success(rowNumber, name);
 	}

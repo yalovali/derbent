@@ -34,4 +34,9 @@ public interface IDetailLinesRepository extends IAbstractRepository<CDetailLines
 	 * @return the next available order number */
 	@Query ("SELECT COALESCE(MAX(e.itemOrder), 0) + 1 FROM #{#entityName} e WHERE e.detailSection = :master")
 	Integer getNextItemOrder(@Param ("master") CDetailSection master);
+
+	/** Find a detail line by its parent section and entity property (used for upsert during Excel import). */
+	@Query ("SELECT e FROM #{#entityName} e WHERE e.detailSection = :section AND e.entityProperty = :entityProperty")
+	java.util.Optional<CDetailLines> findBySectionAndEntityProperty(
+			@Param ("section") CDetailSection section, @Param ("entityProperty") String entityProperty);
 }

@@ -10,7 +10,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import tech.derbent.api.config.CDataInitializer;
-import tech.derbent.api.session.service.ISessionService;
 
 @SpringBootApplication
 public class DbResetApplication {
@@ -23,10 +22,7 @@ public class DbResetApplication {
 		if (Arrays.asList(context.getEnvironment().getActiveProfiles()).contains("reset-db")) {
 			try {
 				LOGGER.info("Resetting database with initial data...");
-				// Get session service bean from Spring context
-				ISessionService sessionService = context.getBean(ISessionService.class);
-				LOGGER.debug("Retrieved ISessionService bean from Spring context");
-				final CDataInitializer initializer = new CDataInitializer(sessionService);
+				final CDataInitializer initializer = new CDataInitializer();
 				initializer.reloadForcedExcel(false);
 				LOGGER.info("Database reset completed successfully!");
 			} catch (Exception e) {

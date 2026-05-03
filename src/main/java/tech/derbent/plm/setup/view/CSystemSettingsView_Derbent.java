@@ -250,7 +250,7 @@ public final class CSystemSettingsView_Derbent extends CAbstractPage {
 		final CDialogProgress progressDialog = CNotificationService.showProgressDialog("Database Reset", "Veritabanı yeniden hazırlanıyor...");
 		CompletableFuture.runAsync(() -> {
 			try {
-				final CDataInitializer init = new CDataInitializer(sessionService);
+				final CDataInitializer init = new CDataInitializer();
 				init.reloadForcedExcel(minimal);
 				ui.access(() -> {
 					progressDialog.close();

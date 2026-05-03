@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.imports.service.CExcelRow;
+import tech.derbent.api.imports.service.CImportProjectResolver;
 import tech.derbent.api.imports.service.CProjectItemImportHandler;
 import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.page.domain.CPageEntityType;
@@ -24,14 +25,29 @@ public class CPageEntityImportHandler extends CProjectItemImportHandler<CPageEnt
 	private final CGridEntityService gridEntityService;
 	private final CPageEntityService pageEntityService;
 	private final CPageEntityTypeService typeService;
+	private final CImportProjectResolver projectResolver;
 
 	public CPageEntityImportHandler(final CPageEntityService pageEntityService,
 			final CPageEntityTypeService typeService, final CGridEntityService gridEntityService,
-			final CProjectItemStatusService statusService, final IUserRepository userRepository) {
+			final CProjectItemStatusService statusService, final IUserRepository userRepository,
+			final CImportProjectResolver projectResolver) {
 		super(statusService, userRepository);
 		this.pageEntityService = pageEntityService;
 		this.typeService = typeService;
 		this.gridEntityService = gridEntityService;
+		this.projectResolver = projectResolver;
+	}
+
+	@Override
+	protected CProject<?> resolveProjectForRow(final CExcelRow row, final CProject<?> sessionProject) {
+		final String projectName = row.string("project");
+		if (projectName.isBlank()) {
+			return sessionProject;
+		}
+		if (sessionProject.getCompany() == null) {
+			return null;
+		}
+		return projectResolver.findProjectByNameAndCompany(projectName, sessionProject.getCompany()).orElse(null);
 	}
 
 	@Override

@@ -308,7 +308,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 					LOGGER.info("ℹ️ Calimero can be started manually via system settings after login");
 				}
 			} else {
-				final CDataInitializer init = new CDataInitializer(sessionService);
+				final CDataInitializer init = new CDataInitializer();
 				LOGGER.info("🔧 Using Derbent data initializer (Excel-first)");
 				init.reloadForcedExcel(minimal);
 			}

@@ -16,6 +16,7 @@ public class CExcelTemplateService {
 
     public static final String SYSTEM_INIT_TEMPLATE_RESOURCE_PATH = "excel/system_init.xlsx";
     public static final String SYSTEM_INIT_MINIMAL_TEMPLATE_RESOURCE_PATH = "excel/system_init_min.xlsx";
+    public static final String SCREENS_INIT_TEMPLATE_RESOURCE_PATH = "excel/screens_init.xlsx";
 
     public InputStream openSystemInitTemplate(final boolean minimal) {
         final String resourcePath = minimal ? SYSTEM_INIT_MINIMAL_TEMPLATE_RESOURCE_PATH : SYSTEM_INIT_TEMPLATE_RESOURCE_PATH;
@@ -30,5 +31,18 @@ public class CExcelTemplateService {
 
     public InputStream openSystemInitTemplate() {
         return openSystemInitTemplate(false);
+    }
+
+    /** Returns the screens layout init template, or null if the file is not present (screens init is optional). */
+    public InputStream openScreensInitTemplate() {
+        final ClassPathResource resource = new ClassPathResource(SCREENS_INIT_TEMPLATE_RESOURCE_PATH);
+        if (!resource.exists()) {
+            return null;
+        }
+        try {
+            return resource.getInputStream();
+        } catch (final Exception e) {
+            throw new IllegalStateException("Failed to open " + SCREENS_INIT_TEMPLATE_RESOURCE_PATH, e);
+        }
     }
 }
