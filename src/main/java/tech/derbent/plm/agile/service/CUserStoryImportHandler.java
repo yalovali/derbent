@@ -42,13 +42,8 @@ public class CUserStoryImportHandler extends CAbstractExcelImportHandler<CUserSt
 	public Class<CUserStory> getEntityClass() { return CUserStory.class; }
 
 	@Override
-	public Map<String, String> getColumnAliases() {
-		// WHY: item type columns are domain-specific ("User Story Type", "Ticket Type", etc.) but the field token is consistently "entityType".
-		return Map.of(
-				"User Story Type", "entitytype",
-				"Type", "entitytype",
-				"Progress %", "progresspercentage",
-				"Story Points", "storypoint");
+	protected Map<String, String> getAdditionalColumnAliases() {
+		return Map.of("Type", "entitytype");
 	}
 
 	@Override
@@ -88,7 +83,7 @@ public class CUserStoryImportHandler extends CAbstractExcelImportHandler<CUserSt
 			final CProjectItemStatus status = statusService.findByNameAndCompany(statusName, project.getCompany()).orElse(null);
 			if (status == null) {
 				return CImportRowResult.error(rowNumber,
-						"Status '" + statusName + "' not found. Create it before importing (or enable auto-create lookups).", rowData);
+						"Status '" + statusName + "' not found. Create it before importing.", rowData);
 			}
 			story.setStatus(status);
 		}
@@ -98,7 +93,7 @@ public class CUserStoryImportHandler extends CAbstractExcelImportHandler<CUserSt
 			final CUserStoryType type = typeService.findByNameAndCompany(typeName, project.getCompany()).orElse(null);
 			if (type == null) {
 				return CImportRowResult.error(rowNumber,
-						"User Story Type '" + typeName + "' not found. Create it before importing (or enable auto-create lookups).",
+						"User Story Type '" + typeName + "' not found. Create it before importing.",
 						rowData);
 			}
 			story.setEntityType(type);

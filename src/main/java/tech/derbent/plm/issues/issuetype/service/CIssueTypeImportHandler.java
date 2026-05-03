@@ -26,7 +26,7 @@ public class CIssueTypeImportHandler extends CAbstractWorkflowTypeImportHandler<
     public Class<CIssueType> getEntityClass() { return CIssueType.class; }
 
     @Override
-    public Map<String, String> getColumnAliases() {
+    protected Map<String, String> getAdditionalColumnAliases() {
         // WHY: header normalization turns "Non Deletable" into "nondeletable"; the underlying field is attributeNonDeletable.
         return Map.of(
                 "Non Deletable", "attributenondeletable",

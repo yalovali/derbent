@@ -25,7 +25,7 @@ public class CTicketPriorityImportHandler extends CAbstractSimpleTypeImportHandl
 	public Class<CTicketPriority> getEntityClass() { return CTicketPriority.class; }
 
 	@Override
-	public Map<String, String> getColumnAliases() {
+	protected Map<String, String> getAdditionalColumnAliases() {
 		return Map.of(
 				"Priority Level", "prioritylevel",
 				"Is Default", "isdefault");

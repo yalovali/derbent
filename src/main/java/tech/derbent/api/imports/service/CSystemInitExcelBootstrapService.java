@@ -61,7 +61,6 @@ public class CSystemInitExcelBootstrapService {
 		options.setDryRun(false);
 		options.setRollbackOnError(true);
 		options.setSkipUnknownSheets(true);
-		options.setAutoCreateLookups(true);
 
 		int companiesProcessed = 0;
 		int projectsProcessed = 0;

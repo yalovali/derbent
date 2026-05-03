@@ -2,9 +2,6 @@ package tech.derbent.plm.activities.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -14,14 +11,12 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.imports.domain.CImportOptions;
 import tech.derbent.api.imports.domain.CImportRowResult;
-import tech.derbent.api.imports.service.IEntityImportHandler;
+import tech.derbent.api.imports.service.CAbstractExcelImportHandler;
+import tech.derbent.api.imports.service.CImportParsers;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.users.service.IUserRepository;
-import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.activities.domain.CActivityPriority;
-import tech.derbent.plm.activities.domain.CActivityType;
 
 /**
  * Handles import of CActivity rows from Excel.
@@ -33,15 +28,9 @@ import tech.derbent.plm.activities.domain.CActivityType;
  */
 @Service
 @Profile({"derbent", "default"})
-public class CActivityImportHandler implements IEntityImportHandler<CActivity> {
+public class CActivityImportHandler extends CAbstractExcelImportHandler<CActivity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CActivityImportHandler.class);
-    private static final DateTimeFormatter[] DATE_FORMATS = {
-        DateTimeFormatter.ofPattern("yyyy-MM-dd"),
-        DateTimeFormatter.ofPattern("dd/MM/yyyy"),
-        DateTimeFormatter.ofPattern("MM/dd/yyyy"),
-        DateTimeFormatter.ofPattern("d.M.yyyy"),
-    };
 
     private final CActivityService activityService;
     private final CActivityTypeService activityTypeService;
@@ -65,45 +54,8 @@ public class CActivityImportHandler implements IEntityImportHandler<CActivity> {
     public Class<CActivity> getEntityClass() { return CActivity.class; }
 
     @Override
-    public Set<String> getSupportedSheetNames() {
-        final Set<String> names = new LinkedHashSet<>();
-        names.add("CActivity");
-        names.add("Activity");
-        // Add registry names if available
-        try {
-            final String singular = CEntityRegistry.getEntityTitleSingular(CActivity.class);
-            final String plural = CEntityRegistry.getEntityTitlePlural(CActivity.class);
-            if (singular != null && !singular.isBlank()) {
-                names.add(singular);
-            }
-            if (plural != null && !plural.isBlank()) {
-                names.add(plural);
-            }
-        } catch (final Exception ignored) { /* registry may not be ready at bean creation */ }
-        return names;
-    }
-
-    @Override
-    public Map<String, String> getColumnAliases() {
-        // alias (any case) → canonical token used as rowData key
-        return Map.ofEntries(
-                Map.entry("Activity Type", "entitytype"),
-                Map.entry("Type", "entitytype"),
-                Map.entry("Due Date", "duedate"),
-                Map.entry("Estimated Hours", "estimatedhours"),
-                Map.entry("Assigned To", "assignedto"),
-                Map.entry("Description", "description"),
-                Map.entry("Status", "status"),
-                Map.entry("Name", "name"),
-                Map.entry("Priority", "priority"),
-                Map.entry("Acceptance Criteria", "acceptancecriteria"),
-                Map.entry("Notes", "notes"),
-                Map.entry("Results", "results"),
-                Map.entry("Start Date", "startdate"),
-                Map.entry("Completion Date", "completiondate"),
-                Map.entry("Progress %", "progresspercentage"),
-                Map.entry("Story Points", "storypoint")
-        );
+    protected Map<String, String> getAdditionalColumnAliases() {
+        return Map.of("Type", "entitytype");
     }
 
     @Override
@@ -128,13 +80,9 @@ public class CActivityImportHandler implements IEntityImportHandler<CActivity> {
             final var statusOpt = statusService.findByNameAndCompany(statusName, project.getCompany());
             if (statusOpt.isPresent()) {
                 activity.setStatus(statusOpt.get());
-            } else if (options.isAutoCreateLookups() && !options.isDryRun()) {
-                // WHY: bootstrapping workbooks are easier to maintain if they can declare new lookup values inline.
-                final CProjectItemStatus created = statusService.save(new CProjectItemStatus(statusName, project.getCompany()));
-                activity.setStatus(created);
             } else {
                 return CImportRowResult.error(rowNumber,
-                        "Status '" + statusName + "' not found. Create it before importing (or enable auto-create lookups).", rowData);
+                        "Status '" + statusName + "' not found. Create it before importing.", rowData);
             }
         }
         // Resolve optional activity type by name
@@ -143,13 +91,9 @@ public class CActivityImportHandler implements IEntityImportHandler<CActivity> {
             final var typeOpt = activityTypeService.findByNameAndCompany(typeName, project.getCompany());
             if (typeOpt.isPresent()) {
                 activity.setEntityType(typeOpt.get());
-            } else if (options.isAutoCreateLookups() && !options.isDryRun()) {
-                // WHY: types are reference data; creating them during import keeps the workbook self-contained.
-                final CActivityType created = activityTypeService.save(new CActivityType(typeName, project.getCompany()));
-                activity.setEntityType(created);
             } else {
                 return CImportRowResult.error(rowNumber,
-                        "Activity Type '" + typeName + "' not found. Create it before importing (or enable auto-create lookups).", rowData);
+                        "Activity Type '" + typeName + "' not found. Create it before importing.", rowData);
             }
         }
         // Resolve optional assignee by login
@@ -174,12 +118,9 @@ public class CActivityImportHandler implements IEntityImportHandler<CActivity> {
             final var priorityOpt = priorityService.findByNameAndCompany(priorityName, project.getCompany());
             if (priorityOpt.isPresent()) {
                 activity.setPriority(priorityOpt.get());
-            } else if (options.isAutoCreateLookups() && !options.isDryRun()) {
-                // WHY: sample workbooks should be self-contained; allow creating missing priorities.
-                activity.setPriority(priorityService.save(new CActivityPriority(priorityName, project.getCompany())));
             } else {
                 return CImportRowResult.error(rowNumber,
-                        "Priority '" + priorityName + "' not found. Create it before importing (or enable auto-create lookups).", rowData);
+                        "Priority '" + priorityName + "' not found. Create it before importing.", rowData);
             }
         }
         // Optional acceptance criteria / notes / results
@@ -198,7 +139,7 @@ public class CActivityImportHandler implements IEntityImportHandler<CActivity> {
         // Optional dates
         final String startDateStr = rowData.getOrDefault("startdate", "").trim();
         if (!startDateStr.isBlank()) {
-            final LocalDate startDate = parseDate(startDateStr);
+            final LocalDate startDate = CImportParsers.tryParseLocalDate(startDateStr).orElse(null);
             if (startDate == null) {
                 return CImportRowResult.error(rowNumber,
                         "Cannot parse start date '" + startDateStr + "'. Use yyyy-MM-dd or dd/MM/yyyy.", rowData);
@@ -207,7 +148,7 @@ public class CActivityImportHandler implements IEntityImportHandler<CActivity> {
         }
         final String dueDateStr = rowData.getOrDefault("duedate", "").trim();
         if (!dueDateStr.isBlank()) {
-            final LocalDate dueDate = parseDate(dueDateStr);
+            final LocalDate dueDate = CImportParsers.tryParseLocalDate(dueDateStr).orElse(null);
             if (dueDate == null) {
                 return CImportRowResult.error(rowNumber,
                         "Cannot parse due date '" + dueDateStr + "'. Use yyyy-MM-dd or dd/MM/yyyy.", rowData);
@@ -216,7 +157,7 @@ public class CActivityImportHandler implements IEntityImportHandler<CActivity> {
         }
         final String completionDateStr = rowData.getOrDefault("completiondate", "").trim();
         if (!completionDateStr.isBlank()) {
-            final LocalDate completionDate = parseDate(completionDateStr);
+            final LocalDate completionDate = CImportParsers.tryParseLocalDate(completionDateStr).orElse(null);
             if (completionDate == null) {
                 return CImportRowResult.error(rowNumber,
                         "Cannot parse completion date '" + completionDateStr + "'. Use yyyy-MM-dd or dd/MM/yyyy.", rowData);
@@ -260,14 +201,5 @@ public class CActivityImportHandler implements IEntityImportHandler<CActivity> {
         }
         LOGGER.debug("Imported activity '{}' (row {})", name, rowNumber);
         return CImportRowResult.success(rowNumber, name);
-    }
-
-    private LocalDate parseDate(final String value) {
-        for (final DateTimeFormatter fmt : DATE_FORMATS) {
-            try {
-                return LocalDate.parse(value, fmt);
-            } catch (final DateTimeParseException ignored) { /* try next format */ }
-        }
-        return null;
     }
 }

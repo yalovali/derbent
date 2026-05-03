@@ -1,9 +1,6 @@
 package tech.derbent.plm.issues.issue.service;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -13,14 +10,12 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.imports.domain.CImportOptions;
 import tech.derbent.api.imports.domain.CImportRowResult;
-import tech.derbent.api.imports.service.IEntityImportHandler;
+import tech.derbent.api.imports.service.CAbstractExcelImportHandler;
+import tech.derbent.api.imports.service.CImportParsers;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.registry.CEntityRegistry;
-import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.users.service.IUserRepository;
 import tech.derbent.plm.activities.service.CActivityService;
 import tech.derbent.plm.issues.issue.domain.CIssue;
-import tech.derbent.plm.issues.issuetype.domain.CIssueType;
 import tech.derbent.plm.issues.issuetype.service.CIssueTypeService;
 
 /**
@@ -31,15 +26,9 @@ import tech.derbent.plm.issues.issuetype.service.CIssueTypeService;
  */
 @Service
 @Profile({"derbent", "default"})
-public class CIssueImportHandler implements IEntityImportHandler<CIssue> {
+public class CIssueImportHandler extends CAbstractExcelImportHandler<CIssue> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CIssueImportHandler.class);
-    private static final DateTimeFormatter[] DATE_FORMATS = {
-        DateTimeFormatter.ofPattern("yyyy-MM-dd"),
-        DateTimeFormatter.ofPattern("dd/MM/yyyy"),
-        DateTimeFormatter.ofPattern("MM/dd/yyyy"),
-        DateTimeFormatter.ofPattern("d.M.yyyy"),
-    };
 
     private final CIssueService issueService;
     private final CIssueTypeService issueTypeService;
@@ -61,29 +50,8 @@ public class CIssueImportHandler implements IEntityImportHandler<CIssue> {
     public Class<CIssue> getEntityClass() { return CIssue.class; }
 
     @Override
-    public Set<String> getSupportedSheetNames() {
-        final Set<String> names = new LinkedHashSet<>();
-        names.add("CIssue");
-        names.add("Issue");
-        try {
-            names.add(CEntityRegistry.getEntityTitleSingular(CIssue.class));
-            names.add(CEntityRegistry.getEntityTitlePlural(CIssue.class));
-        } catch (final Exception ignored) { /* registry may not be ready */ }
-        return names;
-    }
-
-    @Override
-    public Map<String, String> getColumnAliases() {
-        return Map.of(
-            "Issue Type",     "entitytype",
-            "Type",          "entitytype",
-            "Due Date",      "duedate",
-            "Description",   "description",
-            "Linked Activity","linkedactivity",
-            "Assigned To",   "assignedto",
-            "Status",        "status",
-            "Name",          "name"
-        );
+    protected Map<String, String> getAdditionalColumnAliases() {
+        return Map.of("Type", "entitytype");
     }
 
     @Override
@@ -107,13 +75,9 @@ public class CIssueImportHandler implements IEntityImportHandler<CIssue> {
             final var statusOpt = statusService.findByNameAndCompany(statusName, project.getCompany());
             if (statusOpt.isPresent()) {
                 issue.setStatus(statusOpt.get());
-            } else if (options.isAutoCreateLookups() && !options.isDryRun()) {
-                // WHY: status is reference data; auto-creating enables single-workbook bootstrapping.
-                final CProjectItemStatus created = statusService.save(new CProjectItemStatus(statusName, project.getCompany()));
-                issue.setStatus(created);
             } else {
                 return CImportRowResult.error(rowNumber,
-                        "Status '" + statusName + "' not found. Create it before importing (or enable auto-create lookups).", rowData);
+                        "Status '" + statusName + "' not found. Create it before importing.", rowData);
             }
         }
         final String typeName = rowData.getOrDefault("entitytype", "").trim();
@@ -121,13 +85,9 @@ public class CIssueImportHandler implements IEntityImportHandler<CIssue> {
             final var typeOpt = issueTypeService.findByNameAndCompany(typeName, project.getCompany());
             if (typeOpt.isPresent()) {
                 issue.setEntityType(typeOpt.get());
-            } else if (options.isAutoCreateLookups() && !options.isDryRun()) {
-                // WHY: types are reference data; creating them during import keeps the workbook self-contained.
-                final CIssueType created = issueTypeService.save(new CIssueType(typeName, project.getCompany()));
-                issue.setEntityType(created);
             } else {
                 return CImportRowResult.error(rowNumber,
-                        "Issue Type '" + typeName + "' not found. Create it before importing (or enable auto-create lookups).", rowData);
+                        "Issue Type '" + typeName + "' not found. Create it before importing.", rowData);
             }
         }
         // Resolve optional linked activity by name
@@ -157,7 +117,7 @@ public class CIssueImportHandler implements IEntityImportHandler<CIssue> {
         }
         final String dueDateStr = rowData.getOrDefault("duedate", "").trim();
         if (!dueDateStr.isBlank()) {
-            final LocalDate dueDate = parseDate(dueDateStr);
+            final LocalDate dueDate = CImportParsers.tryParseLocalDate(dueDateStr).orElse(null);
             if (dueDate == null) {
                 return CImportRowResult.error(rowNumber,
                         "Cannot parse date '" + dueDateStr + "'. Use yyyy-MM-dd or dd/MM/yyyy.", rowData);
@@ -174,14 +134,5 @@ public class CIssueImportHandler implements IEntityImportHandler<CIssue> {
         }
         LOGGER.debug("Imported issue '{}' (row {})", name, rowNumber);
         return CImportRowResult.success(rowNumber, name);
-    }
-
-    private LocalDate parseDate(final String value) {
-        for (final DateTimeFormatter fmt : DATE_FORMATS) {
-            try {
-                return LocalDate.parse(value, fmt);
-            } catch (final DateTimeParseException ignored) { /* try next format */ }
-        }
-        return null;
     }
 }

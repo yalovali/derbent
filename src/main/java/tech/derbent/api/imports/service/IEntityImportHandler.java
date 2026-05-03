@@ -46,7 +46,7 @@ public interface IEntityImportHandler<T> {
      * @param rowData  map of canonicalFieldToken → cellStringValue (already normalised by import engine)
      * @param project  the currently active project
      * @param rowNumber 1-based sheet row number for error messages
-     * @param options import options (dry-run, auto-create lookups, rollback policy, etc.)
+     * @param options import options (dry-run, rollback policy, etc.)
      * @return per-row result; never null
      */
     CImportRowResult importRow(Map<String, String> rowData, CProject<?> project, int rowNumber, CImportOptions options);

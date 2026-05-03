@@ -1,5 +1,7 @@
 package tech.derbent.api.imports.service;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import tech.derbent.api.registry.CEntityRegistry;
@@ -43,6 +45,30 @@ public final class CImportSheetNames {
         } catch (final Exception ignored) {
             // WHY: some registries may not be fully ready during early bean initialization.
         }
+
+        // WHY: import handlers are registered early; if the registry is not ready we still want to
+        // accept the canonical ENTITY_TITLE_* constants used across the domain model.
+        readStaticStringField(entityClass, "ENTITY_TITLE").ifPresent(names::add);
+        readStaticStringField(entityClass, "ENTITY_TITLE_SINGULAR").ifPresent(names::add);
+        readStaticStringField(entityClass, "ENTITY_TITLE_PLURAL").ifPresent(names::add);
+
         return names;
+    }
+
+    private static java.util.Optional<String> readStaticStringField(final Class<?> clazz, final String fieldName) {
+        try {
+            final Field field = clazz.getDeclaredField(fieldName);
+            if (!Modifier.isStatic(field.getModifiers()) || field.getType() != String.class) {
+                return java.util.Optional.empty();
+            }
+            field.setAccessible(true);
+            final Object value = field.get(null);
+            if (value instanceof final String str && !str.isBlank()) {
+                return java.util.Optional.of(str);
+            }
+            return java.util.Optional.empty();
+        } catch (final Exception ignored) {
+            return java.util.Optional.empty();
+        }
     }
 }

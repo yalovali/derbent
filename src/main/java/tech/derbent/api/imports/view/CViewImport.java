@@ -75,7 +75,6 @@ public final class CViewImport extends CAbstractPage {
     private Checkbox dryRunCheckbox;
     private Checkbox rollbackOnErrorCheckbox;
     private Checkbox skipUnknownSheetsCheckbox;
-    private Checkbox autoCreateLookupsCheckbox;
 
     // Results area
     private Div resultsContainer;
@@ -228,12 +227,7 @@ public final class CViewImport extends CAbstractPage {
         rollbackOnErrorCheckbox.setValue(false);
         skipUnknownSheetsCheckbox = new Checkbox("Skip unrecognized sheet names");
         skipUnknownSheetsCheckbox.setValue(true);
-        autoCreateLookupsCheckbox = new Checkbox("Auto-create missing types/statuses (opt-in)");
-        autoCreateLookupsCheckbox.setValue(false);
-        autoCreateLookupsCheckbox.getElement().setProperty("title",
-                "When enabled, import handlers may create missing reference data (e.g. Status/Type) instead of failing the row.");
-        final HorizontalLayout opts = new HorizontalLayout(dryRunCheckbox, rollbackOnErrorCheckbox, skipUnknownSheetsCheckbox,
-                autoCreateLookupsCheckbox);
+        final HorizontalLayout opts = new HorizontalLayout(dryRunCheckbox, rollbackOnErrorCheckbox, skipUnknownSheetsCheckbox);
         opts.setSpacing(true);
         section.add(optTitle, opts);
         return section;
@@ -266,7 +260,6 @@ public final class CViewImport extends CAbstractPage {
         options.setDryRun(dryRunCheckbox.getValue());
         options.setRollbackOnError(rollbackOnErrorCheckbox.getValue());
         options.setSkipUnknownSheets(skipUnknownSheetsCheckbox.getValue());
-        options.setAutoCreateLookups(autoCreateLookupsCheckbox.getValue());
         importButton.setEnabled(false);
         importButton.setText("Importing…");
         try {

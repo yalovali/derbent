@@ -48,10 +48,8 @@ public class CTicketImportHandler extends CAbstractExcelImportHandler<CTicket> {
 	public Class<CTicket> getEntityClass() { return CTicket.class; }
 
 	@Override
-	public Map<String, String> getColumnAliases() {
-		return Map.of(
-				"Ticket Type", "entitytype",
-				"Type", "entitytype");
+	protected Map<String, String> getAdditionalColumnAliases() {
+		return Map.of("Type", "entitytype");
 	}
 
 	@Override
@@ -88,7 +86,7 @@ public class CTicketImportHandler extends CAbstractExcelImportHandler<CTicket> {
 			final CProjectItemStatus status = statusService.findByNameAndCompany(statusName, project.getCompany()).orElse(null);
 			if (status == null) {
 				return CImportRowResult.error(rowNumber,
-						"Status '" + statusName + "' not found. Create it before importing (or enable auto-create lookups).", rowData);
+						"Status '" + statusName + "' not found. Create it before importing.", rowData);
 			}
 			ticket.setStatus(status);
 		}
@@ -98,7 +96,7 @@ public class CTicketImportHandler extends CAbstractExcelImportHandler<CTicket> {
 			final CTicketType type = typeService.findByNameAndCompany(typeName, project.getCompany()).orElse(null);
 			if (type == null) {
 				return CImportRowResult.error(rowNumber,
-						"Ticket Type '" + typeName + "' not found. Create it before importing (or enable auto-create lookups).", rowData);
+						"Ticket Type '" + typeName + "' not found. Create it before importing.", rowData);
 			}
 			ticket.setEntityType(type);
 		}

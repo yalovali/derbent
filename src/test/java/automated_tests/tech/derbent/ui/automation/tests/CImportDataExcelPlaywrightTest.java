@@ -98,10 +98,6 @@ public class CImportDataExcelPlaywrightTest extends CBaseUITest {
 		if (dryRun.isChecked()) {
 			dryRun.uncheck();
 		}
-		final Locator autoCreate = page.getByLabel("Auto-create missing types/statuses (opt-in)");
-		if (!autoCreate.isChecked()) {
-			autoCreate.check();
-		}
 		final Locator importButton =
 				page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Import").setExact(true));
 		waitForButtonEnabled(importButton);

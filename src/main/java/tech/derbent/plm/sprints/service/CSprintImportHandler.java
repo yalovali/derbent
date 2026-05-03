@@ -39,10 +39,8 @@ public class CSprintImportHandler extends CAbstractExcelImportHandler<CSprint> {
 	public Class<CSprint> getEntityClass() { return CSprint.class; }
 
 	@Override
-	public Map<String, String> getColumnAliases() {
-		return Map.of(
-				"Sprint Type", "entitytype",
-				"Type", "entitytype");
+	protected Map<String, String> getAdditionalColumnAliases() {
+		return Map.of("Type", "entitytype");
 	}
 
 	@Override
@@ -89,7 +87,7 @@ public class CSprintImportHandler extends CAbstractExcelImportHandler<CSprint> {
 			final CProjectItemStatus status = statusService.findByNameAndCompany(statusName, project.getCompany()).orElse(null);
 			if (status == null) {
 				return CImportRowResult.error(rowNumber,
-						"Status '" + statusName + "' not found. Create it before importing (or enable auto-create lookups).", rowData);
+						"Status '" + statusName + "' not found. Create it before importing.", rowData);
 			}
 			sprint.setStatus(status);
 		}
@@ -99,7 +97,7 @@ public class CSprintImportHandler extends CAbstractExcelImportHandler<CSprint> {
 			final CSprintType type = typeService.findByNameAndCompany(typeName, project.getCompany()).orElse(null);
 			if (type == null) {
 				return CImportRowResult.error(rowNumber,
-						"Sprint Type '" + typeName + "' not found. Create it before importing (or enable auto-create lookups).", rowData);
+						"Sprint Type '" + typeName + "' not found. Create it before importing.", rowData);
 			}
 			sprint.setEntityType(type);
 		}
