@@ -2,8 +2,6 @@ package tech.derbent.plm.tickets.ticket.service;
 
 import java.util.Map;
 import java.util.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.companies.domain.CCompany;
@@ -22,8 +20,6 @@ import tech.derbent.plm.tickets.tickettype.service.CTicketTypeService;
 @Service
 @Profile({"derbent", "default"})
 public class CTicketImportHandler extends CProjectItemImportHandler<CTicket, CTicketType> {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(CTicketImportHandler.class);
 
 	private final CTicketService ticketService;
 	private final CTicketTypeService typeService;
@@ -75,12 +71,13 @@ public class CTicketImportHandler extends CProjectItemImportHandler<CTicket, CTi
 		applyMetaFieldsDeclaredOn(entity, row, CTicket.class);
 
 		final String priorityName = row.string("priority");
-		if (!priorityName.isBlank()) {
-			final CTicketPriority priority = priorityService.findByNameAndCompany(priorityName, project.getCompany()).orElse(null);
-			if (priority == null) {
-				throw new IllegalArgumentException("Ticket Priority '" + priorityName + "' not found");
-			}
-			entity.setPriority(priority);
+		if (priorityName.isBlank()) {
+			return;
 		}
+		final CTicketPriority priority = priorityService.findByNameAndCompany(priorityName, project.getCompany()).orElse(null);
+		if (priority == null) {
+			throw new IllegalArgumentException("Ticket Priority '" + priorityName + "' not found");
+		}
+		entity.setPriority(priority);
 	}
 }

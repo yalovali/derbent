@@ -14,7 +14,6 @@ import tech.derbent.api.ui.component.basic.CCheckbox;
 public class CShowClosedFilter extends CAbstractFilterComponent<Boolean> {
 
 	public static final String FILTER_KEY = "showClosed";
-	private static final long serialVersionUID = 1L;
 	private final CCheckbox checkbox;
 
 	public CShowClosedFilter() {

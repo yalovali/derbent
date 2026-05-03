@@ -107,7 +107,6 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	private final CVerticalLayout tabSprintSummaryLayout;
 	private final com.vaadin.flow.component.tabs.Tab tabDetails;
 	private CComponentBacklogNavigator backlogNavigator;
-	private final EKanbanViewMode currentMode = EKanbanViewMode.SPRINT_BOARD;
 	private CSprint currentSprint;
 	private boolean statusOnlyMode;
 	private boolean allSprintsMode = true;

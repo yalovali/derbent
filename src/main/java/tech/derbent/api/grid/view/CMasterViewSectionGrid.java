@@ -14,7 +14,8 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.view.CAbstractEntityDBPage;
 import tech.derbent.api.grid.domain.CGrid;
 
-public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> extends CMasterViewSectionBase<EntityClass> {
+public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>>
+		extends CMasterViewSectionBase<EntityClass> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMasterViewSectionGrid.class);
 	private static final long serialVersionUID = 1L;
@@ -25,7 +26,19 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 		createMasterView();
 	}
 
-	
+	private void addContextMenu(final CGrid<EntityClass> grid1) {
+		final GridContextMenu<EntityClass> contextMenu = grid1.addContextMenu();
+		// "Edit" just selects the row; the single-select value-change listener fires and
+		// the master-detail page automatically shows the item in the detail form.
+		contextMenu.addItem("Edit", event -> event.getItem().ifPresent(this::select));
+		contextMenu.addItem("New", event -> page.actionCreate());
+		contextMenu.addItem("Delete", event -> event.getItem().ifPresent(item -> {
+			select(item);
+			page.actionDelete();
+		}));
+		contextMenu.addItem("Refresh", event -> page.actionRefresh());
+	}
+
 	protected Component createGridToolbar() {
 		return null;
 	}
@@ -43,19 +56,6 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 		add(grid);
 	}
 
-	private void addContextMenu(final CGrid<EntityClass> grid) {
-		final GridContextMenu<EntityClass> contextMenu = grid.addContextMenu();
-		// "Edit" just selects the row; the single-select value-change listener fires and
-		// the master-detail page automatically shows the item in the detail form.
-		contextMenu.addItem("Edit", event -> event.getItem().ifPresent(this::select));
-		contextMenu.addItem("New", event -> page.actionCreate());
-		contextMenu.addItem("Delete", event -> event.getItem().ifPresent(item -> {
-			select(item);
-			page.actionDelete();
-		}));
-		contextMenu.addItem("Refresh", event -> page.actionRefresh());
-	}
-
 	private Optional<EntityClass> fetchIndex(final int index) {
 		if (index < 0) {
 			return Optional.empty();
@@ -64,13 +64,8 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 		return grid.getDataProvider().fetch(new Query<>(index, 1, null, null, null)).findFirst();
 	}
 
-	private CGrid<EntityClass> getGrid() { return grid; }
-
-	/**
-	 * Gets all items currently in the grid's data provider.
-	 * Useful for operations like CSV export that need access to all grid data.
-	 * @return list of all items in the grid
-	 */
+	/** Gets all items currently in the grid's data provider. Useful for operations like CSV export that need access to all grid data.
+	 * @return list of all items in the grid */
 	public List<EntityClass> getAllItems() {
 		final List<EntityClass> items = new ArrayList<>();
 		try {
@@ -80,6 +75,8 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 		}
 		return items;
 	}
+
+	private CGrid<EntityClass> getGrid() { return grid; }
 
 	@Override
 	public EntityClass getSelectedItem() { return grid.asSingleSelect().getValue(); }

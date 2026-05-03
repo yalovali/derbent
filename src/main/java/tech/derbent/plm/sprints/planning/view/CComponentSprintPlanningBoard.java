@@ -50,7 +50,6 @@ import tech.derbent.plm.sprints.planning.domain.CSprintPlanningViewEntity;
 import tech.derbent.plm.sprints.planning.domain.ESprintPlanningScope;
 import tech.derbent.plm.sprints.planning.view.components.CBacklogNavigatorHierarchyBuilder;
 import tech.derbent.plm.sprints.planning.view.components.CDialogAddBacklogItemToSprint;
-import tech.derbent.plm.sprints.service.CSprintItemWorkflowStatusSupport;
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningBacklogBrowser;
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningDragContext;
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningDropRequest;
@@ -58,6 +57,7 @@ import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningFilterTo
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningSprintMetrics;
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningTreeGrid;
 import tech.derbent.plm.sprints.service.CSprintItemService;
+import tech.derbent.plm.sprints.service.CSprintItemWorkflowStatusSupport;
 import tech.derbent.plm.sprints.service.CSprintService;
 
 /** Sprint Planning Board (v2) - timeline + drag/drop planning without changing existing sprint pages.
@@ -73,7 +73,6 @@ import tech.derbent.plm.sprints.service.CSprintService;
  * </p>
  */
 public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlanningViewEntity> {
-
 
 	private static final double DEFAULT_SPLITTER_POSITION = 60.0;
 	public static final String ID_BOARD = "custom-sprint-planning-board-v2";
@@ -204,12 +203,12 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		}
 	}
 
-	private CBacklogNavigatorHierarchyBuilder.CBacklogData buildBacklogData(final Map<String, CProjectItem<?, ?>> hierarchyItemsByKey) {
+	private CBacklogNavigatorHierarchyBuilder.CBacklogData
+			buildBacklogData(final Map<String, CProjectItem<?, ?>> hierarchyItemsByKey) {
 		final ESprintPlanningScope scope = filterToolbar.getScope();
 		if (scope != ESprintPlanningScope.SPRINT) {
 			return CBacklogNavigatorHierarchyBuilder.buildBacklogData(hierarchyItemsByKey, scope,
-					filterToolbar::shouldIncludeBacklogParentItem,
-					filterToolbar::shouldIncludeBacklogItem,
+					filterToolbar::shouldIncludeBacklogParentItem, filterToolbar::shouldIncludeBacklogItem,
 					CComponentSprintPlanningBoard::resolveItemOrder);
 		}
 		// In sprint scope we keep backlog empty to focus on the sprint tree.
@@ -355,7 +354,6 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		updateSelectedSprintMetrics();
 		return new CGnntHierarchyResult(rootItems, childrenByParentKey, flatItems);
 	}
-
 
 	private boolean canAddExistingChild(final CGnntItem context) {
 		return resolveParentContextEntity(context) != null
@@ -514,7 +512,6 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		return sprintableItemsByKey;
 	}
 
-
 	private CGnntItem getSelectedLeafActionContext() { return backlogBrowser.getSelectedLeafItem(); }
 
 	private CGnntItem getSelectedParentActionContext() { return backlogBrowser.getSelectedParentItem(); }
@@ -560,18 +557,6 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		add(splitLayout);
 	}
 
-	private boolean isBacklogCandidate(final CProjectItem<?, ?> entity, final ESprintPlanningScope scope) {
-		if (scope == ESprintPlanningScope.ALL_ITEMS) {
-			return true;
-		}
-		if (!(entity instanceof final ISprintableItem sprintableItem)) {
-			return true;
-		}
-		final CSprint sprint =
-				sprintableItem.getSprintItem() != null ? sprintableItem.getSprintItem().getSprint() : null;
-		return sprint == null;
-	}
-
 	private boolean isClosedSprint(final CSprint sprint) {
 		// Eager-fetch sprint status to avoid LazyInitialization on detached proxy during drag/drop
 		if (sprint == null || sprint.getId() == null) {
@@ -612,8 +597,8 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 			final CProjectItem<?, ?> item = context != null && context.getEntity() instanceof CProjectItem<?, ?>
 					? (CProjectItem<?, ?>) context.getEntity() : null;
 			if (item instanceof final IHasStatusAndWorkflow<?, ?> statusItem) {
-				final CProjectItemStatus resetStatus =
-						CSprintItemWorkflowStatusSupport.applyWorkflowInitialStatus(statusItem, projectItemStatusService);
+				final CProjectItemStatus resetStatus = CSprintItemWorkflowStatusSupport
+						.applyWorkflowInitialStatus(statusItem, projectItemStatusService);
 				if (resetStatus != null && item instanceof final ISprintableItem sprintableToSave) {
 					sprintableToSave.saveProjectItem();
 				}
@@ -651,8 +636,8 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 					};
 			sprintableItem.moveSprintItemToBacklog(anchorItem, insertAfter);
 			if (sprintableItem instanceof final IHasStatusAndWorkflow<?, ?> statusItem) {
-				final CProjectItemStatus resetStatus =
-						CSprintItemWorkflowStatusSupport.applyWorkflowInitialStatus(statusItem, projectItemStatusService);
+				final CProjectItemStatus resetStatus = CSprintItemWorkflowStatusSupport
+						.applyWorkflowInitialStatus(statusItem, projectItemStatusService);
 				if (resetStatus != null) {
 					sprintableItem.saveProjectItem();
 				}
@@ -993,7 +978,8 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 			final CSprintPlanningViewEntity view = getValue();
 			if (view == null || view.getProject() == null) {
 				final CGnntHierarchyResult emptyHierarchy = new CGnntHierarchyResult(List.of(), Map.of(), List.of());
-				final CGanttTimelineRange emptyRange = CBacklogNavigatorHierarchyBuilder.resolveTimelineRange(List.of());
+				final CGanttTimelineRange emptyRange =
+						CBacklogNavigatorHierarchyBuilder.resolveTimelineRange(List.of());
 				backlogBrowser.setBacklogData(emptyHierarchy, emptyHierarchy, Map.of(), emptyRange);
 				backlogBrowser.setParentRollupSummaries(Map.of());
 				gridSprints.setHierarchy(emptyHierarchy, emptyRange);

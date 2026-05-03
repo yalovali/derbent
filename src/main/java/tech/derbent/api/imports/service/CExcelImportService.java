@@ -117,7 +117,9 @@ public class CExcelImportService {
         int headerRowIndex = -1;
         for (int r = sheet.getFirstRowNum(); r <= sheet.getLastRowNum(); r++) {
             final Row row = sheet.getRow(r);
-            if (row == null) continue;
+            if (row == null) {
+				continue;
+			}
             if (!isCommentRow(row, evaluator)) {
                 headerRowIndex = r;
                 break;
