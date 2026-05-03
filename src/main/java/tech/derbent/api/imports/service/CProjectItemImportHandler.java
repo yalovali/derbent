@@ -2,7 +2,6 @@ package tech.derbent.api.imports.service;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.domains.CTypeEntity;
@@ -12,7 +11,6 @@ import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.imports.domain.CImportOptions;
 import tech.derbent.api.imports.domain.CImportRowResult;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.IUserRepository;
 
 /**
@@ -32,12 +30,11 @@ public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>
         extends CEntityOfProjectImportHandler<T> {
 
     protected final CProjectItemStatusService statusService;
-    protected final IUserRepository userRepository;
 
     protected CProjectItemImportHandler(final CProjectItemStatusService statusService,
             final IUserRepository userRepository) {
+        super(userRepository);
         this.statusService = statusService;
-        this.userRepository = userRepository;
     }
 
     protected abstract Class<TType> getTypeClass();
@@ -67,28 +64,28 @@ public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>
     }
 
     @Override
-    public Set<String> getRequiredColumns() {
-        return Set.of("name");
-    }
-
-    @Override
     @Transactional
     public CImportRowResult importRow(final Map<String, String> rowData, final CProject<?> project, final int rowNumber,
             final CImportOptions options) {
         final CExcelRow row = row(rowData);
+        final var nameError = validateEntityNamed(row, rowNumber, rowData);
+        if (nameError.isPresent()) {
+            return nameError.get();
+        }
+        final var companyError = validateProjectHasCompany(project, rowNumber, rowData);
+        if (companyError.isPresent()) {
+            return companyError.get();
+        }
         final String name = row.string("name");
-        if (name.isBlank()) {
-            return CImportRowResult.error(rowNumber, "Name is required", rowData);
-        }
-        if (project.getCompany() == null) {
-            return CImportRowResult.error(rowNumber, "Project company is required", rowData);
-        }
         final CCompany company = project.getCompany();
 
         // WHY: system_init.xlsx and sample workbooks are intended to be re-runnable.
         final T entity = findByNameAndProject(name, project).orElseGet(() -> createNew(name, project));
 
-        row.optionalString("description").ifPresent(entity::setDescription);
+        final var projectFieldsError = applyEntityOfProjectFields(entity, row, project, rowNumber, rowData);
+        if (projectFieldsError.isPresent()) {
+            return projectFieldsError.get();
+        }
 
         final String statusName = row.string("status");
         if (!statusName.isBlank()) {
@@ -112,17 +109,6 @@ public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>
         } else if (isTypeRequired()) {
             return CImportRowResult.error(rowNumber,
                     getTypeClass().getSimpleName().replaceFirst("^C", "").replace("Type", " Type") + " is required", rowData);
-        }
-
-        final String assignedToLogin = row.string("assignedto");
-        if (!assignedToLogin.isBlank()) {
-            final CUser user = userRepository.findByUsernameIgnoreCase(company.getId(), assignedToLogin).orElse(null);
-            if (user == null) {
-                return CImportRowResult.error(rowNumber,
-                        "Assigned user '" + assignedToLogin + "' not found in company. Create it before importing.",
-                        rowData);
-            }
-            entity.setAssignedTo(user);
         }
 
         try {

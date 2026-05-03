@@ -2,7 +2,6 @@ package tech.derbent.api.imports.service;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.imports.domain.CImportOptions;
@@ -29,25 +28,25 @@ public abstract class CAbstractSimpleTypeImportHandler<T extends CTypeEntity<T>>
     }
 
     @Override
-    public Set<String> getRequiredColumns() {
-        return Set.of("name");
-    }
-
-    @Override
     public CImportRowResult importRow(final Map<String, String> rowData, final CProject<?> project, final int rowNumber,
             final CImportOptions options) {
         final CExcelRow row = row(rowData);
+        final var nameError = validateEntityNamed(row, rowNumber, rowData);
+        if (nameError.isPresent()) {
+            return nameError.get();
+        }
+        final var companyError = validateProjectHasCompany(project, rowNumber, rowData);
+        if (companyError.isPresent()) {
+            return companyError.get();
+        }
         final String name = row.string("name");
-        if (name.isBlank()) {
-            return CImportRowResult.error(rowNumber, "Name is required", rowData);
-        }
-        if (project.getCompany() == null) {
-            return CImportRowResult.error(rowNumber, "Project company is required to create reference types", rowData);
-        }
         final CCompany company = project.getCompany();
 
         // WHY: templates are imported both automatically (after DB reset) and manually; upsert-by-name keeps them re-runnable.
         final T type = findByNameAndCompany(name, company).orElseGet(() -> createNew(name, company));
+
+        applyEntityNamedFields(type, row);
+        applyEntityOfCompanyFields(type, company);
 
         row.optionalString("color").ifPresent(type::setColor);
         row.optionalInt("sortorder").ifPresent(type::setSortOrder);

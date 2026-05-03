@@ -12,6 +12,7 @@ import tech.derbent.api.imports.service.CEntityOfProjectImportHandler;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CGridEntity;
+import tech.derbent.api.users.service.IUserRepository;
 
 /** Imports CGridEntity rows from Excel (project-scoped "view" configuration). */
 @Service
@@ -19,7 +20,8 @@ public class CGridEntityImportHandler extends CEntityOfProjectImportHandler<CGri
 
     private final CGridEntityService gridEntityService;
 
-    public CGridEntityImportHandler(final CGridEntityService gridEntityService) {
+    public CGridEntityImportHandler(final CGridEntityService gridEntityService, final IUserRepository userRepository) {
+        super(userRepository);
         this.gridEntityService = gridEntityService;
     }
 
@@ -64,34 +66,36 @@ public class CGridEntityImportHandler extends CEntityOfProjectImportHandler<CGri
     @Override
     public CImportRowResult importRow(final Map<String, String> rowData, final CProject<?> project, final int rowNumber,
             final CImportOptions options) {
-        final String name = rowData.getOrDefault("name", "").trim();
-        if (name.isBlank()) {
-            return CImportRowResult.error(rowNumber, "Name is required", rowData);
+        final var row = row(rowData);
+        final var nameError = validateEntityNamed(row, rowNumber, rowData);
+        if (nameError.isPresent()) {
+            return nameError.get();
         }
-        final String beanName = rowData.getOrDefault("dataservicebeanname", "").trim();
+        final var companyError = validateProjectHasCompany(project, rowNumber, rowData);
+        if (companyError.isPresent()) {
+            return companyError.get();
+        }
+        final String name = row.string("name");
+
+        final String beanName = row.string("dataservicebeanname");
         if (beanName.isBlank()) {
             return CImportRowResult.error(rowNumber, "Data Service Bean is required", rowData);
         }
 
         // WHY: view configuration should be re-runnable; we upsert by name to avoid duplicate bootstrap runs failing.
         final CGridEntity entity = gridEntityService.findByNameAndProject(name, project).orElseGet(() -> new CGridEntity(name, project));
+
+        final var projectFieldsError = applyEntityOfProjectFields(entity, row, project, rowNumber, rowData);
+        if (projectFieldsError.isPresent()) {
+            return projectFieldsError.get();
+        }
+
         entity.setDataServiceBeanName(beanName);
 
-        final String colFields = rowData.getOrDefault("columnfields", "").trim();
-        if (!colFields.isBlank()) {
-            entity.setColumnFields(splitCsv(colFields));
-        }
+        row.optionalString("columnfields").ifPresent(v -> entity.setColumnFields(splitCsv(v)));
+        row.optionalString("editablecolumnfields").ifPresent(v -> entity.setEditableColumnFields(splitCsv(v)));
 
-        final String editable = rowData.getOrDefault("editablecolumnfields", "").trim();
-        if (!editable.isBlank()) {
-            entity.setEditableColumnFields(splitCsv(editable));
-        }
-
-        final String noneGrid = rowData.getOrDefault("attributenone", "").trim();
-        if (!noneGrid.isBlank()) {
-            // WHY: accept common Excel boolean variants.
-            entity.setAttributeNone(Set.of("true", "yes", "1").contains(noneGrid.toLowerCase()));
-        }
+        row.optionalBoolean("attributenone").ifPresent(entity::setAttributeNone);
 
         if (!options.isDryRun()) {
             gridEntityService.save(entity);
