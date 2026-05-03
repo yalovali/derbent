@@ -18,21 +18,16 @@ import tech.derbent.api.users.service.IUserRepository;
 public class CMasterSectionImportHandler extends CEntityOfProjectImportHandler<CMasterSection> {
 
 	private final CMasterSectionService masterSectionService;
-	private final CImportProjectResolver projectResolver;
 
 	public CMasterSectionImportHandler(final CMasterSectionService masterSectionService,
 			final IUserRepository userRepository, final CImportProjectResolver projectResolver) {
-		super(userRepository);
+		super(userRepository, projectResolver);
 		this.masterSectionService = masterSectionService;
-		this.projectResolver = projectResolver;
 	}
 
 	@Override
 	protected Map<String, String> getAdditionalColumnAliases() {
-		return Map.of(
-				"Name", "name",
-				"Section Type", "sectiontype",
-				"Section DB Name", "sectiondbname");
+		return Map.of("Name", "name", "Section Type", "sectiontype", "Section DB Name", "sectiondbname");
 	}
 
 	@Override
@@ -69,17 +64,7 @@ public class CMasterSectionImportHandler extends CEntityOfProjectImportHandler<C
 		if (nameError.isPresent()) {
 			return nameError.get();
 		}
-		// Resolve effective project from "project" column if present; otherwise use session project.
-		final var resolvedProject = resolveProjectFromRow(row, project, projectResolver);
-		if (resolvedProject.isEmpty()) {
-			return CImportRowResult.error(rowNumber,
-					"Project '" + row.string("project") + "' not found. Create it before importing.", rowData);
-		}
-		final CProject<?> effectiveProject = resolvedProject.get();
-		final var companyError = validateProjectHasCompany(effectiveProject, rowNumber, rowData);
-		if (companyError.isPresent()) {
-			return companyError.get();
-		}
+		final CProject<?> effectiveProject = resolveProjectFromRow(row, project);
 		final String name = row.string("name");
 		final String sectionType = row.string("sectiontype");
 		if (sectionType.isBlank()) {

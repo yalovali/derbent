@@ -64,7 +64,6 @@ public class CSystemInitExcelBootstrapService {
 	private final CExcelTemplateService excelTemplateService;
 	private final CProjectService<?> projectService;
 	private final CProjectTypeService projectTypeService;
-	private final CScreensInitializerService screensInitializerService;
 	private final ISessionService sessionService;
 	private final CProjectItemStatusService statusService;
 	private final CUserCompanyRoleService userCompanyRoleService;
@@ -97,7 +96,6 @@ public class CSystemInitExcelBootstrapService {
 		this.sessionService = sessionService;
 		this.excelImportService = excelImportService;
 		this.excelTemplateService = excelTemplateService;
-		this.screensInitializerService = screensInitializerService;
 	}
 
 	/** Excel-first DB reset entrypoint. This method is designed to be called right after the DB has been cleared. */
@@ -136,8 +134,8 @@ public class CSystemInitExcelBootstrapService {
 				final CImportResult result =
 						excelImportService.importExcel(new ByteArrayInputStream(workbookBytes), options, project);
 				if (result.getTotalErrors() > 0) {
-					throw new IllegalStateException("Excel init failed for project " + project.getName()
-							+ " (errors=" + result.getTotalErrors() + ")");
+					throw new IllegalStateException("Excel init failed for project " + project.getName() + " (errors="
+							+ result.getTotalErrors() + ")");
 				}
 				totalSuccess += result.getTotalSuccess();
 				totalErrors += result.getTotalErrors();

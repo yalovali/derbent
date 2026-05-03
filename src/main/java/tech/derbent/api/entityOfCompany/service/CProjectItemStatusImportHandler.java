@@ -16,69 +16,57 @@ import tech.derbent.api.registry.CEntityRegistry;
 @Service
 public class CProjectItemStatusImportHandler extends CEntityOfCompanyImportHandler<CProjectItemStatus> {
 
-    private final CProjectItemStatusService statusService;
+	private final CProjectItemStatusService statusService;
 
-    public CProjectItemStatusImportHandler(final CProjectItemStatusService statusService) {
-        this.statusService = statusService;
-    }
+	public CProjectItemStatusImportHandler(final CProjectItemStatusService statusService) {
+		this.statusService = statusService;
+	}
 
-    @Override
-    public Class<CProjectItemStatus> getEntityClass() { return CProjectItemStatus.class; }
+	@Override
+	protected Map<String, String> getAdditionalColumnAliases() {
+		return Map.of("Name", "name", "Final Status", "finalstatus", "Is Final", "finalstatus", "Color", "color",
+				"Icon", "icon");
+	}
 
-    @Override
-    public Set<String> getSupportedSheetNames() {
-        final Set<String> names = new LinkedHashSet<>();
-        names.add("CProjectItemStatus");
-        names.add("ProjectItemStatus");
-        names.add("Status");
-        names.add("Statuses");
-        try {
-            names.add(CEntityRegistry.getEntityTitleSingular(CProjectItemStatus.class));
-            names.add(CEntityRegistry.getEntityTitlePlural(CProjectItemStatus.class));
-        } catch (final Exception ignored) { /* registry may not be ready */ }
-        return names;
-    }
+	@Override
+	public Class<CProjectItemStatus> getEntityClass() { return CProjectItemStatus.class; }
 
-    @Override
-    protected Map<String, String> getAdditionalColumnAliases() {
-        return Map.of(
-                "Name", "name",
-                "Final Status", "finalstatus",
-                "Is Final", "finalstatus",
-                "Color", "color",
-                "Icon", "icon");
-    }
+	@Override
+	public Set<String> getSupportedSheetNames() {
+		final Set<String> names = new LinkedHashSet<>();
+		names.add("CProjectItemStatus");
+		names.add("ProjectItemStatus");
+		names.add("Status");
+		names.add("Statuses");
+		try {
+			names.add(CEntityRegistry.getEntityTitleSingular(CProjectItemStatus.class));
+			names.add(CEntityRegistry.getEntityTitlePlural(CProjectItemStatus.class));
+		} catch (final Exception ignored) { /* registry may not be ready */ }
+		return names;
+	}
 
-    @Override
-    public CImportRowResult importRow(final Map<String, String> rowData, final CProject<?> project, final int rowNumber,
-            final CImportOptions options) {
-        final CExcelRow row = row(rowData);
-        final var nameError = validateEntityNamed(row, rowNumber, rowData);
-        if (nameError.isPresent()) {
-            return nameError.get();
-        }
-        final var companyError = validateProjectHasCompany(project, rowNumber, rowData);
-        if (companyError.isPresent()) {
-            return companyError.get();
-        }
-        final var company = project.getCompany();
-        final String name = row.string("name");
-
-        // WHY: system init Excel is intended to be re-runnable (and also safe on top of code-initialized reference data).
-        // Upsert-by-name avoids unique constraint violations.
-        final CProjectItemStatus status = statusService.findByNameAndCompany(name, company)
-                .orElseGet(() -> new CProjectItemStatus(name, company));
-
-        applyEntityNamedFields(status, row);
-        applyEntityOfCompanyFields(status, company);
-
-        row.optionalBoolean("finalstatus").ifPresent(status::setFinalStatus);
-        row.optionalString("color").ifPresent(status::setColor);
-        row.optionalString("icon").ifPresent(status::setIconString);
-
-        if (!options.isDryRun()) {
-            statusService.save(status);
-        }
-        return CImportRowResult.success(rowNumber, name);
-    }
+	@Override
+	public CImportRowResult importRow(final Map<String, String> rowData, final CProject<?> project, final int rowNumber,
+			final CImportOptions options) {
+		final CExcelRow row = row(rowData);
+		final var nameError = validateEntityNamed(row, rowNumber, rowData);
+		if (nameError.isPresent()) {
+			return nameError.get();
+		}
+		final var company = project.getCompany();
+		final String name = row.string("name");
+		// WHY: system init Excel is intended to be re-runnable (and also safe on top of code-initialized reference data).
+		// Upsert-by-name avoids unique constraint violations.
+		final CProjectItemStatus status = statusService.findByNameAndCompany(name, company)
+				.orElseGet(() -> new CProjectItemStatus(name, company));
+		applyEntityNamedFields(status, row);
+		applyEntityOfCompanyFields(status, company);
+		row.optionalBoolean("finalstatus").ifPresent(status::setFinalStatus);
+		row.optionalString("color").ifPresent(status::setColor);
+		row.optionalString("icon").ifPresent(status::setIconString);
+		if (!options.isDryRun()) {
+			statusService.save(status);
+		}
+		return CImportRowResult.success(rowNumber, name);
+	}
 }

@@ -17,27 +17,31 @@ import tech.derbent.api.users.service.IUserRepository;
 @Service
 public class CDetailSectionImportHandler extends CEntityOfProjectImportHandler<CDetailSection> {
 
+	private static String resolveViewNameFromEntityType(final String entityType) {
+		if (entityType == null || entityType.isBlank()) {
+			return "";
+		}
+		try {
+			final Class<?> entityClass = CEntityRegistry.getEntityClass(entityType);
+			return (String) entityClass.getField("VIEW_NAME").get(null);
+		} catch (final Exception ignored) {
+			return "";
+		}
+	}
+
 	private final CDetailSectionService detailSectionService;
-	private final CImportProjectResolver projectResolver;
 
 	public CDetailSectionImportHandler(final CDetailSectionService detailSectionService,
 			final IUserRepository userRepository, final CImportProjectResolver projectResolver) {
-		super(userRepository);
+		super(userRepository, projectResolver);
 		this.detailSectionService = detailSectionService;
-		this.projectResolver = projectResolver;
 	}
 
 	@Override
 	protected Map<String, String> getAdditionalColumnAliases() {
-		return Map.of(
-				"Name", "name",
-				"Entity Type", "entitytype",
-				"Screen Title", "screentitle",
-				"Header Text", "headertext",
-				"Default Section", "defaultsection",
-				"Non Deletable", "attributenondeletable",
-				"Company", "company",
-				"Project", "project");
+		return Map.of("Name", "name", "Entity Type", "entitytype", "Screen Title", "screentitle", "Header Text",
+				"headertext", "Default Section", "defaultsection", "Non Deletable", "attributenondeletable", "Company",
+				"company", "Project", "project");
 	}
 
 	@Override
@@ -66,38 +70,12 @@ public class CDetailSectionImportHandler extends CEntityOfProjectImportHandler<C
 		return names;
 	}
 
-	private static String resolveViewNameFromEntityType(final String entityType) {
-		if (entityType == null || entityType.isBlank()) {
-			return "";
-		}
-		try {
-			final Class<?> entityClass = CEntityRegistry.getEntityClass(entityType);
-			return (String) entityClass.getField("VIEW_NAME").get(null);
-		} catch (final Exception ignored) {
-			return "";
-		}
-	}
-
 	@Override
 	public CImportRowResult importRow(final Map<String, String> rowData, final CProject<?> project, final int rowNumber,
 			final CImportOptions options) {
 		final var row = row(rowData);
 		// Resolve effective project from "project" column if present; otherwise use session project.
-		final String projectName = row.string("project");
-		final String companyName = row.string("company");
-		final var resolvedProject = projectName.isBlank() || (project.getName() != null && projectName.equalsIgnoreCase(project.getName()))
-				? java.util.Optional.of(project)
-				: resolveProjectByNameAndCompany(project, companyName, projectName);
-		if (resolvedProject.isEmpty()) {
-			return CImportRowResult.error(rowNumber,
-					"Project '" + projectName + "' not found. Create it before importing.", rowData);
-		}
-		final CProject<?> effectiveProject = resolvedProject.get();
-		
-		final var companyError = validateProjectHasCompany(effectiveProject, rowNumber, rowData);
-		if (companyError.isPresent()) {
-			return companyError.get();
-		}
+		final CProject<?> effectiveProject = resolveProjectFromRow(row, project);
 		final String entityType = row.string("entitytype");
 		if (entityType.isBlank()) {
 			return CImportRowResult.error(rowNumber, "Entity Type is required", rowData);
@@ -128,17 +106,5 @@ public class CDetailSectionImportHandler extends CEntityOfProjectImportHandler<C
 			detailSectionService.save(entity);
 		}
 		return CImportRowResult.success(rowNumber, name);
-	}
-
-	private java.util.Optional<CProject<?>> resolveProjectByNameAndCompany(final CProject<?> sessionProject,
-			final String companyName, final String projectName) {
-		var company = sessionProject.getCompany();
-		if (company != null && companyName != null && !companyName.isBlank()) {
-			company = projectResolver.findCompanyByName(companyName).orElse(null);
-		}
-		if (company == null) {
-			return java.util.Optional.empty();
-		}
-		return projectResolver.findProjectByNameAndCompany(projectName, company);
 	}
 }

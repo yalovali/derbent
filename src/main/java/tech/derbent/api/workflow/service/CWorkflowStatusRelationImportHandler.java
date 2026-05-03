@@ -22,14 +22,13 @@ import tech.derbent.api.workflow.domain.CWorkflowStatusRelation;
 @Service
 public class CWorkflowStatusRelationImportHandler extends CEntityImportHandler<CWorkflowStatusRelation> {
 
-	private final CProjectItemStatusService statusService;
-	private final CUserProjectRoleService roleService;
-	private final CWorkflowEntityService workflowEntityService;
 	private final CWorkflowStatusRelationService relationService;
+	private final CUserProjectRoleService roleService;
+	private final CProjectItemStatusService statusService;
+	private final CWorkflowEntityService workflowEntityService;
 
 	public CWorkflowStatusRelationImportHandler(final CProjectItemStatusService statusService,
-			final CUserProjectRoleService roleService,
-			final CWorkflowEntityService workflowEntityService,
+			final CUserProjectRoleService roleService, final CWorkflowEntityService workflowEntityService,
 			final CWorkflowStatusRelationService relationService) {
 		this.statusService = statusService;
 		this.roleService = roleService;
@@ -38,9 +37,16 @@ public class CWorkflowStatusRelationImportHandler extends CEntityImportHandler<C
 	}
 
 	@Override
-	public Class<CWorkflowStatusRelation> getEntityClass() {
-		return CWorkflowStatusRelation.class;
+	protected Map<String, String> getAdditionalColumnAliases() {
+		return Map.of("Workflow", "workflow", "From Status", "fromstatus", "To Status", "tostatus", "Is Initial",
+				"initialstatus", "Is Initial Status", "initialstatus", "Roles", "roles");
 	}
+
+	@Override
+	public Class<CWorkflowStatusRelation> getEntityClass() { return CWorkflowStatusRelation.class; }
+
+	@Override
+	public Set<String> getRequiredColumns() { return Set.of("workflow", "fromstatus", "tostatus"); }
 
 	@Override
 	public Set<String> getSupportedSheetNames() {
@@ -63,28 +69,8 @@ public class CWorkflowStatusRelationImportHandler extends CEntityImportHandler<C
 	}
 
 	@Override
-	protected Map<String, String> getAdditionalColumnAliases() {
-		return Map.of(
-				"Workflow", "workflow",
-				"From Status", "fromstatus",
-				"To Status", "tostatus",
-				"Is Initial", "initialstatus",
-				"Is Initial Status", "initialstatus",
-				"Roles", "roles");
-	}
-
-	@Override
-	public Set<String> getRequiredColumns() {
-		return Set.of("workflow", "fromstatus", "tostatus");
-	}
-
-	@Override
 	public CImportRowResult importRow(final Map<String, String> rowData, final CProject<?> project, final int rowNumber,
 			final CImportOptions options) {
-		final var companyError = validateProjectHasCompany(project, rowNumber, rowData);
-		if (companyError.isPresent()) {
-			return companyError.get();
-		}
 		final var row = row(rowData);
 		final String workflowName = row.string("workflow");
 		final String fromName = row.string("fromstatus");
@@ -92,34 +78,34 @@ public class CWorkflowStatusRelationImportHandler extends CEntityImportHandler<C
 		if (workflowName.isBlank() || fromName.isBlank() || toName.isBlank()) {
 			return CImportRowResult.error(rowNumber, "Workflow, From Status and To Status are required", rowData);
 		}
-
-		final CWorkflowEntity workflow = workflowEntityService.findByNameAndCompany(workflowName, project.getCompany()).orElse(null);
+		final CWorkflowEntity workflow =
+				workflowEntityService.findByNameAndCompany(workflowName, project.getCompany()).orElse(null);
 		if (workflow == null) {
 			return CImportRowResult.error(rowNumber, "Workflow '" + workflowName + "' not found", rowData);
 		}
-		final CProjectItemStatus fromStatus = statusService.findByNameAndCompany(fromName, project.getCompany()).orElse(null);
+		final CProjectItemStatus fromStatus =
+				statusService.findByNameAndCompany(fromName, project.getCompany()).orElse(null);
 		if (fromStatus == null) {
 			return CImportRowResult.error(rowNumber, "From Status '" + fromName + "' not found", rowData);
 		}
-		final CProjectItemStatus toStatus = statusService.findByNameAndCompany(toName, project.getCompany()).orElse(null);
+		final CProjectItemStatus toStatus =
+				statusService.findByNameAndCompany(toName, project.getCompany()).orElse(null);
 		if (toStatus == null) {
 			return CImportRowResult.error(rowNumber, "To Status '" + toName + "' not found", rowData);
 		}
-
 		final boolean initialStatus = row.optionalBoolean("initialstatus").orElse(Boolean.FALSE).booleanValue();
 		final List<CUserProjectRole> roles = resolveRoles(rowData.getOrDefault("roles", ""), project);
 		if (roles == null) {
 			return CImportRowResult.error(rowNumber, "One or more roles not found", rowData);
 		}
-
-		final var existing = relationService.findRelationshipByStatuses(workflow.getId(), fromStatus.getId(), toStatus.getId()).orElse(null);
+		final var existing = relationService
+				.findRelationshipByStatuses(workflow.getId(), fromStatus.getId(), toStatus.getId()).orElse(null);
 		final CWorkflowStatusRelation relation = existing != null ? existing : new CWorkflowStatusRelation(true);
 		relation.setWorkflowEntity(workflow);
 		relation.setFromStatus(fromStatus);
 		relation.setToStatus(toStatus);
 		relation.setInitialStatus(initialStatus);
 		relation.setRoles(roles);
-
 		if (!options.isDryRun()) {
 			relationService.save(relation);
 		}
@@ -132,11 +118,8 @@ public class CWorkflowStatusRelationImportHandler extends CEntityImportHandler<C
 			// WHY: Hibernate-managed collections must be mutable; immutable List.of() breaks merge/replace semantics.
 			return new java.util.ArrayList<>();
 		}
-		final List<String> names = Arrays.stream(trimmed.split(","))
-				.map(String::trim)
-				.filter(s -> !s.isBlank())
-				.distinct()
-				.toList();
+		final List<String> names =
+				Arrays.stream(trimmed.split(",")).map(String::trim).filter(s -> !s.isBlank()).distinct().toList();
 		final List<CUserProjectRole> roles = new java.util.ArrayList<>();
 		for (final String roleName : names) {
 			final var roleOpt = roleService.findByNameAndCompany(roleName, project.getCompany());

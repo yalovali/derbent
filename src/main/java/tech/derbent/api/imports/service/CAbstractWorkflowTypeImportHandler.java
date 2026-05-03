@@ -39,10 +39,6 @@ public abstract class CAbstractWorkflowTypeImportHandler<T extends CTypeEntity<T
 		if (nameError.isPresent()) {
 			return nameError.get();
 		}
-		final var companyError = validateProjectHasCompany(project, rowNumber, rowData);
-		if (companyError.isPresent()) {
-			return companyError.get();
-		}
 		final String name = row.string("name");
 		final CCompany company = project.getCompany();
 		// WHY: system init Excel is intended to be re-runnable (and also safe on top of code-initialized reference data).

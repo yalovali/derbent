@@ -19,18 +19,30 @@ import tech.derbent.api.users.service.IUserRepository;
 @Service
 public class CGridEntityImportHandler extends CEntityOfProjectImportHandler<CGridEntity> {
 
+	private static String resolveViewNameFromServiceBean(final String beanName) {
+		if (beanName == null || beanName.isBlank()) {
+			return "";
+		}
+		final String entitySimpleName =
+				beanName.endsWith("Service") ? beanName.substring(0, beanName.length() - "Service".length()) : beanName;
+		try {
+			final Class<?> entityClass = CEntityRegistry.getEntityClass(entitySimpleName);
+			return (String) entityClass.getField("VIEW_NAME").get(null);
+		} catch (final Exception ignored) {
+			return "";
+		}
+	}
+
 	private static List<String> splitCsv(final String csv) {
 		return Arrays.stream(csv.split(",")).map(String::trim).filter(s -> !s.isBlank()).distinct().toList();
 	}
 
 	private final CGridEntityService gridEntityService;
-	private final CImportProjectResolver projectResolver;
 
 	public CGridEntityImportHandler(final CGridEntityService gridEntityService, final IUserRepository userRepository,
 			final CImportProjectResolver projectResolver) {
-		super(userRepository);
+		super(userRepository, projectResolver);
 		this.gridEntityService = gridEntityService;
-		this.projectResolver = projectResolver;
 	}
 
 	@Override
@@ -38,18 +50,6 @@ public class CGridEntityImportHandler extends CEntityOfProjectImportHandler<CGri
 		return Map.of("Name", "name", "Data Service Bean", "dataservicebeanname", "Column Fields", "columnfields",
 				"Editable Column Fields", "editablecolumnfields", "None Grid", "attributenone", "Company", "company",
 				"Project", "project");
-	}
-
-	private java.util.Optional<CProject<?>> resolveProjectByNameAndCompany(final CProject<?> sessionProject,
-			final String companyName, final String projectName) {
-		var company = sessionProject.getCompany();
-		if (company != null && companyName != null && !companyName.isBlank()) {
-			company = projectResolver.findCompanyByName(companyName).orElse(null);
-		}
-		if (company == null) {
-			return java.util.Optional.empty();
-		}
-		return projectResolver.findProjectByNameAndCompany(projectName, company);
 	}
 
 	@Override
@@ -78,38 +78,12 @@ public class CGridEntityImportHandler extends CEntityOfProjectImportHandler<CGri
 		return names;
 	}
 
-	private static String resolveViewNameFromServiceBean(final String beanName) {
-		if (beanName == null || beanName.isBlank()) {
-			return "";
-		}
-		final String entitySimpleName = beanName.endsWith("Service") ? beanName.substring(0, beanName.length() - "Service".length()) : beanName;
-		try {
-			final Class<?> entityClass = CEntityRegistry.getEntityClass(entitySimpleName);
-			return (String) entityClass.getField("VIEW_NAME").get(null);
-		} catch (final Exception ignored) {
-			return "";
-		}
-	}
-
 	@Override
 	public CImportRowResult importRow(final Map<String, String> rowData, final CProject<?> project, final int rowNumber,
 			final CImportOptions options) {
 		final var row = row(rowData);
 		// Resolve effective project from "project" column if present; otherwise use session project.
-		final String projectName = row.string("project");
-		final String companyName = row.string("company");
-		final var resolvedProject = projectName.isBlank() || (project.getName() != null && projectName.equalsIgnoreCase(project.getName()))
-				? java.util.Optional.of(project)
-				: resolveProjectByNameAndCompany(project, companyName, projectName);
-		if (resolvedProject.isEmpty()) {
-			return CImportRowResult.error(rowNumber,
-					"Project '" + projectName + "' not found. Create it before importing.", rowData);
-		}
-		final CProject<?> effectiveProject = resolvedProject.get();
-		final var companyError = validateProjectHasCompany(effectiveProject, rowNumber, rowData);
-		if (companyError.isPresent()) {
-			return companyError.get();
-		}
+		final CProject<?> effectiveProject = resolveProjectFromRow(row, project);
 		final String beanName = row.string("dataservicebeanname");
 		if (beanName.isBlank()) {
 			return CImportRowResult.error(rowNumber, "Data Service Bean is required", rowData);

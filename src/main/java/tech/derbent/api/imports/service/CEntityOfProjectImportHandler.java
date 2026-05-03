@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.imports.domain.CImportRowResult;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.users.domain.CUser;
@@ -22,10 +23,13 @@ import tech.derbent.api.users.service.IUserRepository;
 public abstract class CEntityOfProjectImportHandler<T extends CEntityOfProject<T>>
 		extends CEntityNamedImportHandler<T> {
 
+	private final CImportProjectResolver projectResolver;
 	protected final IUserRepository userRepository;
 
-	protected CEntityOfProjectImportHandler(final IUserRepository userRepository) {
+	protected CEntityOfProjectImportHandler(final IUserRepository userRepository,
+			final CImportProjectResolver projectResolver) {
 		this.userRepository = userRepository;
+		this.projectResolver = projectResolver;
 	}
 
 	protected final Optional<CImportRowResult> applyEntityOfProjectFields(final T entity, final CExcelRow row,
@@ -45,14 +49,24 @@ public abstract class CEntityOfProjectImportHandler<T extends CEntityOfProject<T
 		return Optional.empty();
 	}
 
-	/** Resolves the effective project for a row. If the "project" column is blank, returns the session project unchanged. If specified, looks it up by
-	 * name within the session project's company. Returns empty if the named project is not found. */
-	protected final Optional<CProject<?>> resolveProjectFromRow(final CExcelRow row, final CProject<?> sessionProject,
-			final CImportProjectResolver resolver) {
+	protected final CProject<?> resolveProjectFromRow(final CExcelRow row, final CProject<?> sessionProject) {
 		final String projectName = row.string("project");
 		if (projectName.isBlank()) {
-			return Optional.of(sessionProject);
+			return sessionProject;
 		}
-		return resolver.findProjectByNameAndCompany(projectName, sessionProject.getCompany());
+		if (sessionProject.getName() != null && projectName.equalsIgnoreCase(sessionProject.getName())) {
+			return sessionProject;
+		}
+		CCompany company = sessionProject.getCompany();
+		final String companyName = row.string("company");
+		if (!companyName.isBlank() && !isWildcard(companyName)) {
+			company = projectResolver.findCompanyByName(companyName).orElse(null);
+		}
+		if (company == null) {
+			throw new CValidationException("Company '" + companyName + "' not found. Create it before importing.");
+		}
+		return projectResolver.findProjectByNameAndCompany(projectName, company)
+				.orElseThrow(() -> new CValidationException("Project '" + projectName + "' not found in company '"
+						+ companyName + "'. Create it before importing."));
 	}
 }

@@ -29,13 +29,11 @@ import tech.derbent.api.users.service.IUserRepository;
 public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>, TType extends CTypeEntity<TType>>
 		extends CEntityOfProjectImportHandler<T> {
 
-	private final CImportProjectResolver projectResolver;
 	protected final CProjectItemStatusService statusService;
 
 	protected CProjectItemImportHandler(final CProjectItemStatusService statusService,
 			final IUserRepository userRepository, final CImportProjectResolver projectResolver) {
-		super(userRepository);
-		this.projectResolver = projectResolver;
+		super(userRepository, projectResolver);
 		this.statusService = statusService;
 	}
 
@@ -69,18 +67,9 @@ public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>
 			return nameError.get();
 		}
 		// Allow subclasses to resolve project from the "project" column in the row.
-		final CProject<?> effectiveProject = resolveProjectForRow(row, project);
-		if (effectiveProject == null) {
-			return CImportRowResult.error(rowNumber,
-					"Project '" + row.string("project") + "' not found in company. Create it before importing.",
-					rowData);
-		}
-		final var companyError = validateProjectHasCompany(effectiveProject, rowNumber, rowData);
-		if (companyError.isPresent()) {
-			return companyError.get();
-		}
-		final String name = row.string("name");
+		final CProject<?> effectiveProject = resolveProjectFromRow(row, project);
 		final CCompany company = effectiveProject.getCompany();
+		final String name = row.string("name");
 		// WHY: system_init.xlsx and sample workbooks are intended to be re-runnable.
 		final T entity =
 				findByNameAndProject(name, effectiveProject).orElseGet(() -> createNew(name, effectiveProject));
@@ -164,24 +153,5 @@ public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>
 
 	/** Hook for subclasses to resolve the effective project from row data. Default: return sessionProject unchanged. Override in handlers that read a
 	 * "project" column. */
-	protected final CProject<?> resolveProjectForRow(final CExcelRow row, final CProject<?> sessionProject) {
-		final String projectName = row.string("project");
-		if (projectName.isBlank()) {
-			return sessionProject;
-		}
-		if (sessionProject.getName() != null && projectName.equalsIgnoreCase(sessionProject.getName())) {
-			return sessionProject;
-		}
-		CCompany company = sessionProject.getCompany();
-		final String companyName = row.string("company");
-		if (!companyName.isBlank() && !isWildcard(companyName)) {
-			company = projectResolver.findCompanyByName(companyName).orElse(null);
-		}
-		if (company == null) {
-			return null;
-		}
-		return projectResolver.findProjectByNameAndCompany(projectName, company).orElse(null);
-	}
-
 	protected abstract void save(T entity);
 }

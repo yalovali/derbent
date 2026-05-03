@@ -31,10 +31,6 @@ public abstract class CAbstractSimpleTypeImportHandler<T extends CTypeEntity<T>>
 		if (nameError.isPresent()) {
 			return nameError.get();
 		}
-		final var companyError = validateProjectHasCompany(project, rowNumber, rowData);
-		if (companyError.isPresent()) {
-			return companyError.get();
-		}
 		final String name = row.string("name");
 		final CCompany company = project.getCompany();
 		// WHY: templates are imported both automatically (after DB reset) and manually; upsert-by-name keeps them re-runnable.
