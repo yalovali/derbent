@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -104,16 +105,28 @@ public abstract class CBaseUITest {
 	 * @param entityType The entity type (e.g., "CUser")
 	 * @return Array of possible search terms */
 	protected static String[] generateSearchTermsForEntity(String entityType) {
-		// Remove 'C' prefix if present
-		final String baseName = entityType.startsWith("C") ? entityType.substring(1) : entityType;
-		return new String[] {
-				baseName + "s", // Users, Activities, Projects
-				baseName, // User, Activity, Project
-				baseName.toLowerCase() + "s", // users, activities, projects
-				baseName.toLowerCase(), // user, activity, project
-				entityType, // CUser, CActivity, CProject
-				entityType.toLowerCase() // cuser, cactivity, cproject
-		};
+		final String raw = entityType == null ? "" : entityType.trim();
+		if (raw.isBlank()) {
+			return new String[0];
+		}
+		final LinkedHashSet<String> terms = new LinkedHashSet<>();
+		// WHY: navigateByMenuSearch() is used by CI/Playwright; always try the exact requested label first.
+		terms.add(raw);
+		terms.add(raw.toLowerCase());
+
+		final boolean hasWhitespace = raw.matches(".*\\s+.*");
+		final String baseName = raw.startsWith("C") && raw.length() > 1 ? raw.substring(1) : raw;
+		terms.add(baseName);
+		terms.add(baseName.toLowerCase());
+
+		// WHY: naive pluralization breaks for multi-word labels ("Import Data" -> "Import Datas") and wastes time.
+		if (!hasWhitespace) {
+			terms.add(baseName + "s");
+			terms.add(baseName.toLowerCase() + "s");
+			terms.add(raw.startsWith("C") ? raw : ("C" + baseName));
+			terms.add((raw.startsWith("C") ? raw : ("C" + baseName)).toLowerCase());
+		}
+		return terms.toArray(new String[0]);
 	}
 
 	private static boolean isIgnorableConsoleMessage(final String message) {

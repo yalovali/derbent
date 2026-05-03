@@ -31,18 +31,33 @@ public final class CSystemInitExcelGenerator {
         createStatusSheet(wb);
         createWorkflowEntitySheet(wb);
         createWorkflowStatusRelationSheet(wb);
+
+        // Reference/type data (must appear before any project item sheets).
         createActivityPrioritySheet(wb);
         createActivityTypeSheet(wb);
         createIssueTypeSheet(wb);
         createMeetingTypeSheet(wb);
         createDecisionTypeSheet(wb);
+        createUserStoryTypeSheet(wb);
+        createSprintTypeSheet(wb);
+        createTicketPrioritySheet(wb);
+        createTicketTypeSheet(wb);
+
+        // View configuration can be imported even in minimal mode.
         createGridEntitySheet(wb);
         createPageEntitySheet(wb);
+
         if (!minimal) {
+            // Project items (owners/parents for later child/relationship sheets).
             CSampleImportExcelGenerator.createActivitySheet(wb);
             CSampleImportExcelGenerator.createIssueSheet(wb);
+            createUserStorySheet(wb);
+            createSprintSheet(wb);
             createMeetingSheet(wb);
             createDecisionSheet(wb);
+            createTicketSheet(wb);
+
+            // Child/relationship sheets last.
             createCommentSheet(wb);
             createLinkSheet(wb);
             createAgileParentRelationSheet(wb);
@@ -192,6 +207,12 @@ public final class CSystemInitExcelGenerator {
                 "Activities Grid", "CActivityService", "id,name,status,dueDate,assignedTo", "name,status,dueDate", "false");
         CSampleImportExcelGenerator.addRow(sheet, 4, null,
                 "Issues Grid", "CIssueService", "id,name,status,dueDate,assignedTo,linkedActivity", "name,status,dueDate", "false");
+        CSampleImportExcelGenerator.addRow(sheet, 5, null,
+                "User Stories Grid", "CUserStoryService", "id,name,status,dueDate,assignedTo,storyPoint", "name,status,dueDate", "false");
+        CSampleImportExcelGenerator.addRow(sheet, 6, null,
+                "Tickets Grid", "CTicketService", "id,name,status,dueDate,priority,assignedTo", "name,status,dueDate", "false");
+        CSampleImportExcelGenerator.addRow(sheet, 7, null,
+                "Sprints Grid", "CSprintService", "id,name,status,startDate,endDate,velocity", "name,status,startDate,endDate", "false");
 
         for (int col = 0; col <= 4; col++) {
             sheet.autoSizeColumn(col);
@@ -216,6 +237,15 @@ public final class CSystemInitExcelGenerator {
         CSampleImportExcelGenerator.addRow(sheet, 4, null,
                 "Issues Page", "Project.Issues (Excel)", "10.202", "Issues (Excel)", "CPageServiceIssue", "vaadin:bug", "true",
                 "Issues Grid", "");
+        CSampleImportExcelGenerator.addRow(sheet, 5, null,
+                "User Stories Page", "Project.User Stories (Excel)", "10.203", "User Stories (Excel)", "CPageServiceUserStory", "vaadin:comment",
+                "true", "User Stories Grid", "");
+        CSampleImportExcelGenerator.addRow(sheet, 6, null,
+                "Tickets Page", "Project.Tickets (Excel)", "10.204", "Tickets (Excel)", "CPageServiceTicket", "vaadin:ticket", "true",
+                "Tickets Grid", "");
+        CSampleImportExcelGenerator.addRow(sheet, 7, null,
+                "Sprints Page", "Project.Sprints (Excel)", "10.205", "Sprints (Excel)", "CPageServiceSprint", "vaadin:calendar-clock", "true",
+                "Sprints Grid", "");
 
         for (int col = 0; col <= 8; col++) {
             sheet.autoSizeColumn(col);
@@ -258,6 +288,171 @@ public final class CSystemInitExcelGenerator {
         CSampleImportExcelGenerator.addRow(sheet, 5, null, "Budget", "#91856C", "30", "-1", "false", "false", "Agile Item Workflow", "true");
 
         for (int col = 0; col <= 7; col++) {
+            sheet.autoSizeColumn(col);
+        }
+    }
+
+    private static void createUserStoryTypeSheet(final Workbook wb) {
+        final Sheet sheet = wb.createSheet("User Story Type");
+        final CellStyle headerStyle = CSampleImportExcelGenerator.createHeaderStyle(wb);
+        final CellStyle commentStyle = CSampleImportExcelGenerator.createCommentStyle(wb);
+
+        CSampleImportExcelGenerator.addRow(sheet, 0, commentStyle, "# User Story Types");
+        CSampleImportExcelGenerator.addRow(sheet, 1, commentStyle,
+                "# Columns: Name (required), Color, Sort Order, Level, Can Have Children, Non Deletable, Workflow");
+        CSampleImportExcelGenerator.addRow(sheet, 2, headerStyle,
+                "Name", "Color", "Sort Order", "Level", "Can Have Children", "Non Deletable", "Workflow");
+
+        CSampleImportExcelGenerator.addRow(sheet, 3, null, "Story", "#1F8EFA", "10", "-1", "false", "false", "Agile Item Workflow");
+        CSampleImportExcelGenerator.addRow(sheet, 4, null, "Spike", "#455A64", "20", "-1", "false", "false", "Agile Item Workflow");
+
+        for (int col = 0; col <= 6; col++) {
+            sheet.autoSizeColumn(col);
+        }
+    }
+
+    private static void createSprintTypeSheet(final Workbook wb) {
+        final Sheet sheet = wb.createSheet("Sprint Type");
+        final CellStyle headerStyle = CSampleImportExcelGenerator.createHeaderStyle(wb);
+        final CellStyle commentStyle = CSampleImportExcelGenerator.createCommentStyle(wb);
+
+        CSampleImportExcelGenerator.addRow(sheet, 0, commentStyle, "# Sprint Types");
+        CSampleImportExcelGenerator.addRow(sheet, 1, commentStyle,
+                "# Columns: Name (required), Color, Sort Order, Level, Can Have Children, Non Deletable, Workflow");
+        CSampleImportExcelGenerator.addRow(sheet, 2, headerStyle,
+                "Name", "Color", "Sort Order", "Level", "Can Have Children", "Non Deletable", "Workflow");
+
+        CSampleImportExcelGenerator.addRow(sheet, 3, null, "Sprint", "#8377C5", "10", "-1", "false", "false", "Agile Item Workflow");
+
+        for (int col = 0; col <= 6; col++) {
+            sheet.autoSizeColumn(col);
+        }
+    }
+
+    private static void createTicketPrioritySheet(final Workbook wb) {
+        final Sheet sheet = wb.createSheet("Ticket Priority");
+        final CellStyle headerStyle = CSampleImportExcelGenerator.createHeaderStyle(wb);
+        final CellStyle commentStyle = CSampleImportExcelGenerator.createCommentStyle(wb);
+
+        CSampleImportExcelGenerator.addRow(sheet, 0, commentStyle, "# Ticket Priorities");
+        CSampleImportExcelGenerator.addRow(sheet, 1, commentStyle,
+                "# Columns: Name (required), Color, Sort Order, Priority Level, Is Default");
+        CSampleImportExcelGenerator.addRow(sheet, 2, headerStyle,
+                "Name", "Color", "Sort Order", "Priority Level", "Is Default");
+
+        CSampleImportExcelGenerator.addRow(sheet, 3, null, "High", "#D32F2F", "10", "2", "false");
+        CSampleImportExcelGenerator.addRow(sheet, 4, null, "Medium", "#F9A825", "20", "3", "true");
+        CSampleImportExcelGenerator.addRow(sheet, 5, null, "Low", "#1976D2", "30", "4", "false");
+
+        for (int col = 0; col <= 4; col++) {
+            sheet.autoSizeColumn(col);
+        }
+    }
+
+    private static void createTicketTypeSheet(final Workbook wb) {
+        final Sheet sheet = wb.createSheet("Ticket Type");
+        final CellStyle headerStyle = CSampleImportExcelGenerator.createHeaderStyle(wb);
+        final CellStyle commentStyle = CSampleImportExcelGenerator.createCommentStyle(wb);
+
+        CSampleImportExcelGenerator.addRow(sheet, 0, commentStyle, "# Ticket Types");
+        CSampleImportExcelGenerator.addRow(sheet, 1, commentStyle,
+                "# Columns: Name (required), Color, Sort Order, Level, Can Have Children, Non Deletable, Workflow");
+        CSampleImportExcelGenerator.addRow(sheet, 2, headerStyle,
+                "Name", "Color", "Sort Order", "Level", "Can Have Children", "Non Deletable", "Workflow");
+
+        CSampleImportExcelGenerator.addRow(sheet, 3, null, "Support", "#3A5791", "10", "-1", "false", "false", "Agile Item Workflow");
+        CSampleImportExcelGenerator.addRow(sheet, 4, null, "Bug", "#D32F2F", "20", "-1", "false", "false", "Agile Item Workflow");
+
+        for (int col = 0; col <= 6; col++) {
+            sheet.autoSizeColumn(col);
+        }
+    }
+
+    private static void createUserStorySheet(final Workbook wb) {
+        final Sheet sheet = wb.createSheet("User Story");
+        final CellStyle headerStyle = CSampleImportExcelGenerator.createHeaderStyle(wb);
+        final CellStyle commentStyle = CSampleImportExcelGenerator.createCommentStyle(wb);
+
+        CSampleImportExcelGenerator.addRow(sheet, 0, commentStyle, "# User story import sheet (project items)");
+        CSampleImportExcelGenerator.addRow(sheet, 1, commentStyle,
+                "# Columns: Name (required), Description, Status, User Story Type, Start Date, Due Date, Completion Date, Progress %, Story Points, Assigned To, Acceptance Criteria, Notes, Results");
+        CSampleImportExcelGenerator.addRow(sheet, 2, headerStyle,
+                "Name", "Description", "Status", "User Story Type", "Start Date", "Due Date", "Completion Date", "Progress %",
+                "Story Points", "Assigned To", "Acceptance Criteria", "Notes", "Results");
+
+        CSampleImportExcelGenerator.addRow(sheet, 3, null,
+                "As an account owner I can enroll MFA for my workspace admins",
+                "Security: require MFA enrollment and enforce it for admins.",
+                "In Progress",
+                "Story",
+                "2025-06-01",
+                "2025-06-30",
+                "",
+                "40",
+                "5",
+                "admin",
+                "- Must support TOTP\n- Recovery codes\n- Admin enforcement",
+                "Sync with SSO roadmap",
+                "");
+
+        for (int col = 0; col <= 12; col++) {
+            sheet.autoSizeColumn(col);
+        }
+    }
+
+    private static void createSprintSheet(final Workbook wb) {
+        final Sheet sheet = wb.createSheet("Sprint");
+        final CellStyle headerStyle = CSampleImportExcelGenerator.createHeaderStyle(wb);
+        final CellStyle commentStyle = CSampleImportExcelGenerator.createCommentStyle(wb);
+
+        CSampleImportExcelGenerator.addRow(sheet, 0, commentStyle, "# Sprint import sheet (project items)");
+        CSampleImportExcelGenerator.addRow(sheet, 1, commentStyle,
+                "# Columns: Name (required), Description, Status, Sprint Type, Start Date, End Date (required by domain rules), Sprint Goal, Definition of Done, Retrospective Notes, Color, Velocity");
+        CSampleImportExcelGenerator.addRow(sheet, 2, headerStyle,
+                "Name", "Description", "Status", "Sprint Type", "Start Date", "End Date", "Sprint Goal", "Definition of Done",
+                "Retrospective Notes", "Color", "Velocity");
+
+        CSampleImportExcelGenerator.addRow(sheet, 3, null,
+                "Sprint 24",
+                "Identity hardening sprint.",
+                "To Do",
+                "Sprint",
+                "2025-06-10",
+                "2025-06-24",
+                "MFA enrollment for admins",
+                "- Build\n- Test\n- Document",
+                "",
+                "#8377C5",
+                "0");
+
+        for (int col = 0; col <= 10; col++) {
+            sheet.autoSizeColumn(col);
+        }
+    }
+
+    private static void createTicketSheet(final Workbook wb) {
+        final Sheet sheet = wb.createSheet("Ticket");
+        final CellStyle headerStyle = CSampleImportExcelGenerator.createHeaderStyle(wb);
+        final CellStyle commentStyle = CSampleImportExcelGenerator.createCommentStyle(wb);
+
+        CSampleImportExcelGenerator.addRow(sheet, 0, commentStyle, "# Ticket import sheet (project items)");
+        CSampleImportExcelGenerator.addRow(sheet, 1, commentStyle,
+                "# Columns: Name (required), Description, Status, Ticket Type, Due Date, Priority, Assigned To, Context Information, Result");
+        CSampleImportExcelGenerator.addRow(sheet, 2, headerStyle,
+                "Name", "Description", "Status", "Ticket Type", "Due Date", "Priority", "Assigned To", "Context Information", "Result");
+
+        CSampleImportExcelGenerator.addRow(sheet, 3, null,
+                "MFA enrollment fails for some admins",
+                "Investigate edge cases in enrollment flow and fix.",
+                "To Do",
+                "Bug",
+                "2025-06-20",
+                "High",
+                "admin",
+                "Safari 17 + WebAuthn disabled",
+                "");
+
+        for (int col = 0; col <= 8; col++) {
             sheet.autoSizeColumn(col);
         }
     }
@@ -339,6 +534,12 @@ public final class CSystemInitExcelGenerator {
                 "Meeting", "Sprint Planning - Week 24", "Agenda finalized; focus on MFA story first.", "admin", "false");
         CSampleImportExcelGenerator.addRow(sheet, 5, null,
                 "Decision", "Choose auth provider", "Compare SSO support and audit logging.", "admin", "false");
+        CSampleImportExcelGenerator.addRow(sheet, 6, null,
+                "User Story", "As an account owner I can enroll MFA for my workspace admins",
+                "Capture unhappy-path cases and browser constraints.", "admin", "false");
+        CSampleImportExcelGenerator.addRow(sheet, 7, null,
+                "Ticket", "MFA enrollment fails for some admins",
+                "Reproduce on Safari and document workaround.", "admin", "true");
 
         for (int col = 0; col <= 4; col++) {
             sheet.autoSizeColumn(col);
@@ -362,6 +563,13 @@ public final class CSystemInitExcelGenerator {
                 "Implementation must follow the provider choice",
                 "true");
 
+        CSampleImportExcelGenerator.addRow(sheet, 4, null,
+                "Ticket", "MFA enrollment fails for some admins",
+                "User Story", "As an account owner I can enroll MFA for my workspace admins",
+                "Relates To",
+                "Ticket contributes evidence and repro steps for the story",
+                "false");
+
         for (int col = 0; col <= 6; col++) {
             sheet.autoSizeColumn(col);
         }
@@ -377,15 +585,20 @@ public final class CSystemInitExcelGenerator {
         CSampleImportExcelGenerator.addRow(sheet, 1, commentStyle, "# Columns: Owner Type, Owner Name, Parent Type, Parent Name");
         CSampleImportExcelGenerator.addRow(sheet, 2, headerStyle, "Owner Type", "Owner Name", "Parent Type", "Parent Name");
 
-        // WHY: UserStory sample items are still created by code initializers; Excel sets the leaf relations to those stable names.
         CSampleImportExcelGenerator.addRow(sheet, 3, null,
+                "User Story", "As an account owner I can enroll MFA for my workspace admins",
+                "", "");
+        CSampleImportExcelGenerator.addRow(sheet, 4, null,
                 "Activity", "Design login screen",
                 "User Story", "As an account owner I can enroll MFA for my workspace admins");
-        CSampleImportExcelGenerator.addRow(sheet, 4, null,
+        CSampleImportExcelGenerator.addRow(sheet, 5, null,
                 "Meeting", "Sprint Planning - Week 24",
                 "User Story", "As an account owner I can enroll MFA for my workspace admins");
-        CSampleImportExcelGenerator.addRow(sheet, 5, null,
+        CSampleImportExcelGenerator.addRow(sheet, 6, null,
                 "Decision", "Choose auth provider",
+                "User Story", "As an account owner I can enroll MFA for my workspace admins");
+        CSampleImportExcelGenerator.addRow(sheet, 7, null,
+                "Ticket", "MFA enrollment fails for some admins",
                 "User Story", "As an account owner I can enroll MFA for my workspace admins");
 
         for (int col = 0; col <= 3; col++) {

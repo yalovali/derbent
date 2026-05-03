@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import jakarta.persistence.EntityManager;
 import tech.derbent.api.imports.domain.CImportOptions;
 import tech.derbent.api.imports.domain.CImportResult;
 import tech.derbent.api.imports.domain.CImportRowResult;
@@ -37,9 +38,11 @@ public class CExcelImportService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CExcelImportService.class);
 
     private final CImportHandlerRegistry handlerRegistry;
+    private final EntityManager entityManager;
 
-    public CExcelImportService(final CImportHandlerRegistry handlerRegistry) {
+    public CExcelImportService(final CImportHandlerRegistry handlerRegistry, final EntityManager entityManager) {
         this.handlerRegistry = handlerRegistry;
+        this.entityManager = entityManager;
     }
 
     /**
@@ -96,6 +99,12 @@ public class CExcelImportService {
                 final IEntityImportHandler<?> handler = handlerOpt.get();
                 final CImportSheetResult sheetResult = processSheet(sheet, handler, project, options, evaluator);
                 result.addSheetResult(sheetResult);
+
+                // WHY: later sheets commonly resolve relations by querying the database (Issue → Activity, ParentRelation → Ticket, etc.).
+                // Within a single transaction, Hibernate may not flush inserts before those queries, yielding false "not found" errors.
+                if (!options.isDryRun()) {
+                    entityManager.flush();
+                }
             }
         }
     }
