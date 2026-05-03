@@ -61,16 +61,7 @@ public class CExcelImportService {
         Check.notNull(options, "Import options cannot be null");
         Check.notNull(project, "Project cannot be null");
         final CImportResult result = new CImportResult(options.isDryRun());
-        try {
-            processWorkbook(inputStream, options, project, result);
-        } catch (final Exception e) {
-            LOGGER.error("Excel import failed globally reason={}", e.getMessage(), e);
-            result.setGlobalErrorMessage("Import failed: " + e.getMessage());
-            // Roll back on unexpected exception
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            result.setRolledBack(true);
-            return result;
-        }
+        processWorkbook(inputStream, options, project, result);
         // Apply rollback policy after all rows have been processed
         if (options.isDryRun() || (options.isRollbackOnError() && result.getTotalErrors() > 0)) {
             result.setRolledBack(true);
@@ -80,7 +71,7 @@ public class CExcelImportService {
     }
 
     private void processWorkbook(final InputStream inputStream, final CImportOptions options,
-            final CProject<?> project, final CImportResult result) throws Exception {
+            final CProject<?> project, final CImportResult result) {
         try (final Workbook workbook = new XSSFWorkbook(inputStream)) {
             final FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
             for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
@@ -106,6 +97,8 @@ public class CExcelImportService {
                     entityManager.flush();
                 }
             }
+        } catch (final Exception e) {
+            throw new IllegalStateException("Excel import failed: " + e.getMessage(), e);
         }
     }
 

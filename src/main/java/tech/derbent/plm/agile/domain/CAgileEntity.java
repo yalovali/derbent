@@ -7,14 +7,20 @@ import java.util.HashSet;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.DiscriminatorType;
+import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -46,7 +52,11 @@ import tech.derbent.plm.links.domain.CLink;
 import tech.derbent.plm.links.domain.IHasLinks;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 
-@MappedSuperclass
+@Entity
+@Table (name = "cagileitem")
+@AttributeOverride (name = "id", column = @Column (name = "agile_item_id"))
+@Inheritance (strategy = InheritanceType.JOINED)
+@DiscriminatorColumn (name = "agile_item_kind", discriminatorType = DiscriminatorType.STRING)
 public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass, TypeClass>,
 		TypeClass extends CTypeEntity<TypeClass>> extends CProjectItem<EntityClass, TypeClass>
 		implements IHasStatusAndWorkflow<EntityClass, TypeClass>, IGnntEntityItem, ISprintableItem, IHasIcon, IHasAttachments,
@@ -99,6 +109,7 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 			hidden = false
 	)
 	private LocalDate completionDate;
+	@Transient
 	@AMetaData (
 			displayName = "Component Widget", required = false, readOnly = false,
 			description = "Component Widget for item", hidden = false, dataProviderBean = "pageservice",
@@ -348,7 +359,8 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		sprintItem.setStartDate(LocalDate.now());
 		sprintItem.setStoryPoint(0L);
 		parentRelation = new CParentRelation(this);
-		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+		// NOTE: do not call service.initializeNewEntity() from constructors.
+		// Excel bootstrap/import runs before all reference/type tables exist; service-level initialization depends on those tables.
 	}
 
 	@Override

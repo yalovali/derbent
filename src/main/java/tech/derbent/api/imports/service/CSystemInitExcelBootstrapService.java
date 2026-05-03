@@ -5,6 +5,9 @@ import java.io.InputStream;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.companies.service.CCompanyService;
@@ -146,6 +149,7 @@ public class CSystemInitExcelBootstrapService {
 			ensureUserInProject(user, project);
 		}
 		sessionService.setActiveUser(user);
+		ensureSystemAuthentication(user);
 		sessionService.setActiveProject(projects.get(0));
 	}
 
@@ -240,6 +244,17 @@ public class CSystemInitExcelBootstrapService {
 		final List<CUserCompanyRole> roles = userCompanyRoleService.listByCompany(company);
 		final CUserCompanyRole role = roles.stream().filter(CUserCompanyRole::isAdmin).findFirst().orElseGet(() -> roles.get(0));
 		return userService.createLoginUser(SEED_ADMIN_LOGIN, SEED_ADMIN_PASSWORD, "Admin", "admin@local", company, role);
+	}
+
+	private void ensureSystemAuthentication(final CUser user) {
+		if (user == null) {
+			return;
+		}
+		// WHY: The Excel bootstrap/import pipeline runs before any interactive login session exists.
+		// Many service beans are protected with @PreAuthorize("isAuthenticated()") even for internal initialization hooks.
+		// Setting a temporary authenticated principal avoids bootstrap failures while keeping UI/API security intact.
+		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+				user.getUsername(), "bootstrap", List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))));
 	}
 
 	private void ensureUserInProject(final CUser user, final CProject<?> project) {

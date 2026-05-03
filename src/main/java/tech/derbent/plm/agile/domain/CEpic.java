@@ -1,10 +1,11 @@
 package tech.derbent.plm.agile.domain;
 
-import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.projects.domain.CProject;
@@ -17,7 +18,8 @@ import tech.derbent.api.projects.domain.CProject;
  */
 @Entity
 @Table (name = "cepic")
-@AttributeOverride (name = "id", column = @Column (name = "epic_id"))
+@PrimaryKeyJoinColumn (name = "epic_id")
+@DiscriminatorValue ("EPIC")
 public class CEpic extends CAgileEntity<CEpic, CEpicType> {
 
 	public static final String DEFAULT_COLOR = "#6F42C1";

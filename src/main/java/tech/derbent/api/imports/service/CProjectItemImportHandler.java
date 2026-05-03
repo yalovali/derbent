@@ -104,7 +104,7 @@ public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>
 		try {
 			applyExtraFields(entity, row, project, rowNumber, rowData);
 		} catch (final RuntimeException e) {
-			return CImportRowResult.error(rowNumber, e.getMessage(), rowData);
+			return CImportRowResult.error(rowNumber, e.getClass().getSimpleName() + ": " + e.getMessage(), rowData);
 		}
 		if (!options.isDryRun()) {
 			save(entity);

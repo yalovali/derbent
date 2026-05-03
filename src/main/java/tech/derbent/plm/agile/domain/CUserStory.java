@@ -1,10 +1,11 @@
 package tech.derbent.plm.agile.domain;
 
-import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.projects.domain.CProject;
@@ -17,7 +18,8 @@ import tech.derbent.api.projects.domain.CProject;
  */
 @Entity
 @Table (name = "cuserstory")
-@AttributeOverride (name = "id", column = @Column (name = "userstory_id"))
+@PrimaryKeyJoinColumn (name = "userstory_id")
+@DiscriminatorValue ("USER_STORY")
 public class CUserStory extends CAgileEntity<CUserStory, CUserStoryType> {
 
 	public static final String DEFAULT_COLOR = "#1F8EFA";

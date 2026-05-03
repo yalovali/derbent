@@ -55,7 +55,7 @@ public final class CExcelRow {
         try {
             return Optional.of(Integer.valueOf(v));
         } catch (final Exception e) {
-            return Optional.empty();
+            throw new IllegalArgumentException("Invalid integer for " + normalizeToken(token) + ": '" + v + "'", e);
         }
     }
 
@@ -67,7 +67,7 @@ public final class CExcelRow {
         try {
             return Optional.of(Long.valueOf(v));
         } catch (final Exception e) {
-            return Optional.empty();
+            throw new IllegalArgumentException("Invalid long for " + normalizeToken(token) + ": '" + v + "'", e);
         }
     }
 
@@ -79,7 +79,7 @@ public final class CExcelRow {
         try {
             return Optional.of(new BigDecimal(v));
         } catch (final Exception e) {
-            return Optional.empty();
+            throw new IllegalArgumentException("Invalid decimal for " + normalizeToken(token) + ": '" + v + "'", e);
         }
     }
 
