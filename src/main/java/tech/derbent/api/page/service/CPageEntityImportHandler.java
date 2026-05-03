@@ -36,8 +36,14 @@ public class CPageEntityImportHandler implements IEntityImportHandler<CPageEntit
         names.add("Page Entity");
         names.add("Page Entities");
         try {
-            names.add(CEntityRegistry.getEntityTitleSingular(CPageEntity.class));
-            names.add(CEntityRegistry.getEntityTitlePlural(CPageEntity.class));
+            final String singular = CEntityRegistry.getEntityTitleSingular(CPageEntity.class);
+            final String plural = CEntityRegistry.getEntityTitlePlural(CPageEntity.class);
+            if (singular != null && !singular.isBlank()) {
+                names.add(singular);
+            }
+            if (plural != null && !plural.isBlank()) {
+                names.add(plural);
+            }
         } catch (final Exception ignored) { /* registry may not be ready */ }
         return names;
     }

@@ -39,6 +39,7 @@ import tech.derbent.api.imports.domain.CImportOptions;
 import tech.derbent.api.imports.domain.CImportResult;
 import tech.derbent.api.imports.service.CExcelImportService;
 import tech.derbent.api.imports.service.CExcelTemplateService;
+import tech.derbent.api.imports.service.CSystemInitExcelBootstrapService;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CColorAwareComboBox;
@@ -85,6 +86,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	private final Div errorMessage = new Div();
 	private final CExcelImportService excelImportService;
 	private final CExcelTemplateService excelTemplateService;
+	private final CSystemInitExcelBootstrapService systemInitExcelBootstrapService;
 	private final Button loginButton = new CButton("Login", CColorUtils.createStyledIcon("vaadin:sign-in", CColorUtils.CRUD_SAVE_COLOR));
 	private final PasswordField passwordField = new PasswordField();
 	private final Button resetDbButton = new CButton("DB Full", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
@@ -97,12 +99,14 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 
 	/** Constructor sets up the custom login form with basic Vaadin components. */
 	public CCustomLoginView(final ISessionService sessionService, final CCompanyService companyService, final Environment environment,
-			final CExcelImportService excelImportService, final CExcelTemplateService excelTemplateService) {
+			final CExcelImportService excelImportService, final CExcelTemplateService excelTemplateService,
+			final CSystemInitExcelBootstrapService systemInitExcelBootstrapService) {
 		this.sessionService = sessionService;
 		this.companyService = companyService;
 		this.environment = environment;
 		this.excelImportService = excelImportService;
 		this.excelTemplateService = excelTemplateService;
+		this.systemInitExcelBootstrapService = systemInitExcelBootstrapService;
 		addClassNames("custom-login-view");
 		setSizeFull();
 		setupForm();
@@ -146,7 +150,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?",
 					"Evet, sıfırla", () -> {
 						try {
-							runDatabaseReset(false, "Sample data loaded.", "Sample data and default values are loaded.");
+							runDatabaseReset(false, "Sample data + Excel loaded.", "Sample data, defaults, and system_init.xlsx are loaded.");
 						} catch (final Exception e) {
 							CNotificationService.showException("Error resetting database", e);
 						}
@@ -161,8 +165,8 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		try {
 			LOGGER.info("🔄 Showing DB Min reset confirmation dialog...");
 			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve minimum örnek veriler yeniden yüklenecek. Devam edilsin mi?",
-					"Evet, sıfırla", () -> runDatabaseReset(true, "Minimum örnek veri yeniden yüklendi.",
-							"Minimum örnek veriler ve varsayılan veriler yeniden oluşturuldu."));
+					"Evet, sıfırla", () -> runDatabaseReset(true, "Minimum sample + Excel loaded.",
+							"Minimum sample data, defaults, and system_init_min.xlsx are loaded."));
 		} catch (final Exception e) {
 			CNotificationService.showException("Error showing confirmation dialog", e);
 		}
@@ -176,76 +180,53 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		try {
 			LOGGER.info("🔄 Showing DB Excel reset confirmation dialog...");
 			CNotificationService.showConfirmationDialog(
-					"Veritabanı SIFIRLANACAK ve Excel'den örnek veriler yüklenecek. Devam edilsin mi?",
-					"Evet, sıfırla", () -> runDatabaseResetWithExcelImport(false));
+					"Excel template (system_init.xlsx) tekrar yüklenecek. Devam edilsin mi?",
+					"Evet, yükle", () -> runExcelBootstrapOnly(false));
 		} catch (final Exception e) {
 			CNotificationService.showException("Error showing confirmation dialog", e);
 		}
 	}
 
-	private void runDatabaseResetWithExcelImport(final boolean minimal) {
+	private void runExcelBootstrapOnly(final boolean minimal) {
 		final UI ui = getUI().orElse(null);
-		Check.notNull(ui, "UI must be available to run database reset");
+		Check.notNull(ui, "UI must be available");
 		final VaadinSession session = ui.getSession();
 		Check.notNull(session, "Vaadin session must not be null");
-		final String schemaSelection = schemaSelector.getValue();
-		final CDialogProgress progressDialog = CNotificationService.showProgressDialog("Database Reset", "Veritabanı ve Excel örnek verisi hazırlanıyor...");
+		final CDialogProgress progressDialog = CNotificationService.showProgressDialog("Excel Init", "Excel örnek verisi yükleniyor...");
 		CompletableFuture.runAsync(() -> {
 			Exception failure = null;
-			CImportResult importResult = null;
+			CSystemInitExcelBootstrapService.CBootstrapSummary summary = null;
 			try {
-				importResult = runDatabaseResetWithExcelImportInSession(session, ui, minimal, schemaSelection);
+				session.lock();
+				try {
+					VaadinSession.setCurrent(session);
+					UI.setCurrent(ui);
+					summary = systemInitExcelBootstrapService.bootstrapAllProjects(minimal);
+				} finally {
+					UI.setCurrent(null);
+					VaadinSession.setCurrent(null);
+					session.unlock();
+				}
 			} catch (final Exception ex) {
 				failure = ex;
-				LOGGER.error("❌ DB Excel reset failed", ex);
+				LOGGER.error("❌ Excel bootstrap failed", ex);
 			} finally {
 				final Exception capturedFailure = failure;
-				final CImportResult capturedImport = importResult;
+				final var capturedSummary = summary;
 				ui.access(() -> {
 					progressDialog.close();
 					if (capturedFailure != null) {
 						CNotificationService.showException("Hata", capturedFailure);
 						return;
 					}
-					final String summary = capturedImport != null
-							? "Excel import: " + capturedImport.getTotalSuccess() + " ok, " + capturedImport.getTotalErrors() + " errors"
-							: "Excel import skipped";
-					CNotificationService.showSuccess("DB reset + Excel import completed.");
-					CNotificationService.showInfoDialog("Information", summary);
+					CNotificationService.showSuccess("Excel init completed.");
+					if (capturedSummary != null) {
+						CNotificationService.showInfoDialog("Information", capturedSummary.toUiSummary());
+					}
 					populateForm();
 				});
 			}
 		});
-	}
-
-	private CImportResult runDatabaseResetWithExcelImportInSession(final VaadinSession session, final UI ui, final boolean minimal,
-			final String schemaSelection) throws Exception {
-		// Step 1: perform the normal reset flow (this method handles its own VaadinSession lock).
-		runDatabaseResetInSession(session, ui, minimal, schemaSelection);
-		if (environment.acceptsProfiles(Profiles.of("bab"))) {
-			// WHY: BAB profile bootstrapping has additional domain constraints; keep Excel init incremental.
-			return null;
-		}
-		// Step 2: import the generated workbook under a VaadinSession lock so session-scoped services work.
-		session.lock();
-		try {
-			VaadinSession.setCurrent(session);
-			UI.setCurrent(ui);
-			final var project = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project after reset"));
-			final CImportOptions options = CImportOptions.defaults();
-			options.setDryRun(false);
-			options.setRollbackOnError(true);
-			options.setSkipUnknownSheets(true);
-			options.setAutoCreateLookups(true);
-			try (final InputStream in = excelTemplateService.openSystemInitTemplate()) {
-				// WHY: importing a committed workbook makes the Excel init reproducible across machines and CI.
-				return excelImportService.importExcel(in, options, project);
-			}
-		} finally {
-			UI.setCurrent(null);
-			VaadinSession.setCurrent(null);
-			session.unlock();
-		}
 	}
 
 	private void on_login_clicked() { 
@@ -399,6 +380,9 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 				final CDataInitializer init = new CDataInitializer(sessionService);
 				LOGGER.info("🔧 Using Derbent data initializer");
 				init.reloadForced(minimal);
+				// WHY: keep code-initializers for core safety, but layer Excel-based samples on top to reduce initializer complexity over time.
+				final var summary = systemInitExcelBootstrapService.bootstrapAllProjects(minimal);
+				LOGGER.info("✅ Excel bootstrap after DB reset: {}", summary.toUiSummary());
 			}
 		} finally {
 			UI.setCurrent(null);

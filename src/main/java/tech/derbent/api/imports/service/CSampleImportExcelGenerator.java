@@ -81,8 +81,11 @@ public final class CSampleImportExcelGenerator {
         addRow(sheet, 3, commentStyle, "# Status and Activity Type must already exist in the system");
 
         // Header (intentionally includes extra spaces to test normalization)
-        addRow(sheet, 4, headerStyle, "Name", "Description", "Status", "Activity Type", "Due   Date",
-                "Estimated   Hours", "Assigned To");
+        addRow(sheet, 4, headerStyle,
+                "Name", "Description", "Status", "Activity Type", "Priority",
+                "Start   Date", "Due   Date", "Completion Date",
+                "Progress   %", "Story Points", "Estimated   Hours", "Assigned To",
+                "Acceptance Criteria", "Notes", "Results");
 
         // Sample rows (use initializer-backed activity types; avoid non-existing types like 'Meeting')
         addActivityRow(sheet, 5, dateStyle,
@@ -90,8 +93,16 @@ public final class CSampleImportExcelGenerator {
                 "Create wireframes for the login page\n- include MFA enrollment\n- validate error states",
                 "To Do",
                 "Design",
+                "High",
+                LocalDate.of(2025, 6, 10),
                 LocalDate.of(2025, 6, 15),
+                null,
+                "0",
+                "3",
                 "8",
+                "",
+                "UI matches specs and error states are covered",
+                "Created from Excel system init",
                 "");
 
         addActivityRow(sheet, 6, dateStyle,
@@ -99,20 +110,36 @@ public final class CSampleImportExcelGenerator {
                 "JWT-based auth implementation (access + refresh tokens)",
                 "In Progress",
                 "Development",
+                "Critical",
+                LocalDate.of(2025, 6, 12),
                 LocalDate.of(2025, 6, 20),
                 null,
-                "admin");
+                "35",
+                "8",
+                null,
+                "admin",
+                "Tokens validated; refresh rotation; logout invalidates tokens",
+                "Security review pending",
+                "");
         // formula in Estimated Hours
-        sheet.getRow(6).getCell(5).setCellFormula("4+4");
+        sheet.getRow(6).getCell(10).setCellFormula("4+4");
 
         addActivityRow(sheet, 7, dateStyle,
                 "Write unit tests",
                 "Cover authentication service with tests; include edge cases (Safari, iOS)",
                 "To Do",
                 "Testing",
+                "Medium",
+                LocalDate.of(2025, 6, 15),
                 LocalDate.of(2025, 6, 25),
+                null,
+                "0",
+                "5",
                 "4.5",
-                "admin");
+                "admin",
+                "Happy path + edge cases pass on CI",
+                "Use Playwright + unit test mix",
+                "");
         // WHY: keep the default template importable on top of sample data; 'qa' user may not exist in all environments.
 
         addActivityRow(sheet, 8, dateStyle,
@@ -120,25 +147,41 @@ public final class CSampleImportExcelGenerator {
                 "Release notes + runbook update",
                 "",
                 "Documentation",
+                "Low",
+                LocalDate.of(2025, 6, 16),
                 LocalDate.of(2025, 6, 18),
+                null,
+                "0",
                 "2",
-                "");
+                "2",
+                "",
+                "Runbook includes rollback steps",
+                "",
+                "" );
 
         // Formula-based due date (tests formula evaluation + date formatting)
         addActivityRow(sheet, 9, dateStyle,
                 "Verify formula date",
-                "Due date is generated via formula: E6+14 (safe POI-evaluable date arithmetic)",
+                "Due date is generated via formula: G7+14 (safe POI-evaluable date arithmetic)",
                 "To Do",
                 "Testing",
+                "Low",
                 LocalDate.of(2025, 6, 1),
+                LocalDate.of(2025, 6, 1),
+                null,
+                "0",
                 "1",
+                "1",
+                "",
+                "Date formula evaluated on import",
+                "",
                 "");
         // WHY: Apache POI does not support every Excel function (e.g. TODAY) equally; date math is reliable.
-        sheet.getRow(9).getCell(4).setCellFormula("E6+14");
-        sheet.getRow(9).getCell(4).setCellStyle(dateStyle);
+        sheet.getRow(9).getCell(6).setCellFormula("G7+14");
+        sheet.getRow(9).getCell(6).setCellStyle(dateStyle);
 
         // Auto-size columns
-        for (int col = 0; col <= 6; col++) {
+        for (int col = 0; col <= 14; col++) {
             sheet.autoSizeColumn(col);
         }
     }
@@ -202,21 +245,47 @@ public final class CSampleImportExcelGenerator {
     }
 
     private static void addActivityRow(final Sheet sheet, final int rowIndex, final CellStyle dateStyle,
-            final String name, final String description, final String status, final String activityType,
-            final LocalDate dueDate, final String estimatedHours, final String assignedTo) {
+            final String name, final String description, final String status, final String activityType, final String priority,
+            final LocalDate startDate, final LocalDate dueDate, final LocalDate completionDate,
+            final String progressPercentage, final String storyPoint,
+            final String estimatedHours, final String assignedTo,
+            final String acceptanceCriteria, final String notes, final String results) {
         final Row row = sheet.createRow(rowIndex);
         row.createCell(0).setCellValue(name);
         row.createCell(1).setCellValue(description);
         row.createCell(2).setCellValue(status);
         row.createCell(3).setCellValue(activityType);
-        final var dueCell = row.createCell(4);
-        dueCell.setCellValue(java.sql.Date.valueOf(dueDate));
+        row.createCell(4).setCellValue(priority);
+
+        final var startCell = row.createCell(5);
+        startCell.setCellStyle(dateStyle);
+        if (startDate != null) {
+            startCell.setCellValue(java.sql.Date.valueOf(startDate));
+        }
+
+        final var dueCell = row.createCell(6);
         dueCell.setCellStyle(dateStyle);
-        final var hoursCell = row.createCell(5);
+        if (dueDate != null) {
+            dueCell.setCellValue(java.sql.Date.valueOf(dueDate));
+        }
+
+        final var completionCell = row.createCell(7);
+        completionCell.setCellStyle(dateStyle);
+        if (completionDate != null) {
+            completionCell.setCellValue(java.sql.Date.valueOf(completionDate));
+        }
+
+        row.createCell(8).setCellValue(progressPercentage != null ? progressPercentage : "");
+        row.createCell(9).setCellValue(storyPoint != null ? storyPoint : "");
+
+        final var hoursCell = row.createCell(10);
         if (estimatedHours != null) {
             hoursCell.setCellValue(estimatedHours);
         }
-        row.createCell(6).setCellValue(assignedTo);
+        row.createCell(11).setCellValue(assignedTo != null ? assignedTo : "");
+        row.createCell(12).setCellValue(acceptanceCriteria != null ? acceptanceCriteria : "");
+        row.createCell(13).setCellValue(notes != null ? notes : "");
+        row.createCell(14).setCellValue(results != null ? results : "");
     }
 
     private static void addIssueRow(final Sheet sheet, final int rowIndex, final CellStyle dateStyle,

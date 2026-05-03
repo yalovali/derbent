@@ -1,0 +1,81 @@
+package tech.derbent.api.workflow.service;
+
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+import org.springframework.stereotype.Service;
+import tech.derbent.api.imports.domain.CImportOptions;
+import tech.derbent.api.imports.domain.CImportRowResult;
+import tech.derbent.api.imports.service.IEntityImportHandler;
+import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.registry.CEntityRegistry;
+import tech.derbent.api.workflow.domain.CWorkflowEntity;
+
+/** Imports CWorkflowEntity rows from Excel (company-scoped reference data). */
+@Service
+public class CWorkflowEntityImportHandler implements IEntityImportHandler<CWorkflowEntity> {
+
+	private final CWorkflowEntityService workflowEntityService;
+
+	public CWorkflowEntityImportHandler(final CWorkflowEntityService workflowEntityService) {
+		this.workflowEntityService = workflowEntityService;
+	}
+
+	@Override
+	public Class<CWorkflowEntity> getEntityClass() {
+		return CWorkflowEntity.class;
+	}
+
+	@Override
+	public Set<String> getSupportedSheetNames() {
+		final Set<String> names = new LinkedHashSet<>();
+		names.add("CWorkflowEntity");
+		names.add("WorkflowEntity");
+		names.add("Workflow Entity");
+		names.add("Workflows");
+		try {
+			final String singular = CEntityRegistry.getEntityTitleSingular(CWorkflowEntity.class);
+			final String plural = CEntityRegistry.getEntityTitlePlural(CWorkflowEntity.class);
+			if (singular != null && !singular.isBlank()) {
+				names.add(singular);
+			}
+			if (plural != null && !plural.isBlank()) {
+				names.add(plural);
+			}
+		} catch (final Exception ignored) { /* registry may not be ready */ }
+		return names;
+	}
+
+	@Override
+	public Map<String, String> getColumnAliases() {
+		return Map.of(
+				"Name", "name",
+				"Color", "color",
+				"Icon", "icon");
+	}
+
+	@Override
+	public Set<String> getRequiredColumns() {
+		return Set.of("name");
+	}
+
+	@Override
+	public CImportRowResult importRow(final Map<String, String> rowData, final CProject<?> project, final int rowNumber,
+			final CImportOptions options) {
+		final String name = rowData.getOrDefault("name", "").trim();
+		if (name.isBlank()) {
+			return CImportRowResult.error(rowNumber, "Name is required", rowData);
+		}
+		if (project.getCompany() == null) {
+			return CImportRowResult.error(rowNumber, "Project company is required to create workflows", rowData);
+		}
+		// WHY: system init Excel is intended to be re-runnable; upsert-by-name avoids unique constraint violations.
+		final CWorkflowEntity workflow = workflowEntityService.findByNameAndCompany(name, project.getCompany())
+				.orElseGet(() -> new CWorkflowEntity(name, project.getCompany()));
+		// NOTE: workflow entity currently has no color/icon fields; keep columns reserved for future.
+		if (!options.isDryRun()) {
+			workflowEntityService.save(workflow);
+		}
+		return CImportRowResult.success(rowNumber, name);
+	}
+}

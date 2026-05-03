@@ -531,6 +531,8 @@ public class CDataInitializer {
 						CMeetingTypeInitializerService.initializeSample(sampleProject, minimal);
 						CDecisionTypeInitializerService.initializeSample(sampleProject, minimal);
 						COrderTypeInitializerService.initializeSample(sampleProject, minimal);
+						// WHY: activity creation/initialization depends on having at least one Activity Type available.
+						// We keep this initializer-backed reference data until Excel bootstrap is moved earlier in the reset pipeline.
 						CActivityTypeInitializerService.initializeSample(sampleProject, minimal);
 						CEpicTypeInitializerService.initializeSample(sampleProject, minimal);
 						CUserStoryTypeInitializerService.initializeSample(sampleProject, minimal);
@@ -552,6 +554,8 @@ public class CDataInitializer {
 						CStorageItemTypeInitializerService.initializeSample(sampleProject, minimal);
 						CProjectExpenseTypeInitializerService.initializeSample(sampleProject, minimal);
 						CProjectIncomeTypeInitializerService.initializeSample(sampleProject, minimal);
+						// WHY: new Activity initialization requires at least one priority in the company.
+						// We keep this initializer-backed reference data until Excel bootstrap is moved earlier in the reset pipeline.
 						CActivityPriorityInitializerService.initializeSample(sampleProject, minimal);
 						CSprintTypeInitializerService.initializeSample(sampleProject, minimal);
 						CValidationCaseTypeInitializerService.initializeSample(sampleProject, minimal);
@@ -568,7 +572,8 @@ public class CDataInitializer {
 					final CEpic[] epics = CEpicInitializerService.initializeSample(project, minimal);
 					final CFeature[] features = CFeatureInitializerService.initializeSample(project, minimal, epics[0], epics[1]);
 					final CUserStory[] userStories = CUserStoryInitializerService.initializeSample(project, minimal, features[0], features[1]);
-					CActivityInitializerService.initializeSample(project, minimal, userStories[0], userStories[1]);
+					// WHY: Activity sample rows are now authored in system_init.xlsx and imported after DB reset for each project.
+					// CActivityInitializerService.initializeSample(project, minimal, userStories[0], userStories[1]);
 					CAssetInitializerService.initializeSample(project, minimal);
 					CBudgetInitializerService.initializeSample(project, minimal);
 					CDeliverableInitializerService.initializeSample(project, minimal, features[0], userStories[0]);

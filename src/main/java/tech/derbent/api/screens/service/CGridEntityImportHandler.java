@@ -34,8 +34,14 @@ public class CGridEntityImportHandler implements IEntityImportHandler<CGridEntit
         names.add("Grid Entity");
         names.add("Grid Entities");
         try {
-            names.add(CEntityRegistry.getEntityTitleSingular(CGridEntity.class));
-            names.add(CEntityRegistry.getEntityTitlePlural(CGridEntity.class));
+            final String singular = CEntityRegistry.getEntityTitleSingular(CGridEntity.class);
+            final String plural = CEntityRegistry.getEntityTitlePlural(CGridEntity.class);
+            if (singular != null && !singular.isBlank()) {
+                names.add(singular);
+            }
+            if (plural != null && !plural.isBlank()) {
+                names.add(plural);
+            }
         } catch (final Exception ignored) { /* registry may not be ready */ }
         return names;
     }

@@ -20,6 +20,7 @@ import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.users.service.IUserRepository;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.plm.activities.domain.CActivity;
+import tech.derbent.plm.activities.domain.CActivityPriority;
 import tech.derbent.plm.activities.domain.CActivityType;
 
 /**
@@ -44,15 +45,18 @@ public class CActivityImportHandler implements IEntityImportHandler<CActivity> {
 
     private final CActivityService activityService;
     private final CActivityTypeService activityTypeService;
+    private final CActivityPriorityService priorityService;
     private final CProjectItemStatusService statusService;
     private final IUserRepository userRepository;
 
     public CActivityImportHandler(final CActivityService activityService,
             final CActivityTypeService activityTypeService,
+            final CActivityPriorityService priorityService,
             final CProjectItemStatusService statusService,
             final IUserRepository userRepository) {
         this.activityService = activityService;
         this.activityTypeService = activityTypeService;
+        this.priorityService = priorityService;
         this.statusService = statusService;
         this.userRepository = userRepository;
     }
@@ -67,8 +71,14 @@ public class CActivityImportHandler implements IEntityImportHandler<CActivity> {
         names.add("Activity");
         // Add registry names if available
         try {
-            names.add(CEntityRegistry.getEntityTitleSingular(CActivity.class));
-            names.add(CEntityRegistry.getEntityTitlePlural(CActivity.class));
+            final String singular = CEntityRegistry.getEntityTitleSingular(CActivity.class);
+            final String plural = CEntityRegistry.getEntityTitlePlural(CActivity.class);
+            if (singular != null && !singular.isBlank()) {
+                names.add(singular);
+            }
+            if (plural != null && !plural.isBlank()) {
+                names.add(plural);
+            }
         } catch (final Exception ignored) { /* registry may not be ready at bean creation */ }
         return names;
     }
@@ -76,15 +86,23 @@ public class CActivityImportHandler implements IEntityImportHandler<CActivity> {
     @Override
     public Map<String, String> getColumnAliases() {
         // alias (any case) → canonical token used as rowData key
-        return Map.of(
-            "Activity Type",   "entitytype",
-            "Type",            "entitytype",
-            "Due Date",        "duedate",
-            "Estimated Hours", "estimatedhours",
-            "Assigned To",     "assignedto",
-            "Description",     "description",
-            "Status",          "status",
-            "Name",            "name"
+        return Map.ofEntries(
+                Map.entry("Activity Type", "entitytype"),
+                Map.entry("Type", "entitytype"),
+                Map.entry("Due Date", "duedate"),
+                Map.entry("Estimated Hours", "estimatedhours"),
+                Map.entry("Assigned To", "assignedto"),
+                Map.entry("Description", "description"),
+                Map.entry("Status", "status"),
+                Map.entry("Name", "name"),
+                Map.entry("Priority", "priority"),
+                Map.entry("Acceptance Criteria", "acceptancecriteria"),
+                Map.entry("Notes", "notes"),
+                Map.entry("Results", "results"),
+                Map.entry("Start Date", "startdate"),
+                Map.entry("Completion Date", "completiondate"),
+                Map.entry("Progress %", "progresspercentage"),
+                Map.entry("Story Points", "storypoint")
         );
     }
 
@@ -147,15 +165,77 @@ public class CActivityImportHandler implements IEntityImportHandler<CActivity> {
         if (!description.isBlank()) {
             activity.setDescription(description);
         }
-        // Optional due date
+        // Optional priority by name
+        final String priorityName = rowData.getOrDefault("priority", "").trim();
+        if (!priorityName.isBlank()) {
+            final var priorityOpt = priorityService.findByNameAndCompany(priorityName, project.getCompany());
+            if (priorityOpt.isPresent()) {
+                activity.setPriority(priorityOpt.get());
+            } else if (options.isAutoCreateLookups() && !options.isDryRun()) {
+                // WHY: sample workbooks should be self-contained; allow creating missing priorities.
+                activity.setPriority(priorityService.save(new CActivityPriority(priorityName, project.getCompany())));
+            } else {
+                return CImportRowResult.error(rowNumber,
+                        "Priority '" + priorityName + "' not found. Create it before importing (or enable auto-create lookups).", rowData);
+            }
+        }
+        // Optional acceptance criteria / notes / results
+        final String acceptanceCriteria = rowData.getOrDefault("acceptancecriteria", "").trim();
+        if (!acceptanceCriteria.isBlank()) {
+            activity.setAcceptanceCriteria(acceptanceCriteria);
+        }
+        final String notes = rowData.getOrDefault("notes", "").trim();
+        if (!notes.isBlank()) {
+            activity.setNotes(notes);
+        }
+        final String results = rowData.getOrDefault("results", "").trim();
+        if (!results.isBlank()) {
+            activity.setResults(results);
+        }
+        // Optional dates
+        final String startDateStr = rowData.getOrDefault("startdate", "").trim();
+        if (!startDateStr.isBlank()) {
+            final LocalDate startDate = parseDate(startDateStr);
+            if (startDate == null) {
+                return CImportRowResult.error(rowNumber,
+                        "Cannot parse start date '" + startDateStr + "'. Use yyyy-MM-dd or dd/MM/yyyy.", rowData);
+            }
+            activity.setStartDate(startDate);
+        }
         final String dueDateStr = rowData.getOrDefault("duedate", "").trim();
         if (!dueDateStr.isBlank()) {
             final LocalDate dueDate = parseDate(dueDateStr);
             if (dueDate == null) {
                 return CImportRowResult.error(rowNumber,
-                        "Cannot parse date '" + dueDateStr + "'. Use yyyy-MM-dd or dd/MM/yyyy.", rowData);
+                        "Cannot parse due date '" + dueDateStr + "'. Use yyyy-MM-dd or dd/MM/yyyy.", rowData);
             }
             activity.setDueDate(dueDate);
+        }
+        final String completionDateStr = rowData.getOrDefault("completiondate", "").trim();
+        if (!completionDateStr.isBlank()) {
+            final LocalDate completionDate = parseDate(completionDateStr);
+            if (completionDate == null) {
+                return CImportRowResult.error(rowNumber,
+                        "Cannot parse completion date '" + completionDateStr + "'. Use yyyy-MM-dd or dd/MM/yyyy.", rowData);
+            }
+            activity.setCompletionDate(completionDate);
+        }
+        // Optional progress / story points
+        final String progressStr = rowData.getOrDefault("progresspercentage", "").trim();
+        if (!progressStr.isBlank()) {
+            try {
+                activity.setProgressPercentage(Integer.valueOf(progressStr));
+            } catch (final Exception e) {
+                return CImportRowResult.error(rowNumber, "Invalid progress %: " + progressStr, rowData);
+            }
+        }
+        final String storyPointStr = rowData.getOrDefault("storypoint", "").trim();
+        if (!storyPointStr.isBlank()) {
+            try {
+                activity.setStoryPoint(Long.valueOf(storyPointStr));
+            } catch (final Exception e) {
+                return CImportRowResult.error(rowNumber, "Invalid story points: " + storyPointStr, rowData);
+            }
         }
         // Optional estimated hours
         final String hoursStr = rowData.getOrDefault("estimatedhours", "").trim();

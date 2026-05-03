@@ -10,6 +10,7 @@ import tech.derbent.api.imports.domain.CImportRowResult;
 import tech.derbent.api.imports.service.IEntityImportHandler;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
+import tech.derbent.api.workflow.service.CWorkflowEntityService;
 import tech.derbent.plm.activities.domain.CActivityType;
 
 /** Imports CActivityType rows from Excel (company-scoped reference data). */
@@ -18,9 +19,12 @@ import tech.derbent.plm.activities.domain.CActivityType;
 public class CActivityTypeImportHandler implements IEntityImportHandler<CActivityType> {
 
     private final CActivityTypeService activityTypeService;
+    private final CWorkflowEntityService workflowEntityService;
 
-    public CActivityTypeImportHandler(final CActivityTypeService activityTypeService) {
+    public CActivityTypeImportHandler(final CActivityTypeService activityTypeService,
+            final CWorkflowEntityService workflowEntityService) {
         this.activityTypeService = activityTypeService;
+        this.workflowEntityService = workflowEntityService;
     }
 
     @Override
@@ -44,7 +48,12 @@ public class CActivityTypeImportHandler implements IEntityImportHandler<CActivit
     public Map<String, String> getColumnAliases() {
         return Map.of(
                 "Name", "name",
-                "Color", "color");
+                "Color", "color",
+                "Sort Order", "sortorder",
+                "Level", "level",
+                "Can Have Children", "canhavechildren",
+                "Non Deletable", "attributenondeletable",
+                "Workflow", "workflow");
     }
 
     @Override
@@ -69,6 +78,38 @@ public class CActivityTypeImportHandler implements IEntityImportHandler<CActivit
         final String color = rowData.getOrDefault("color", "").trim();
         if (!color.isBlank()) {
             type.setColor(color);
+        }
+        final String sortOrderStr = rowData.getOrDefault("sortorder", "").trim();
+        if (!sortOrderStr.isBlank()) {
+            try {
+                type.setSortOrder(Integer.valueOf(sortOrderStr));
+            } catch (final Exception e) {
+                return CImportRowResult.error(rowNumber, "Invalid sort order: " + sortOrderStr, rowData);
+            }
+        }
+        final String levelStr = rowData.getOrDefault("level", "").trim();
+        if (!levelStr.isBlank()) {
+            try {
+                type.setLevel(Integer.valueOf(levelStr));
+            } catch (final Exception e) {
+                return CImportRowResult.error(rowNumber, "Invalid level: " + levelStr, rowData);
+            }
+        }
+        final String canHaveChildrenStr = rowData.getOrDefault("canhavechildren", "").trim();
+        if (!canHaveChildrenStr.isBlank()) {
+            type.setCanHaveChildren(Set.of("true", "yes", "1").contains(canHaveChildrenStr.toLowerCase()));
+        }
+        final String nonDeletableStr = rowData.getOrDefault("attributenondeletable", "").trim();
+        if (!nonDeletableStr.isBlank()) {
+            type.setAttributeNonDeletable(Set.of("true", "yes", "1").contains(nonDeletableStr.toLowerCase()));
+        }
+        final String workflowName = rowData.getOrDefault("workflow", "").trim();
+        if (!workflowName.isBlank()) {
+            final var wf = workflowEntityService.findByNameAndCompany(workflowName, project.getCompany()).orElse(null);
+            if (wf == null) {
+                return CImportRowResult.error(rowNumber, "Workflow '" + workflowName + "' not found", rowData);
+            }
+            type.setWorkflow(wf);
         }
         if (!options.isDryRun()) {
             activityTypeService.save(type);

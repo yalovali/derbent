@@ -207,7 +207,7 @@ public final class CViewImport extends CAbstractPage {
         return new StreamResource("system_init.xlsx", () -> {
             try {
                 // WHY: serve the committed template so what users download matches what "DB Excel" imports.
-                return excelTemplateService.openSystemInitTemplate();
+                return excelTemplateService.openSystemInitTemplate(false);
             } catch (final Exception e) {
                 LOGGER.error("Failed to open system init template reason={}", e.getMessage());
                 return new java.io.ByteArrayInputStream(new byte[0]);
