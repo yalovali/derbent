@@ -14,8 +14,12 @@ class CSystemInitExcelFileTest {
         final File dir = new File("src/test/resources/import");
         dir.mkdirs();
         try (final FileOutputStream out = new FileOutputStream(new File(dir, "system_init.xlsx"))) {
-            CSystemInitExcelGenerator.writeSystemInitWorkbook(out);
+            CSystemInitExcelGenerator.writeSystemInitWorkbook(out, false);
+        }
+        try (final FileOutputStream out = new FileOutputStream(new File(dir, "system_init_min.xlsx"))) {
+            CSystemInitExcelGenerator.writeSystemInitWorkbook(out, true);
         }
         System.out.println("Generated: " + dir.getAbsolutePath() + "/system_init.xlsx");
+        System.out.println("Generated: " + dir.getAbsolutePath() + "/system_init_min.xlsx");
     }
 }

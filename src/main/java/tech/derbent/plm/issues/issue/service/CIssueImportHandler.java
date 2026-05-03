@@ -98,7 +98,10 @@ public class CIssueImportHandler implements IEntityImportHandler<CIssue> {
         if (name.isBlank()) {
             return CImportRowResult.error(rowNumber, "Name is required", rowData);
         }
-        final CIssue issue = new CIssue(name, project);
+        // WHY: system_init.xlsx is imported automatically after DB reset and can also be imported manually;
+        // upsert-by-name keeps the workbook re-runnable without unique constraint failures.
+        final CIssue issue = issueService.findByNameAndProject(name, project)
+                .orElseGet(() -> new CIssue(name, project));
         final String statusName = rowData.getOrDefault("status", "").trim();
         if (!statusName.isBlank()) {
             final var statusOpt = statusService.findByNameAndCompany(statusName, project.getCompany());

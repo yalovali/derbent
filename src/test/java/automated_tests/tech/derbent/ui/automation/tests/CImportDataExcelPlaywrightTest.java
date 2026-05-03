@@ -106,10 +106,11 @@ public class CImportDataExcelPlaywrightTest extends CBaseUITest {
 				page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Import").setExact(true));
 		waitForButtonEnabled(importButton);
 		importButton.click();
-		page.waitForSelector("text=Import Summary", new Page.WaitForSelectorOptions().setTimeout(60000));
-		page.waitForSelector("text=Errors: 0", new Page.WaitForSelectorOptions().setTimeout(60000));
+		// WHY: system_init.xlsx keeps growing (many sheets + relations); give the UI enough time to finish the server-side import.
+		page.waitForSelector("text=Import Summary", new Page.WaitForSelectorOptions().setTimeout(180000));
+		page.waitForSelector("text=Errors: 0", new Page.WaitForSelectorOptions().setTimeout(180000));
 		// WHY: sheet accordion text can be shadow-dom dependent; validate via summary counters instead.
-		page.waitForSelector("text=Sheets", new Page.WaitForSelectorOptions().setTimeout(60000));
+		page.waitForSelector("text=Sheets", new Page.WaitForSelectorOptions().setTimeout(180000));
 		assertTrue(page.locator("text=Errors: 0").count() > 0, "Expected zero errors");
 		assertTrue(page.locator("text=Imported").count() > 0, "Expected imported rows");
 		assertTrue(page.locator("text=Sheets").count() > 0, "Expected sheet summary counter");

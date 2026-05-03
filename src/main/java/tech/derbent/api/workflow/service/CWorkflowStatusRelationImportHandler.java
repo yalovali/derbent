@@ -127,7 +127,8 @@ public class CWorkflowStatusRelationImportHandler implements IEntityImportHandle
 	private List<CUserProjectRole> resolveRoles(final String rolesCsv, final CProject<?> project) {
 		final String trimmed = rolesCsv == null ? "" : rolesCsv.trim();
 		if (trimmed.isBlank()) {
-			return List.of();
+			// WHY: Hibernate-managed collections must be mutable; immutable List.of() breaks merge/replace semantics.
+			return new java.util.ArrayList<>();
 		}
 		final List<String> names = Arrays.stream(trimmed.split(","))
 				.map(String::trim)

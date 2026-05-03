@@ -118,7 +118,10 @@ public class CActivityImportHandler implements IEntityImportHandler<CActivity> {
         if (name.isBlank()) {
             return CImportRowResult.error(rowNumber, "Name is required", rowData);
         }
-        final CActivity activity = new CActivity(name, project);
+        // WHY: system_init.xlsx is imported automatically after DB reset and can also be imported manually;
+        // upsert-by-name keeps the workbook re-runnable without unique constraint failures.
+        final CActivity activity = activityService.findByNameAndProject(name, project)
+                .orElseGet(() -> new CActivity(name, project));
         // Resolve optional status by name
         final String statusName = rowData.getOrDefault("status", "").trim();
         if (!statusName.isBlank()) {

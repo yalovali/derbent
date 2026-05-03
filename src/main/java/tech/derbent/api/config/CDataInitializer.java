@@ -528,8 +528,9 @@ public class CDataInitializer {
 					CCurrencyInitializerService.initializeSample(project, minimal);
 					// types
 					if (project.getId().equals(sampleProject.getId())) {
-						CMeetingTypeInitializerService.initializeSample(sampleProject, minimal);
-						CDecisionTypeInitializerService.initializeSample(sampleProject, minimal);
+						// WHY: meeting/decision type samples are now authored in system_init.xlsx (bootstrapped after DB reset).
+						// CMeetingTypeInitializerService.initializeSample(sampleProject, minimal);
+						// CDecisionTypeInitializerService.initializeSample(sampleProject, minimal);
 						COrderTypeInitializerService.initializeSample(sampleProject, minimal);
 						// WHY: activity creation/initialization depends on having at least one Activity Type available.
 						// We keep this initializer-backed reference data until Excel bootstrap is moved earlier in the reset pipeline.
@@ -566,8 +567,9 @@ public class CDataInitializer {
 					CStorageItemInitializerService.initializeSample(project, minimal);
 					initializeSampleUserProjectSettings(project, minimal);
 					// entities
-					CDecisionInitializerService.initializeSample(project, minimal);
-					CMeetingInitializerService.initializeSample(project, minimal);
+					// WHY: meeting/decision samples are now authored in system_init.xlsx and imported after DB reset for each project.
+					// CDecisionInitializerService.initializeSample(project, minimal);
+					// CMeetingInitializerService.initializeSample(project, minimal);
 					// Agile hierarchy - MUST be in order: Epic (root) → Feature → UserStory → Activity (leaf)
 					final CEpic[] epics = CEpicInitializerService.initializeSample(project, minimal);
 					final CFeature[] features = CFeatureInitializerService.initializeSample(project, minimal, epics[0], epics[1]);
