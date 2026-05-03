@@ -6,14 +6,14 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.imports.domain.CImportOptions;
 import tech.derbent.api.imports.domain.CImportRowResult;
-import tech.derbent.api.imports.service.IEntityImportHandler;
+import tech.derbent.api.imports.service.CEntityOfCompanyImportHandler;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 
 /** Imports CWorkflowEntity rows from Excel (company-scoped reference data). */
 @Service
-public class CWorkflowEntityImportHandler implements IEntityImportHandler<CWorkflowEntity> {
+public class CWorkflowEntityImportHandler extends CEntityOfCompanyImportHandler<CWorkflowEntity> {
 
 	private final CWorkflowEntityService workflowEntityService;
 
@@ -47,7 +47,7 @@ public class CWorkflowEntityImportHandler implements IEntityImportHandler<CWorkf
 	}
 
 	@Override
-	public Map<String, String> getColumnAliases() {
+	protected Map<String, String> getAdditionalColumnAliases() {
 		return Map.of(
 				"Name", "name",
 				"Color", "color",

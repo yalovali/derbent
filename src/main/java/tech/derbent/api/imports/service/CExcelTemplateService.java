@@ -15,14 +15,20 @@ import tech.derbent.api.utils.Check;
 public class CExcelTemplateService {
 
     public static final String SYSTEM_INIT_TEMPLATE_RESOURCE_PATH = "excel/system_init.xlsx";
+    public static final String SYSTEM_INIT_MINIMAL_TEMPLATE_RESOURCE_PATH = "excel/system_init_min.xlsx";
 
-    public InputStream openSystemInitTemplate() {
-        final ClassPathResource resource = new ClassPathResource(SYSTEM_INIT_TEMPLATE_RESOURCE_PATH);
-        Check.isTrue(resource.exists(), "Missing classpath resource: " + SYSTEM_INIT_TEMPLATE_RESOURCE_PATH);
+    public InputStream openSystemInitTemplate(final boolean minimal) {
+        final String resourcePath = minimal ? SYSTEM_INIT_MINIMAL_TEMPLATE_RESOURCE_PATH : SYSTEM_INIT_TEMPLATE_RESOURCE_PATH;
+        final ClassPathResource resource = new ClassPathResource(resourcePath);
+        Check.isTrue(resource.exists(), "Missing classpath resource: " + resourcePath);
         try {
             return resource.getInputStream();
         } catch (final Exception e) {
-            throw new IllegalStateException("Failed to open " + SYSTEM_INIT_TEMPLATE_RESOURCE_PATH, e);
+            throw new IllegalStateException("Failed to open " + resourcePath, e);
         }
+    }
+
+    public InputStream openSystemInitTemplate() {
+        return openSystemInitTemplate(false);
     }
 }

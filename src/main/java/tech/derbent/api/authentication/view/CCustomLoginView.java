@@ -82,7 +82,8 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	private final CSystemInitExcelBootstrapService systemInitExcelBootstrapService;
 	private final Button loginButton = new CButton("Login", CColorUtils.createStyledIcon("vaadin:sign-in", CColorUtils.CRUD_SAVE_COLOR));
 	private final PasswordField passwordField = new PasswordField();
-	private final Button resetDbButton = new CButton("DB Reset", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
+	private final Button resetDbButton = new CButton("DB Full", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
+	private final Button resetDbMinimalButton = new CButton("DB Min", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
 	private final CComboBox<String> schemaSelector = new CComboBox<>();
 	private final ISessionService sessionService;
 	private final TextField usernameField = new TextField();
@@ -137,11 +138,23 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?",
 					"Evet, sıfırla", () -> {
 						try {
-							runDatabaseReset("Database reset + Excel init completed.", "Sample data, defaults, and system_init.xlsx are loaded.");
+							runDatabaseReset(false, "Sample data + Excel loaded.", "Sample data, defaults, and system_init.xlsx are loaded.");
 						} catch (final Exception e) {
 							CNotificationService.showException("Error resetting database", e);
 						}
 					});
+		} catch (final Exception e) {
+			CNotificationService.showException("Error showing confirmation dialog", e);
+		}
+	}
+
+	/** Handle reset database minimal button click. */
+	private void on_buttonResetDbMinimal_clicked() {
+		try {
+			LOGGER.info("🔄 Showing DB Min reset confirmation dialog...");
+			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve minimum örnek veriler yeniden yüklenecek. Devam edilsin mi?",
+					"Evet, sıfırla", () -> runDatabaseReset(true, "Minimum sample + Excel loaded.",
+							"Minimum sample data, defaults, and system_init_min.xlsx are loaded."));
 		} catch (final Exception e) {
 			CNotificationService.showException("Error showing confirmation dialog", e);
 		}
@@ -212,7 +225,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		}
 	}
 
-	private void runDatabaseReset(final String successMessage, final String infoMessage) {
+	private void runDatabaseReset(final boolean minimal, final String successMessage, final String infoMessage) {
 		final UI ui = getUI().orElse(null);
 		Check.notNull(ui, "UI must be available to run database reset");
 		final VaadinSession session = ui.getSession();
@@ -223,7 +236,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		CompletableFuture.runAsync(() -> {
 			Exception failure = null;
 			try {
-				runDatabaseResetInSession(session, ui, schemaSelection);
+				runDatabaseResetInSession(session, ui, minimal, schemaSelection);
 				LOGGER.info("🗄️ DB reset completed successfully");
 			} catch (final Exception ex) {
 				failure = ex;
@@ -252,7 +265,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		});
 	}
 
-	private void runDatabaseResetInSession(final VaadinSession session, final UI ui, final String schemaSelection)
+	private void runDatabaseResetInSession(final VaadinSession session, final UI ui, final boolean minimal, final String schemaSelection)
 			throws Exception {
 		session.lock();
 		try {
@@ -275,7 +288,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 				Check.isTrue(!initializers.isEmpty(), "BAB initializer bean is not available. Activate the bab profile.");
 				final CBabDataInitializer init = initializers.values().iterator().next();
 				LOGGER.info("🔧 Using BAB Gateway data initializer");
-				init.reloadForced(false);
+				init.reloadForced(minimal);
 				// CRITICAL: Handle Calimero service after database reset
 				// Sample data initialization sets enableCalimeroService=true
 				// We must handle the service startup according to new post-login flow
@@ -297,9 +310,9 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 			} else {
 				final CDataInitializer init = new CDataInitializer(sessionService);
 				LOGGER.info("🔧 Using Derbent data initializer");
-				init.reloadForced(false);
+				init.reloadForced(minimal);
 				// WHY: keep code-initializers for core safety, but layer Excel-based samples on top to reduce initializer complexity over time.
-				final var summary = systemInitExcelBootstrapService.bootstrapAllProjects();
+				final var summary = systemInitExcelBootstrapService.bootstrapAllProjects(minimal);
 				LOGGER.info("✅ Excel bootstrap after DB reset: {}", summary.toUiSummary());
 			}
 		} finally {
@@ -357,6 +370,8 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		// Database reset button setup
 		resetDbButton.addClickListener(event -> on_buttonResetDb_clicked());
 		resetDbButton.setId("cbutton-db-full");
+		resetDbMinimalButton.addClickListener(event -> on_buttonResetDbMinimal_clicked());
+		resetDbMinimalButton.setId("cbutton-db-min");
 		// Chart test button setup
 		// chartTestButton.addClickListener(e -> { getUI().ifPresent(ui -> ui.navigate("chart"));});
 		// chartTestButton.setMinWidth("120px");
@@ -419,7 +434,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		if (showSchemaSelector) {
 			buttonsLayout.add(schemaSelector);
 		}
-		buttonsLayout.add(new CDiv(), resetDbButton/* , chartTestButton */);
+		buttonsLayout.add(new CDiv(), resetDbMinimalButton, resetDbButton/* , chartTestButton */);
 		final HorizontalLayout loginButtonLayout = new CHorizontalLayout();
 		loginButtonLayout.setAlignItems(Alignment.END);
 		loginButtonLayout.add(passwordHint, new CDiv(), loginButton);

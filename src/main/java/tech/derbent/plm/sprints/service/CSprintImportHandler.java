@@ -1,38 +1,36 @@
 package tech.derbent.plm.sprints.service;
 
+import java.time.LocalDate;
 import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
-import tech.derbent.api.imports.domain.CImportOptions;
-import tech.derbent.api.imports.domain.CImportRowResult;
-import tech.derbent.api.imports.service.CAbstractExcelImportHandler;
 import tech.derbent.api.imports.service.CExcelRow;
-import tech.derbent.api.imports.service.CImportParsers;
+import tech.derbent.api.imports.service.CProjectItemImportHandler;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.users.service.IUserRepository;
 import tech.derbent.plm.sprints.domain.CSprint;
 import tech.derbent.plm.sprints.domain.CSprintType;
 
 /** Imports {@link CSprint} rows from Excel into the active project. */
 @Service
 @Profile({"derbent", "default"})
-public class CSprintImportHandler extends CAbstractExcelImportHandler<CSprint> {
+public class CSprintImportHandler extends CProjectItemImportHandler<CSprint, CSprintType> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintImportHandler.class);
 
 	private final CSprintService sprintService;
 	private final CSprintTypeService typeService;
-	private final CProjectItemStatusService statusService;
 
 	public CSprintImportHandler(final CSprintService sprintService, final CSprintTypeService typeService,
-			final CProjectItemStatusService statusService) {
+			final CProjectItemStatusService statusService, final IUserRepository userRepository) {
+		super(statusService, userRepository);
 		this.sprintService = sprintService;
 		this.typeService = typeService;
-		this.statusService = statusService;
 	}
 
 	@Override
@@ -44,68 +42,45 @@ public class CSprintImportHandler extends CAbstractExcelImportHandler<CSprint> {
 	}
 
 	@Override
-	public Set<String> getRequiredColumns() {
-		return Set.of("name");
+	protected Class<CSprintType> getTypeClass() { return CSprintType.class; }
+
+	@Override
+	protected Optional<CSprint> findByNameAndProject(final String name, final CProject<?> project) {
+		return sprintService.findByNameAndProject(name, project);
 	}
 
 	@Override
-	public CImportRowResult importRow(final Map<String, String> rowData, final CProject<?> project, final int rowNumber,
-			final CImportOptions options) {
-		final CExcelRow row = row(rowData);
-		final String name = row.string("name");
-		if (name.isBlank()) {
-			return CImportRowResult.error(rowNumber, "Name is required", rowData);
-		}
-		if (project.getCompany() == null) {
-			return CImportRowResult.error(rowNumber, "Project company is required", rowData);
-		}
+	protected CSprint createNew(final String name, final CProject<?> project) {
+		return new CSprint(name, project);
+	}
 
-		// WHY: system_init.xlsx is imported automatically after DB reset and can also be imported manually.
-		final CSprint sprint = sprintService.findByNameAndProject(name, project)
-				.orElseGet(() -> new CSprint(name, project));
+	@Override
+	protected void save(final CSprint entity) {
+		sprintService.save(entity);
+	}
 
-		row.optionalString("description").ifPresent(sprint::setDescription);
-		row.optionalString("sprintgoal").ifPresent(sprint::setSprintGoal);
-		row.optionalString("definitionofdone").ifPresent(sprint::setDefinitionOfDone);
-		row.optionalString("retrospectivenotes").ifPresent(sprint::setRetrospectiveNotes);
+	@Override
+	protected Optional<CSprintType> findTypeByNameAndCompany(final String name, final CCompany company) {
+		return typeService.findByNameAndCompany(name, company);
+	}
 
-		row.optionalString("color").ifPresent(sprint::setColor);
-		row.optionalInt("velocity").ifPresent(sprint::setVelocity);
-		row.optionalLocalDate("startdate").ifPresent(sprint::setStartDate);
+	@Override
+	protected void applyExtraFields(final CSprint entity, final CExcelRow row, final CProject<?> project, final int rowNumber,
+			final Map<String, String> rowData) {
+		row.optionalString("sprintgoal").ifPresent(entity::setSprintGoal);
+		row.optionalString("definitionofdone").ifPresent(entity::setDefinitionOfDone);
+		row.optionalString("retrospectivenotes").ifPresent(entity::setRetrospectiveNotes);
+		row.optionalString("color").ifPresent(entity::setColor);
+		row.optionalInt("velocity").ifPresent(entity::setVelocity);
+		row.optionalLocalDate("startdate").ifPresent(entity::setStartDate);
 
-		final String endDateRaw = row.string("enddate");
-		if (!endDateRaw.isBlank()) {
-			final var endDate = CImportParsers.tryParseLocalDate(endDateRaw).orElse(null);
-			if (endDate == null) {
-				return CImportRowResult.error(rowNumber, "Invalid end date: " + endDateRaw, rowData);
+		final String endRaw = row.string("enddate");
+		if (!endRaw.isBlank()) {
+			final LocalDate end = row.optionalLocalDate("enddate").orElse(null);
+			if (end == null) {
+				throw new IllegalArgumentException("Invalid end date: " + endRaw);
 			}
-			sprint.setEndDate(endDate);
+			entity.setEndDate(end);
 		}
-
-		final String statusName = row.string("status");
-		if (!statusName.isBlank()) {
-			final CProjectItemStatus status = statusService.findByNameAndCompany(statusName, project.getCompany()).orElse(null);
-			if (status == null) {
-				return CImportRowResult.error(rowNumber,
-						"Status '" + statusName + "' not found. Create it before importing.", rowData);
-			}
-			sprint.setStatus(status);
-		}
-
-		final String typeName = row.string("entitytype");
-		if (!typeName.isBlank()) {
-			final CSprintType type = typeService.findByNameAndCompany(typeName, project.getCompany()).orElse(null);
-			if (type == null) {
-				return CImportRowResult.error(rowNumber,
-						"Sprint Type '" + typeName + "' not found. Create it before importing.", rowData);
-			}
-			sprint.setEntityType(type);
-		}
-
-		if (!options.isDryRun()) {
-			sprintService.save(sprint);
-		}
-		LOGGER.debug("Imported sprint '{}' (row {})", name, rowNumber);
-		return CImportRowResult.success(rowNumber, name);
 	}
 }

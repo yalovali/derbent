@@ -2,26 +2,35 @@ package tech.derbent.api.page.service;
 
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.springframework.stereotype.Service;
-import tech.derbent.api.imports.domain.CImportOptions;
-import tech.derbent.api.imports.domain.CImportRowResult;
-import tech.derbent.api.imports.service.IEntityImportHandler;
+import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
+import tech.derbent.api.imports.service.CExcelRow;
+import tech.derbent.api.imports.service.CProjectItemImportHandler;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CGridEntityService;
+import tech.derbent.api.users.service.IUserRepository;
 import tech.derbent.api.page.domain.CPageEntity;
+import tech.derbent.api.page.domain.CPageEntityType;
 
 /** Imports CPageEntity rows from Excel (project-scoped navigation/view configuration). */
 @Service
-public class CPageEntityImportHandler implements IEntityImportHandler<CPageEntity> {
+public class CPageEntityImportHandler extends CProjectItemImportHandler<CPageEntity, CPageEntityType> {
 
     private final CPageEntityService pageEntityService;
+    private final CPageEntityTypeService typeService;
     private final CGridEntityService gridEntityService;
 
-    public CPageEntityImportHandler(final CPageEntityService pageEntityService, final CGridEntityService gridEntityService) {
+    public CPageEntityImportHandler(final CPageEntityService pageEntityService, final CPageEntityTypeService typeService,
+            final CGridEntityService gridEntityService, final CProjectItemStatusService statusService,
+            final IUserRepository userRepository) {
+        super(statusService, userRepository);
         this.pageEntityService = pageEntityService;
+        this.typeService = typeService;
         this.gridEntityService = gridEntityService;
     }
 
@@ -49,7 +58,7 @@ public class CPageEntityImportHandler implements IEntityImportHandler<CPageEntit
     }
 
     @Override
-    public Map<String, String> getColumnAliases() {
+    protected Map<String, String> getAdditionalColumnAliases() {
         return Map.of(
                 "Name", "name",
                 "Menu Title", "menutitle",
@@ -64,63 +73,57 @@ public class CPageEntityImportHandler implements IEntityImportHandler<CPageEntit
 
     @Override
     public Set<String> getRequiredColumns() {
-        // pageService is required by CPageEntityService validation
         return Set.of("name", "menutitle", "pagetitle", "pageservice");
     }
 
     @Override
-    public CImportRowResult importRow(final Map<String, String> rowData, final CProject<?> project, final int rowNumber,
-            final CImportOptions options) {
-        final String name = rowData.getOrDefault("name", "").trim();
-        if (name.isBlank()) {
-            return CImportRowResult.error(rowNumber, "Name is required", rowData);
-        }
+    protected Class<CPageEntityType> getTypeClass() { return CPageEntityType.class; }
 
-        // WHY: view configuration should be re-runnable; we upsert by name to avoid duplicate bootstrap runs failing.
-        final CPageEntity page = pageEntityService.findByNameAndProject(name, project).orElseGet(() -> new CPageEntity(name, project));
+    @Override
+    protected Optional<CPageEntity> findByNameAndProject(final String name, final CProject<?> project) {
+        return pageEntityService.findByNameAndProject(name, project);
+    }
 
-        final String menuTitle = rowData.getOrDefault("menutitle", "").trim();
-        page.setMenuTitle(menuTitle);
+    @Override
+    protected CPageEntity createNew(final String name, final CProject<?> project) {
+        return new CPageEntity(name, project);
+    }
 
-        final String menuOrder = rowData.getOrDefault("menuorder", "").trim();
+    @Override
+    protected void save(final CPageEntity entity) {
+        pageEntityService.save(entity);
+    }
+
+    @Override
+    protected Optional<CPageEntityType> findTypeByNameAndCompany(final String name, final CCompany company) {
+        return typeService.findByNameAndCompany(name, company);
+    }
+
+    @Override
+    protected void applyExtraFields(final CPageEntity entity, final CExcelRow row, final CProject<?> project, final int rowNumber,
+            final Map<String, String> rowData) {
+        entity.setMenuTitle(row.string("menutitle"));
+
+        final String menuOrder = row.string("menuorder");
         if (!menuOrder.isBlank()) {
-            page.setMenuOrder(menuOrder);
+            entity.setMenuOrder(menuOrder);
         }
 
-        final String pageTitle = rowData.getOrDefault("pagetitle", "").trim();
-        page.setPageTitle(pageTitle);
+        entity.setPageTitle(row.string("pagetitle"));
+        entity.setPageService(row.string("pageservice"));
 
-        final String pageService = rowData.getOrDefault("pageservice", "").trim();
-        page.setPageService(pageService);
+        row.optionalString("icon").ifPresent(entity::setIconString);
+        row.optionalBoolean("requiresauthentication").ifPresent(entity::setRequiresAuthentication);
 
-        final String icon = rowData.getOrDefault("icon", "").trim();
-        if (!icon.isBlank()) {
-            page.setIconString(icon);
-        }
-
-        final String requiresAuth = rowData.getOrDefault("requiresauthentication", "").trim();
-        if (!requiresAuth.isBlank()) {
-            // WHY: accept common Excel boolean variants.
-            page.setRequiresAuthentication(Set.of("true", "yes", "1").contains(requiresAuth.toLowerCase()));
-        }
-
-        final String gridEntityName = rowData.getOrDefault("gridentity", "").trim();
+        final String gridEntityName = row.string("gridentity");
         if (!gridEntityName.isBlank()) {
             final CGridEntity grid = gridEntityService.findByNameAndProject(gridEntityName, project).orElse(null);
             if (grid == null) {
-                return CImportRowResult.error(rowNumber, "Grid Entity '" + gridEntityName + "' not found in project", rowData);
+                throw new IllegalArgumentException("Grid Entity '" + gridEntityName + "' not found");
             }
-            page.setGridEntity(grid);
+            entity.setGridEntity(grid);
         }
 
-        final String content = rowData.getOrDefault("content", "").trim();
-        if (!content.isBlank()) {
-            page.setContent(content);
-        }
-
-        if (!options.isDryRun()) {
-            pageEntityService.save(page);
-        }
-        return CImportRowResult.success(rowNumber, name);
+        row.optionalString("content").ifPresent(entity::setContent);
     }
 }

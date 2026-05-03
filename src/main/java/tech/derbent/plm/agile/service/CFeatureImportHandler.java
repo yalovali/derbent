@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
-import tech.derbent.api.imports.service.CAbstractAgileItemImportHandler;
+import tech.derbent.api.imports.service.CAgileEntityImportHandler;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.users.service.IUserRepository;
 import tech.derbent.plm.agile.domain.CFeature;
@@ -14,7 +14,7 @@ import tech.derbent.plm.agile.domain.CFeatureType;
 /** Imports {@link CFeature} rows from Excel into the active project. */
 @Service
 @Profile({"derbent", "bab", "default"})
-public class CFeatureImportHandler extends CAbstractAgileItemImportHandler<CFeature, CFeatureType> {
+public class CFeatureImportHandler extends CAgileEntityImportHandler<CFeature, CFeatureType> {
 
     private final CFeatureService featureService;
     private final CFeatureTypeService typeService;

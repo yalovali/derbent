@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
-import tech.derbent.api.imports.service.CAbstractProjectItemImportHandler;
+import tech.derbent.api.imports.service.CProjectItemImportHandler;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.users.service.IUserRepository;
 import tech.derbent.plm.milestones.milestone.domain.CMilestone;
@@ -16,7 +16,7 @@ import tech.derbent.plm.milestones.milestonetype.service.CMilestoneTypeService;
 /** Imports {@link CMilestone} rows from Excel into the active project. */
 @Service
 @Profile({"derbent", "bab", "default"})
-public class CMilestoneImportHandler extends CAbstractProjectItemImportHandler<CMilestone, CMilestoneType> {
+public class CMilestoneImportHandler extends CProjectItemImportHandler<CMilestone, CMilestoneType> {
 
     private final CMilestoneService milestoneService;
     private final CMilestoneTypeService typeService;

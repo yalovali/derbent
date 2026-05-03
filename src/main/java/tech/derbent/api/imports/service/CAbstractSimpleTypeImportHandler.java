@@ -15,7 +15,7 @@ import tech.derbent.api.projects.domain.CProject;
  * WHY: priorities/levels/etc have the same "upsert by name" + scalar field parsing logic.
  */
 public abstract class CAbstractSimpleTypeImportHandler<T extends CTypeEntity<T>>
-        extends CAbstractExcelImportHandler<T> {
+        extends CEntityOfCompanyImportHandler<T> {
 
     protected abstract Optional<T> findByNameAndCompany(String name, CCompany company);
 

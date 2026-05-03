@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
-import tech.derbent.api.imports.service.CAbstractProjectItemImportHandler;
+import tech.derbent.api.imports.service.CProjectItemImportHandler;
 import tech.derbent.api.imports.service.CExcelRow;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.users.service.IUserRepository;
@@ -18,7 +18,7 @@ import tech.derbent.plm.requirements.requirementtype.service.CRequirementTypeSer
 /** Imports {@link CRequirement} rows from Excel into the active project. */
 @Service
 @Profile({"derbent", "bab", "default"})
-public class CRequirementImportHandler extends CAbstractProjectItemImportHandler<CRequirement, CRequirementType> {
+public class CRequirementImportHandler extends CProjectItemImportHandler<CRequirement, CRequirementType> {
 
     private final CRequirementService requirementService;
     private final CRequirementTypeService typeService;

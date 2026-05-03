@@ -2,12 +2,13 @@ package tech.derbent.plm.activities.service;
 
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-import tech.derbent.api.imports.domain.CImportOptions;
-import tech.derbent.api.imports.domain.CImportRowResult;
-import tech.derbent.api.imports.service.IEntityImportHandler;
+import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.imports.service.CAbstractSimpleTypeImportHandler;
+import tech.derbent.api.imports.service.CExcelRow;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.plm.activities.domain.CActivityPriority;
@@ -15,7 +16,7 @@ import tech.derbent.plm.activities.domain.CActivityPriority;
 /** Imports CActivityPriority rows from Excel (company-scoped reference data). */
 @Service
 @Profile({"derbent", "default"})
-public class CActivityPriorityImportHandler implements IEntityImportHandler<CActivityPriority> {
+public class CActivityPriorityImportHandler extends CAbstractSimpleTypeImportHandler<CActivityPriority> {
 
 	private final CActivityPriorityService priorityService;
 
@@ -49,7 +50,7 @@ public class CActivityPriorityImportHandler implements IEntityImportHandler<CAct
 	}
 
 	@Override
-	public Map<String, String> getColumnAliases() {
+	protected Map<String, String> getAdditionalColumnAliases() {
 		return Map.of(
 				"Name", "name",
 				"Color", "color",
@@ -59,52 +60,24 @@ public class CActivityPriorityImportHandler implements IEntityImportHandler<CAct
 	}
 
 	@Override
-	public Set<String> getRequiredColumns() {
-		return Set.of("name");
+	protected Optional<CActivityPriority> findByNameAndCompany(final String name, final CCompany company) {
+		return priorityService.findByNameAndCompany(name, company);
 	}
 
 	@Override
-	public CImportRowResult importRow(final Map<String, String> rowData, final CProject<?> project, final int rowNumber,
-			final CImportOptions options) {
-		final String name = rowData.getOrDefault("name", "").trim();
-		if (name.isBlank()) {
-			return CImportRowResult.error(rowNumber, "Name is required", rowData);
-		}
-		if (project.getCompany() == null) {
-			return CImportRowResult.error(rowNumber, "Project company is required to create activity priorities", rowData);
-		}
-		// WHY: system init Excel is intended to be re-runnable; upsert-by-name avoids unique constraint violations.
-		final CActivityPriority priority = priorityService.findByNameAndCompany(name, project.getCompany())
-				.orElseGet(() -> new CActivityPriority(name, project.getCompany()));
+	protected CActivityPriority createNew(final String name, final CCompany company) {
+		return new CActivityPriority(name, company);
+	}
 
-		final String color = rowData.getOrDefault("color", "").trim();
-		if (!color.isBlank()) {
-			priority.setColor(color);
-		}
-		final String sortOrderStr = rowData.getOrDefault("sortorder", "").trim();
-		if (!sortOrderStr.isBlank()) {
-			try {
-				priority.setSortOrder(Integer.valueOf(sortOrderStr));
-			} catch (final Exception e) {
-				return CImportRowResult.error(rowNumber, "Invalid sort order: " + sortOrderStr, rowData);
-			}
-		}
-		final String priorityLevelStr = rowData.getOrDefault("prioritylevel", "").trim();
-		if (!priorityLevelStr.isBlank()) {
-			try {
-				priority.setPriorityLevel(Integer.valueOf(priorityLevelStr));
-			} catch (final Exception e) {
-				return CImportRowResult.error(rowNumber, "Invalid priority level: " + priorityLevelStr, rowData);
-			}
-		}
-		final String isDefaultStr = rowData.getOrDefault("isdefault", "").trim();
-		if (!isDefaultStr.isBlank()) {
-			priority.setIsDefault(Set.of("true", "yes", "1").contains(isDefaultStr.toLowerCase()));
-		}
+	@Override
+	protected void save(final CActivityPriority entity) {
+		priorityService.save(entity);
+	}
 
-		if (!options.isDryRun()) {
-			priorityService.save(priority);
-		}
-		return CImportRowResult.success(rowNumber, name);
+	@Override
+	protected void applyExtraFields(final CActivityPriority entity, final CExcelRow row,
+			final CProject<?> project, final int rowNumber) {
+		row.optionalInt("prioritylevel").ifPresent(entity::setPriorityLevel);
+		row.optionalBoolean("isdefault").ifPresent(entity::setIsDefault);
 	}
 }

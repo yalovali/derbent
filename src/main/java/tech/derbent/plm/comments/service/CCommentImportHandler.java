@@ -8,7 +8,8 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.imports.domain.CImportOptions;
 import tech.derbent.api.imports.domain.CImportRowResult;
 import tech.derbent.api.imports.service.CProjectItemReferenceResolver;
-import tech.derbent.api.imports.service.IEntityImportHandler;
+import tech.derbent.api.imports.service.CEntityOfCompanyImportHandler;
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.IUserRepository;
@@ -23,7 +24,7 @@ import tech.derbent.plm.comments.domain.IHasComments;
  */
 @Service
 @Profile({"derbent", "default"})
-public class CCommentImportHandler implements IEntityImportHandler<CComment> {
+public class CCommentImportHandler extends CEntityOfCompanyImportHandler<CComment> {
 
 	private final CProjectItemReferenceResolver itemResolver;
 	private final IUserRepository userRepository;
@@ -47,7 +48,7 @@ public class CCommentImportHandler implements IEntityImportHandler<CComment> {
 	}
 
 	@Override
-	public Map<String, String> getColumnAliases() {
+	protected Map<String, String> getAdditionalColumnAliases() {
 		return Map.ofEntries(
 				Map.entry("Owner Type", "ownertype"),
 				Map.entry("Owner Name", "ownername"),
@@ -103,7 +104,7 @@ public class CCommentImportHandler implements IEntityImportHandler<CComment> {
 		}
 		owner.getComments().add(comment);
 		if (!options.isDryRun()) {
-			itemResolver.save((tech.derbent.api.entityOfProject.domain.CProjectItem<?, ?>) ownerOpt.get());
+			itemResolver.save((CProjectItem<?, ?>) ownerOpt.get());
 		}
 		return CImportRowResult.success(rowNumber, ownerName);
 	}

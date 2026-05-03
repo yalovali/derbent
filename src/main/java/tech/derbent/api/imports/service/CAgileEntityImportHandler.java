@@ -14,10 +14,10 @@ import tech.derbent.plm.agile.domain.CAgileEntity;
  * via {@link CAgileEntity}. Centralising the mapping avoids drift between handlers and ensures imports stay consistent
  * as the agile model evolves.</p>
  */
-public abstract class CAbstractAgileItemImportHandler<T extends CAgileEntity<T, TType>, TType extends CTypeEntity<TType>>
-        extends CAbstractProjectItemImportHandler<T, TType> {
+public abstract class CAgileEntityImportHandler<T extends CAgileEntity<T, TType>, TType extends CTypeEntity<TType>>
+        extends CProjectItemImportHandler<T, TType> {
 
-    protected CAbstractAgileItemImportHandler(final CProjectItemStatusService statusService,
+    protected CAgileEntityImportHandler(final CProjectItemStatusService statusService,
             final IUserRepository userRepository) {
         super(statusService, userRepository);
     }

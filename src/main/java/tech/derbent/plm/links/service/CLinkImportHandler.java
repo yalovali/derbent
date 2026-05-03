@@ -8,7 +8,8 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.imports.domain.CImportOptions;
 import tech.derbent.api.imports.domain.CImportRowResult;
 import tech.derbent.api.imports.service.CProjectItemReferenceResolver;
-import tech.derbent.api.imports.service.IEntityImportHandler;
+import tech.derbent.api.imports.service.CEntityOfCompanyImportHandler;
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.plm.links.domain.CLink;
 import tech.derbent.plm.links.domain.IHasLinks;
@@ -20,7 +21,7 @@ import tech.derbent.plm.links.domain.IHasLinks;
  */
 @Service
 @Profile({"derbent", "default"})
-public class CLinkImportHandler implements IEntityImportHandler<CLink> {
+public class CLinkImportHandler extends CEntityOfCompanyImportHandler<CLink> {
 
 	private final CProjectItemReferenceResolver itemResolver;
 
@@ -41,7 +42,7 @@ public class CLinkImportHandler implements IEntityImportHandler<CLink> {
 	}
 
 	@Override
-	public Map<String, String> getColumnAliases() {
+	protected Map<String, String> getAdditionalColumnAliases() {
 		return Map.ofEntries(
 				Map.entry("Source Type", "sourcetype"),
 				Map.entry("Source Name", "sourcename"),
@@ -109,12 +110,12 @@ public class CLinkImportHandler implements IEntityImportHandler<CLink> {
 			}
 			targetOwner.getLinks().add(reverse);
 			if (!options.isDryRun()) {
-				itemResolver.save((tech.derbent.api.entityOfProject.domain.CProjectItem<?, ?>) targetOpt.get());
+				itemResolver.save((CProjectItem<?, ?>) targetOpt.get());
 			}
 		}
 
 		if (!options.isDryRun()) {
-			itemResolver.save((tech.derbent.api.entityOfProject.domain.CProjectItem<?, ?>) sourceOpt.get());
+			itemResolver.save((CProjectItem<?, ?>) sourceOpt.get());
 		}
 		return CImportRowResult.success(rowNumber, sourceName);
 	}

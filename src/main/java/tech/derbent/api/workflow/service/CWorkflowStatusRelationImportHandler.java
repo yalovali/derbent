@@ -10,7 +10,7 @@ import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.imports.domain.CImportOptions;
 import tech.derbent.api.imports.domain.CImportRowResult;
-import tech.derbent.api.imports.service.IEntityImportHandler;
+import tech.derbent.api.imports.service.CEntityImportHandler;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.roles.domain.CUserProjectRole;
@@ -20,7 +20,7 @@ import tech.derbent.api.workflow.domain.CWorkflowStatusRelation;
 
 /** Imports CWorkflowStatusRelation rows from Excel (company-scoped transition config). */
 @Service
-public class CWorkflowStatusRelationImportHandler implements IEntityImportHandler<CWorkflowStatusRelation> {
+public class CWorkflowStatusRelationImportHandler extends CEntityImportHandler<CWorkflowStatusRelation> {
 
 	private final CProjectItemStatusService statusService;
 	private final CUserProjectRoleService roleService;
@@ -63,7 +63,7 @@ public class CWorkflowStatusRelationImportHandler implements IEntityImportHandle
 	}
 
 	@Override
-	public Map<String, String> getColumnAliases() {
+	protected Map<String, String> getAdditionalColumnAliases() {
 		return Map.of(
 				"Workflow", "workflow",
 				"From Status", "fromstatus",

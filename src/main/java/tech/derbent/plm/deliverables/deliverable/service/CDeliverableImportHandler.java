@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
-import tech.derbent.api.imports.service.CAbstractProjectItemImportHandler;
+import tech.derbent.api.imports.service.CProjectItemImportHandler;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.users.service.IUserRepository;
 import tech.derbent.plm.deliverables.deliverable.domain.CDeliverable;
@@ -16,7 +16,7 @@ import tech.derbent.plm.deliverables.deliverabletype.service.CDeliverableTypeSer
 /** Imports {@link CDeliverable} rows from Excel into the active project. */
 @Service
 @Profile({"derbent", "bab", "default"})
-public class CDeliverableImportHandler extends CAbstractProjectItemImportHandler<CDeliverable, CDeliverableType> {
+public class CDeliverableImportHandler extends CProjectItemImportHandler<CDeliverable, CDeliverableType> {
 
     private final CDeliverableService deliverableService;
     private final CDeliverableTypeService typeService;

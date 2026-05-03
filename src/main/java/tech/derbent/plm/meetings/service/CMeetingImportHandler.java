@@ -1,17 +1,19 @@
 package tech.derbent.plm.meetings.service;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
-import tech.derbent.api.imports.domain.CImportOptions;
-import tech.derbent.api.imports.domain.CImportRowResult;
-import tech.derbent.api.imports.service.CAbstractExcelImportHandler;
-import tech.derbent.api.imports.service.CImportParsers;
+import tech.derbent.api.imports.service.CExcelRow;
+import tech.derbent.api.imports.service.CProjectItemImportHandler;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.IUserRepository;
@@ -27,26 +29,23 @@ import tech.derbent.plm.meetings.domain.CMeetingType;
  */
 @Service
 @Profile({"derbent", "default"})
-public class CMeetingImportHandler extends CAbstractExcelImportHandler<CMeeting> {
+public class CMeetingImportHandler extends CProjectItemImportHandler<CMeeting, CMeetingType> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingImportHandler.class);
 
     private final CMeetingService meetingService;
     private final CMeetingTypeService meetingTypeService;
-    private final CProjectItemStatusService statusService;
     private final CActivityService activityService;
-    private final IUserRepository userRepository;
 
     public CMeetingImportHandler(final CMeetingService meetingService,
             final CMeetingTypeService meetingTypeService,
             final CProjectItemStatusService statusService,
             final CActivityService activityService,
             final IUserRepository userRepository) {
+        super(statusService, userRepository);
         this.meetingService = meetingService;
         this.meetingTypeService = meetingTypeService;
-        this.statusService = statusService;
         this.activityService = activityService;
-        this.userRepository = userRepository;
     }
 
     @Override
@@ -62,125 +61,92 @@ public class CMeetingImportHandler extends CAbstractExcelImportHandler<CMeeting>
     }
 
     @Override
-    public Set<String> getRequiredColumns() {
-        return Set.of("name");
+    protected Class<CMeetingType> getTypeClass() { return CMeetingType.class; }
+
+    @Override
+    protected Optional<CMeeting> findByNameAndProject(final String name, final CProject<?> project) {
+        return meetingService.findByNameAndProject(name, project);
     }
 
     @Override
-    public CImportRowResult importRow(final Map<String, String> rowData, final CProject<?> project, final int rowNumber,
-            final CImportOptions options) {
-        final var row = row(rowData);
-        final String name = row.string("name");
-        if (name.isBlank()) {
-            return CImportRowResult.error(rowNumber, "Name is required", rowData);
-        }
-        // WHY: upsert-by-name keeps the workbook re-runnable without constraint failures.
-        final CMeeting meeting = meetingService.findByNameAndProject(name, project)
-                .orElseGet(() -> new CMeeting(name, project));
+    protected CMeeting createNew(final String name, final CProject<?> project) {
+        return new CMeeting(name, project);
+    }
 
-        row.optionalString("description").ifPresent(meeting::setDescription);
-        row.optionalString("location").ifPresent(meeting::setLocation);
-        row.optionalString("agenda").ifPresent(meeting::setAgenda);
-        row.optionalString("minutes").ifPresent(meeting::setMinutes);
-        row.optionalString("linkedelement").ifPresent(meeting::setLinkedElement);
-        row.optionalLong("storypoint").ifPresent(meeting::setStoryPoint);
+    @Override
+    protected void save(final CMeeting entity) {
+        meetingService.save(entity);
+    }
 
-        final String statusName = row.string("status");
-        if (!statusName.isBlank()) {
-            final var status = statusService.findByNameAndCompany(statusName, project.getCompany()).orElse(null);
-            if (status == null) {
-                return CImportRowResult.error(rowNumber, "Status '" + statusName + "' not found", rowData);
-            }
-            meeting.setStatus(status);
-        }
+    @Override
+    protected Optional<CMeetingType> findTypeByNameAndCompany(final String name, final CCompany company) {
+        return meetingTypeService.findByNameAndCompany(name, company);
+    }
 
-        final String typeName = row.string("entitytype");
-        if (!typeName.isBlank()) {
-            final CMeetingType type = meetingTypeService.findByNameAndCompany(typeName, project.getCompany()).orElse(null);
-            if (type == null) {
-                return CImportRowResult.error(rowNumber, "Meeting Type '" + typeName + "' not found", rowData);
-            }
-            meeting.setEntityType(type);
-        }
 
-        final String startDateRaw = row.string("startdate");
-        if (!startDateRaw.isBlank()) {
-            final var startDate = CImportParsers.tryParseLocalDate(startDateRaw).orElse(null);
-            if (startDate == null) {
-                return CImportRowResult.error(rowNumber, "Cannot parse start date '" + startDateRaw + "'", rowData);
-            }
-            meeting.setStartDate(startDate);
-        }
-        final String startTimeRaw = row.string("starttime");
-        if (!startTimeRaw.isBlank()) {
-            final var startTime = CImportParsers.tryParseLocalTime(startTimeRaw).orElse(null);
-            if (startTime == null) {
-                return CImportRowResult.error(rowNumber, "Cannot parse start time '" + startTimeRaw + "' (use HH:mm)", rowData);
-            }
-            meeting.setStartTime(startTime);
-        }
-        final String endDateRaw = row.string("enddate");
-        if (!endDateRaw.isBlank()) {
-            final var endDate = CImportParsers.tryParseLocalDate(endDateRaw).orElse(null);
-            if (endDate == null) {
-                return CImportRowResult.error(rowNumber, "Cannot parse end date '" + endDateRaw + "'", rowData);
-            }
-            meeting.setEndDate(endDate);
-        }
-        final String endTimeRaw = row.string("endtime");
-        if (!endTimeRaw.isBlank()) {
-            final var endTime = CImportParsers.tryParseLocalTime(endTimeRaw).orElse(null);
-            if (endTime == null) {
-                return CImportRowResult.error(rowNumber, "Cannot parse end time '" + endTimeRaw + "' (use HH:mm)", rowData);
-            }
-            meeting.setEndTime(endTime);
-        }
+    @Override
+    protected void applyExtraFields(final CMeeting entity, final CExcelRow row, final CProject<?> project, final int rowNumber,
+            final Map<String, String> rowData) {
+        row.optionalString("location").ifPresent(entity::setLocation);
+        row.optionalString("agenda").ifPresent(entity::setAgenda);
+        row.optionalString("minutes").ifPresent(entity::setMinutes);
+        row.optionalString("linkedelement").ifPresent(entity::setLinkedElement);
+        row.optionalLong("storypoint").ifPresent(entity::setStoryPoint);
+
+        applyDate(entity, row, "startdate", true);
+        applyDate(entity, row, "enddate", false);
+        applyTime(entity, row, "starttime", true);
+        applyTime(entity, row, "endtime", false);
 
         final String relatedActivityName = row.string("relatedactivity");
         if (!relatedActivityName.isBlank()) {
-            final var actOpt = activityService.findByNameAndProject(relatedActivityName, project);
-            if (actOpt.isEmpty()) {
-                return CImportRowResult.error(rowNumber, "Related Activity '" + relatedActivityName + "' not found", rowData);
+            final var act = activityService.findByNameAndProject(relatedActivityName, project).orElse(null);
+            if (act == null) {
+                throw new IllegalArgumentException("Related Activity '" + relatedActivityName + "' not found");
             }
-            meeting.setRelatedActivity(actOpt.get());
-        }
-
-        final String assignedToLogin = row.string("assignedto");
-        if (!assignedToLogin.isBlank()) {
-            final var userOpt = userRepository.findByUsernameIgnoreCase(project.getCompany().getId(), assignedToLogin);
-            if (userOpt.isEmpty()) {
-                return CImportRowResult.error(rowNumber, "Assigned To user '" + assignedToLogin + "' not found in company.", rowData);
-            }
-            meeting.setAssignedTo(userOpt.get());
+            entity.setRelatedActivity(act);
         }
 
         final String participantsStr = row.string("participants");
         if (!participantsStr.isBlank()) {
-            final Set<CUser> participants = resolveUsersCsv(participantsStr, project.getCompany().getId(), rowNumber);
-            if (participants == null) {
-                return CImportRowResult.error(rowNumber, "Participants contains unknown users", rowData);
-            }
-            meeting.setParticipants(participants);
+            entity.setParticipants(resolveUsersCsv(participantsStr, project.getCompany().getId(), rowNumber));
         }
         final String attendeesStr = row.string("attendees");
         if (!attendeesStr.isBlank()) {
-            final Set<CUser> attendees = resolveUsersCsv(attendeesStr, project.getCompany().getId(), rowNumber);
-            if (attendees == null) {
-                return CImportRowResult.error(rowNumber, "Attendees contains unknown users", rowData);
-            }
-            meeting.setAttendees(attendees);
+            entity.setAttendees(resolveUsersCsv(attendeesStr, project.getCompany().getId(), rowNumber));
         }
+    }
 
-        if (!options.isDryRun()) {
-            try {
-                meetingService.save(meeting);
-            } catch (final Exception e) {
-                LOGGER.error("Failed to save meeting '{}' reason={}", name, e.getMessage());
-                return CImportRowResult.error(rowNumber, "Save failed: " + e.getMessage(), rowData);
-            }
+    private static void applyDate(final CMeeting meeting, final CExcelRow row, final String token, final boolean start) {
+        final String raw = row.string(token);
+        if (raw.isBlank()) {
+            return;
         }
-        LOGGER.debug("Imported meeting '{}' (row {})", name, rowNumber);
-        return CImportRowResult.success(rowNumber, name);
+        final LocalDate parsed = row.optionalLocalDate(token).orElse(null);
+        if (parsed == null) {
+            throw new IllegalArgumentException("Cannot parse " + token + " '" + raw + "'");
+        }
+        if (start) {
+            meeting.setStartDate(parsed);
+        } else {
+            meeting.setEndDate(parsed);
+        }
+    }
+
+    private static void applyTime(final CMeeting meeting, final CExcelRow row, final String token, final boolean start) {
+        final String raw = row.string(token);
+        if (raw.isBlank()) {
+            return;
+        }
+        final LocalTime parsed = row.optionalLocalTime(token).orElse(null);
+        if (parsed == null) {
+            throw new IllegalArgumentException("Cannot parse " + token + " '" + raw + "' (use HH:mm)");
+        }
+        if (start) {
+            meeting.setStartTime(parsed);
+        } else {
+            meeting.setEndTime(parsed);
+        }
     }
 
     private Set<CUser> resolveUsersCsv(final String value, final Long companyId, final int rowNumber) {
@@ -193,7 +159,7 @@ public class CMeetingImportHandler extends CAbstractExcelImportHandler<CMeeting>
             final var userOpt = userRepository.findByUsernameIgnoreCase(companyId, login);
             if (userOpt.isEmpty()) {
                 LOGGER.warn("Import row {}: user '{}' not found", rowNumber, login);
-                return null;
+                throw new IllegalArgumentException("User '" + login + "' not found");
             }
             users.add(userOpt.get());
         }

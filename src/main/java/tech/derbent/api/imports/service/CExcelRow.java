@@ -2,6 +2,8 @@ package tech.derbent.api.imports.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Map;
 import java.util.Optional;
 
@@ -87,6 +89,22 @@ public final class CExcelRow {
             return Optional.empty();
         }
         return CImportParsers.tryParseLocalDate(v);
+    }
+
+    public Optional<LocalTime> optionalLocalTime(final String token) {
+        final String v = string(token);
+        if (v.isBlank()) {
+            return Optional.empty();
+        }
+        return CImportParsers.tryParseLocalTime(v);
+    }
+
+    public Optional<LocalDateTime> optionalLocalDateTime(final String token) {
+        final String v = string(token);
+        if (v.isBlank()) {
+            return Optional.empty();
+        }
+        return CImportParsers.tryParseLocalDateTime(v);
     }
 
     public Optional<Boolean> optionalBoolean(final String token) {

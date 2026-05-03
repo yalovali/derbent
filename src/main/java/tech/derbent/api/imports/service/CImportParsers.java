@@ -1,6 +1,7 @@
 package tech.derbent.api.imports.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -25,6 +26,13 @@ public final class CImportParsers {
     private static final DateTimeFormatter[] TIME_FORMATS = {
             DateTimeFormatter.ofPattern("HH:mm"),
             DateTimeFormatter.ofPattern("HH:mm:ss"),
+    };
+
+    private static final DateTimeFormatter[] DATE_TIME_FORMATS = {
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"),
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"),
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"),
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
     };
 
     private CImportParsers() { /* utility class */ }
@@ -63,6 +71,25 @@ public final class CImportParsers {
         }
         try {
             return Optional.of(LocalTime.parse(value));
+        } catch (final Exception ignored) {
+            return Optional.empty();
+        }
+    }
+
+    public static Optional<LocalDateTime> tryParseLocalDateTime(final String raw) {
+        if (raw == null || raw.isBlank()) {
+            return Optional.empty();
+        }
+        final String value = raw.trim();
+        for (final DateTimeFormatter fmt : DATE_TIME_FORMATS) {
+            try {
+                return Optional.of(LocalDateTime.parse(value, fmt));
+            } catch (final Exception ignored) {
+                // try next
+            }
+        }
+        try {
+            return Optional.of(LocalDateTime.parse(value));
         } catch (final Exception ignored) {
             return Optional.empty();
         }

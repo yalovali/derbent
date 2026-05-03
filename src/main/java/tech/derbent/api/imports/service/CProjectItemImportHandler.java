@@ -28,13 +28,13 @@ import tech.derbent.api.users.service.IUserRepository;
  * </ul>
  * Implementations provide the persistence + lookup hooks; this class keeps the import format consistent.</p>
  */
-public abstract class CAbstractProjectItemImportHandler<T extends CProjectItem<T, TType>, TType extends CTypeEntity<TType>>
-        extends CAbstractExcelImportHandler<T> {
+public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>, TType extends CTypeEntity<TType>>
+        extends CEntityOfProjectImportHandler<T> {
 
     protected final CProjectItemStatusService statusService;
     protected final IUserRepository userRepository;
 
-    protected CAbstractProjectItemImportHandler(final CProjectItemStatusService statusService,
+    protected CProjectItemImportHandler(final CProjectItemStatusService statusService,
             final IUserRepository userRepository) {
         this.statusService = statusService;
         this.userRepository = userRepository;
@@ -125,7 +125,11 @@ public abstract class CAbstractProjectItemImportHandler<T extends CProjectItem<T
             entity.setAssignedTo(user);
         }
 
-        applyExtraFields(entity, row, project, rowNumber, rowData);
+        try {
+            applyExtraFields(entity, row, project, rowNumber, rowData);
+        } catch (final RuntimeException e) {
+            return CImportRowResult.error(rowNumber, e.getMessage(), rowData);
+        }
 
         if (!options.isDryRun()) {
             save(entity);

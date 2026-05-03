@@ -8,8 +8,9 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.imports.domain.CImportOptions;
 import tech.derbent.api.imports.domain.CImportRowResult;
 import tech.derbent.api.imports.service.CProjectItemReferenceResolver;
-import tech.derbent.api.imports.service.IEntityImportHandler;
+import tech.derbent.api.imports.service.CEntityImportHandler;
 import tech.derbent.api.interfaces.IHasParentRelation;
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.parentrelation.domain.CParentRelation;
 import tech.derbent.api.projects.domain.CProject;
 
@@ -21,7 +22,7 @@ import tech.derbent.api.projects.domain.CProject;
  */
 @Service
 @Profile({"derbent", "default"})
-public class CParentRelationImportHandler implements IEntityImportHandler<CParentRelation> {
+public class CParentRelationImportHandler extends CEntityImportHandler<CParentRelation> {
 
 	private final CProjectItemReferenceResolver itemResolver;
 
@@ -43,7 +44,7 @@ public class CParentRelationImportHandler implements IEntityImportHandler<CParen
 	}
 
 	@Override
-	public Map<String, String> getColumnAliases() {
+	protected Map<String, String> getAdditionalColumnAliases() {
 		return Map.ofEntries(
 				Map.entry("Owner Type", "ownertype"),
 				Map.entry("Owner Name", "ownername"),
@@ -88,7 +89,7 @@ public class CParentRelationImportHandler implements IEntityImportHandler<CParen
 			owner.setParentItem(parentOpt.get());
 		}
 		if (!options.isDryRun()) {
-			itemResolver.save((tech.derbent.api.entityOfProject.domain.CProjectItem<?, ?>) ownerOpt.get());
+			itemResolver.save((CProjectItem<?, ?>) ownerOpt.get());
 		}
 		return CImportRowResult.success(rowNumber, ownerName);
 	}

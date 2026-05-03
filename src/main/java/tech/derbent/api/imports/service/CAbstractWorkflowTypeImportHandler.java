@@ -17,7 +17,7 @@ import tech.derbent.api.workflow.service.CWorkflowEntityService;
  * pushing the shared logic here reduces duplication and makes it easier to expand system_init.xlsx.
  */
 public abstract class CAbstractWorkflowTypeImportHandler<T extends CTypeEntity<T>>
-        extends CAbstractExcelImportHandler<T> {
+        extends CEntityOfCompanyImportHandler<T> {
 
     protected final CWorkflowEntityService workflowEntityService;
 

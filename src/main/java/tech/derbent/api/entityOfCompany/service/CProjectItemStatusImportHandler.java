@@ -7,13 +7,13 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.imports.domain.CImportOptions;
 import tech.derbent.api.imports.domain.CImportRowResult;
-import tech.derbent.api.imports.service.IEntityImportHandler;
+import tech.derbent.api.imports.service.CEntityOfCompanyImportHandler;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 
 /** Imports CProjectItemStatus rows from Excel (company-scoped reference data). */
 @Service
-public class CProjectItemStatusImportHandler implements IEntityImportHandler<CProjectItemStatus> {
+public class CProjectItemStatusImportHandler extends CEntityOfCompanyImportHandler<CProjectItemStatus> {
 
     private final CProjectItemStatusService statusService;
 
@@ -39,7 +39,7 @@ public class CProjectItemStatusImportHandler implements IEntityImportHandler<CPr
     }
 
     @Override
-    public Map<String, String> getColumnAliases() {
+    protected Map<String, String> getAdditionalColumnAliases() {
         return Map.of(
                 "Name", "name",
                 "Final Status", "finalstatus",

@@ -8,14 +8,14 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.imports.domain.CImportOptions;
 import tech.derbent.api.imports.domain.CImportRowResult;
-import tech.derbent.api.imports.service.IEntityImportHandler;
+import tech.derbent.api.imports.service.CEntityOfProjectImportHandler;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CGridEntity;
 
 /** Imports CGridEntity rows from Excel (project-scoped "view" configuration). */
 @Service
-public class CGridEntityImportHandler implements IEntityImportHandler<CGridEntity> {
+public class CGridEntityImportHandler extends CEntityOfProjectImportHandler<CGridEntity> {
 
     private final CGridEntityService gridEntityService;
 
@@ -47,7 +47,7 @@ public class CGridEntityImportHandler implements IEntityImportHandler<CGridEntit
     }
 
     @Override
-    public Map<String, String> getColumnAliases() {
+    protected Map<String, String> getAdditionalColumnAliases() {
         return Map.of(
                 "Name", "name",
                 "Data Service Bean", "dataservicebeanname",
