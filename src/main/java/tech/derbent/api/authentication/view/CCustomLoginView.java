@@ -309,11 +309,8 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 				}
 			} else {
 				final CDataInitializer init = new CDataInitializer(sessionService);
-				LOGGER.info("🔧 Using Derbent data initializer");
-				init.reloadForced(minimal);
-				// WHY: keep code-initializers for core safety, but layer Excel-based samples on top to reduce initializer complexity over time.
-				final var summary = systemInitExcelBootstrapService.bootstrapAllProjects(minimal);
-				LOGGER.info("✅ Excel bootstrap after DB reset: {}", summary.toUiSummary());
+				LOGGER.info("🔧 Using Derbent data initializer (Excel-first)");
+				init.reloadForcedExcel(minimal);
 			}
 		} finally {
 			UI.setCurrent(null);

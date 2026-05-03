@@ -8,30 +8,65 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.companies.service.CCompanyService;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.imports.domain.CImportOptions;
 import tech.derbent.api.imports.domain.CImportResult;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProjectType;
 import tech.derbent.api.projects.service.CProjectService;
+import tech.derbent.api.projects.service.CProjectTypeService;
+import tech.derbent.api.roles.domain.CUserCompanyRole;
+import tech.derbent.api.roles.service.CUserCompanyRoleService;
+import tech.derbent.api.roles.service.CUserProjectRoleService;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.users.domain.CUser;
+import tech.derbent.api.users.service.CUserProjectSettingsService;
 import tech.derbent.api.users.service.CUserService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.workflow.domain.CWorkflowEntity;
+import tech.derbent.api.workflow.domain.CWorkflowStatusRelation;
+import tech.derbent.api.workflow.service.CWorkflowEntityService;
+import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
 
 /**
  * Runs the committed "system init" workbooks after DB reset.
  *
- * WHY: We want to gradually move sample initialization out of code initializers and into reproducible Excel templates.
- * The reset flow still creates core system entities (companies/projects/users), then Excel adds rich sample content.
+ * WHY: DB reset must be reproducible and driven by committed Excel templates; initializer-service sample creators are no longer used.
+ * We still seed the minimal "core" objects required to have a company/user/project context, then Excel populates everything else.
  */
 @Service
 public class CSystemInitExcelBootstrapService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSystemInitExcelBootstrapService.class);
 
+	private static final String SEED_COMPANY_NAME = "Of Teknoloji Çözümleri";
+	// Keep these aligned with src/main/resources/excel/system_init.xlsx company/project tokens.
+	private static final List<String> SEED_PROJECT_NAMES = List.of(
+			"Derbent PM Demo",
+			"Derbent API Platform",
+			"BAB Integration Program",
+			"Mobile App Delivery",
+			"Data & Analytics Platform",
+			"Customer Portal Revamp");
+	private static final String SEED_WORKFLOW_NAME = "Default Workflow";
+	private static final String SEED_PROJECT_TYPE_NAME = "Default Project Type";
+	private static final String SEED_STATUS_FROM_NAME = "Seed Start";
+	private static final String SEED_STATUS_TO_NAME = "Open";
+	private static final String SEED_ADMIN_LOGIN = "admin";
+	private static final String SEED_ADMIN_PASSWORD = "test123";
+
 	private final CCompanyService companyService;
 	private final CExcelImportService excelImportService;
 	private final CExcelTemplateService excelTemplateService;
+	private final CProjectItemStatusService statusService;
 	private final CProjectService<?> projectService;
+	private final CProjectTypeService projectTypeService;
+	private final CUserCompanyRoleService userCompanyRoleService;
+	private final CUserProjectRoleService userProjectRoleService;
+	private final CUserProjectSettingsService userProjectSettingsService;
+	private final CWorkflowEntityService workflowEntityService;
+	private final CWorkflowStatusRelationService workflowStatusRelationService;
 	private final ISessionService sessionService;
 	private final CUserService userService;
 
@@ -43,16 +78,181 @@ public class CSystemInitExcelBootstrapService {
 
 	public CSystemInitExcelBootstrapService(final CCompanyService companyService,
 			final CProjectService<?> projectService,
+			final CProjectTypeService projectTypeService,
 			final CUserService userService,
+			final CUserCompanyRoleService userCompanyRoleService,
+			final CUserProjectRoleService userProjectRoleService,
+			final CUserProjectSettingsService userProjectSettingsService,
+			final CWorkflowEntityService workflowEntityService,
+			final CWorkflowStatusRelationService workflowStatusRelationService,
+			final CProjectItemStatusService statusService,
 			final ISessionService sessionService,
 			final CExcelImportService excelImportService,
 			final CExcelTemplateService excelTemplateService) {
 		this.companyService = companyService;
 		this.projectService = projectService;
+		this.projectTypeService = projectTypeService;
 		this.userService = userService;
+		this.userCompanyRoleService = userCompanyRoleService;
+		this.userProjectRoleService = userProjectRoleService;
+		this.userProjectSettingsService = userProjectSettingsService;
+		this.workflowEntityService = workflowEntityService;
+		this.workflowStatusRelationService = workflowStatusRelationService;
+		this.statusService = statusService;
 		this.sessionService = sessionService;
 		this.excelImportService = excelImportService;
 		this.excelTemplateService = excelTemplateService;
+	}
+
+	/**
+	 * Excel-first DB reset entrypoint.
+	 *
+	 * This method is designed to be called right after the DB has been cleared.
+	 */
+	public CBootstrapSummary bootstrapAfterReset(final boolean minimal) {
+		ensureSeedData(minimal);
+		return bootstrapAllProjects(minimal);
+	}
+
+	private void ensureSeedData(final boolean minimal) {
+		final List<CCompany> active = companyService.findActiveCompanies();
+		if (active.isEmpty()) {
+			LOGGER.info("No companies found; creating minimal seed company/project/user for Excel bootstrap");
+			final CCompany seed = new CCompany(SEED_COMPANY_NAME);
+			companyService.save(seed);
+		}
+		for (final CCompany company : companyService.findActiveCompanies()) {
+			ensureSeedDataForCompany(company, minimal);
+		}
+	}
+
+	private void ensureSeedDataForCompany(final CCompany company, final boolean minimal) {
+		Check.notNull(company, "Company cannot be null");
+		sessionService.setActiveCompany(company);
+
+		userCompanyRoleService.initializeDefaultRoles(company);
+		userProjectRoleService.initializeDefaultRoles(company);
+
+		final CWorkflowEntity workflow = getOrCreateWorkflow(company);
+		final CProjectItemStatus fromStatus = getOrCreateStatus(company, SEED_STATUS_FROM_NAME);
+		final CProjectItemStatus toStatus = getOrCreateStatus(company, SEED_STATUS_TO_NAME);
+		ensureSeedWorkflowInitialRelation(workflow, fromStatus, toStatus);
+		getOrCreateProjectType(company, workflow);
+
+		final List<CProject<?>> projects = getOrCreateProjects(company, minimal);
+		Check.notEmpty(projects, "Seed projects must not be empty");
+		final CUser user = getOrCreateAdminUser(company);
+		for (final CProject<?> project : projects) {
+			ensureUserInProject(user, project);
+		}
+		sessionService.setActiveUser(user);
+		sessionService.setActiveProject(projects.get(0));
+	}
+
+	private CWorkflowEntity getOrCreateWorkflow(final CCompany company) {
+		final List<CWorkflowEntity> workflows = workflowEntityService.listByCompany(company);
+		if (!workflows.isEmpty()) {
+			return workflows.get(0);
+		}
+		final CWorkflowEntity wf = new CWorkflowEntity(SEED_WORKFLOW_NAME, company);
+		return workflowEntityService.save(wf);
+	}
+
+	private CProjectItemStatus getOrCreateStatus(final CCompany company, final String name) {
+		final List<CProjectItemStatus> statuses = statusService.listByCompany(company);
+		for (final CProjectItemStatus status : statuses) {
+			if (status.getName() != null && status.getName().equalsIgnoreCase(name)) {
+				return status;
+			}
+		}
+		return statusService.save(new CProjectItemStatus(name, company));
+	}
+
+	private void ensureSeedWorkflowInitialRelation(final CWorkflowEntity workflow, final CProjectItemStatus fromStatus,
+			final CProjectItemStatus toStatus) {
+		final List<CWorkflowStatusRelation> relations = workflowStatusRelationService.findByWorkflow(workflow);
+		if (!relations.isEmpty()) {
+			return;
+		}
+		final CWorkflowStatusRelation rel = new CWorkflowStatusRelation(true);
+		rel.setWorkflowEntity(workflow);
+		rel.setFromStatus(fromStatus);
+		rel.setToStatus(toStatus);
+		rel.setInitialStatus(Boolean.TRUE);
+		rel.setRoles(List.of());
+		workflowStatusRelationService.save(rel);
+	}
+
+	private CProjectType getOrCreateProjectType(final CCompany company, final CWorkflowEntity workflow) {
+		final List<CProjectType> types = projectTypeService.listByCompany(company);
+		if (!types.isEmpty()) {
+			return types.get(0);
+		}
+		final CProjectType type = new CProjectType(SEED_PROJECT_TYPE_NAME, company);
+		type.setWorkflow(workflow);
+		return projectTypeService.save(type);
+	}
+
+	private List<CProject<?>> getOrCreateProjects(final CCompany company, final boolean minimal) {
+		final List<? extends CProject<?>> existing = projectService.listByCompany(company);
+		final List<CProject<?>> result = new java.util.ArrayList<>();
+		final List<String> targetNames = minimal ? List.of(SEED_PROJECT_NAMES.get(0)) : SEED_PROJECT_NAMES;
+		for (final String name : targetNames) {
+			CProject<?> match = null;
+			for (final CProject<?> p : existing) {
+				if (p.getName() != null && p.getName().equalsIgnoreCase(name)) {
+					match = p;
+					break;
+				}
+			}
+			if (match == null) {
+				match = createProject(company, name);
+			}
+			result.add(match);
+		}
+		return result;
+	}
+
+	private CProject<?> createProject(final CCompany company, final String name) {
+		sessionService.setActiveCompany(company);
+		try {
+			final CProject<?> project = (CProject<?>) projectService.newEntity();
+			project.setName(name);
+			return saveProject(project);
+		} catch (final Exception e) {
+			throw new IllegalStateException("Failed to create seed project '" + name + "'", e);
+		}
+	}
+
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
+	private CProject<?> saveProject(final CProject<?> project) {
+		// WHY: Spring injects a single concrete CProjectService implementation per profile; we bridge wildcard generics here.
+		return (CProject<?>) ((CProjectService) projectService).save(project);
+	}
+
+	private CUser getOrCreateAdminUser(final CCompany company) {
+		final CUser existing = userService.findByLogin(SEED_ADMIN_LOGIN, company.getId());
+		if (existing != null) {
+			return existing;
+		}
+		final List<CUserCompanyRole> roles = userCompanyRoleService.listByCompany(company);
+		final CUserCompanyRole role = roles.stream().filter(CUserCompanyRole::isAdmin).findFirst().orElseGet(() -> roles.get(0));
+		return userService.createLoginUser(SEED_ADMIN_LOGIN, SEED_ADMIN_PASSWORD, "Admin", "admin@local", company, role);
+	}
+
+	private void ensureUserInProject(final CUser user, final CProject<?> project) {
+		if (user == null || project == null) {
+			return;
+		}
+		if (user.getId() == null || project.getId() == null) {
+			return;
+		}
+		if (userProjectSettingsService.relationshipExists(user.getId(), project.getId())) {
+			return;
+		}
+		userProjectSettingsService.addUserToProject(user, project, "write");
 	}
 
 	public CBootstrapSummary bootstrapAllProjects(final boolean minimal) {

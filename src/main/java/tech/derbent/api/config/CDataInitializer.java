@@ -16,6 +16,7 @@ import tech.derbent.api.companies.service.CCompanyService;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusInitializerService;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.imports.service.CDataImportInitializerService;
+import tech.derbent.api.imports.service.CSystemInitExcelBootstrapService;
 import tech.derbent.api.page.service.CPageEntityInitializerService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
@@ -618,5 +619,18 @@ public class CDataInitializer {
 		clearSampleData(); // <<<<< ÖNCE TEMİZLE
 		loadSampleData(minimal); // <<<<< SONRA YENİDEN OLUŞTUR
 		LOGGER.info("Sample data reload (forced) finished");
+	}
+
+	/**
+	 * Excel-first DB reset.
+	 *
+	 * WHY: initializer-service sample creators are being retired; system_init.xlsx is the canonical source of sample data.
+	 */
+	public void reloadForcedExcel(final boolean minimal) throws Exception {
+		LOGGER.info("DB reset (Excel-first) started");
+		clearSampleData();
+		final CSystemInitExcelBootstrapService excelBootstrap = CSpringContext.getBean(CSystemInitExcelBootstrapService.class);
+		final var summary = excelBootstrap.bootstrapAfterReset(minimal);
+		LOGGER.info("DB reset (Excel-first) finished: {}", summary.toUiSummary());
 	}
 }

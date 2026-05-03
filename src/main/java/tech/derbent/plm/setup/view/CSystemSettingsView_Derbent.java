@@ -251,7 +251,7 @@ public final class CSystemSettingsView_Derbent extends CAbstractPage {
 		CompletableFuture.runAsync(() -> {
 			try {
 				final CDataInitializer init = new CDataInitializer(sessionService);
-				init.reloadForced(minimal);
+				init.reloadForcedExcel(minimal);
 				ui.access(() -> {
 					progressDialog.close();
 					CNotificationService.showSuccess(successMessage);
