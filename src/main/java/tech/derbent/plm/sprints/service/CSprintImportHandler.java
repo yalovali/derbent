@@ -1,6 +1,5 @@
 package tech.derbent.plm.sprints.service;
 
-import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -67,20 +66,6 @@ public class CSprintImportHandler extends CProjectItemImportHandler<CSprint, CSp
 	@Override
 	protected void applyExtraFields(final CSprint entity, final CExcelRow row, final CProject<?> project, final int rowNumber,
 			final Map<String, String> rowData) {
-		row.optionalString("sprintgoal").ifPresent(entity::setSprintGoal);
-		row.optionalString("definitionofdone").ifPresent(entity::setDefinitionOfDone);
-		row.optionalString("retrospectivenotes").ifPresent(entity::setRetrospectiveNotes);
-		row.optionalString("color").ifPresent(entity::setColor);
-		row.optionalInt("velocity").ifPresent(entity::setVelocity);
-		row.optionalLocalDate("startdate").ifPresent(entity::setStartDate);
-
-		final String endRaw = row.string("enddate");
-		if (!endRaw.isBlank()) {
-			final LocalDate end = row.optionalLocalDate("enddate").orElse(null);
-			if (end == null) {
-				throw new IllegalArgumentException("Invalid end date: " + endRaw);
-			}
-			entity.setEndDate(end);
-		}
+		applyMetaFieldsDeclaredOn(entity, row, CSprint.class);
 	}
 }

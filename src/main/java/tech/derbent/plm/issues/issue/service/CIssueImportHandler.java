@@ -76,7 +76,7 @@ public class CIssueImportHandler extends CProjectItemImportHandler<CIssue, CIssu
     @Override
     protected void applyExtraFields(final CIssue entity, final CExcelRow row, final CProject<?> project, final int rowNumber,
             final Map<String, String> rowData) {
-        row.optionalLocalDate("duedate").ifPresent(entity::setDueDate);
+        applyMetaFieldsDeclaredOn(entity, row, CIssue.class);
 
         final String linkedActivityName = row.string("linkedactivity");
         if (!linkedActivityName.isBlank()) {

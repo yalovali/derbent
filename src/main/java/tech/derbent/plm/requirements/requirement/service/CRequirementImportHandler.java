@@ -70,9 +70,6 @@ public class CRequirementImportHandler extends CProjectItemImportHandler<CRequir
     @Override
     protected void applyExtraFields(final CRequirement entity, final CExcelRow row, final CProject<?> project, final int rowNumber,
             final Map<String, String> rowData) {
-        row.optionalString("acceptancecriteria").ifPresent(entity::setAcceptanceCriteria);
-        row.optionalString("source").ifPresent(entity::setSource);
-        row.optionalLocalDate("startdate").ifPresent(entity::setStartDate);
-        row.optionalLocalDate("duedate").ifPresent(entity::setDueDate);
+        applyMetaFieldsDeclaredOn(entity, row, CRequirement.class);
     }
 }

@@ -72,11 +72,7 @@ public class CTicketImportHandler extends CProjectItemImportHandler<CTicket, CTi
 	@Override
 	protected void applyExtraFields(final CTicket entity, final CExcelRow row, final CProject<?> project, final int rowNumber,
 			final Map<String, String> rowData) {
-		row.optionalString("contextinformation").ifPresent(entity::setContextInformation);
-		row.optionalString("result").ifPresent(entity::setResult);
-		row.optionalLocalDate("duedate").ifPresent(entity::setDueDate);
-		row.optionalLocalDate("initialdate").ifPresent(entity::setInitialDate);
-		row.optionalLocalDate("planneddate").ifPresent(entity::setPlannedDate);
+		applyMetaFieldsDeclaredOn(entity, row, CTicket.class);
 
 		final String priorityName = row.string("priority");
 		if (!priorityName.isBlank()) {

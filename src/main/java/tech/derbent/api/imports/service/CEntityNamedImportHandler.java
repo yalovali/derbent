@@ -28,6 +28,6 @@ public abstract class CEntityNamedImportHandler<T extends CEntityNamed<T>> exten
 	}
 
 	protected void applyEntityNamedFields(final T entity, final CExcelRow row) {
-		row.optionalString("description").ifPresent(entity::setDescription);
+		applyMetaFieldsDeclaredOn(entity, row, CEntityNamed.class);
 	}
 }

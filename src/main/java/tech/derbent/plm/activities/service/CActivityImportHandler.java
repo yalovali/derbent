@@ -82,15 +82,6 @@ public class CActivityImportHandler extends CProjectItemImportHandler<CActivity,
             }
             entity.setPriority(priority);
         }
-        row.optionalString("acceptancecriteria").ifPresent(entity::setAcceptanceCriteria);
-        row.optionalString("notes").ifPresent(entity::setNotes);
-        row.optionalString("results").ifPresent(entity::setResults);
-
-        row.optionalLocalDate("startdate").ifPresent(entity::setStartDate);
-        row.optionalLocalDate("duedate").ifPresent(entity::setDueDate);
-        row.optionalLocalDate("completiondate").ifPresent(entity::setCompletionDate);
-        row.optionalInt("progresspercentage").ifPresent(entity::setProgressPercentage);
-        row.optionalLong("storypoint").ifPresent(entity::setStoryPoint);
-        row.optionalBigDecimal("estimatedhours").ifPresent(entity::setEstimatedHours);
+        applyMetaFieldsDeclaredOn(entity, row, CActivity.class);
     }
 }

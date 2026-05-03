@@ -1,11 +1,19 @@
 package tech.derbent.api.imports.service;
 
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.imports.domain.CImportRowResult;
 import tech.derbent.api.projects.domain.CProject;
@@ -58,6 +66,120 @@ public abstract class CAbstractExcelImportHandler<T> implements IEntityImportHan
 			return Optional.of(CImportRowResult.error(rowNumber, "Project company is required", rowData));
 		}
 		return Optional.empty();
+	}
+
+	private static final ConcurrentMap<Class<?>, Map<String, Method>> WRITE_METHOD_CACHE = new ConcurrentHashMap<>();
+
+	/**
+	 * Applies simple (scalar) fields declared on {@code declaringClass} by reflecting over its
+	 * {@link AMetaData}-annotated fields and assigning values from the current row.
+	 *
+	 * <p>RULE: Call this at the same inheritance level as the entity fields themselves.
+	 * For example, {@code CAgileEntityImportHandler} should pass {@code CAgileEntity.class}.
+	 * This keeps field ownership aligned with the domain model hierarchy.</p>
+	 *
+	 * <p>WHY: reduces duplicated {@code row.optionalX(...).ifPresent(entity::setX)} blocks while keeping
+	 * the import format stable (header aliases are already derived from {@link AMetaData#displayName()}).</p>
+	 */
+	protected final void applyMetaFieldsDeclaredOn(final T entity, final CExcelRow row, final Class<?> declaringClass) {
+		if (entity == null || row == null || declaringClass == null) {
+			return;
+		}
+		for (final Field field : declaringClass.getDeclaredFields()) {
+			if (Modifier.isStatic(field.getModifiers())) {
+				continue;
+			}
+			final AMetaData meta = field.getAnnotation(AMetaData.class);
+			if (meta == null || meta.hidden() || meta.autoCalculate()) {
+				continue;
+			}
+			final String token = CExcelRow.normalizeToken(field.getName());
+			final String raw = row.string(token);
+			if (raw.isBlank()) {
+				continue;
+			}
+			final Object parsed = parseScalarValue(field.getType(), raw, row, token);
+			if (parsed == null) {
+				continue;
+			}
+			final Method setter = getWriteMethod(entity.getClass(), field.getName());
+			if (setter == null) {
+				continue;
+			}
+			try {
+				setter.invoke(entity, parsed);
+			} catch (final Exception e) {
+				throw new IllegalArgumentException("Failed to set '" + field.getName() + "': " + e.getMessage(), e);
+			}
+		}
+	}
+
+	private static Method getWriteMethod(final Class<?> beanClass, final String propertyName) {
+		final Map<String, Method> setters = WRITE_METHOD_CACHE.computeIfAbsent(beanClass, c -> {
+			try {
+				final Map<String, Method> map = new LinkedHashMap<>();
+				for (final PropertyDescriptor pd : Introspector.getBeanInfo(c).getPropertyDescriptors()) {
+					if (pd.getWriteMethod() != null) {
+						map.put(pd.getName(), pd.getWriteMethod());
+					}
+				}
+				return Map.copyOf(map);
+			} catch (final Exception e) {
+				return Map.of();
+			}
+		});
+		return setters.get(propertyName);
+	}
+
+	private static Object parseScalarValue(final Class<?> type, final String raw, final CExcelRow row, final String token) {
+		try {
+			if (type == String.class) {
+				return raw;
+			}
+			if (type == Integer.class || type == int.class) {
+				return row.optionalInt(token).orElseThrow(() -> new IllegalArgumentException("Invalid integer: " + raw));
+			}
+			if (type == Long.class || type == long.class) {
+				return row.optionalLong(token).orElseThrow(() -> new IllegalArgumentException("Invalid long: " + raw));
+			}
+			if (type == java.math.BigDecimal.class) {
+				return row.optionalBigDecimal(token).orElseThrow(() -> new IllegalArgumentException("Invalid decimal: " + raw));
+			}
+			if (type == Boolean.class || type == boolean.class) {
+				return row.optionalBoolean(token).orElse(Boolean.FALSE);
+			}
+			if (type == LocalDate.class) {
+				return row.optionalLocalDate(token).orElseThrow(() -> new IllegalArgumentException("Invalid date: " + raw));
+			}
+			if (type == LocalTime.class) {
+				return row.optionalLocalTime(token).orElseThrow(() -> new IllegalArgumentException("Invalid time: " + raw));
+			}
+			if (type == LocalDateTime.class) {
+				final LocalDateTime dt = row.optionalLocalDateTime(token).orElse(null);
+				if (dt != null) {
+					return dt;
+				}
+				final LocalDate d = row.optionalLocalDate(token).orElse(null);
+				if (d != null) {
+					return d.atStartOfDay();
+				}
+				throw new IllegalArgumentException("Invalid datetime: " + raw);
+			}
+			if (type.isEnum()) {
+				final String normalized = raw.trim().toLowerCase().replaceAll("[\\s_]+", "");
+				for (final Object constant : type.getEnumConstants()) {
+					final String key = constant.toString().trim().toLowerCase().replaceAll("[\\s_]+", "");
+					if (key.equals(normalized)) {
+						return constant;
+					}
+				}
+				throw new IllegalArgumentException("Invalid enum value: " + raw);
+			}
+			return null;
+		} catch (final RuntimeException e) {
+			// Re-throw with token context to make Excel fixes easy.
+			throw new IllegalArgumentException("Invalid value for " + token + ": '" + raw + "'", e);
+		}
 	}
 
     private static Map<String, String> buildMetaAliases(final Class<?> entityClass) {

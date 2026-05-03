@@ -75,11 +75,23 @@ public class CProject_DerbentInitializerService extends CProjectInitializerServi
 	public static void initializeSample(final CCompany company, final boolean minimal) throws Exception {
 		final String[][] nameAndDescription = {
 				{
-						"Digital Transformation Initiative",
-						"Comprehensive digital transformation for enhanced customer experience"
+						"Derbent PM Demo",
+						"End-to-end project management demo (backlog, sprints, requirements, deliverables, workflows)."
 				}, {
-						"Infrastructure Upgrade Project",
-						"Upgrading IT infrastructure for improved performance and scalability"
+						"Derbent API Platform",
+						"API platform delivery (gateway, auth, versioning, observability, SDKs)."
+				}, {
+						"BAB Integration Program",
+						"Integration workstream for BAB gateway + device onboarding + policy automation."
+				}, {
+						"Mobile App Delivery",
+						"Mobile app program (iOS/Android) with releases, sprint planning, testing, and rollout."
+				}, {
+						"Data & Analytics Platform",
+						"Data ingestion, warehouse, BI dashboards, and governance."
+				}, {
+						"Customer Portal Revamp",
+						"Customer self-service portal redesign with accessibility and performance improvements."
 				}
 		};
 		initializeCompanyEntity(nameAndDescription,

@@ -1,7 +1,5 @@
 package tech.derbent.plm.decisions.service;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -77,35 +75,6 @@ public class CDecisionImportHandler extends CProjectItemImportHandler<CDecision,
     @Override
     protected void applyExtraFields(final CDecision entity, final CExcelRow row, final CProject<?> project, final int rowNumber,
             final Map<String, String> rowData) {
-        final String costRaw = row.string("estimatedcost");
-        if (!costRaw.isBlank()) {
-            final BigDecimal cost = row.optionalBigDecimal("estimatedcost").orElse(null);
-            if (cost == null) {
-                throw new IllegalArgumentException("Invalid Estimated Cost: " + costRaw);
-            }
-            entity.setEstimatedCost(cost);
-        }
-
-        applyDateTime(entity, row, "implementationdate", true);
-        applyDateTime(entity, row, "reviewdate", false);
-    }
-
-    private static void applyDateTime(final CDecision decision, final CExcelRow row, final String token, final boolean impl) {
-        final String raw = row.string(token);
-        if (raw.isBlank()) {
-            return;
-        }
-        LocalDateTime dt = row.optionalLocalDateTime(token).orElse(null);
-        if (dt == null) {
-            dt = row.optionalLocalDate(token).map(d -> d.atStartOfDay()).orElse(null);
-        }
-        if (dt == null) {
-            throw new IllegalArgumentException("Cannot parse " + token + " '" + raw + "' (use yyyy-MM-dd or yyyy-MM-ddTHH:mm)");
-        }
-        if (impl) {
-            decision.setImplementationDate(dt);
-        } else {
-            decision.setReviewDate(dt);
-        }
+        applyMetaFieldsDeclaredOn(entity, row, CDecision.class);
     }
 }

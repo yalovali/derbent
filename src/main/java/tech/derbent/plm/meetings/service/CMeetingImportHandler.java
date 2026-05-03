@@ -1,7 +1,5 @@
 package tech.derbent.plm.meetings.service;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -87,16 +85,7 @@ public class CMeetingImportHandler extends CProjectItemImportHandler<CMeeting, C
     @Override
     protected void applyExtraFields(final CMeeting entity, final CExcelRow row, final CProject<?> project, final int rowNumber,
             final Map<String, String> rowData) {
-        row.optionalString("location").ifPresent(entity::setLocation);
-        row.optionalString("agenda").ifPresent(entity::setAgenda);
-        row.optionalString("minutes").ifPresent(entity::setMinutes);
-        row.optionalString("linkedelement").ifPresent(entity::setLinkedElement);
-        row.optionalLong("storypoint").ifPresent(entity::setStoryPoint);
-
-        applyDate(entity, row, "startdate", true);
-        applyDate(entity, row, "enddate", false);
-        applyTime(entity, row, "starttime", true);
-        applyTime(entity, row, "endtime", false);
+        applyMetaFieldsDeclaredOn(entity, row, CMeeting.class);
 
         final String relatedActivityName = row.string("relatedactivity");
         if (!relatedActivityName.isBlank()) {
@@ -114,38 +103,6 @@ public class CMeetingImportHandler extends CProjectItemImportHandler<CMeeting, C
         final String attendeesStr = row.string("attendees");
         if (!attendeesStr.isBlank()) {
             entity.setAttendees(resolveUsersCsv(attendeesStr, project.getCompany().getId(), rowNumber));
-        }
-    }
-
-    private static void applyDate(final CMeeting meeting, final CExcelRow row, final String token, final boolean start) {
-        final String raw = row.string(token);
-        if (raw.isBlank()) {
-            return;
-        }
-        final LocalDate parsed = row.optionalLocalDate(token).orElse(null);
-        if (parsed == null) {
-            throw new IllegalArgumentException("Cannot parse " + token + " '" + raw + "'");
-        }
-        if (start) {
-            meeting.setStartDate(parsed);
-        } else {
-            meeting.setEndDate(parsed);
-        }
-    }
-
-    private static void applyTime(final CMeeting meeting, final CExcelRow row, final String token, final boolean start) {
-        final String raw = row.string(token);
-        if (raw.isBlank()) {
-            return;
-        }
-        final LocalTime parsed = row.optionalLocalTime(token).orElse(null);
-        if (parsed == null) {
-            throw new IllegalArgumentException("Cannot parse " + token + " '" + raw + "' (use HH:mm)");
-        }
-        if (start) {
-            meeting.setStartTime(parsed);
-        } else {
-            meeting.setEndTime(parsed);
         }
     }
 

@@ -25,19 +25,6 @@ public abstract class CAgileEntityImportHandler<T extends CAgileEntity<T, TType>
     @Override
     protected void applyExtraFields(final T entity, final CExcelRow row, final CProject<?> project, final int rowNumber,
             final Map<String, String> rowData) {
-        row.optionalString("acceptancecriteria").ifPresent(entity::setAcceptanceCriteria);
-        row.optionalString("notes").ifPresent(entity::setNotes);
-        row.optionalString("results").ifPresent(entity::setResults);
-
-        row.optionalLong("storypoint").ifPresent(entity::setStoryPoint);
-        row.optionalLocalDate("startdate").ifPresent(entity::setStartDate);
-        row.optionalLocalDate("duedate").ifPresent(entity::setDueDate);
-        row.optionalLocalDate("completiondate").ifPresent(entity::setCompletionDate);
-        row.optionalInt("progresspercentage").ifPresent(entity::setProgressPercentage);
-
-        row.optionalBigDecimal("estimatedhours").ifPresent(entity::setEstimatedHours);
-        row.optionalBigDecimal("estimatedcost").ifPresent(entity::setEstimatedCost);
-        row.optionalBigDecimal("actualhours").ifPresent(entity::setActualHours);
-        row.optionalBigDecimal("actualcost").ifPresent(entity::setActualCost);
+        applyMetaFieldsDeclaredOn(entity, row, CAgileEntity.class);
     }
 }

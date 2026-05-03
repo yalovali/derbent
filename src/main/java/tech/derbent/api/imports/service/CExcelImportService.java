@@ -150,6 +150,10 @@ public class CExcelImportService {
                 continue;
             }
             final Map<String, String> rowData = extractRowData(row, columnMapping, evaluator);
+            if (shouldSkipByCompanyOrProject(rowData, project)) {
+                sheetResult.addRowResult(CImportRowResult.skipped(r + 1));
+                continue;
+            }
             // Validate required columns
             final String missingCol = checkRequiredColumns(rowData, handler);
             if (missingCol != null) {
@@ -261,6 +265,31 @@ public class CExcelImportService {
             case BLANK, _NONE -> "";
             default -> "";
         };
+    }
+
+    private static boolean shouldSkipByCompanyOrProject(final Map<String, String> rowData, final CProject<?> project) {
+        if (rowData == null || project == null) {
+            return false;
+        }
+        final String companyToken = rowData.getOrDefault("company", "").trim();
+        if (!companyToken.isBlank() && !isWildcard(companyToken)) {
+            final var company = project.getCompany();
+            if (company != null && !companyToken.equalsIgnoreCase(company.getName())) {
+                return true;
+            }
+        }
+        final String projectToken = rowData.getOrDefault("project", "").trim();
+        if (!projectToken.isBlank() && !isWildcard(projectToken)) {
+            if (!projectToken.equalsIgnoreCase(project.getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isWildcard(final String token) {
+        final String v = token == null ? "" : token.trim().toLowerCase();
+        return v.equals("*") || v.equals("all") || v.equals("any");
     }
 
     private boolean isCommentRow(final Row row, final FormulaEvaluator evaluator) {
