@@ -287,8 +287,8 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 				final Map<String, CBabDataInitializer> initializers = CSpringContext.getBeansOfType(CBabDataInitializer.class);
 				Check.isTrue(!initializers.isEmpty(), "BAB initializer bean is not available. Activate the bab profile.");
 				final CBabDataInitializer init = initializers.values().iterator().next();
-				LOGGER.info("🔧 Using BAB Gateway data initializer");
-				init.reloadForced(minimal);
+				LOGGER.info("🔧 Using BAB Gateway data initializer (Excel-first)");
+				init.reloadForcedExcel(minimal);
 				// CRITICAL: Handle Calimero service after database reset
 				// Sample data initialization sets enableCalimeroService=true
 				// We must handle the service startup according to new post-login flow

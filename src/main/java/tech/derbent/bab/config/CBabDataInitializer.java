@@ -9,54 +9,12 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.api.companies.service.CCompanyInitializerService;
-import tech.derbent.api.companies.service.CCompanyService;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entityOfCompany.service.CProjectItemStatusInitializerService;
-import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
-import tech.derbent.api.page.service.CPageEntityInitializerService;
-import tech.derbent.api.page.service.CPageEntityService;
-import tech.derbent.api.projects.service.CProjectTypeInitializerService;
-import tech.derbent.api.roles.domain.CUserCompanyRole;
-import tech.derbent.api.roles.service.CUserCompanyRoleInitializerService;
-import tech.derbent.api.roles.service.CUserProjectRoleInitializerService;
-import tech.derbent.api.roles.service.CUserProjectRoleService;
-import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.api.screens.service.CGridEntityInitializerService;
-import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.session.service.ISessionService;
-import tech.derbent.api.users.domain.CUser;
-import tech.derbent.api.users.service.CUserInitializerService;
+import tech.derbent.api.imports.service.CSystemInitExcelBootstrapService;
 import tech.derbent.api.users.service.CUserService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.workflow.service.CWorkflowEntityInitializerService;
-import tech.derbent.api.workflow.service.CWorkflowEntityService;
-import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
-import tech.derbent.bab.dashboard.dashboardinterfaces.service.CDashboardInterfaces_InitializerService;
-import tech.derbent.bab.dashboard.dashboardproject_bab.service.CDashboardProject_BabInitializerService;
-import tech.derbent.bab.device.service.CBabDeviceInitializerService;
 import tech.derbent.bab.device.service.CBabDeviceService;
-import tech.derbent.bab.policybase.action.service.CBabPolicyActionInitializerService;
-import tech.derbent.bab.policybase.actionmask.service.CBabPolicyActionMaskInitializerService;
-import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterInitializerService;
-import tech.derbent.bab.policybase.node.can.CBabCanNodeInitializerService;
-import tech.derbent.bab.policybase.node.file.CBabFileInputNodeInitializerService;
-import tech.derbent.bab.policybase.node.file.CBabFileOutputNodeInitializerService;
-import tech.derbent.bab.policybase.node.ip.CBabHttpServerNodeInitializerService;
-import tech.derbent.bab.policybase.node.ip.CBabSyslogNodeInitializerService;
-import tech.derbent.bab.policybase.node.ip.CBabTCPModbusNodeInitializerService;
-import tech.derbent.bab.policybase.node.modbus.CBabModbusNodeInitializerService;
-import tech.derbent.bab.policybase.node.ros.CBabROSNodeInitializerService;
-import tech.derbent.bab.policybase.rule.service.CBabPolicyRuleInitializerService;
-import tech.derbent.bab.policybase.service.CBabPolicybaseInitializerService;
-import tech.derbent.bab.policybase.trigger.service.CBabPolicyTriggerInitializerService;
-import tech.derbent.bab.project.domain.CProject_Bab;
-import tech.derbent.bab.project.service.CProject_BabInitializerService;
 import tech.derbent.bab.project.service.CProject_BabService;
-import tech.derbent.bab.setup.service.CSystemSettings_BabInitializerService;
 
 @Component
 @Profile ("bab")
@@ -86,41 +44,26 @@ public class CBabDataInitializer {
 	}
 
 	private final CBabDeviceService babDeviceService;
-	private final CDetailSectionService detailSectionService;
-	@PersistenceContext
-	private EntityManager entityManager;
-	private final CGridEntityService gridEntityService;
 	// Service dependencies - injected via constructor
 	private final JdbcTemplate jdbcTemplate;
-	private final CPageEntityService pageEntityService;
 	private final CProject_BabService projectService;
-	private final ISessionService sessionService;
 	private final CUserService userService;
 	// ========================================================================
 	// UTILITY METHODS
 	// ========================================================================
 
-	public CBabDataInitializer(final JdbcTemplate jdbcTemplate, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, final CBabDeviceService babDeviceService,
-			final CProject_BabService projectService, final CUserService userService, final CCompanyService companyService,
-			final ISessionService sessionService) {
+	public CBabDataInitializer(final JdbcTemplate jdbcTemplate,
+			final CBabDeviceService babDeviceService,
+			final CProject_BabService projectService,
+			final CUserService userService) {
 		Check.notNull(jdbcTemplate, "JdbcTemplate cannot be null");
-		Check.notNull(gridEntityService, "GridEntityService cannot be null");
-		Check.notNull(detailSectionService, "DetailSectionService cannot be null");
-		Check.notNull(pageEntityService, "PageEntityService cannot be null");
 		Check.notNull(babDeviceService, "BabDeviceService cannot be null");
 		Check.notNull(projectService, "ProjectService cannot be null");
 		Check.notNull(userService, "UserService cannot be null");
-		Check.notNull(companyService, "CompanyService cannot be null");
-		Check.notNull(sessionService, "SessionService cannot be null");
 		this.jdbcTemplate = jdbcTemplate;
-		this.gridEntityService = gridEntityService;
-		this.detailSectionService = detailSectionService;
-		this.pageEntityService = pageEntityService;
 		this.babDeviceService = babDeviceService;
 		this.projectService = projectService;
 		this.userService = userService;
-		this.sessionService = sessionService;
 	}
 	// ========================================================================
 	// CLEAR DATA METHODS
@@ -188,49 +131,6 @@ public class CBabDataInitializer {
 			throw e;
 		}
 	}
-	// ========================================================================
-	// INITIALIZATION METHODS
-	// ========================================================================
-
-	/** Initialize UI views for a project. Creates screens and grids for all BAB entities. */
-	private void initializeStandardViews(final CProject_Bab project) throws Exception {
-		try {
-			LOGGER.debug("Initializing BAB standard views for project: {}", project.getName());
-			// Core system views
-			CSystemSettings_BabInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			CCompanyInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			CUserInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			CUserCompanyRoleInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			// BAB-specific views
-			CProject_BabInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			CDashboardProject_BabInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			CDashboardInterfaces_InitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			CBabPolicyRuleInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			// BAB Policy entities (policybase components)
-			CBabPolicyTriggerInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			CBabPolicyActionMaskInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			CBabPolicyActionInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			CBabPolicyFilterInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			CBabDeviceInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			// BAB Node entities (polymorphic virtual network nodes)
-			CBabHttpServerNodeInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			CBabFileInputNodeInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			CBabFileOutputNodeInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			CBabCanNodeInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			CBabModbusNodeInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			CBabSyslogNodeInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			CBabTCPModbusNodeInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			CBabROSNodeInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			// Administrative views
-			CGridEntityInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			CPageEntityInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			LOGGER.debug("BAB standard views initialized successfully");
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing BAB standard views reason={}", e.getMessage());
-			throw e;
-		}
-	}
-
 	public boolean isDatabaseEmpty() {
 		final long cnt = userService.count();
 		LOGGER.info("BAB User count = {}", cnt);
@@ -240,81 +140,31 @@ public class CBabDataInitializer {
 	// PUBLIC API METHODS
 	// ========================================================================
 
-	/** Load minimal data required for BAB profile. Following CDataInitializer pattern but with BAB-specific entities only. */
-	private void loadMinimalData(final boolean minimal) throws Exception {
-		try {
-			LOGGER.info("Loading BAB minimal data (minimal={})", minimal);
-			// ========== NON-PROJECT RELATED INITIALIZATION PHASE ==========
-			// Create BAB company
-			final CCompany company = CCompanyInitializerService.initializeSampleBab(minimal);
-			// Create user roles and users
-			final CUserCompanyRole adminRole = CUserCompanyRoleInitializerService.initializeSampleBab(company, minimal);
-			CUserInitializerService.initializeSampleBab(company, adminRole, minimal);
-			// Set session context for company-scoped initializations
-			sessionService.setActiveCompany(company);
-			final CUser user = userService.getRandomByCompany(company);
-			Check.notNull(user, "No user found for BAB company");
-			sessionService.setActiveUser(user);
-			// ========== ESSENTIAL FOUNDATION ENTITIES ==========
-			// These are REQUIRED for projects to work - must be in exact order
-			// 1. Create project item statuses (REQUIRED for workflow relations)
-			CProjectItemStatusInitializerService.initializeSample(company, minimal);
-			// 2. Create user project roles (REQUIRED for workflow relations)
-			CUserProjectRoleInitializerService.initializeSample(company, minimal);
-			// 3. Create workflow entities WITH status relations (REQUIRED for projects)
-			final CWorkflowEntityService workflowService = CSpringContext.getBean(CWorkflowEntityService.class);
-			final CWorkflowStatusRelationService workflowRelationService = CSpringContext.getBean(CWorkflowStatusRelationService.class);
-			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
-			final CUserProjectRoleService projectRoleService = CSpringContext.getBean(CUserProjectRoleService.class);
-			// Create BAB workflow with proper status relations
-			CWorkflowEntityInitializerService.initializeSampleWorkflowEntities(company, minimal, statusService, projectRoleService, workflowService,
-					workflowRelationService);
-			// 4. Create project types
-			CProjectTypeInitializerService.initializeSampleBab(company, minimal);
-			// ========== PROJECT-SPECIFIC INITIALIZATION PHASE ==========
-			// Create BAB project (now that workflow/status/types exist)
-			final CProject_Bab project = CProject_BabInitializerService.initializeSampleBab(company, minimal);
-			sessionService.setActiveProject(project);
-			// Initialize UI views
-			initializeStandardViews(project);
-			// Initialize system settings
-			CSystemSettings_BabInitializerService.initializeSample(company, minimal);
-			// Initialize dashboard projects
-			CDashboardProject_BabInitializerService.initializeSample(project, minimal);
-			CDashboardInterfaces_InitializerService.initializeSample(project, minimal);
-			// ========== BAB ENTITY INITIALIZATION ==========
-			// Initialize BAB devices and nodes (sample data)
-			CBabDeviceInitializerService.initializeSample(project, minimal);
-			// Initialize BAB network nodes (HTTP servers, vehicles, file inputs, CAN, Modbus, Syslog, TCP Modbus, ROS)
-			CBabHttpServerNodeInitializerService.initializeSample(project, minimal);
-			CBabFileInputNodeInitializerService.initializeSample(project, minimal);
-			CBabFileOutputNodeInitializerService.initializeSample(project, minimal);
-			CBabCanNodeInitializerService.initializeSample(project, minimal);
-			CBabModbusNodeInitializerService.initializeSample(project, minimal);
-			CBabSyslogNodeInitializerService.initializeSample(project, minimal);
-			CBabTCPModbusNodeInitializerService.initializeSample(project, minimal);
-			CBabROSNodeInitializerService.initializeSample(project, minimal);
-			// Initialize policybase sample data after nodes/masks so actions can bind destination-compatible masks
-			CBabPolicybaseInitializerService.initializeSample(project, minimal);
-			// Initialize policy rule sample data after nodes so source/destination combos can be populated
-			CBabPolicyRuleInitializerService.initializeSample(project, minimal);
-			entityManager.flush();
-			LOGGER.info("BAB minimal data loaded successfully");
-		} catch (final Exception e) {
-			LOGGER.error("Error loading BAB minimal data reason={}", e.getMessage());
-			throw e;
-		}
+	/**
+	 * @deprecated Sample creator methods are retired; use {@link #reloadForcedExcel(boolean)} which bootstraps from committed Excel templates.
+	 */
+	@Deprecated(forRemoval = true)
+	public void loadSampleData(final boolean minimal) throws Exception {
+		throw new UnsupportedOperationException("Sample data initialization via Java initializers is disabled. Use reloadForcedExcel(minimal) to import system_init.xlsx.");
 	}
 
-	public void loadSampleData(final boolean minimal) throws Exception {
-		loadMinimalData(minimal);
+	/** Backward-compatible entrypoint: delegates to Excel-first reset. */
+	@Transactional
+	public void reloadForced(final boolean minimal) throws Exception {
+		reloadForcedExcel(minimal);
 	}
 
 	@Transactional
-	public void reloadForced(final boolean minimal) throws Exception {
-		LOGGER.info("BAB data reload (forced) started (minimal={})", minimal);
-		clearSampleData();
-		loadMinimalData(minimal);
-		LOGGER.info("BAB data reload (forced) finished");
+	public void reloadForcedExcel(final boolean minimal) throws Exception {
+		try {
+			LOGGER.info("BAB data reload (forced, Excel-first) started (minimal={})", minimal);
+			clearSampleData();
+			final CSystemInitExcelBootstrapService excelBootstrap = CSpringContext.getBean(CSystemInitExcelBootstrapService.class);
+			final var summary = excelBootstrap.bootstrapAfterReset(minimal);
+			LOGGER.info("BAB data reload (forced, Excel-first) finished: {}", summary.toUiSummary());
+		} catch (final Exception e) {
+			LOGGER.error("Error during BAB Excel-first reset: {}", e.getMessage());
+			throw e;
+		}
 	}
 }
