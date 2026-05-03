@@ -56,7 +56,7 @@ public class CGridEntityImportHandler extends CEntityOfProjectImportHandler<CGri
 	public Class<CGridEntity> getEntityClass() { return CGridEntity.class; }
 
 	@Override
-	public Set<String> getRequiredColumns() { return Set.of("name", "dataservicebeanname"); }
+	public Set<String> getRequiredColumns() { return Set.of("dataservicebeanname"); }
 
 	@Override
 	public Set<String> getSupportedSheetNames() {
@@ -78,14 +78,23 @@ public class CGridEntityImportHandler extends CEntityOfProjectImportHandler<CGri
 		return names;
 	}
 
+	private static String resolveViewNameFromServiceBean(final String beanName) {
+		if (beanName == null || beanName.isBlank()) {
+			return "";
+		}
+		final String entitySimpleName = beanName.endsWith("Service") ? beanName.substring(0, beanName.length() - "Service".length()) : beanName;
+		try {
+			final Class<?> entityClass = CEntityRegistry.getEntityClass(entitySimpleName);
+			return (String) entityClass.getField("VIEW_NAME").get(null);
+		} catch (final Exception ignored) {
+			return "";
+		}
+	}
+
 	@Override
 	public CImportRowResult importRow(final Map<String, String> rowData, final CProject<?> project, final int rowNumber,
 			final CImportOptions options) {
 		final var row = row(rowData);
-		final var nameError = validateEntityNamed(row, rowNumber, rowData);
-		if (nameError.isPresent()) {
-			return nameError.get();
-		}
 		// Resolve effective project from "project" column if present; otherwise use session project.
 		final String projectName = row.string("project");
 		final String companyName = row.string("company");
@@ -101,11 +110,18 @@ public class CGridEntityImportHandler extends CEntityOfProjectImportHandler<CGri
 		if (companyError.isPresent()) {
 			return companyError.get();
 		}
-		final String name = row.string("name");
 		final String beanName = row.string("dataservicebeanname");
 		if (beanName.isBlank()) {
 			return CImportRowResult.error(rowNumber, "Data Service Bean is required", rowData);
 		}
+		if (row.string("name").isBlank()) {
+			rowData.put("name", resolveViewNameFromServiceBean(beanName));
+		}
+		final var nameError = validateEntityNamed(row, rowNumber, rowData);
+		if (nameError.isPresent()) {
+			return nameError.get();
+		}
+		final String name = row.string("name");
 		// WHY: view configuration should be re-runnable; we upsert by name to avoid duplicate bootstrap runs failing.
 		final CGridEntity entity = gridEntityService.findByNameAndProject(name, effectiveProject)
 				.orElseGet(() -> new CGridEntity(name, effectiveProject));

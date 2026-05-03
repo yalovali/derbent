@@ -115,7 +115,7 @@ public class CSystemInitExcelBootstrapService {
 		final byte[] workbookBytes = loadTemplateBytes(minimal);
 		final CImportOptions options = CImportOptions.defaults();
 		options.setDryRun(false);
-		options.setRollbackOnError(false);
+		options.setRollbackOnError(true);
 		options.setSkipUnknownSheets(false);
 		int companiesProcessed = 0;
 		int projectsProcessed = 0;
@@ -135,6 +135,10 @@ public class CSystemInitExcelBootstrapService {
 				sessionService.setActiveProject(project);
 				final CImportResult result =
 						excelImportService.importExcel(new ByteArrayInputStream(workbookBytes), options, project);
+				if (result.getTotalErrors() > 0) {
+					throw new IllegalStateException("Excel init failed for project " + project.getName()
+							+ " (errors=" + result.getTotalErrors() + ")");
+				}
 				totalSuccess += result.getTotalSuccess();
 				totalErrors += result.getTotalErrors();
 				LOGGER.info("Excel init imported into project {}:{} (ok={}, errors={})", project.getId(),
@@ -164,29 +168,28 @@ public class CSystemInitExcelBootstrapService {
 		}
 		final CImportOptions options = CImportOptions.defaults();
 		options.setDryRun(false);
-		options.setRollbackOnError(false);
+		options.setRollbackOnError(true);
 		options.setSkipUnknownSheets(true);
 		// WHY: screens_init.xlsx rows carry explicit parent columns (company/project). Import per-project and
 		// let the engine skip mismatched rows; this keeps the sessionProject context correct and avoids
 		// cross-project inserts when resolving relations.
+		// Import per project; skip mismatched rows so each transaction only touches one project.
 		options.setSkipMismatchedProjectTokens(true);
 		for (final CCompany company : companyService.findActiveCompanies()) {
 			final List<? extends CProject<?>> projects = projectService.listByCompany(company);
-			if (projects.isEmpty()) {
-				LOGGER.warn("No projects for company {}; skipping screens Excel init", company.getName());
-				continue;
-			}
+			Check.notEmpty(projects, "No projects for company " + company.getName());
 			sessionService.setActiveCompany(company);
 			final CUser user = userService.getRandomByCompany(company);
-			if (user == null) {
-				LOGGER.warn("No user for company {}; skipping screens Excel init", company.getName());
-				continue;
-			}
+			Check.notNull(user, "No user for company: " + company.getName());
 			sessionService.setActiveUser(user);
 			for (final CProject<?> project : projects) {
 				sessionService.setActiveProject(project);
 				final CImportResult result =
 						excelImportService.importExcel(new ByteArrayInputStream(workbookBytes), options, project);
+				if (result.getTotalErrors() > 0) {
+					throw new IllegalStateException("Screens Excel init failed for company " + company.getName()
+							+ " project " + project.getName() + " (errors=" + result.getTotalErrors() + ")");
+				}
 				LOGGER.info("Screens Excel imported for company {} project {} (ok={}, errors={})", company.getName(),
 						project.getName(), result.getTotalSuccess(), result.getTotalErrors());
 			}

@@ -15,6 +15,7 @@ import tech.derbent.api.page.domain.CPageEntityType;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CGridEntity;
+import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.users.service.IUserRepository;
 
@@ -22,18 +23,21 @@ import tech.derbent.api.users.service.IUserRepository;
 @Service
 public class CPageEntityImportHandler extends CProjectItemImportHandler<CPageEntity, CPageEntityType> {
 
+	private final CDetailSectionService detailSectionService;
 	private final CGridEntityService gridEntityService;
 	private final CPageEntityService pageEntityService;
 	private final CPageEntityTypeService typeService;
 
 	public CPageEntityImportHandler(final CPageEntityService pageEntityService,
 			final CPageEntityTypeService typeService, final CGridEntityService gridEntityService,
+			final CDetailSectionService detailSectionService,
 			final CProjectItemStatusService statusService, final IUserRepository userRepository,
 			final CImportProjectResolver projectResolver) {
 		super(statusService, userRepository, projectResolver);
 		this.pageEntityService = pageEntityService;
 		this.typeService = typeService;
 		this.gridEntityService = gridEntityService;
+		this.detailSectionService = detailSectionService;
 	}
 
 	@Override
@@ -48,6 +52,8 @@ public class CPageEntityImportHandler extends CProjectItemImportHandler<CPageEnt
 		entity.setPageService(row.string("pageservice"));
 		row.optionalString("icon").ifPresent(entity::setIconString);
 		row.optionalBoolean("requiresauthentication").ifPresent(entity::setRequiresAuthentication);
+		row.optionalBoolean("attributeshowinquicktoolbar").ifPresent(entity::setAttributeShowInQuickToolbar);
+
 		final String gridEntityName = row.string("gridentity");
 		if (!gridEntityName.isBlank()) {
 			final CGridEntity grid = gridEntityService.findByNameAndProject(gridEntityName, project).orElse(null);
@@ -56,6 +62,19 @@ public class CPageEntityImportHandler extends CProjectItemImportHandler<CPageEnt
 			}
 			entity.setGridEntity(grid);
 		}
+
+		String detailSectionName = row.string("detailsection");
+		if (detailSectionName.isBlank()) {
+			detailSectionName = gridEntityName;
+		}
+		if (!detailSectionName.isBlank()) {
+			final var section = detailSectionService.findByNameAndProject(project, detailSectionName);
+			if (section == null) {
+				throw new IllegalArgumentException("Detail Section '" + detailSectionName + "' not found");
+			}
+			entity.setDetailSection(section);
+		}
+
 		row.optionalString("content").ifPresent(entity::setContent);
 	}
 
@@ -80,6 +99,8 @@ public class CPageEntityImportHandler extends CProjectItemImportHandler<CPageEnt
 				Map.entry("Menu Order", "menuorder"), Map.entry("Page Title", "pagetitle"),
 				Map.entry("Page Service", "pageservice"), Map.entry("Icon", "icon"),
 				Map.entry("Requires Authentication", "requiresauthentication"), Map.entry("Grid Entity", "gridentity"),
+				Map.entry("Detail Section", "detailsection"),
+				Map.entry("Show in Quick Toolbar", "attributeshowinquicktoolbar"),
 				Map.entry("Content", "content"), Map.entry("Company", "company"), Map.entry("Project", "project"));
 	}
 
@@ -87,7 +108,7 @@ public class CPageEntityImportHandler extends CProjectItemImportHandler<CPageEnt
 	public Class<CPageEntity> getEntityClass() { return CPageEntity.class; }
 
 	@Override
-	public Set<String> getRequiredColumns() { return Set.of("name", "menutitle", "pagetitle", "pageservice"); }
+	public Set<String> getRequiredColumns() { return Set.of("menutitle", "pagetitle", "pageservice"); }
 
 	@Override
 	public Set<String> getSupportedSheetNames() {
@@ -111,6 +132,19 @@ public class CPageEntityImportHandler extends CProjectItemImportHandler<CPageEnt
 
 	@Override
 	protected Class<CPageEntityType> getTypeClass() { return CPageEntityType.class; }
+
+	@Override
+	public tech.derbent.api.imports.domain.CImportRowResult importRow(final Map<String, String> rowData, final CProject<?> project,
+			final int rowNumber, final tech.derbent.api.imports.domain.CImportOptions options) {
+		final var row = row(rowData);
+		if (row.string("name").isBlank()) {
+			final String grid = row.string("gridentity");
+			final String pageTitle = row.string("pagetitle");
+			final String fallback = !grid.isBlank() ? grid : (!pageTitle.isBlank() ? pageTitle : "Dynamic Page");
+			rowData.put("name", fallback);
+		}
+		return super.importRow(rowData, project, rowNumber, options);
+	}
 
 	@Override
 	protected void save(final CPageEntity entity) {

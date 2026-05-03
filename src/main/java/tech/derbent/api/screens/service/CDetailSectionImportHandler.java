@@ -44,7 +44,7 @@ public class CDetailSectionImportHandler extends CEntityOfProjectImportHandler<C
 	public Class<CDetailSection> getEntityClass() { return CDetailSection.class; }
 
 	@Override
-	public Set<String> getRequiredColumns() { return Set.of("name", "entitytype"); }
+	public Set<String> getRequiredColumns() { return Set.of("entitytype"); }
 
 	@Override
 	public Set<String> getSupportedSheetNames() {
@@ -66,14 +66,22 @@ public class CDetailSectionImportHandler extends CEntityOfProjectImportHandler<C
 		return names;
 	}
 
+	private static String resolveViewNameFromEntityType(final String entityType) {
+		if (entityType == null || entityType.isBlank()) {
+			return "";
+		}
+		try {
+			final Class<?> entityClass = CEntityRegistry.getEntityClass(entityType);
+			return (String) entityClass.getField("VIEW_NAME").get(null);
+		} catch (final Exception ignored) {
+			return "";
+		}
+	}
+
 	@Override
 	public CImportRowResult importRow(final Map<String, String> rowData, final CProject<?> project, final int rowNumber,
 			final CImportOptions options) {
 		final var row = row(rowData);
-		final var nameError = validateEntityNamed(row, rowNumber, rowData);
-		if (nameError.isPresent()) {
-			return nameError.get();
-		}
 		// Resolve effective project from "project" column if present; otherwise use session project.
 		final String projectName = row.string("project");
 		final String companyName = row.string("company");
@@ -90,11 +98,18 @@ public class CDetailSectionImportHandler extends CEntityOfProjectImportHandler<C
 		if (companyError.isPresent()) {
 			return companyError.get();
 		}
-		final String name = row.string("name");
 		final String entityType = row.string("entitytype");
 		if (entityType.isBlank()) {
 			return CImportRowResult.error(rowNumber, "Entity Type is required", rowData);
 		}
+		if (row.string("name").isBlank()) {
+			rowData.put("name", resolveViewNameFromEntityType(entityType));
+		}
+		final var nameError = validateEntityNamed(row, rowNumber, rowData);
+		if (nameError.isPresent()) {
+			return nameError.get();
+		}
+		final String name = row.string("name");
 		// WHY: screen configuration must be re-runnable; upsert by name avoids duplicate bootstrap runs failing.
 		CDetailSection entity = detailSectionService.findByNameAndProject(effectiveProject, name);
 		if (entity == null) {
