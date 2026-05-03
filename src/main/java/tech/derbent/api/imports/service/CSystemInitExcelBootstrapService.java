@@ -98,7 +98,19 @@ public class CSystemInitExcelBootstrapService {
 		this.excelTemplateService = excelTemplateService;
 	}
 
-	/** Excel-first DB reset entrypoint. This method is designed to be called right after the DB has been cleared. */
+	/** Excel-first DB reset entrypoint. This method is designed to be called right after the DB has been cleared.
+	 * <p>
+	 * Import sequence:
+	 * <ol>
+	 * <li>Ensure seed data (companies, users, workflows)</li>
+	 * <li>Import static types once per company (Status, Workflow, Activity Type, etc.)</li>
+	 * <li>Import data items per project (Activity, Requirement, Decision, etc.)</li>
+	 * <li>Import screen configurations (optional)</li>
+	 * </ol>
+	 * WHY: Types are company-scoped and shared; importing them once improves performance
+	 * and avoids duplicate lookups across projects.
+	 * </p>
+	 */
 	public CBootstrapSummary bootstrapAfterReset(final boolean minimal) throws Exception {
 		ensureSeedData(minimal);
 		final CBootstrapSummary summary = bootstrapAllProjects(minimal);
@@ -110,7 +122,6 @@ public class CSystemInitExcelBootstrapService {
 	}
 
 	public CBootstrapSummary bootstrapAllProjects(final boolean minimal) {
-		final byte[] workbookBytes = loadTemplateBytes(minimal);
 		final CImportOptions options = CImportOptions.defaults();
 		options.setDryRun(false);
 		options.setRollbackOnError(true);
@@ -127,19 +138,38 @@ public class CSystemInitExcelBootstrapService {
 			final CUser user = userService.getRandomByCompany(company);
 			Check.notNull(user, "No user found for company: " + company.getName());
 			sessionService.setActiveUser(user);
+			// STEP 1: Import static types once per company (Activity Type, Status, Workflow, etc.)
+			// WHY: Types are company-scoped and shared across all projects
+			final byte[] typesWorkbookBytes = loadTypesTemplateBytes();
 			final List<? extends CProject<?>> projects = projectService.listByCompany(company);
+			Check.notEmpty(projects, "No projects for company: " + company.getName());
+			sessionService.setActiveProject(projects.get(0)); // Use first project for company-scoped imports
+			final CImportResult typesResult =
+					excelImportService.importExcel(new ByteArrayInputStream(typesWorkbookBytes), options,
+							projects.get(0));
+			if (typesResult.getTotalErrors() > 0) {
+				throw new IllegalStateException("Types Excel init failed for company " + company.getName() + " (errors="
+						+ typesResult.getTotalErrors() + ")");
+			}
+			totalSuccess += typesResult.getTotalSuccess();
+			totalErrors += typesResult.getTotalErrors();
+			LOGGER.info("Types Excel imported for company {} (ok={}, errors={})", company.getName(),
+					typesResult.getTotalSuccess(), typesResult.getTotalErrors());
+			// STEP 2: Import data items per project (Activity, Requirement, Decision, etc.)
+			// WHY: Data items are project-scoped and must be imported for each project separately
+			final byte[] dataWorkbookBytes = loadDataTemplateBytes();
 			for (final CProject<?> project : projects) {
 				projectsProcessed++;
 				sessionService.setActiveProject(project);
 				final CImportResult result =
-						excelImportService.importExcel(new ByteArrayInputStream(workbookBytes), options, project);
+						excelImportService.importExcel(new ByteArrayInputStream(dataWorkbookBytes), options, project);
 				if (result.getTotalErrors() > 0) {
-					throw new IllegalStateException("Excel init failed for project " + project.getName() + " (errors="
-							+ result.getTotalErrors() + ")");
+					throw new IllegalStateException("Data Excel init failed for project " + project.getName()
+							+ " (errors=" + result.getTotalErrors() + ")");
 				}
 				totalSuccess += result.getTotalSuccess();
 				totalErrors += result.getTotalErrors();
-				LOGGER.info("Excel init imported into project {}:{} (ok={}, errors={})", project.getId(),
+				LOGGER.info("Data Excel imported into project {}:{} (ok={}, errors={})", project.getId(),
 						project.getName(), result.getTotalSuccess(), result.getTotalErrors());
 			}
 		}
@@ -338,13 +368,23 @@ public class CSystemInitExcelBootstrapService {
 		return workflowEntityService.save(wf);
 	}
 
-	private byte[] loadTemplateBytes(final boolean minimal) {
-		try (final InputStream in = excelTemplateService.openSystemInitTemplate(minimal)) {
+	private byte[] loadTypesTemplateBytes() {
+		try (final InputStream in = excelTemplateService.openSystemInitTypesTemplate()) {
 			final byte[] bytes = in.readAllBytes();
-			Check.isTrue(bytes.length > 0, "Empty system init workbook");
+			Check.isTrue(bytes.length > 0, "Empty system init types workbook");
 			return bytes;
 		} catch (final Exception e) {
-			throw new IllegalStateException("Failed to read system init workbook bytes", e);
+			throw new IllegalStateException("Failed to read system init types workbook bytes", e);
+		}
+	}
+
+	private byte[] loadDataTemplateBytes() {
+		try (final InputStream in = excelTemplateService.openSystemInitDataTemplate()) {
+			final byte[] bytes = in.readAllBytes();
+			Check.isTrue(bytes.length > 0, "Empty system init data workbook");
+			return bytes;
+		} catch (final Exception e) {
+			throw new IllegalStateException("Failed to read system init data workbook bytes", e);
 		}
 	}
 

@@ -79,27 +79,21 @@ public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>
 		}
 		final String statusName = row.string("status");
 		if (!statusName.isBlank()) {
-			final CProjectItemStatus status = statusService.findByNameAndCompany(statusName, company).orElse(null);
-			if (status == null) {
-				return CImportRowResult.error(rowNumber,
-						"Status '" + statusName + "' not found. Create it before importing.", rowData);
-			}
+			final CProjectItemStatus status = statusService.findByNameAndCompany(statusName, company)
+					.orElseThrow(() -> new tech.derbent.api.exceptions.CImportException(rowNumber,
+							"Status '" + statusName + "' not found. Create it before importing."));
 			entity.setStatus(status);
 		}
 		final String typeName = row.string("entitytype");
 		if (!typeName.isBlank()) {
-			final TType type = findTypeByNameAndCompany(typeName, company).orElse(null);
-			if (type == null) {
-				return CImportRowResult.error(rowNumber,
-						getTypeClass().getSimpleName().replaceFirst("^C", "").replace("Type", " Type") + " '" + typeName
-								+ "' not found. Create it before importing.",
-						rowData);
-			}
+			final TType type = findTypeByNameAndCompany(typeName, company)
+					.orElseThrow(() -> new tech.derbent.api.exceptions.CImportException(rowNumber,
+							getTypeClass().getSimpleName().replaceFirst("^C", "").replace("Type", " Type") + " '" + typeName
+									+ "' not found. Create it before importing."));
 			entity.setEntityType(type);
 		} else if (isTypeRequired()) {
-			return CImportRowResult.error(rowNumber,
-					getTypeClass().getSimpleName().replaceFirst("^C", "").replace("Type", " Type") + " is required",
-					rowData);
+			throw new tech.derbent.api.exceptions.CImportException(rowNumber,
+					getTypeClass().getSimpleName().replaceFirst("^C", "").replace("Type", " Type") + " is required");
 		}
 		applyExtraFields(entity, row, effectiveProject, rowNumber, rowData);
 		if (!options.isDryRun()) {
@@ -118,22 +112,16 @@ public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>
 							return retryProjectFieldsError.get();
 						}
 						if (!statusName.isBlank()) {
-							final CProjectItemStatus status =
-									statusService.findByNameAndCompany(statusName, company).orElse(null);
-							if (status == null) {
-								return CImportRowResult.error(rowNumber,
-										"Status '" + statusName + "' not found. Create it before importing.", rowData);
-							}
+							final CProjectItemStatus status = statusService.findByNameAndCompany(statusName, company)
+									.orElseThrow(() -> new tech.derbent.api.exceptions.CImportException(rowNumber,
+											"Status '" + statusName + "' not found. Create it before importing."));
 							existing.setStatus(status);
 						}
 						if (!typeName.isBlank()) {
-							final TType type = findTypeByNameAndCompany(typeName, company).orElse(null);
-							if (type == null) {
-								return CImportRowResult.error(rowNumber,
-										getTypeClass().getSimpleName().replaceFirst("^C", "").replace("Type", " Type")
-												+ " '" + typeName + "' not found. Create it before importing.",
-										rowData);
-							}
+							final TType type = findTypeByNameAndCompany(typeName, company)
+									.orElseThrow(() -> new tech.derbent.api.exceptions.CImportException(rowNumber,
+											getTypeClass().getSimpleName().replaceFirst("^C", "").replace("Type", " Type")
+													+ " '" + typeName + "' not found. Create it before importing."));
 							existing.setEntityType(type);
 						}
 						applyExtraFields(existing, row, effectiveProject, rowNumber, rowData);
