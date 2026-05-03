@@ -11,7 +11,7 @@ import tech.derbent.plm.agile.domain.CEpicType;
 
 /** Imports {@link CEpicType} rows from Excel (company-scoped reference data). */
 @Service
-@Profile({"derbent", "default"})
+@Profile({"derbent", "bab", "default"})
 public class CEpicTypeImportHandler extends CAbstractWorkflowTypeImportHandler<CEpicType> {
 
     private final CEpicTypeService epicTypeService;

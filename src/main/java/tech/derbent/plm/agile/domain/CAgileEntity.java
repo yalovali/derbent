@@ -400,6 +400,10 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 
 	public void setCompletionDate(final LocalDate completionDate) {
 		this.completionDate = completionDate;
+		// WHY: Agile entities delegate sprint planning fields to CSprintItem; keep the owned sprint item in sync.
+		if (sprintItem != null) {
+			sprintItem.setCompletionDate(completionDate);
+		}
 		updateLastModified();
 	}
 
@@ -449,6 +453,9 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 
 	public void setProgressPercentage(final Integer progressPercentage) {
 		this.progressPercentage = progressPercentage;
+		// WHY: getProgressPercentage() reads from sprintItem; without syncing, imports and UI edits appear to be ignored.
+		Check.notNull(sprintItem, "Sprint item must not be null");
+		sprintItem.setProgressPercentage(progressPercentage);
 		updateLastModified();
 	}
 
@@ -472,7 +479,10 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 	}
 
 	public void setStartDate(final LocalDate startDate) {
-		this.startDate = startDate;
+		this.startDate = startDate; // kept for backward compatibility
+		// WHY: getStartDate() reads from sprintItem; ensure start date changes (incl. Excel import) affect sprint planning.
+		Check.notNull(sprintItem, "Sprint item must not be null");
+		sprintItem.setStartDate(startDate);
 		updateLastModified();
 	}
 

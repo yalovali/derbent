@@ -20,7 +20,7 @@ import tech.derbent.plm.agile.domain.CUserStoryType;
 
 /** Imports {@link CUserStory} rows from Excel into the active project. */
 @Service
-@Profile({"derbent", "default"})
+@Profile({"derbent", "bab", "default"})
 public class CUserStoryImportHandler extends CAbstractExcelImportHandler<CUserStory> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserStoryImportHandler.class);

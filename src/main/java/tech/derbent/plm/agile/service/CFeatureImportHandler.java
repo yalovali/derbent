@@ -23,7 +23,7 @@ import tech.derbent.plm.agile.domain.CFeatureType;
  * Column aliases are built automatically from @AMetaData; additional synonyms are declared here.
  */
 @Service
-@Profile({"derbent", "default"})
+@Profile({"derbent", "bab", "default"})
 public class CFeatureImportHandler extends CAbstractExcelImportHandler<CFeature> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CFeatureImportHandler.class);

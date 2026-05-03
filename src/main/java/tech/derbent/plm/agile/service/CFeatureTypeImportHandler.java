@@ -11,7 +11,7 @@ import tech.derbent.plm.agile.domain.CFeatureType;
 
 /** Imports {@link CFeatureType} rows from Excel (company-scoped reference data). */
 @Service
-@Profile({"derbent", "default"})
+@Profile({"derbent", "bab", "default"})
 public class CFeatureTypeImportHandler extends CAbstractWorkflowTypeImportHandler<CFeatureType> {
 
     private final CFeatureTypeService featureTypeService;

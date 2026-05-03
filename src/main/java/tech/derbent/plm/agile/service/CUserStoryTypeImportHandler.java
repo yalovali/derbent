@@ -11,7 +11,7 @@ import tech.derbent.plm.agile.domain.CUserStoryType;
 
 /** Imports {@link CUserStoryType} rows from Excel (company-scoped reference data). */
 @Service
-@Profile({"derbent", "default"})
+@Profile({"derbent", "bab", "default"})
 public class CUserStoryTypeImportHandler extends CAbstractWorkflowTypeImportHandler<CUserStoryType> {
 
 	private final CUserStoryTypeService userStoryTypeService;

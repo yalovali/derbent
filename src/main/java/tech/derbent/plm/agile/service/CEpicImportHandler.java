@@ -23,7 +23,7 @@ import tech.derbent.plm.agile.domain.CEpicType;
  * Epics are the top-level items in the agile hierarchy (Epic → Feature → User Story).
  */
 @Service
-@Profile({"derbent", "default"})
+@Profile({"derbent", "bab", "default"})
 public class CEpicImportHandler extends CAbstractExcelImportHandler<CEpic> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CEpicImportHandler.class);
