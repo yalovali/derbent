@@ -67,9 +67,14 @@ public class CCommentImportHandler extends CEntityOfCompanyImportHandler<CCommen
 	@Override
 	public CImportRowResult importRow(final Map<String, String> rowData, final CProject<?> project, final int rowNumber,
 			final CImportOptions options) {
-		final String ownerType = rowData.getOrDefault("ownertype", "").trim();
-		final String ownerName = rowData.getOrDefault("ownername", "").trim();
-		final String commentText = rowData.getOrDefault("commenttext", "").trim();
+		final var companyError = validateProjectHasCompany(project, rowNumber, rowData);
+		if (companyError.isPresent()) {
+			return companyError.get();
+		}
+		final var row = row(rowData);
+		final String ownerType = row.string("ownertype");
+		final String ownerName = row.string("ownername");
+		final String commentText = row.string("commenttext");
 		if (ownerType.isBlank() || ownerName.isBlank()) {
 			return CImportRowResult.error(rowNumber, "Owner Type and Owner Name are required", rowData);
 		}
@@ -85,7 +90,7 @@ public class CCommentImportHandler extends CEntityOfCompanyImportHandler<CCommen
 			return CImportRowResult.error(rowNumber,
 					"Owner entity does not support comments: " + ownerOpt.get().getClass().getSimpleName(), rowData);
 		}
-		final String authorLogin = rowData.getOrDefault("author", "").trim();
+		final String authorLogin = row.string("author");
 		final CUser author;
 		if (!authorLogin.isBlank()) {
 			// WHY: login/username is the only stable identifier for users across environments.
@@ -97,11 +102,8 @@ public class CCommentImportHandler extends CEntityOfCompanyImportHandler<CCommen
 			author = null;
 		}
 		final CComment comment = new CComment(commentText, author);
-		comment.setCompany(project.getCompany());
-		final String importantStr = rowData.getOrDefault("important", "").trim();
-		if (!importantStr.isBlank()) {
-			comment.setImportant(Set.of("true", "yes", "1").contains(importantStr.toLowerCase()));
-		}
+		applyEntityOfCompanyFields(comment, project.getCompany());
+		row.optionalBoolean("important").ifPresent(comment::setImportant);
 		owner.getComments().add(comment);
 		if (!options.isDryRun()) {
 			itemResolver.save((CProjectItem<?, ?>) ownerOpt.get());

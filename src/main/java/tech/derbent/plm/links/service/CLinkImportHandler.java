@@ -62,10 +62,15 @@ public class CLinkImportHandler extends CEntityOfCompanyImportHandler<CLink> {
 	@Override
 	public CImportRowResult importRow(final Map<String, String> rowData, final CProject<?> project, final int rowNumber,
 			final CImportOptions options) {
-		final String sourceType = rowData.getOrDefault("sourcetype", "").trim();
-		final String sourceName = rowData.getOrDefault("sourcename", "").trim();
-		final String targetType = rowData.getOrDefault("targettype", "").trim();
-		final String targetName = rowData.getOrDefault("targetname", "").trim();
+		final var companyError = validateProjectHasCompany(project, rowNumber, rowData);
+		if (companyError.isPresent()) {
+			return companyError.get();
+		}
+		final var row = row(rowData);
+		final String sourceType = row.string("sourcetype");
+		final String sourceName = row.string("sourcename");
+		final String targetType = row.string("targettype");
+		final String targetName = row.string("targetname");
 		if (sourceType.isBlank() || sourceName.isBlank() || targetType.isBlank() || targetName.isBlank()) {
 			return CImportRowResult.error(rowNumber, "Source/Target Type and Name are required", rowData);
 		}
@@ -83,19 +88,16 @@ public class CLinkImportHandler extends CEntityOfCompanyImportHandler<CLink> {
 			return CImportRowResult.error(rowNumber,
 					"Source entity does not support links: " + sourceOpt.get().getClass().getSimpleName(), rowData);
 		}
-		final String linkTypeValue = rowData.getOrDefault("linktype", "").trim();
-		final String description = rowData.getOrDefault("description", "").trim();
+		final String linkTypeValue = row.string("linktype");
 
 		final CLink link = new CLink(sourceOpt.get().getClass().getSimpleName(), sourceOpt.get().getId(),
 				targetOpt.get().getClass().getSimpleName(), targetOpt.get().getId(),
 				linkTypeValue.isBlank() ? "Related" : linkTypeValue);
-		link.setCompany(project.getCompany());
-		if (!description.isBlank()) {
-			link.setDescription(description);
-		}
+		applyEntityOfCompanyFields(link, project.getCompany());
+		applyEntityNamedFields(link, row);
 		sourceOwner.getLinks().add(link);
 
-		final boolean bidirectional = Set.of("true", "yes", "1").contains(rowData.getOrDefault("bidirectional", "").trim().toLowerCase());
+		final boolean bidirectional = row.optionalBoolean("bidirectional").orElse(Boolean.FALSE).booleanValue();
 		if (bidirectional) {
 			if (!(targetOpt.get() instanceof final IHasLinks targetOwner)) {
 				return CImportRowResult.error(rowNumber,
@@ -104,10 +106,8 @@ public class CLinkImportHandler extends CEntityOfCompanyImportHandler<CLink> {
 			final CLink reverse = new CLink(targetOpt.get().getClass().getSimpleName(), targetOpt.get().getId(),
 					sourceOpt.get().getClass().getSimpleName(), sourceOpt.get().getId(),
 					linkTypeValue.isBlank() ? "Related" : linkTypeValue);
-			reverse.setCompany(project.getCompany());
-			if (!description.isBlank()) {
-				reverse.setDescription(description);
-			}
+			applyEntityOfCompanyFields(reverse, project.getCompany());
+			applyEntityNamedFields(reverse, row);
 			targetOwner.getLinks().add(reverse);
 			if (!options.isDryRun()) {
 				itemResolver.save((CProjectItem<?, ?>) targetOpt.get());

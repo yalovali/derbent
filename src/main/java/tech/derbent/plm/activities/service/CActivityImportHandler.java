@@ -49,11 +49,6 @@ public class CActivityImportHandler extends CProjectItemImportHandler<CActivity,
     public Class<CActivity> getEntityClass() { return CActivity.class; }
 
     @Override
-    protected Map<String, String> getAdditionalColumnAliases() {
-        return Map.of("Type", "entitytype");
-    }
-
-    @Override
     protected Class<CActivityType> getTypeClass() { return CActivityType.class; }
 
     @Override

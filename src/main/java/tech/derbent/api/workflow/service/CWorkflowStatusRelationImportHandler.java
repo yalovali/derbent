@@ -81,12 +81,14 @@ public class CWorkflowStatusRelationImportHandler extends CEntityImportHandler<C
 	@Override
 	public CImportRowResult importRow(final Map<String, String> rowData, final CProject<?> project, final int rowNumber,
 			final CImportOptions options) {
-		if (project.getCompany() == null) {
-			return CImportRowResult.error(rowNumber, "Project company is required to import workflow relations", rowData);
+		final var companyError = validateProjectHasCompany(project, rowNumber, rowData);
+		if (companyError.isPresent()) {
+			return companyError.get();
 		}
-		final String workflowName = rowData.getOrDefault("workflow", "").trim();
-		final String fromName = rowData.getOrDefault("fromstatus", "").trim();
-		final String toName = rowData.getOrDefault("tostatus", "").trim();
+		final var row = row(rowData);
+		final String workflowName = row.string("workflow");
+		final String fromName = row.string("fromstatus");
+		final String toName = row.string("tostatus");
 		if (workflowName.isBlank() || fromName.isBlank() || toName.isBlank()) {
 			return CImportRowResult.error(rowNumber, "Workflow, From Status and To Status are required", rowData);
 		}
@@ -104,7 +106,7 @@ public class CWorkflowStatusRelationImportHandler extends CEntityImportHandler<C
 			return CImportRowResult.error(rowNumber, "To Status '" + toName + "' not found", rowData);
 		}
 
-		final boolean initialStatus = Set.of("true", "yes", "1").contains(rowData.getOrDefault("initialstatus", "").trim().toLowerCase());
+		final boolean initialStatus = row.optionalBoolean("initialstatus").orElse(Boolean.FALSE).booleanValue();
 		final List<CUserProjectRole> roles = resolveRoles(rowData.getOrDefault("roles", ""), project);
 		if (roles == null) {
 			return CImportRowResult.error(rowNumber, "One or more roles not found", rowData);

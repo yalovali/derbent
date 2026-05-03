@@ -23,14 +23,6 @@ public abstract class CEntityOfProjectImportHandler<T extends CEntityOfProject<T
 		this.userRepository = userRepository;
 	}
 
-	protected final Optional<CImportRowResult> validateProjectHasCompany(final CProject<?> project, final int rowNumber,
-			final Map<String, String> rowData) {
-		if (project.getCompany() == null) {
-			return Optional.of(CImportRowResult.error(rowNumber, "Project company is required", rowData));
-		}
-		return Optional.empty();
-	}
-
 	protected final Optional<CImportRowResult> applyEntityOfProjectFields(final T entity, final CExcelRow row,
 			final CProject<?> project, final int rowNumber, final Map<String, String> rowData) {
 		applyEntityNamedFields(entity, row);

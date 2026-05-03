@@ -4,8 +4,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.imports.domain.CImportRowResult;
+import tech.derbent.api.projects.domain.CProject;
 
 /**
  * Base class for entity import handlers.
@@ -48,6 +51,14 @@ public abstract class CAbstractExcelImportHandler<T> implements IEntityImportHan
     protected final CExcelRow row(final Map<String, String> rowData) {
         return new CExcelRow(rowData);
     }
+
+	protected final Optional<CImportRowResult> validateProjectHasCompany(final CProject<?> project, final int rowNumber,
+			final Map<String, String> rowData) {
+		if (project.getCompany() == null) {
+			return Optional.of(CImportRowResult.error(rowNumber, "Project company is required", rowData));
+		}
+		return Optional.empty();
+	}
 
     private static Map<String, String> buildMetaAliases(final Class<?> entityClass) {
         final Map<String, String> aliases = new LinkedHashMap<>();
