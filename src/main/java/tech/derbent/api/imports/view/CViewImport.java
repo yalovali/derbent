@@ -185,7 +185,15 @@ public final class CViewImport extends CAbstractPage {
         systemInitAnchor.getElement().setAttribute("download", true);
         systemInitAnchor.addClassNames(LumoUtility.FontSize.SMALL);
 
-        section.add(upload, templateAnchor, systemInitAnchor);
+        final Anchor plmSampleAnchor = new Anchor(createPlmProjectResource(), "Download PLM project sample (Smart Building IoT)");
+        plmSampleAnchor.getElement().setAttribute("download", true);
+        plmSampleAnchor.addClassNames(LumoUtility.FontSize.SMALL);
+
+        final Anchor babSampleAnchor = new Anchor(createBabProjectResource(), "Download BAB project sample (Building Automation System)");
+        babSampleAnchor.getElement().setAttribute("download", true);
+        babSampleAnchor.addClassNames(LumoUtility.FontSize.SMALL);
+
+        section.add(upload, templateAnchor, systemInitAnchor, plmSampleAnchor, babSampleAnchor);
         return section;
     }
 
@@ -209,6 +217,36 @@ public final class CViewImport extends CAbstractPage {
                 return excelTemplateService.openSystemInitTemplate(false);
             } catch (final Exception e) {
                 LOGGER.error("Failed to open system init template reason={}", e.getMessage());
+                return new java.io.ByteArrayInputStream(new byte[0]);
+            }
+        });
+    }
+
+    private StreamResource createPlmProjectResource() {
+        return new StreamResource("sample_plm_project.xlsx", () -> {
+            try {
+                final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                try (final var wb = CSampleImportExcelGenerator.createPlmProjectWorkbook()) {
+                    wb.write(baos);
+                }
+                return new java.io.ByteArrayInputStream(baos.toByteArray());
+            } catch (final Exception e) {
+                LOGGER.error("Failed to generate PLM sample reason={}", e.getMessage());
+                return new java.io.ByteArrayInputStream(new byte[0]);
+            }
+        });
+    }
+
+    private StreamResource createBabProjectResource() {
+        return new StreamResource("sample_bab_project.xlsx", () -> {
+            try {
+                final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                try (final var wb = CSampleImportExcelGenerator.createBabProjectWorkbook()) {
+                    wb.write(baos);
+                }
+                return new java.io.ByteArrayInputStream(baos.toByteArray());
+            } catch (final Exception e) {
+                LOGGER.error("Failed to generate BAB sample reason={}", e.getMessage());
                 return new java.io.ByteArrayInputStream(new byte[0]);
             }
         });
