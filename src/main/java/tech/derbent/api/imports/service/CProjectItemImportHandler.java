@@ -151,7 +151,7 @@ public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>
 						applyExtraFields(existing, row, effectiveProject, rowNumber, rowData);
 						save(existing);
 					} else {
-						throw e;
+						return CImportRowResult.error(rowNumber, e.getMessage(), rowData);
 					}
 				} else {
 					throw e;

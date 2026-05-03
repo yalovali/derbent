@@ -53,7 +53,7 @@ public class CSystemInitExcelBootstrapService {
 	private static final String SEED_COMPANY_NAME = "Of Teknoloji Çözümleri";
 	// Keep these aligned with src/main/resources/excel/system_init.xlsx company/project tokens.
 	private static final List<String> SEED_PROJECT_NAMES = List.of("Derbent PM Demo", "Derbent API Platform",
-			"BAB Integration Program", "Mobile App Delivery", "Data & Analytics Platform", "Customer Portal Revamp");
+			"BAB Integration Program");
 	private static final String SEED_PROJECT_TYPE_NAME = "Default Project Type";
 	private static final String SEED_STATUS_FROM_NAME = "Seed Start";
 	private static final String SEED_STATUS_TO_NAME = "Open";
@@ -187,10 +187,19 @@ public class CSystemInitExcelBootstrapService {
 			// Use first project as fallback context; individual rows override via the "project" column.
 			final CProject<?> fallbackProject = projects.get(0);
 			sessionService.setActiveProject(fallbackProject);
-			final CImportResult result =
-					excelImportService.importExcel(new ByteArrayInputStream(workbookBytes), options, fallbackProject);
-			LOGGER.info("Screens Excel imported for company {} (ok={}, errors={})", company.getName(),
-					result.getTotalSuccess(), result.getTotalErrors());
+			try {
+				final CImportResult result =
+						excelImportService.importExcel(new ByteArrayInputStream(workbookBytes), options, fallbackProject);
+				LOGGER.info("Screens Excel imported for company {} (ok={}, errors={})", company.getName(),
+						result.getTotalSuccess(), result.getTotalErrors());
+			} catch (final org.springframework.transaction.UnexpectedRollbackException e) {
+				// WHY: screen init is best-effort; duplicate/constraint issues in large config workbooks must not break DB reset.
+				LOGGER.warn("Screens Excel import rolled back for company {}: {}; continuing without Excel screens", company.getName(),
+						e.getMessage());
+			} catch (final RuntimeException e) {
+				LOGGER.warn("Screens Excel import failed for company {}: {}; continuing without Excel screens", company.getName(),
+						e.getMessage());
+			}
 		}
 	}
 

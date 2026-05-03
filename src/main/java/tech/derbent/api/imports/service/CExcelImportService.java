@@ -1,9 +1,9 @@
 package tech.derbent.api.imports.service;
 
 import java.io.InputStream;
+import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.time.ZoneId;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -25,320 +25,305 @@ import tech.derbent.api.imports.domain.CImportSheetResult;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 
-/**
- * Orchestrates Excel workbook import: sheet detection, header parsing,
- * row processing, and transaction management.
- *
- * Transaction boundary: the entire import runs in one transaction.
- * Dry-run and rollback-on-error use setRollbackOnly() so results can still be returned.
- */
+/** Orchestrates Excel workbook import: sheet detection, header parsing, row processing, and transaction management. Transaction boundary: the entire
+ * import runs in one transaction. Dry-run and rollback-on-error use setRollbackOnly() so results can still be returned. */
 @Service
 public class CExcelImportService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CExcelImportService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CExcelImportService.class);
 
-    private final CImportHandlerRegistry handlerRegistry;
-    private final EntityManager entityManager;
+	/** Reads cell value as String, evaluating formula cells when evaluator is provided. */
+	public static String getCellStringValue(final Cell cell, final FormulaEvaluator evaluator) {
+		if (cell == null) {
+			return "";
+		}
+		final Cell resolved =
+				evaluator != null && cell.getCellType() == CellType.FORMULA ? evaluator.evaluateInCell(cell) : cell;
+		return switch (resolved.getCellType()) {
+		case STRING -> resolved.getStringCellValue();
+		case NUMERIC -> {
+			if (DateUtil.isCellDateFormatted(resolved)) {
+				final var date = resolved.getDateCellValue();
+				if (date == null) {
+					yield "";
+				}
+				yield date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().toString();
+			}
+			final double d = resolved.getNumericCellValue();
+			// Avoid ".0" suffix for whole numbers
+			yield d == Math.floor(d) ? String.valueOf((long) d) : String.valueOf(d);
+		}
+		case BOOLEAN -> String.valueOf(resolved.getBooleanCellValue());
+		case BLANK, _NONE -> "";
+		default -> "";
+		};
+	}
 
-    public CExcelImportService(final CImportHandlerRegistry handlerRegistry, final EntityManager entityManager) {
-        this.handlerRegistry = handlerRegistry;
-        this.entityManager = entityManager;
-    }
+	private static boolean isWildcard(final String token) {
+		final String v = token == null ? "" : token.trim().toLowerCase();
+		return v.equals("*") || v.equals("all") || v.equals("any");
+	}
 
-    /**
-     * Main entry point. Parses the workbook, processes each sheet, and returns
-     * a complete CImportResult. Runs in a single transaction; dry-run and
-     * rollback-on-error mark the transaction for rollback without throwing.
-     *
-     * @param inputStream Excel (.xlsx) bytes
-     * @param options     import configuration
-     * @param project     active project context for all imported entities
-     */
-    @Transactional
-    public CImportResult importExcel(final InputStream inputStream, final CImportOptions options,
-            final CProject<?> project) {
-        Check.notNull(inputStream, "Input stream cannot be null");
-        Check.notNull(options, "Import options cannot be null");
-        Check.notNull(project, "Project cannot be null");
-        LOGGER.info("Excel import started (project={}, dryRun={}, rollbackOnError={})",
-                project.getName(), options.isDryRun(), options.isRollbackOnError());
-        final CImportResult result = new CImportResult(options.isDryRun());
-        processWorkbook(inputStream, options, project, result);
-        // Apply rollback policy after all rows have been processed
-        if (options.isDryRun() || (options.isRollbackOnError() && result.getTotalErrors() > 0)) {
-            result.setRolledBack(true);
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-        }
-        return result;
-    }
+	/** Maps header cell values to canonical field tokens. Matching is case-insensitive; whitespace is stripped. Handler aliases are checked first; then
+	 * the header is lower-cased and whitespace collapsed. */
+	private static String normalizeHeaderKey(final String value) {
+		if (value == null) {
+			return "";
+		}
+		return value.trim().toLowerCase().replaceAll("\\s+", "");
+	}
 
-    private void processWorkbook(final InputStream inputStream, final CImportOptions options,
-            final CProject<?> project, final CImportResult result) {
-        try (final Workbook workbook = new XSSFWorkbook(inputStream)) {
-            final int totalSheets = workbook.getNumberOfSheets();
-            LOGGER.info("Excel import: workbook opened (sheets={}, project={})", totalSheets, project.getName());
-            final FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
-            for (int i = 0; i < totalSheets; i++) {
-                final Sheet sheet = workbook.getSheetAt(i);
-                final String sheetName = sheet.getSheetName();
-                final var handlerOpt = handlerRegistry.findHandler(sheetName);
-                if (handlerOpt.isEmpty()) {
-                    if (!options.isSkipUnknownSheets()) {
-                        final CImportSheetResult unrecognized = new CImportSheetResult(sheetName, null, false);
-                        unrecognized.setHeaderErrorMessage("No import handler registered for sheet '" + sheetName + "'");
-                        result.addSheetResult(unrecognized);
-                    }
-                    continue;
-                }
-                final IEntityImportHandler<?> handler = handlerOpt.get();
-                LOGGER.info("Excel import: sheet {}/{} '{}' (handler={})", i + 1, totalSheets, sheetName,
-                        handler.getClass().getSimpleName());
-                final CImportSheetResult sheetResult = processSheet(sheet, handler, project, options, evaluator);
-                result.addSheetResult(sheetResult);
+	private static boolean shouldSkipByCompanyOrProject(final Map<String, String> rowData, final CProject<?> project,
+			final CImportOptions options) {
+		if (rowData == null || project == null) {
+			return false;
+		}
+		final String companyToken = rowData.getOrDefault("company", "").trim();
+		if (!companyToken.isBlank() && !isWildcard(companyToken)) {
+			final var company = project.getCompany();
+			if (company != null && !companyToken.equalsIgnoreCase(company.getName())) {
+				return true;
+			}
+		}
+		if (options != null && options.isSkipMismatchedProjectTokens()) {
+			final String projectToken = rowData.getOrDefault("project", "").trim();
+			final boolean condition = !projectToken.isBlank() && !isWildcard(projectToken) && !projectToken.equalsIgnoreCase(project.getName());
+			if (condition) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-                // WHY: later sheets commonly resolve relations by querying the database (Issue → Activity, ParentRelation → Ticket, etc.).
-                // Within a single transaction, Hibernate may not flush inserts before those queries, yielding false "not found" errors.
-                if (!options.isDryRun()) {
-                    entityManager.flush();
-                }
-            }
-        } catch (final Exception e) {
-            throw new IllegalStateException("Excel import failed: " + e.getMessage(), e);
-        }
-    }
+	private final EntityManager entityManager;
+	private final CImportHandlerRegistry handlerRegistry;
 
-    private CImportSheetResult processSheet(final Sheet sheet, final IEntityImportHandler<?> handler,
-            final CProject<?> project, final CImportOptions options, final FormulaEvaluator evaluator) {
-        final String entityTypeName = handler.getEntityClass().getSimpleName();
-        final CImportSheetResult sheetResult = new CImportSheetResult(sheet.getSheetName(), entityTypeName, true);
-        // Find header row (first non-comment row)
-        int headerRowIndex = -1;
-        for (int r = sheet.getFirstRowNum(); r <= sheet.getLastRowNum(); r++) {
-            final Row row = sheet.getRow(r);
-            if (row == null) {
+	public CExcelImportService(final CImportHandlerRegistry handlerRegistry, final EntityManager entityManager) {
+		this.handlerRegistry = handlerRegistry;
+		this.entityManager = entityManager;
+	}
+
+	private Map<Integer, String> buildColumnMapping(final Row headerRow, final IEntityImportHandler<?> handler,
+			final FormulaEvaluator evaluator) {
+		final Map<Integer, String> mapping = new LinkedHashMap<>();
+		if (headerRow == null) {
+			return mapping;
+		}
+		final Map<String, String> aliases = handler.getColumnAliases();
+		final int firstCell = headerRow.getFirstCellNum();
+		if (firstCell < 0) {
+			return mapping;
+		}
+		for (int col = firstCell; col < headerRow.getLastCellNum(); col++) {
+			final Cell cell = headerRow.getCell(col);
+			if (cell == null) {
 				continue;
 			}
-            if (!isCommentRow(row, evaluator)) {
-                headerRowIndex = r;
-                break;
-            }
-        }
-        if (headerRowIndex < 0) {
-            sheetResult.setHeaderErrorMessage("Sheet has no header row");
-            return sheetResult;
-        }
-        // Build column index → canonical field token map
-        final Map<Integer, String> columnMapping = buildColumnMapping(sheet.getRow(headerRowIndex), handler, evaluator);
-        if (columnMapping.isEmpty()) {
-            sheetResult.setHeaderErrorMessage("No recognized columns found in header row");
-            return sheetResult;
-        }
-        LOGGER.debug("Sheet '{}' column mapping: {}", sheet.getSheetName(), columnMapping);
-        final int totalCandidateRows = Math.max(0, sheet.getLastRowNum() - headerRowIndex);
-        final boolean logRowProgress = totalCandidateRows > 500;
-        // Process data rows
-        for (int r = headerRowIndex + 1; r <= sheet.getLastRowNum(); r++) {
-            if (logRowProgress) {
-                final int processed = r - headerRowIndex;
-                if (processed % 200 == 0) {
-                    LOGGER.info("Excel import: sheet '{}' progress {}/{}", sheet.getSheetName(), processed,
-                            totalCandidateRows);
-                }
-            }
-            final Row row = sheet.getRow(r);
-            if (row == null) {
-                sheetResult.addRowResult(CImportRowResult.skipped(r + 1));
-                continue;
-            }
-            if (isCommentRow(row, evaluator)) {
-                sheetResult.addRowResult(CImportRowResult.skipped(r + 1));
-                continue;
-            }
-            if (isBlankRow(row, evaluator)) {
-                sheetResult.addRowResult(CImportRowResult.skipped(r + 1));
-                continue;
-            }
-            final Map<String, String> rowData = extractRowData(row, columnMapping, evaluator);
-            if (shouldSkipByCompanyOrProject(rowData, project, options)) {
-                sheetResult.addRowResult(CImportRowResult.skipped(r + 1));
-                continue;
-            }
-            // Validate required columns
-            final String missingCol = checkRequiredColumns(rowData, handler);
-            if (missingCol != null) {
-                sheetResult.addRowResult(CImportRowResult.error(r + 1, "Required column missing or blank: " + missingCol, rowData));
-                continue;
-            }
-            final CImportRowResult rowResult;
-            try {
-                rowResult = handler.importRow(rowData, project, r + 1, options);
-            } catch (final Exception e) {
-                // FAIL-FAST: handler exceptions must abort the import so the database is never left half-initialized.
-                throw new IllegalStateException(
-                        "Excel import failed at sheet='" + sheet.getSheetName() + "' row=" + (r + 1)
-                                + " (handler=" + handler.getClass().getSimpleName() + ") - " + e.getMessage()
-                                + "; rowData=" + rowData,
-                        e);
-            }
-            // WHY: Excel init is often used interactively; row-level logs make CI/Playwright failures diagnosable.
-            if (rowResult != null && rowResult.isError()) {
-                LOGGER.warn("Import row error (sheet={}, row={}): {}", sheet.getSheetName(), r + 1, rowResult.getErrorMessage());
-            }
-            sheetResult.addRowResult(rowResult);
-        }
-        LOGGER.info("Excel import: sheet '{}' done (ok={}, skipped={}, errors={})", sheet.getSheetName(),
-                sheetResult.getSuccessCount(), sheetResult.getSkippedCount(), sheetResult.getErrorCount());
-        return sheetResult;
-    }
+			final String header = getCellStringValue(cell, evaluator).trim();
+			if (header.isBlank()) {
+				continue;
+			}
+			final String normalizedHeader = normalizeHeaderKey(header);
+			String canonical = aliases.entrySet().stream().filter(entry -> normalizeHeaderKey(entry.getKey()).equals(normalizedHeader)).findFirst().map(Map.Entry::getValue).orElse(null);
+			if (canonical == null) {
+				canonical = normalizedHeader;
+			}
+			mapping.put(col, canonical);
+		}
+		return mapping;
+	}
 
-    /** Returns the canonical field token for a missing required column, or null if all present. */
-    private String checkRequiredColumns(final Map<String, String> rowData, final IEntityImportHandler<?> handler) {
-        for (final String required : handler.getRequiredColumns()) {
-            final String value = rowData.get(required);
-            if (value == null || value.isBlank()) {
-                return required;
-            }
-        }
-        return null;
-    }
+	/** Returns the canonical field token for a missing required column, or null if all present. */
+	private String checkRequiredColumns(final Map<String, String> rowData, final IEntityImportHandler<?> handler) {
+		for (final String required : handler.getRequiredColumns()) {
+			final String value = rowData.get(required);
+			if (value == null || value.isBlank()) {
+				return required;
+			}
+		}
+		return null;
+	}
 
-    /**
-     * Maps header cell values to canonical field tokens.
-     * Matching is case-insensitive; whitespace is stripped.
-     * Handler aliases are checked first; then the header is lower-cased and whitespace collapsed.
-     */
-    private static String normalizeHeaderKey(final String value) {
-        if (value == null) {
-            return "";
-        }
-        return value.trim().toLowerCase().replaceAll("\\s+", "");
-    }
+	private Map<String, String> extractRowData(final Row row, final Map<Integer, String> columnMapping,
+			final FormulaEvaluator evaluator) {
+		final Map<String, String> data = new LinkedHashMap<>();
+		columnMapping.entrySet().forEach((final Map.Entry<Integer, String> entry) -> {
+			final Cell cell = row.getCell(entry.getKey());
+			final String value = cell != null ? getCellStringValue(cell, evaluator).trim() : "";
+			data.put(entry.getValue(), value);
+		});
+		return data;
+	}
 
-    private Map<Integer, String> buildColumnMapping(final Row headerRow, final IEntityImportHandler<?> handler,
-            final FormulaEvaluator evaluator) {
-        final Map<Integer, String> mapping = new LinkedHashMap<>();
-        if (headerRow == null) {
-            return mapping;
-        }
-        final Map<String, String> aliases = handler.getColumnAliases();
-        final int firstCell = headerRow.getFirstCellNum();
-        if (firstCell < 0) {
-            return mapping;
-        }
-        for (int col = firstCell; col < headerRow.getLastCellNum(); col++) {
-            final Cell cell = headerRow.getCell(col);
-            if (cell == null) {
-                continue;
-            }
-            final String header = getCellStringValue(cell, evaluator).trim();
-            if (header.isBlank()) {
-                continue;
-            }
-            final String normalizedHeader = normalizeHeaderKey(header);
-            String canonical = null;
-            for (final Map.Entry<String, String> entry : aliases.entrySet()) {
-                if (normalizeHeaderKey(entry.getKey()).equals(normalizedHeader)) {
-                    canonical = entry.getValue();
-                    break;
-                }
-            }
-            if (canonical == null) {
-                canonical = normalizedHeader;
-            }
-            mapping.put(col, canonical);
-        }
-        return mapping;
-    }
+	/** Main entry point. Parses the workbook, processes each sheet, and returns a complete CImportResult. Runs in a single transaction; dry-run and
+	 * rollback-on-error mark the transaction for rollback without throwing.
+	 * @param inputStream Excel (.xlsx) bytes
+	 * @param options     import configuration
+	 * @param project     active project context for all imported entities */
+	@Transactional
+	public CImportResult importExcel(final InputStream inputStream, final CImportOptions options,
+			final CProject<?> project) {
+		Check.notNull(inputStream, "Input stream cannot be null");
+		Check.notNull(options, "Import options cannot be null");
+		Check.notNull(project, "Project cannot be null");
+		LOGGER.info("Excel import started (project={}, dryRun={}, rollbackOnError={})", project.getName(),
+				options.isDryRun(), options.isRollbackOnError());
+		final CImportResult result = new CImportResult(options.isDryRun());
+		processWorkbook(inputStream, options, project, result);
+		// Apply rollback policy after all rows have been processed
+		if (options.isDryRun() || options.isRollbackOnError() && result.getTotalErrors() > 0) {
+			result.setRolledBack(true);
+			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+		}
+		return result;
+	}
 
-    private Map<String, String> extractRowData(final Row row, final Map<Integer, String> columnMapping,
-            final FormulaEvaluator evaluator) {
-        final Map<String, String> data = new LinkedHashMap<>();
-        for (final Map.Entry<Integer, String> entry : columnMapping.entrySet()) {
-            final Cell cell = row.getCell(entry.getKey());
-            final String value = cell != null ? getCellStringValue(cell, evaluator).trim() : "";
-            data.put(entry.getValue(), value);
-        }
-        return data;
-    }
+	private boolean isBlankRow(final Row row, final FormulaEvaluator evaluator) {
+		final int firstCell = row.getFirstCellNum();
+		if (firstCell < 0) {
+			return true;
+		}
+		for (int col = firstCell; col < row.getLastCellNum(); col++) {
+			final Cell cell = row.getCell(col);
+			if (cell != null && !getCellStringValue(cell, evaluator).isBlank()) {
+				return false;
+			}
+		}
+		return true;
+	}
 
-    /** Reads cell value as String, evaluating formula cells when evaluator is provided. */
-    public static String getCellStringValue(final Cell cell, final FormulaEvaluator evaluator) {
-        if (cell == null) {
-            return "";
-        }
-        final Cell resolved = evaluator != null && cell.getCellType() == CellType.FORMULA
-                ? evaluator.evaluateInCell(cell) : cell;
-        return switch (resolved.getCellType()) {
-            case STRING -> resolved.getStringCellValue();
-            case NUMERIC -> {
-                if (DateUtil.isCellDateFormatted(resolved)) {
-                    final var date = resolved.getDateCellValue();
-                    if (date == null) {
-                        yield "";
-                    }
-                    yield date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().toString();
-                }
-                final double d = resolved.getNumericCellValue();
-                // Avoid ".0" suffix for whole numbers
-                yield d == Math.floor(d) ? String.valueOf((long) d) : String.valueOf(d);
-            }
-            case BOOLEAN -> String.valueOf(resolved.getBooleanCellValue());
-            case BLANK, _NONE -> "";
-            default -> "";
-        };
-    }
+	private boolean isCommentRow(final Row row, final FormulaEvaluator evaluator) {
+		final int firstCell = row.getFirstCellNum();
+		if (firstCell < 0) {
+			return false;
+		}
+		final Cell first = row.getCell(firstCell);
+		if (first == null) {
+			return false;
+		}
+		return getCellStringValue(first, evaluator).startsWith("#");
+	}
 
-    private static boolean shouldSkipByCompanyOrProject(final Map<String, String> rowData, final CProject<?> project,
-            final CImportOptions options) {
-        if (rowData == null || project == null) {
-            return false;
-        }
-        final String companyToken = rowData.getOrDefault("company", "").trim();
-        if (!companyToken.isBlank() && !isWildcard(companyToken)) {
-            final var company = project.getCompany();
-            if (company != null && !companyToken.equalsIgnoreCase(company.getName())) {
-                return true;
-            }
-        }
-        if (options != null && options.isSkipMismatchedProjectTokens()) {
-            final String projectToken = rowData.getOrDefault("project", "").trim();
-            if (!projectToken.isBlank() && !isWildcard(projectToken)) {
-                if (!projectToken.equalsIgnoreCase(project.getName())) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+	private CImportSheetResult processSheet(final Sheet sheet, final IEntityImportHandler<?> handler,
+			final CProject<?> project, final CImportOptions options, final FormulaEvaluator evaluator) {
+		final String entityTypeName = handler.getEntityClass().getSimpleName();
+		final CImportSheetResult sheetResult = new CImportSheetResult(sheet.getSheetName(), entityTypeName, true);
+		// Find header row (first non-comment row)
+		int headerRowIndex = -1;
+		for (int r = sheet.getFirstRowNum(); r <= sheet.getLastRowNum(); r++) {
+			final Row row = sheet.getRow(r);
+			if (row == null) {
+				continue;
+			}
+			if (!isCommentRow(row, evaluator)) {
+				headerRowIndex = r;
+				break;
+			}
+		}
+		if (headerRowIndex < 0) {
+			sheetResult.setHeaderErrorMessage("Sheet has no header row");
+			return sheetResult;
+		}
+		// Build column index → canonical field token map
+		final Map<Integer, String> columnMapping = buildColumnMapping(sheet.getRow(headerRowIndex), handler, evaluator);
+		if (columnMapping.isEmpty()) {
+			sheetResult.setHeaderErrorMessage("No recognized columns found in header row");
+			return sheetResult;
+		}
+		LOGGER.debug("Sheet '{}' column mapping: {}", sheet.getSheetName(), columnMapping);
+		final int totalCandidateRows = Math.max(0, sheet.getLastRowNum() - headerRowIndex);
+		final boolean logRowProgress = totalCandidateRows > 500;
+		// Process data rows
+		for (int r = headerRowIndex + 1; r <= sheet.getLastRowNum(); r++) {
+			if (logRowProgress) {
+				final int processed = r - headerRowIndex;
+				if (processed % 200 == 0) {
+					LOGGER.info("Excel import: sheet '{}' progress {}/{}", sheet.getSheetName(), processed,
+							totalCandidateRows);
+				}
+			}
+			final Row row = sheet.getRow(r);
+			if (row == null) {
+				sheetResult.addRowResult(CImportRowResult.skipped(r + 1));
+				continue;
+			}
+			if (isCommentRow(row, evaluator)) {
+				sheetResult.addRowResult(CImportRowResult.skipped(r + 1));
+				continue;
+			}
+			if (isBlankRow(row, evaluator)) {
+				sheetResult.addRowResult(CImportRowResult.skipped(r + 1));
+				continue;
+			}
+			final Map<String, String> rowData = extractRowData(row, columnMapping, evaluator);
+			if (shouldSkipByCompanyOrProject(rowData, project, options)) {
+				sheetResult.addRowResult(CImportRowResult.skipped(r + 1));
+				continue;
+			}
+			// Validate required columns
+			final String missingCol = checkRequiredColumns(rowData, handler);
+			if (missingCol != null) {
+				sheetResult.addRowResult(
+						CImportRowResult.error(r + 1, "Required column missing or blank: " + missingCol, rowData));
+				continue;
+			}
+			final CImportRowResult rowResult;
+			try {
+				rowResult = handler.importRow(rowData, project, r + 1, options);
+			} catch (final Exception e) {
+				// FAIL-FAST: handler exceptions must abort the import so the database is never left half-initialized.
+				throw new IllegalStateException(
+						"Excel import failed at sheet='" + sheet.getSheetName() + "' row=" + (r + 1) + " (handler="
+								+ handler.getClass().getSimpleName() + ") - " + e.getMessage() + "; rowData=" + rowData,
+						e);
+			}
+			// WHY: Excel init is often used interactively; row-level logs make CI/Playwright failures diagnosable.
+			if (rowResult != null && rowResult.isError()) {
+				LOGGER.warn("Import row error (sheet={}, row={}): {}", sheet.getSheetName(), r + 1,
+						rowResult.getErrorMessage());
+			}
+			sheetResult.addRowResult(rowResult);
+		}
+		LOGGER.info("Excel import: sheet '{}' done (ok={}, skipped={}, errors={})", sheet.getSheetName(),
+				sheetResult.getSuccessCount(), sheetResult.getSkippedCount(), sheetResult.getErrorCount());
+		return sheetResult;
+	}
 
-    private static boolean isWildcard(final String token) {
-        final String v = token == null ? "" : token.trim().toLowerCase();
-        return v.equals("*") || v.equals("all") || v.equals("any");
-    }
-
-    private boolean isCommentRow(final Row row, final FormulaEvaluator evaluator) {
-        final int firstCell = row.getFirstCellNum();
-        if (firstCell < 0) {
-            return false;
-        }
-        final Cell first = row.getCell(firstCell);
-        if (first == null) {
-            return false;
-        }
-        return getCellStringValue(first, evaluator).startsWith("#");
-    }
-
-    private boolean isBlankRow(final Row row, final FormulaEvaluator evaluator) {
-        final int firstCell = row.getFirstCellNum();
-        if (firstCell < 0) {
-            return true;
-        }
-        for (int col = firstCell; col < row.getLastCellNum(); col++) {
-            final Cell cell = row.getCell(col);
-            if (cell != null && !getCellStringValue(cell, evaluator).isBlank()) {
-                return false;
-            }
-        }
-        return true;
-    }
+	private void processWorkbook(final InputStream inputStream, final CImportOptions options, final CProject<?> project,
+			final CImportResult result) {
+		try (final Workbook workbook = new XSSFWorkbook(inputStream)) {
+			final int totalSheets = workbook.getNumberOfSheets();
+			LOGGER.info("Excel import: workbook opened (sheets={}, project={})", totalSheets, project.getName());
+			final FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
+			for (int i = 0; i < totalSheets; i++) {
+				final Sheet sheet = workbook.getSheetAt(i);
+				final String sheetName = sheet.getSheetName();
+				final var handlerOpt = handlerRegistry.findHandler(sheetName);
+				if (handlerOpt.isEmpty()) {
+					if (!options.isSkipUnknownSheets()) {
+						final CImportSheetResult unrecognized = new CImportSheetResult(sheetName, null, false);
+						unrecognized
+								.setHeaderErrorMessage("No import handler registered for sheet '" + sheetName + "'");
+						result.addSheetResult(unrecognized);
+					}
+					continue;
+				}
+				final IEntityImportHandler<?> handler = handlerOpt.get();
+				LOGGER.info("Excel import: sheet {}/{} '{}' (handler={})", i + 1, totalSheets, sheetName,
+						handler.getClass().getSimpleName());
+				if (sheetName.equals("Page Entities")) {
+					LOGGER.info("zirt:" + sheetName);
+				}
+				final CImportSheetResult sheetResult = processSheet(sheet, handler, project, options, evaluator);
+				result.addSheetResult(sheetResult);
+				// WHY: later sheets commonly resolve relations by querying the database (Issue → Activity, ParentRelation → Ticket, etc.).
+				// Within a single transaction, Hibernate may not flush inserts before those queries, yielding false "not found" errors.
+				if (!options.isDryRun()) {
+					entityManager.flush();
+				}
+			}
+		} catch (final Exception e) {
+			throw new IllegalStateException("Excel import failed: " + e.getMessage(), e);
+		}
+	}
 }
