@@ -111,9 +111,9 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 	@Max (value = 999, message = "Line order cannot exceed 999")
 	@AMetaData (
 			displayName = "Line Order", required = true, readOnly = false, description = "Order of this line in the screen (1-999)", hidden = false,
-			defaultValue = "0"
+			defaultValue = "1"
 	)
-	private Integer itemOrder = 0;
+	private Integer itemOrder = 1;
 	@Column (name = "max_length", nullable = true)
 	@Min (value = -1, message = "Min length must be at least 1")
 	@Max (value = 10000, message = "Max length cannot exceed 10000")

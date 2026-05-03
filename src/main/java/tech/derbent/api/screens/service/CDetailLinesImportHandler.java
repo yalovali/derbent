@@ -113,7 +113,12 @@ public class CDetailLinesImportHandler extends CAbstractExcelImportHandler<CDeta
 				.orElseGet(() -> new CDetailLines(section, relationFieldName, entityProperty));
 		entity.setFieldCaption(fieldCaption);
 		entity.setRelationFieldName(relationFieldName);
-		row.optionalInt("itemorder").ifPresent(entity::setItemOrder);
+		final Integer importedOrder = row.optionalInt("itemorder").orElse(null);
+		if (importedOrder != null && importedOrder >= 1) {
+			entity.setItemOrder(importedOrder);
+		} else if (entity.getItemOrder() == null || entity.getItemOrder() < 1) {
+			entity.setItemOrder(detailLinesService.getNextItemOrder(section));
+		}
 		row.optionalBoolean("ishidden").ifPresent(entity::setIsHidden);
 		row.optionalBoolean("isreadonly").ifPresent(entity::setIsReadonly);
 		row.optionalBoolean("isrequired").ifPresent(entity::setIsRequired);

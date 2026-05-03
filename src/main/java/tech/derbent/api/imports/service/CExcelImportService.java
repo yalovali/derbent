@@ -145,7 +145,7 @@ public class CExcelImportService {
                 continue;
             }
             final Map<String, String> rowData = extractRowData(row, columnMapping, evaluator);
-            if (shouldSkipByCompanyOrProject(rowData, project)) {
+            if (shouldSkipByCompanyOrProject(rowData, project, options)) {
                 sheetResult.addRowResult(CImportRowResult.skipped(r + 1));
                 continue;
             }
@@ -272,7 +272,8 @@ public class CExcelImportService {
         };
     }
 
-    private static boolean shouldSkipByCompanyOrProject(final Map<String, String> rowData, final CProject<?> project) {
+    private static boolean shouldSkipByCompanyOrProject(final Map<String, String> rowData, final CProject<?> project,
+            final CImportOptions options) {
         if (rowData == null || project == null) {
             return false;
         }
@@ -283,10 +284,12 @@ public class CExcelImportService {
                 return true;
             }
         }
-        final String projectToken = rowData.getOrDefault("project", "").trim();
-        if (!projectToken.isBlank() && !isWildcard(projectToken)) {
-            if (!projectToken.equalsIgnoreCase(project.getName())) {
-                return true;
+        if (options != null && options.isSkipMismatchedProjectTokens()) {
+            final String projectToken = rowData.getOrDefault("project", "").trim();
+            if (!projectToken.isBlank() && !isWildcard(projectToken)) {
+                if (!projectToken.equalsIgnoreCase(project.getName())) {
+                    return true;
+                }
             }
         }
         return false;

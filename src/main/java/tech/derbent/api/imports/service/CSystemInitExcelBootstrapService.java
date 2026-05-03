@@ -165,6 +165,9 @@ public class CSystemInitExcelBootstrapService {
 		options.setDryRun(false);
 		options.setRollbackOnError(false);
 		options.setSkipUnknownSheets(true);
+		// WHY: screens_init.xlsx carries a "project" column and handlers resolve the effective project per row.
+		// Do not pre-filter rows by the session project (we import once per company).
+		options.setSkipMismatchedProjectTokens(false);
 		// WHY: screens_init.xlsx rows carry an explicit "project" column so the workbook is imported once per
 		// company; the handlers resolve the target project from each row. Importing per-project (as before)
 		// would create duplicate entities because every row would be processed N times.
