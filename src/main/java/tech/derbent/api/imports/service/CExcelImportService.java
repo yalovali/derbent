@@ -155,7 +155,17 @@ public class CExcelImportService {
                 sheetResult.addRowResult(CImportRowResult.error(r + 1, "Required column missing or blank: " + missingCol, rowData));
                 continue;
             }
-            final CImportRowResult rowResult = handler.importRow(rowData, project, r + 1, options);
+            final CImportRowResult rowResult;
+            try {
+                rowResult = handler.importRow(rowData, project, r + 1, options);
+            } catch (final Exception e) {
+                // FAIL-FAST: handler exceptions must abort the import so the database is never left half-initialized.
+                throw new IllegalStateException(
+                        "Excel import failed at sheet='" + sheet.getSheetName() + "' row=" + (r + 1)
+                                + " (handler=" + handler.getClass().getSimpleName() + ") - " + e.getMessage()
+                                + "; rowData=" + rowData,
+                        e);
+            }
             // WHY: Excel init is often used interactively; row-level logs make CI/Playwright failures diagnosable.
             if (rowResult != null && rowResult.isError()) {
                 LOGGER.warn("Import row error (sheet={}, row={}): {}", sheet.getSheetName(), r + 1, rowResult.getErrorMessage());

@@ -77,20 +77,16 @@ public class CParentRelationImportHandler extends CEntityImportHandler<CParentRe
 		}
 		final String parentType = rowData.getOrDefault("parenttype", "").trim();
 		final String parentName = rowData.getOrDefault("parentname", "").trim();
-		try {
-			if (parentType.isBlank() || parentName.isBlank()) {
-				// WHY: allow declaring roots explicitly (empty parent means root-level).
-				owner.clearParentItem();
-			} else {
-				final var parentOpt = itemResolver.findByTypeAndName(parentType, parentName, project);
-				if (parentOpt.isEmpty()) {
-					return CImportRowResult.error(rowNumber,
-							"Parent '" + parentType + ":" + parentName + "' not found in project", rowData);
-				}
-				owner.setParentItem(parentOpt.get());
+		if (parentType.isBlank() || parentName.isBlank()) {
+			// WHY: allow declaring roots explicitly (empty parent means root-level).
+			owner.clearParentItem();
+		} else {
+			final var parentOpt = itemResolver.findByTypeAndName(parentType, parentName, project);
+			if (parentOpt.isEmpty()) {
+				return CImportRowResult.error(rowNumber,
+						"Parent '" + parentType + ":" + parentName + "' not found in project", rowData);
 			}
-		} catch (final RuntimeException e) {
-			return CImportRowResult.error(rowNumber, e.getClass().getSimpleName() + ": " + e.getMessage(), rowData);
+			owner.setParentItem(parentOpt.get());
 		}
 		if (!options.isDryRun()) {
 			itemResolver.save((CProjectItem<?, ?>) ownerOpt.get());

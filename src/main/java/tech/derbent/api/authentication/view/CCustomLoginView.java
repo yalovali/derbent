@@ -138,7 +138,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?",
 					"Evet, sıfırla", () -> {
 						try {
-							runDatabaseReset(false, "Sample data + Excel loaded.", "Sample data, defaults, and system_init.xlsx are loaded.");
+							runDatabaseReset(false, "Excel loaded.", "Defaults + system_init.xlsx are loaded.");
 						} catch (final Exception e) {
 							CNotificationService.showException("Error resetting database", e);
 						}
@@ -152,9 +152,9 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	private void on_buttonResetDbMinimal_clicked() {
 		try {
 			LOGGER.info("🔄 Showing DB Min reset confirmation dialog...");
-			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve minimum örnek veriler yeniden yüklenecek. Devam edilsin mi?",
-					"Evet, sıfırla", () -> runDatabaseReset(true, "Minimum sample + Excel loaded.",
-							"Minimum sample data, defaults, and system_init_min.xlsx are loaded."));
+			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve minimum Excel verileri yeniden yüklenecek. Devam edilsin mi?",
+					"Evet, sıfırla", () -> runDatabaseReset(true, "Minimal Excel loaded.",
+							"Defaults + system_init_min.xlsx are loaded."));
 		} catch (final Exception e) {
 			CNotificationService.showException("Error showing confirmation dialog", e);
 		}

@@ -88,8 +88,14 @@ public interface IHasParentRelation {
 	default void setParentItem(final CProjectItem<?, ?> parentItem) {
 		final CParentRelation parentRelation = getParentRelation();
 		Check.notNull(parentRelation, "Parent relation cannot be null");
-		// Prevent self-reference
-		if (parentItem != null && parentItem.getId() != null && parentItem.getId().equals(getId())) {
+		// Prevent self-reference.
+		// IMPORTANT: IDs are only unique within their own table; different entity types may legitimately share the same numeric ID.
+		if (parentItem == this) {
+			throw new IllegalArgumentException("An entity cannot be its own parent");
+		}
+		final Long id = getId();
+		if (parentItem != null && id != null && parentItem.getId() != null
+				&& parentItem.getId().equals(id) && parentItem.getClass().equals(getClass())) {
 			throw new IllegalArgumentException("An entity cannot be its own parent");
 		}
 		parentRelation.setParentItem(parentItem);

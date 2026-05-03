@@ -615,10 +615,8 @@ public class CDataInitializer {
 	}
 
 	public void reloadForced(final boolean minimal) throws Exception {
-		LOGGER.info("Sample data reload (forced) started");
-		clearSampleData(); // <<<<< ÖNCE TEMİZLE
-		loadSampleData(minimal); // <<<<< SONRA YENİDEN OLUŞTUR
-		LOGGER.info("Sample data reload (forced) finished");
+		// Backward-compatible entrypoint: sample creator methods are deprecated; Excel is the canonical source of seed data.
+		reloadForcedExcel(minimal);
 	}
 
 	/**

@@ -101,11 +101,7 @@ public abstract class CProjectItemImportHandler<T extends CProjectItem<T, TType>
 					getTypeClass().getSimpleName().replaceFirst("^C", "").replace("Type", " Type") + " is required",
 					rowData);
 		}
-		try {
-			applyExtraFields(entity, row, project, rowNumber, rowData);
-		} catch (final RuntimeException e) {
-			return CImportRowResult.error(rowNumber, e.getClass().getSimpleName() + ": " + e.getMessage(), rowData);
-		}
+		applyExtraFields(entity, row, project, rowNumber, rowData);
 		if (!options.isDryRun()) {
 			save(entity);
 		}
