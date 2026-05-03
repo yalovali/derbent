@@ -212,7 +212,7 @@ def cmd_verify(args: argparse.Namespace) -> int:
             break
 
     print(str(log_file))
-    _play_sound("all-done" if rc == 0 else "error")
+    _play_sound("success" if rc == 0 else "error")
     return rc
 
 
@@ -226,7 +226,7 @@ def cmd_selective_test(args: argparse.Namespace) -> int:
     _play_sound("start")
     rc = _run(cmd, REPO_ROOT, log_file)
     print(str(log_file))
-    _play_sound("all-done" if rc == 0 else "error")
+    _play_sound("success" if rc == 0 else "error")
     return rc
 
 
@@ -238,7 +238,7 @@ def cmd_kb(args: argparse.Namespace) -> int:
     _play_sound("start")
     rc = subprocess.run([sys.executable, str(script)], cwd=str(REPO_ROOT)).returncode
     print(str(REPO_ROOT / "docs" / "knowledge" / "_generated"))
-    _play_sound("all-done" if rc == 0 else "error")
+    _play_sound("success" if rc == 0 else "error")
     return int(rc)
 
 

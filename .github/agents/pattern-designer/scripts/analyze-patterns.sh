@@ -19,7 +19,7 @@ play_sound() {
         esac
     fi
     case "$kind" in
-        start)    printf '\a\a' ;;
+        start)    printf '\a' ;;
         all-done) printf '\a\a\a\a\a' ;;
         success)  printf '\a\a' ;;
         *)        printf '\a\a\a' ;;
@@ -29,6 +29,9 @@ play_sound() {
 echo "🏗️  Pattern Designer Analysis Tool"
 echo "=================================="
 echo ""
+
+# Ring on exit so the interactive menu has an audible finish.
+trap 'rc=$?; if [ $rc -eq 0 ]; then play_sound success; else play_sound error; fi' EXIT
 
 # Function to analyze entity patterns
 analyze_entities() {
@@ -170,4 +173,3 @@ show_menu() {
 cd "$PROJECT_ROOT"
 play_sound start
 show_menu
-play_sound all-done

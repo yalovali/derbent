@@ -19,7 +19,7 @@ play_sound() {
         esac
     fi
     case "$kind" in
-        start)    printf '\a\a' ;;
+        start)    printf '\a' ;;
         all-done) printf '\a\a\a\a\a' ;;
         success)  printf '\a\a' ;;
         *)        printf '\a\a\a' ;;
@@ -223,7 +223,7 @@ fi
 echo ""
 if [ "$violations" -eq 0 ]; then
   echo "✅ PASS: verify-code gate"
-  play_sound all-done
+  play_sound success
   exit 0
 fi
 

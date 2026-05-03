@@ -68,7 +68,7 @@ run_by_keyword() {
     echo ""
     if [ $result -eq 0 ]; then
         echo "✅ Tests PASSED for keyword: $keyword"
-        play_sound all-done
+        play_sound success
     else
         echo "❌ Tests FAILED for keyword: $keyword"
         echo "   Log: /tmp/playwright-$keyword.log"
@@ -98,7 +98,7 @@ run_by_button() {
     echo ""
     if [ $result -eq 0 ]; then
         echo "✅ Test PASSED for button: $button_id"
-        play_sound all-done
+        play_sound success
     else
         echo "❌ Test FAILED for button: $button_id"
         echo "   Log: /tmp/playwright-button.log"
