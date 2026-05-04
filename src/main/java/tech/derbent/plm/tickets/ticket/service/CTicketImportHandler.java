@@ -69,9 +69,6 @@ public class CTicketImportHandler extends CProjectItemImportHandler<CTicket, CTi
 	}
 
 	@Override
-	protected Map<String, String> getAdditionalColumnAliases() { return Map.of("Type", "entitytype"); }
-
-	@Override
 	public Class<CTicket> getEntityClass() { return CTicket.class; }
 
 	@Override

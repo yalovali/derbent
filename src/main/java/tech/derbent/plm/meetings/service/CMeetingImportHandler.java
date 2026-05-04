@@ -81,8 +81,11 @@ public class CMeetingImportHandler extends CProjectItemImportHandler<CMeeting, C
 
 	@Override
 	protected Map<String, String> getAdditionalColumnAliases() {
-		// WHY: "Meeting Type" and "Type" are common user-facing synonyms for the entitytype token.
-		return Map.of("Meeting Type", "entitytype", "Type", "entitytype", "Related Activity", "relatedactivity");
+		// WHY: "Meeting Type" and "Related Activity" are additional synonyms; "Type" is inherited from parent.
+		final java.util.LinkedHashMap<String, String> aliases = new java.util.LinkedHashMap<>(super.getAdditionalColumnAliases());
+		aliases.put("Meeting Type", "entitytype");
+		aliases.put("Related Activity", "relatedactivity");
+		return Map.copyOf(aliases);
 	}
 
 	@Override

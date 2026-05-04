@@ -1,6 +1,5 @@
 package tech.derbent.plm.sprints.service;
 
-import java.util.Map;
 import java.util.Optional;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -11,7 +10,7 @@ import tech.derbent.plm.sprints.domain.CSprintType;
 
 /** Imports {@link CSprintType} rows from Excel (company-scoped reference data). */
 @Service
-@Profile({"derbent", "default"})
+@Profile ({"derbent", "default"})
 public class CSprintTypeImportHandler extends CAbstractWorkflowTypeImportHandler<CSprintType> {
 
 	private final CSprintTypeService sprintTypeService;
@@ -24,14 +23,6 @@ public class CSprintTypeImportHandler extends CAbstractWorkflowTypeImportHandler
 
 	@Override
 	public Class<CSprintType> getEntityClass() { return CSprintType.class; }
-
-	@Override
-	protected Map<String, String> getAdditionalColumnAliases() {
-		// WHY: header normalization turns "Non Deletable" into "nondeletable"; the underlying field is attributeNonDeletable.
-		return Map.of(
-				"Non Deletable", "attributenondeletable",
-				"Attribute Non Deletable", "attributenondeletable");
-	}
 
 	@Override
 	protected Optional<CSprintType> findByNameAndCompany(final String name, final CCompany company) {

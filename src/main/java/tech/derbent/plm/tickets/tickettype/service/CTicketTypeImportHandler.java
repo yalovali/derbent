@@ -1,6 +1,5 @@
 package tech.derbent.plm.tickets.tickettype.service;
 
-import java.util.Map;
 import java.util.Optional;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -11,7 +10,7 @@ import tech.derbent.plm.tickets.tickettype.domain.CTicketType;
 
 /** Imports {@link CTicketType} rows from Excel (company-scoped reference data). */
 @Service
-@Profile({"derbent", "default"})
+@Profile ({"derbent", "default"})
 public class CTicketTypeImportHandler extends CAbstractWorkflowTypeImportHandler<CTicketType> {
 
 	private final CTicketTypeService ticketTypeService;
@@ -24,14 +23,6 @@ public class CTicketTypeImportHandler extends CAbstractWorkflowTypeImportHandler
 
 	@Override
 	public Class<CTicketType> getEntityClass() { return CTicketType.class; }
-
-	@Override
-	protected Map<String, String> getAdditionalColumnAliases() {
-		// WHY: header normalization turns "Non Deletable" into "nondeletable"; the underlying field is attributeNonDeletable.
-		return Map.of(
-				"Non Deletable", "attributenondeletable",
-				"Attribute Non Deletable", "attributenondeletable");
-	}
 
 	@Override
 	protected Optional<CTicketType> findByNameAndCompany(final String name, final CCompany company) {

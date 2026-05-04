@@ -1,6 +1,5 @@
 package tech.derbent.plm.requirements.requirementtype.service;
 
-import java.util.Map;
 import java.util.Optional;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -11,7 +10,7 @@ import tech.derbent.plm.requirements.requirementtype.domain.CRequirementType;
 
 /** Imports {@link CRequirementType} rows from Excel (company-scoped reference data). */
 @Service
-@Profile({"derbent", "bab", "default"})
+@Profile ({"derbent", "bab", "default"})
 public class CRequirementTypeImportHandler extends CAbstractWorkflowTypeImportHandler<CRequirementType> {
 
     private final CRequirementTypeService requirementTypeService;
@@ -24,13 +23,6 @@ public class CRequirementTypeImportHandler extends CAbstractWorkflowTypeImportHa
 
     @Override
     public Class<CRequirementType> getEntityClass() { return CRequirementType.class; }
-
-    @Override
-    protected Map<String, String> getAdditionalColumnAliases() {
-        return Map.of(
-                "Non Deletable", "attributenondeletable",
-                "Attribute Non Deletable", "attributenondeletable");
-    }
 
     @Override
     protected Optional<CRequirementType> findByNameAndCompany(final String name, final CCompany company) {

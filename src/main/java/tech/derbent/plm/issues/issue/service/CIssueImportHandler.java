@@ -68,9 +68,6 @@ public class CIssueImportHandler extends CProjectItemImportHandler<CIssue, CIssu
 	}
 
 	@Override
-	protected Map<String, String> getAdditionalColumnAliases() { return Map.of("Type", "entitytype"); }
-
-	@Override
 	public Class<CIssue> getEntityClass() { return CIssue.class; }
 
 	@Override

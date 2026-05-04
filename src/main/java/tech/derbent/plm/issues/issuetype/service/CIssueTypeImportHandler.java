@@ -1,6 +1,5 @@
 package tech.derbent.plm.issues.issuetype.service;
 
-import java.util.Map;
 import java.util.Optional;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -11,41 +10,33 @@ import tech.derbent.plm.issues.issuetype.domain.CIssueType;
 
 /** Imports {@link CIssueType} rows from Excel (company-scoped reference data). */
 @Service
-@Profile({"derbent", "default"})
+@Profile ({"derbent", "default"})
 public class CIssueTypeImportHandler extends CAbstractWorkflowTypeImportHandler<CIssueType> {
 
-    private final CIssueTypeService issueTypeService;
+	private final CIssueTypeService issueTypeService;
 
-    public CIssueTypeImportHandler(final CIssueTypeService issueTypeService,
-            final CWorkflowEntityService workflowEntityService) {
-        super(workflowEntityService);
-        this.issueTypeService = issueTypeService;
-    }
+	public CIssueTypeImportHandler(final CIssueTypeService issueTypeService,
+			final CWorkflowEntityService workflowEntityService) {
+		super(workflowEntityService);
+		this.issueTypeService = issueTypeService;
+	}
 
-    @Override
-    public Class<CIssueType> getEntityClass() { return CIssueType.class; }
+	@Override
+	public Class<CIssueType> getEntityClass() { return CIssueType.class; }
 
-    @Override
-    protected Map<String, String> getAdditionalColumnAliases() {
-        // WHY: header normalization turns "Non Deletable" into "nondeletable"; the underlying field is attributeNonDeletable.
-        return Map.of(
-                "Non Deletable", "attributenondeletable",
-                "Attribute Non Deletable", "attributenondeletable");
-    }
+	@Override
+	protected Optional<CIssueType> findByNameAndCompany(final String name, final CCompany company) {
+		return issueTypeService.findByNameAndCompany(name, company);
+	}
 
-    @Override
-    protected Optional<CIssueType> findByNameAndCompany(final String name, final CCompany company) {
-        return issueTypeService.findByNameAndCompany(name, company);
-    }
+	@Override
+	protected CIssueType createNew(final String name, final CCompany company) {
+		return new CIssueType(name, company);
+	}
 
-    @Override
-    protected CIssueType createNew(final String name, final CCompany company) {
-        return new CIssueType(name, company);
-    }
-
-    @Override
-    protected void save(final CIssueType entity) {
-        issueTypeService.save(entity);
-    }
+	@Override
+	protected void save(final CIssueType entity) {
+		issueTypeService.save(entity);
+	}
 }
 

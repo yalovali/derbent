@@ -1,5 +1,6 @@
 package tech.derbent.plm.activities.service;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -51,12 +52,11 @@ public class CActivityPriorityImportHandler extends CAbstractSimpleTypeImportHan
 
 	@Override
 	protected Map<String, String> getAdditionalColumnAliases() {
-		return Map.of(
-				"Name", "name",
-				"Color", "color",
-				"Sort Order", "sortorder",
-				"Priority Level", "prioritylevel",
-				"Is Default", "isdefault");
+		// WHY: "Name", "Color", "Sort Order" are already derived from @AMetaData by buildMetaAliases(); only these two need explicit aliases.
+		final LinkedHashMap<String, String> aliases = new LinkedHashMap<>(super.getAdditionalColumnAliases());
+		aliases.put("Priority Level", "prioritylevel");
+		aliases.put("Is Default", "isdefault");
+		return Map.copyOf(aliases);
 	}
 
 	@Override

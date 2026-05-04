@@ -54,9 +54,6 @@ public class CSprintImportHandler extends CProjectItemImportHandler<CSprint, CSp
 	}
 
 	@Override
-	protected Map<String, String> getAdditionalColumnAliases() { return Map.of("Type", "entitytype"); }
-
-	@Override
 	public Class<CSprint> getEntityClass() { return CSprint.class; }
 
 	@Override

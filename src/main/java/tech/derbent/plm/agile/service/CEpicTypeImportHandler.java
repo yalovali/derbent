@@ -1,6 +1,5 @@
 package tech.derbent.plm.agile.service;
 
-import java.util.Map;
 import java.util.Optional;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -11,39 +10,32 @@ import tech.derbent.plm.agile.domain.CEpicType;
 
 /** Imports {@link CEpicType} rows from Excel (company-scoped reference data). */
 @Service
-@Profile({"derbent", "bab", "default"})
+@Profile ({"derbent", "bab", "default"})
 public class CEpicTypeImportHandler extends CAbstractWorkflowTypeImportHandler<CEpicType> {
 
-    private final CEpicTypeService epicTypeService;
+	private final CEpicTypeService epicTypeService;
 
-    public CEpicTypeImportHandler(final CEpicTypeService epicTypeService,
-            final CWorkflowEntityService workflowEntityService) {
-        super(workflowEntityService);
-        this.epicTypeService = epicTypeService;
-    }
+	public CEpicTypeImportHandler(final CEpicTypeService epicTypeService,
+			final CWorkflowEntityService workflowEntityService) {
+		super(workflowEntityService);
+		this.epicTypeService = epicTypeService;
+	}
 
-    @Override
-    public Class<CEpicType> getEntityClass() { return CEpicType.class; }
+	@Override
+	public Class<CEpicType> getEntityClass() { return CEpicType.class; }
 
-    @Override
-    protected Map<String, String> getAdditionalColumnAliases() {
-        return Map.of(
-                "Non Deletable", "attributenondeletable",
-                "Attribute Non Deletable", "attributenondeletable");
-    }
+	@Override
+	protected Optional<CEpicType> findByNameAndCompany(final String name, final CCompany company) {
+		return epicTypeService.findByNameAndCompany(name, company);
+	}
 
-    @Override
-    protected Optional<CEpicType> findByNameAndCompany(final String name, final CCompany company) {
-        return epicTypeService.findByNameAndCompany(name, company);
-    }
+	@Override
+	protected CEpicType createNew(final String name, final CCompany company) {
+		return new CEpicType(name, company);
+	}
 
-    @Override
-    protected CEpicType createNew(final String name, final CCompany company) {
-        return new CEpicType(name, company);
-    }
-
-    @Override
-    protected void save(final CEpicType entity) {
-        epicTypeService.save(entity);
-    }
+	@Override
+	protected void save(final CEpicType entity) {
+		epicTypeService.save(entity);
+	}
 }

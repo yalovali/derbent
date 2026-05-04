@@ -57,8 +57,10 @@ public class CDecisionImportHandler extends CProjectItemImportHandler<CDecision,
 
 	@Override
 	protected Map<String, String> getAdditionalColumnAliases() {
-		// WHY: "Decision Type" and "Type" are common header synonyms for entitytype token.
-		return Map.of("Decision Type", "entitytype", "Type", "entitytype");
+		// WHY: "Decision Type" is an additional user-facing synonym; "Type" is inherited from parent.
+		final java.util.LinkedHashMap<String, String> aliases = new java.util.LinkedHashMap<>(super.getAdditionalColumnAliases());
+		aliases.put("Decision Type", "entitytype");
+		return Map.copyOf(aliases);
 	}
 
 	@Override

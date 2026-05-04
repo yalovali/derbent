@@ -1,6 +1,5 @@
 package tech.derbent.plm.agile.service;
 
-import java.util.Map;
 import java.util.Optional;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -11,7 +10,7 @@ import tech.derbent.plm.agile.domain.CUserStoryType;
 
 /** Imports {@link CUserStoryType} rows from Excel (company-scoped reference data). */
 @Service
-@Profile({"derbent", "bab", "default"})
+@Profile ({"derbent", "bab", "default"})
 public class CUserStoryTypeImportHandler extends CAbstractWorkflowTypeImportHandler<CUserStoryType> {
 
 	private final CUserStoryTypeService userStoryTypeService;
@@ -24,14 +23,6 @@ public class CUserStoryTypeImportHandler extends CAbstractWorkflowTypeImportHand
 
 	@Override
 	public Class<CUserStoryType> getEntityClass() { return CUserStoryType.class; }
-
-	@Override
-	protected Map<String, String> getAdditionalColumnAliases() {
-		// WHY: header normalization turns "Non Deletable" into "nondeletable"; the underlying field is attributeNonDeletable.
-		return Map.of(
-				"Non Deletable", "attributenondeletable",
-				"Attribute Non Deletable", "attributenondeletable");
-	}
 
 	@Override
 	protected Optional<CUserStoryType> findByNameAndCompany(final String name, final CCompany company) {
