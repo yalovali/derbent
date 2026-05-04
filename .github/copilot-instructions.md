@@ -15,6 +15,11 @@ Mandatory playbook for all AI work in this repository.
   9. `cleanup`
 - Keep diffs minimal and aligned with existing patterns.
 - Prefer task-scoped artifacts over long repeated reasoning in agent prompts.
+- **Play a sound at the start and end of every agent task:**
+  ```bash
+  paplay /usr/share/sounds/freedesktop/stereo/service-login.oga      >/dev/null 2>&1 || true   # start
+  paplay /usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga >/dev/null 2>&1 || true  # done
+  ```
 
 ## 2. Mandatory read path
 1. `AGENTS.md`
