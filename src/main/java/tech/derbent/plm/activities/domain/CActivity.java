@@ -75,7 +75,7 @@ public class CActivity extends CProjectItem<CActivity, CActivityType>
 			maxLength = 2000
 	)
 	private String acceptanceCriteria = "";
-	// One-to-Many relationship with attachments - cascade delete enabled
+	/// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "activity_id")
 	@AMetaData (
