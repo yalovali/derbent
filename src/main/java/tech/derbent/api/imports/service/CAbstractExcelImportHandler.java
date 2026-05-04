@@ -61,6 +61,34 @@ public abstract class CAbstractExcelImportHandler<T> implements IEntityImportHan
 		return setters.get(propertyName);
 	}
 
+	/** Parses a literal string value (from {@link AMetaData#defaultValue()}) into the target type without
+	 * needing a row context. Returns {@code null} for unsupported types or parse failures. */
+	private static Object parseLiteralValue(final Class<?> type, final String literal) {
+		try {
+			if (type == String.class) {
+				return literal;
+			}
+			if (type == Boolean.class || type == boolean.class) {
+				return Boolean.parseBoolean(literal);
+			}
+			if (type == Integer.class || type == int.class) {
+				return Integer.parseInt(literal);
+			}
+			if (type == Long.class || type == long.class) {
+				return Long.parseLong(literal);
+			}
+			if (type == java.math.BigDecimal.class) {
+				return new java.math.BigDecimal(literal);
+			}
+			if (type == LocalDate.class) {
+				return LocalDate.parse(literal);
+			}
+		} catch (final Exception e) {
+			// silently skip unparseable defaults
+		}
+		return null;
+	}
+
 	private static Object parseScalarValue(final Class<?> type, final String raw, final CExcelRow row,
 			final String token) {
 		try {
@@ -137,12 +165,31 @@ public abstract class CAbstractExcelImportHandler<T> implements IEntityImportHan
 				continue;
 			}
 			final AMetaData meta = field.getAnnotation(AMetaData.class);
-			if (meta == null || meta.hidden() || meta.autoCalculate()) {
+			// WHY: skip readOnly fields (e.g. id) — the import must not override Hibernate-managed keys.
+			if (meta == null || meta.hidden() || meta.autoCalculate() || meta.readOnly()) {
 				continue;
 			}
 			final String token = CExcelRow.normalizeToken(field.getName());
 			final String raw = row.string(token);
 			if (raw.isBlank()) {
+				// WHY: when the cell is blank and @AMetaData(defaultValue) declares a non-empty default,
+				// apply it so NOT NULL columns (e.g. active=true) get their intended value even when the
+				// Excel author leaves the cell empty.
+				final String defaultVal = meta.defaultValue();
+				if (!defaultVal.isBlank()) {
+					final Object parsed = parseLiteralValue(field.getType(), defaultVal);
+					if (parsed != null) {
+						final Method setter = getWriteMethod(entity.getClass(), field.getName());
+						if (setter != null) {
+							try {
+								setter.invoke(entity, parsed);
+							} catch (final Exception e) {
+								throw new IllegalArgumentException(
+										"Failed to set default for '" + field.getName() + "': " + e.getMessage(), e);
+							}
+						}
+					}
+				}
 				continue;
 			}
 			final Object parsed = parseScalarValue(field.getType(), raw, row, token);

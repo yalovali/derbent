@@ -3,6 +3,7 @@ package tech.derbent.api.imports.service;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.imports.domain.CImportRowResult;
 
@@ -28,6 +29,9 @@ public abstract class CEntityNamedImportHandler<T extends CEntityNamed<T>> exten
 	}
 
 	protected void applyEntityNamedFields(final T entity, final CExcelRow row) {
+		// WHY: CEntityDB fields (e.g. active=true) must be explicitly applied so NOT NULL columns
+		// are populated even when the Excel cell is blank — the defaultValue from @AMetaData is used.
+		applyMetaFieldsDeclaredOn(entity, row, CEntityDB.class);
 		applyMetaFieldsDeclaredOn(entity, row, CEntityNamed.class);
 	}
 }
