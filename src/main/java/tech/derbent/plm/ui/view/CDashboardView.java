@@ -22,6 +22,7 @@ import tech.derbent.api.entity.view.CAbstractPage;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.projects.service.CProjectService;
 import tech.derbent.api.ui.component.enhanced.CDashboardStatCard;
+import tech.derbent.api.i18n.CI18n;
 import tech.derbent.api.users.service.CUserService;
 import tech.derbent.plm.activities.service.CActivityService;
 import tech.derbent.plm.project.domain.CProject_Derbent;
@@ -46,9 +47,9 @@ public final class CDashboardView extends CAbstractPage {
 	 * @param activityCount the number of activities in the project
 	 * @return the horizontal layout for the project row */
 	private static HorizontalLayout createProjectDetailRow(final String projectName, final long userCount, final long activityCount) {
-		final CDashboardStatCard projectCard = new CDashboardStatCard(projectName, "Project", VaadinIcon.FOLDER_O.create());
-		final CDashboardStatCard usersCard = new CDashboardStatCard("Users", userCount, VaadinIcon.USER.create());
-		final CDashboardStatCard activitiesCard = new CDashboardStatCard("Activities", activityCount, VaadinIcon.CLIPBOARD_CHECK.create());
+		final CDashboardStatCard projectCard = new CDashboardStatCard(projectName, CI18n.get("stat.project"), VaadinIcon.FOLDER_O.create());
+		final CDashboardStatCard usersCard = new CDashboardStatCard(CI18n.get("stat.users"), userCount, VaadinIcon.USER.create());
+		final CDashboardStatCard activitiesCard = new CDashboardStatCard(CI18n.get("stat.activities"), activityCount, VaadinIcon.CLIPBOARD_CHECK.create());
 		final HorizontalLayout projectRow = new HorizontalLayout();
 		projectRow.addClassNames(Gap.MEDIUM, Margin.Bottom.SMALL);
 		projectRow.setWidthFull();
@@ -93,7 +94,7 @@ public final class CDashboardView extends CAbstractPage {
 		projectDetailsLayout = new VerticalLayout();
 		projectDetailsLayout.addClassNames(Padding.NONE, Gap.MEDIUM);
 		projectDetailsLayout.setWidthFull();
-		final H1 sectionTitle = new H1("Project Details");
+		final H1 sectionTitle = new H1(CI18n.get("dashboard.projectDetails"));
 		sectionTitle.addClassNames(Margin.Bottom.MEDIUM);
 		projectDetailsLayout.add(sectionTitle);
 	}
@@ -101,9 +102,9 @@ public final class CDashboardView extends CAbstractPage {
 	/** Creates the summary statistics cards. */
 	private void createSummaryCards() {
 		// LOGGER.debug("Creating summary statistics cards");
-		totalProjectsCard = new CDashboardStatCard("Total Projects", "0", VaadinIcon.BRIEFCASE.create());
-		totalUsersCard = new CDashboardStatCard("Total Users", "0", VaadinIcon.USERS.create());
-		totalActivitiesCard = new CDashboardStatCard("Total Activities", "0", VaadinIcon.TASKS.create());
+		totalProjectsCard = new CDashboardStatCard(CI18n.get("total.projects"), "0", VaadinIcon.BRIEFCASE.create());
+		totalUsersCard = new CDashboardStatCard(CI18n.get("total.users"), "0", VaadinIcon.USERS.create());
+		totalActivitiesCard = new CDashboardStatCard(CI18n.get("total.activities"), "0", VaadinIcon.TASKS.create());
 	}
 
 	/** Creates the layout for summary cards with responsive design.
@@ -122,11 +123,11 @@ public final class CDashboardView extends CAbstractPage {
 	}
 
 	@Override
-	public String getPageTitle() { return "Dashboard"; }
+	public String getPageTitle() { return CI18n.get("page.title.dashboard"); }
 
 	@Override
 	protected void initPage() {
-		final H1 pageTitle = new H1("System Dashboard");
+		final H1 pageTitle = new H1(CI18n.get("dashboard.system"));
 		pageTitle.addClassNames(Margin.Bottom.LARGE);
 		createSummaryCards();
 		createProjectDetailsSection();
@@ -190,12 +191,12 @@ public final class CDashboardView extends CAbstractPage {
 		// Clear existing project details (keep the title)
 		if (projectDetailsLayout.getComponentCount() > 1) {
 			projectDetailsLayout.removeAll();
-			final H1 sectionTitle = new H1("Project Details");
+			final H1 sectionTitle = new H1(CI18n.get("dashboard.projectDetails"));
 			sectionTitle.addClassNames(Margin.Bottom.MEDIUM);
 			projectDetailsLayout.add(sectionTitle);
 		}
 		if (projectMetrics.isEmpty()) {
-			final Div noProjectsMessage = new Div("No projects found in the system.");
+			final Div noProjectsMessage = new Div(CI18n.get("dashboard.noProjects"));
 			noProjectsMessage.addClassNames(Padding.MEDIUM);
 			projectDetailsLayout.add(noProjectsMessage);
 			return;
